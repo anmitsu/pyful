@@ -1,0 +1,90 @@
+#!/usr/bin/env python
+#
+# pyful - Python File Manager
+# This file is the execute file of pyful.
+#
+# Copyright (C) 2010 anmitsu <anmitsu.s@gmail.com>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+import os
+import sys
+
+from optparse import OptionParser
+from pyfulib.version import __version__
+
+def option_parse():
+    usage = "usage: %prog [options]"
+    parser = OptionParser(usage)
+
+    parser.add_option('-v', '--version', action='store_true', dest='version',
+                      help=('display program version'))
+    parser.add_option('-c', '--config', dest='config',
+                      help=('load configure file'))
+    parser.add_option('-e', action='store_true', dest='enter',
+                      help=('wait of the user input'))
+
+    (options, args) = parser.parse_args()
+
+    if options.version:
+        print('%s v%s' % ('pyful', __version__))
+        sys.exit(0)
+
+    if options.enter:
+        from pyfulib import util
+        util.wait_restore()
+        sys.exit(0)
+
+    if options.config is not None:
+        if not os.path.exists(options.config):
+            print('No such rcfile (%s)' % (options.config))
+            sys.exit(1)
+
+    return options
+
+__options__ = option_parse()
+
+import locale
+import imp
+
+locale.setlocale(locale.LC_ALL, "")
+imp.reload(sys)
+sys.setdefaultencoding("utf-8")
+
+from pyfulib import core
+
+if __name__ == '__main__':
+    try:
+        pyful = core.Pyful()
+        pyful.init_instance()
+
+        pyful.setsignal()
+        pyful.binpath = os.path.abspath(__file__)
+
+        pyful.start_curses()
+        pyful.load_rcfile(__options__.config)
+        pyful.init_function()
+
+        pyful.stdscr.refresh()
+        pyful.view()
+        pyful.started = True
+
+        pyful.main_loop()
+    except SystemExit:
+        pyful.create_config()
+        if pyful.started:
+            pyful.exit_function()
+    finally:
+        pyful.stdscr.destroy()
