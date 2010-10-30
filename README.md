@@ -17,7 +17,7 @@ Features
 Installation
 ------------
 
-Pyful is installed in "/usr/local" by executing the following
+Pyful is installed in **/usr/local** by executing the following
 command as a super user:
 
      $ python setup.py install
@@ -39,16 +39,16 @@ The operation of Pyful is confirmed by Python2.6 and Python3.1 on
 Ubuntu 10.04.
 
 To display multi byte character including Japanese,
-"libncursesw" library might become necessary.
+**libncursesw** library might become necessary.
 
-In addition, Pyful operates in the assumption that encoding is utf-8.
+In addition, Pyful operates in the assumption that encoding is **utf-8**.
 Therefore, normal operation cannot be expected in the environment that
-uses encoding that is not utf-8.
+uses encoding that is not **utf-8**.
 
 Configuration
 -------------
 
-Pyful configuration has edit of "~/.pyful/rc.py".
+Pyful configuration has edit of **~/.pyful/rc.py**.
 Please copy rc.py because it doesn't exist in default
 and configure this file.
 
