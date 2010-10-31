@@ -114,9 +114,10 @@ class Completion(ui.InfoBox):
             dirname =  util.unix_dirname(path)
             if dirname == "":
                 return dirname
-            else:
+            elif not dirname.endswith(os.sep):
                 return dirname + os.sep
-
+            else:
+                return dirname
 
     def comp_files(self):
         self.parser.paststr += self.dirname(self.parser.nowstr)
