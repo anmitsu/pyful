@@ -60,7 +60,7 @@ class Mx(object):
             pyful.message.error(str(e))
 
 class ChangeWorkspaceTitle(object):
-    prompt = 'Change tag title:'
+    prompt = 'Change workspace title:'
 
     def complete(self, comp):
         return comp.comp_files()
