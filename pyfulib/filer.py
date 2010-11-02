@@ -1166,8 +1166,6 @@ class FileStat(object):
                 fstat += ' %s ' % grp.getgrgid(self.stat.st_gid)[0]
             except:
                 fstat += ' %s ' % 'unknown'
-        if self.view_permission:
-            fstat += ' %s ' % self.__get_permission()
         if self.view_nlink:
             fstat += ' %3s ' % self.stat.st_nlink
         if self.view_size:
@@ -1175,6 +1173,8 @@ class FileStat(object):
                 fstat += ' %7s ' % '<DIR>'
             else:
                 fstat += ' %7s ' % self.__get_file_size()
+        if self.view_permission:
+            fstat += ' %s ' % self.__get_permission()
         if self.view_mtime:
             fstat += ' %s' % time.strftime(self.time_format, time.localtime(self.stat.st_mtime))
 
