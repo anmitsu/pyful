@@ -416,6 +416,7 @@ class FileJob(object):
         except EnvironmentError as e:
             if errno.EXDEV == e[0]:
                 self.copy(thread)
-                delete(self.src)
+                if thread.active:
+                    delete(self.src)
             else:
                 pyful.message.error("%s: %s" % (e.__class__.__name__, e[-1]))
