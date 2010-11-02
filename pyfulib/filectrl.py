@@ -318,7 +318,7 @@ class MoveThread(threading.Thread):
             pyful.message.error("Move canceled")
 
         def _sort(x, y):
-            return util.cmp(len(y.split("/")), len(x.split("/")))
+            return util.cmp(len(y.split(os.sep)), len(x.split(os.sep)))
 
         self.ctrl.dirlist.sort(key=util.cmp_to_key(_sort))
         for d in self.ctrl.dirlist:
