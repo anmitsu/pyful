@@ -351,14 +351,6 @@ def _trashbox():
 
 def _zip():
     if pyful.filer.dir.ismark():
-        pyful.cmdline.start(mode.Zip(), pyful.filer.workspace.nextdir.path)
+        pyful.cmdline.start(mode.Zip(), '')
     else:
         pyful.cmdline.start(mode.Zip(), pyful.filer.file.name)
-
-
-
-
-
-
-
-

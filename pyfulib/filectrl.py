@@ -133,7 +133,7 @@ def replace(src, dst):
             pyful.message.error("%s: %s" % (e.__class__.__name__, e[-1]))
             break
 
-def zip(src, dst):
+def zip(src, dst, wrap=None):
     import zipfile
 
     if not dst.endswith('.zip'):
@@ -155,7 +155,10 @@ def zip(src, dst):
                 for name in fnames:
                     path = os.path.normpath(os.path.join(root, name))
                     if os.path.isfile(path):
-                        zipf.write(path, path)
+                        if wrap:
+                            zipf.write(path, os.path.join(wrap, path))
+                        else:
+                            zipf.write(path, path)
         else:
             zipf.write(src, src)
 

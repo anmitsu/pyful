@@ -591,11 +591,15 @@ class Utime(object):
 class Zip(object):
     def __init__(self):
         self.src = None
+        self.wrap = None
 
     @property
     def prompt(self):
         if pyful.filer.dir.ismark():
-            return 'Mark files zip to:'
+            if self.wrap is None:
+                return 'Mark files wrap is:'
+            else:
+                return 'Mark files zip to:'
         elif self.src is None:
             return 'Zip from:'
         else:
@@ -606,11 +610,18 @@ class Zip(object):
 
     def execute(self, path):
         if pyful.filer.dir.ismark():
-            filectrl.zip(pyful.filer.dir.get_mark_files(), path)
-            pyful.filer.workspace.all_reload()
+            if self.wrap is None:
+                self.wrap = path
+                ext = '.zip'
+                pyful.cmdline.restart(os.path.join(pyful.filer.workspace.nextdir.path, self.wrap + ext), -len(ext))
+            else:
+                filectrl.zip(pyful.filer.dir.get_mark_files(), path, self.wrap)
+                pyful.filer.dir.mark_clear()
+                pyful.filer.workspace.all_reload()
         elif self.src is None:
             self.src = path
-            pyful.cmdline.restart(os.path.join(pyful.filer.workspace.nextdir.path, self.src))
+            ext = '.zip'
+            pyful.cmdline.restart(os.path.join(pyful.filer.workspace.nextdir.path, self.src + ext), -len(ext))
         else:
             filectrl.zip(self.src, path)
             pyful.filer.workspace.all_reload()
