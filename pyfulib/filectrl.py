@@ -133,6 +133,30 @@ def replace(src, dst):
             pyful.message.error("%s: %s" % (e.__class__.__name__, e[-1]))
             break
 
+def zip(src, dst):
+    import zipfile
+
+    if not dst.endswith('.zip'):
+        dst += '.zip'
+    zipf = zipfile.ZipFile(dst, 'w', compression=zipfile.ZIP_DEFLATED)
+
+    def _write_zip(src):
+        if os.path.isdir(src):
+            for root, dnames, fnames in os.walk(src):
+                for name in fnames:
+                    path = os.path.normpath(os.path.join(root, name))
+                    if os.path.isfile(path):
+                        zipf.write(path, path)
+        else:
+            zipf.write(src, src)
+
+    if isinstance(src, list):
+        for path in src:
+            _write_zip(path)
+    else:
+        _write_zip(src)
+
+    zipf.close()
 
 def kill_thread():
     threads = list([str(th) for th in Filectrl.threads])
@@ -420,3 +444,4 @@ class FileJob(object):
                     delete(self.src)
             else:
                 pyful.message.error("%s: %s" % (e.__class__.__name__, e[-1]))
+
