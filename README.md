@@ -1,8 +1,8 @@
 Pyful - python file management utility
 ======================================
 
-Pyful is a multi screen file manager of the text base with the
-interface of curses. This application operates at the terminal
+Pyful is the filer on console of the keyboard operation main with the
+interface of curses for Linux. This application operates at the terminal
 emulator such as xterm.
 
 Features
