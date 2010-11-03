@@ -42,6 +42,7 @@ commands = {
     'rename'   : lambda: _rename(),
     'symlink'  : lambda: _symlink(),
     'trashbox' : lambda: _trashbox(),
+    'zip'      : lambda: _zip(),
     'chdir'    : lambda: pyful.cmdline.start(mode.Chdir(), pyful.filer.dir.path),
     'chmod'    : lambda: pyful.cmdline.start(mode.Chmod(), ''),
     'chown'    : lambda: pyful.cmdline.start(mode.Chown(), ''),
@@ -206,7 +207,7 @@ def _fileviewer():
 def _pack():
     ret = pyful.message.confirm("Pack type:", ["zip", "tgz", "bz2", "tar", "rar"])
     if "zip" == ret:
-        pyful.cmdline.start(mode.Shell(), "zip -vro %D2.zip %m", -7)
+        _zip()
     elif ret == "tgz":
         pyful.cmdline.start(mode.Shell(), "tar cvfz %D2.tgz %m", -7)
     elif ret == "bz2":
@@ -219,7 +220,7 @@ def _pack():
 def _pack2():
     ret = pyful.message.confirm("Pack type:", ["zip", "tgz", "bz2", "tar", "rar"])
     if ret == "zip":
-        pyful.cmdline.start(mode.Shell(), "zip -vro %D.zip %m", -7)
+        _zip()
     elif ret == "tgz":
         pyful.cmdline.start(mode.Shell(), "tar -cvfz %D.tgz %m", -7)
     elif ret == "bz2":
@@ -347,6 +348,15 @@ def _trashbox():
         pyful.filer.workspace.all_reload()
     else:
         pyful.cmdline.start(mode.TrashBox(), pyful.filer.file.name)
+
+def _zip():
+    if pyful.filer.dir.ismark():
+        pyful.cmdline.start(mode.Zip(), pyful.filer.workspace.nextdir.path)
+    else:
+        pyful.cmdline.start(mode.Zip(), pyful.filer.file.name)
+
+
+
 
 
 
