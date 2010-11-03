@@ -138,7 +138,16 @@ def zip(src, dst):
 
     if not dst.endswith('.zip'):
         dst += '.zip'
-    zipf = zipfile.ZipFile(dst, 'w', compression=zipfile.ZIP_DEFLATED)
+
+    if not isinstance(src, list):
+        if not os.path.exists(src):
+            return pyful.message.error('No such file or directory (%s)' % src)
+
+    try:
+        zipf = zipfile.ZipFile(dst, 'w', compression=zipfile.ZIP_DEFLATED)
+    except Exception as e:
+        pyful.message.error("%s: %s" % (e.__class__.__name__, e[-1]))
+        return
 
     def _write_zip(src):
         if os.path.isdir(src):
@@ -155,7 +164,6 @@ def zip(src, dst):
             _write_zip(path)
     else:
         _write_zip(src)
-
     zipf.close()
 
 def kill_thread():
