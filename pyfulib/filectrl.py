@@ -133,7 +133,52 @@ def replace(src, dst):
             pyful.message.error("%s: %s" % (e.__class__.__name__, e[-1]))
             break
 
-def zip(src, dst, wrap=None):
+def unzip(src, dstdir=''):
+    import zipfile
+
+    dstdir = util.abspath(dstdir)
+
+    def _expand_zip(src):
+        try:
+            zipf = zipfile.ZipFile(src, 'r')
+        except Exception as e:
+            pyful.message.error("%s: %s" % (e.__class__.__name__, e[-1]))
+            return
+
+        for info in zipf.infolist():
+            fname = info.filename
+            path = os.path.join(dstdir, fname)
+            zips = zipf.read(fname)
+            perm = info.external_attr >> 16 & 0o777
+            date = list(info.date_time) + [-1, -1, -1]
+
+            path_dirname = util.unix_dirname(path)
+            if not os.path.exists(path_dirname):
+                try:
+                    os.makedirs(path_dirname)
+                except OSError as e:
+                    pyful.message.error("%s: %s" % (e.__class__.__name__, e[-1]))
+                    continue
+
+            try:
+                with open(path, 'wb', perm) as fdst:
+                    fdst.write(zips)
+            except IOError as e:
+                pyful.message.error("%s: %s" % (e.__class__.__name__, e[-1]))
+                continue
+
+            os.chmod(path, perm)
+            atime = mtime = time.mktime(date)
+            os.utime(path, (atime, mtime))
+        zipf.close()
+
+    if isinstance(src, list):
+        for z in src:
+            _expand_zip(z)
+    else:
+        _expand_zip(src)
+
+def zip(src, dst, wrap=''):
     import zipfile
 
     if not dst.endswith('.zip'):
@@ -155,12 +200,9 @@ def zip(src, dst, wrap=None):
                 for name in fnames:
                     path = os.path.normpath(os.path.join(root, name))
                     if os.path.isfile(path):
-                        if wrap:
-                            zipf.write(path, os.path.join(wrap, path))
-                        else:
-                            zipf.write(path, path)
+                        zipf.write(path, os.path.join(wrap, path))
         else:
-            zipf.write(src, src)
+            zipf.write(src, os.path.join(wrap, src))
 
     if isinstance(src, list):
         for path in src:
