@@ -588,6 +588,34 @@ class Utime(object):
                 pyful.message.error(str(e))
             pyful.filer.workspace.all_reload()
 
+class UnZip(object):
+    def __init__(self):
+        self.src = None
+
+    @property
+    def prompt(self):
+        if pyful.filer.dir.ismark():
+            return 'Mark files unzip to:'
+        elif self.src is None:
+            return 'Unzip from:'
+        else:
+            return 'Unzip from %s to:' % self.src
+
+    def complete(self, comp):
+        return comp.comp_files()
+
+    def execute(self, path):
+        if pyful.filer.dir.ismark():
+            filectrl.unzip(pyful.filer.dir.get_mark_files(), path)
+            pyful.filer.dir.mark_clear()
+            pyful.filer.workspace.all_reload()
+        elif self.src is None:
+            self.src = path
+            pyful.cmdline.restart(pyful.filer.workspace.nextdir.path)
+        else:
+            filectrl.unzip(self.src, path)
+            pyful.filer.workspace.all_reload()
+
 class Zip(object):
     def __init__(self):
         self.src = None
