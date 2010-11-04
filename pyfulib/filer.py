@@ -232,8 +232,8 @@ class Filer(object):
     def default_init(self):
         for i in range(0, 5):
             self.workspaces.append(Workspace(str(i+1)))
-            self.workspaces[-1].dirs.append(Directroy(os.environ['HOME'], 10, 10, 1, 0))
-            self.workspaces[-1].dirs.append(Directroy(os.environ['HOME'], 10, 10, 1, 0))
+            self.workspaces[-1].dirs.append(Directory(os.environ['HOME'], 10, 10, 1, 0))
+            self.workspaces[-1].dirs.append(Directory(os.environ['HOME'], 10, 10, 1, 0))
 
     def savefile(self, path):
         path = os.path.expanduser(path)
@@ -272,7 +272,7 @@ class Filer(object):
                 for j in range(0, d_i):
                     f.readline()
                     path = f.readline().rstrip('\n')
-                    self.workspaces[-1].dirs.append(Directroy(path, 10, 10, 1, 0))
+                    self.workspaces[-1].dirs.append(Directory(path, 10, 10, 1, 0))
                     f.readline()
                     self.workspaces[-1].dirs[-1].sort_kind = f.readline().rstrip('\n')
             f.close()
@@ -281,8 +281,8 @@ class Filer(object):
         if len(self.workspaces) == 0:
             for i in range(0, 5):
                 self.workspaces.append(Workspace(str(i+1)))
-                self.workspaces[-1].dirs.append(Directroy(os.environ['HOME'], 10, 10, 1, 0))
-                self.workspaces[-1].dirs.append(Directroy(os.environ['HOME'], 10, 10, 1, 0))
+                self.workspaces[-1].dirs.append(Directory(os.environ['HOME'], 10, 10, 1, 0))
+                self.workspaces[-1].dirs.append(Directory(os.environ['HOME'], 10, 10, 1, 0))
         self.workspace.resize()
 
 class Workspace(object):
@@ -320,7 +320,7 @@ class Workspace(object):
         begy = 1
         begx = width * size
 
-        self.dirs.insert(0, Directroy(path, height, width, begy, begx))
+        self.dirs.insert(0, Directory(path, height, width, begy, begx))
         self.setcursor(0)
         self.dir.chdir(path)
         self.resize()
@@ -496,7 +496,7 @@ class Workspace(object):
                     d.view(False)
             self.dir.view(True)
 
-class Directroy(object):
+class Directory(object):
     def __init__(self, path, height, width, begy, begx):
         self.win = curses.newwin(height, width, begy, begx)
         self.statwin = curses.newwin(1, self.win.getmaxyx()[0], self.win.getmaxyx()[1], self.win.getbegyx()[1])
