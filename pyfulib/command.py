@@ -42,6 +42,7 @@ commands = {
     'rename'   : lambda: _rename(),
     'symlink'  : lambda: _symlink(),
     'trashbox' : lambda: _trashbox(),
+    'unzip'    : lambda: _unzip(),
     'zip'      : lambda: _zip(),
     'chdir'    : lambda: pyful.cmdline.start(mode.Chdir(), pyful.filer.dir.path),
     'chmod'    : lambda: pyful.cmdline.start(mode.Chmod(), ''),
@@ -348,6 +349,12 @@ def _trashbox():
         pyful.filer.workspace.all_reload()
     else:
         pyful.cmdline.start(mode.TrashBox(), pyful.filer.file.name)
+
+def _unzip():
+    if pyful.filer.dir.ismark():
+        pyful.cmdline.start(mode.UnZip(), pyful.filer.workspace.nextdir.path)
+    else:
+        pyful.cmdline.start(mode.UnZip(), pyful.filer.file.name)
 
 def _zip():
     if pyful.filer.dir.ismark():
