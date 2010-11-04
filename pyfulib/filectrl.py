@@ -147,7 +147,11 @@ def unzip(src, dstdir=''):
 
         for info in zipf.infolist():
             fname = info.filename
-            path = os.path.join(dstdir, fname)
+            try:
+                path = os.path.join(dstdir, fname)
+            except UnicodeDecodeError:
+                pyful.message.error("UnicodeDecodeError: Not support `%s' encoding" % fname)
+                continue
             zips = zipf.read(fname)
             perm = info.external_attr >> 16 & 0o777
             date = list(info.date_time) + [-1, -1, -1]
