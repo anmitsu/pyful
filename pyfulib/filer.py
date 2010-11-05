@@ -187,6 +187,11 @@ class Filer(object):
 
         for i, path in enumerate([d.path for d in self.workspace.dirs]):
             if util.termwidth(path) > width:
+                try:
+                    util.unistr(path)
+                except UnicodeDecodeError:
+                    continue
+
                 for name in util.unistr(path).split(os.sep)[:-1]:
                     if name:
                         path = path.replace(name, name[0])
@@ -286,11 +291,13 @@ class Filer(object):
         self.workspace.resize()
 
 class Workspace(object):
+    default_path = '~/'
+    layout = 'Tile'
+
     def __init__(self, title):
         self.title = title
         self.dirs = []
         self.cursor = 0
-        self.layout = 'Tile'
 
     @property
     def dir(self):
@@ -313,7 +320,10 @@ class Workspace(object):
         else:
             return self.dir[s]
 
-    def create_dir(self, path=os.environ['HOME']):
+    def create_dir(self, path=None):
+        if path is None:
+            path = self.default_path
+        path = os.path.expanduser(path)
         size = len(self.dirs)
         height = pyful.stdscr.maxy - 3
         width = pyful.stdscr.maxx // (size+1)
@@ -497,6 +507,8 @@ class Workspace(object):
             self.dir.view(True)
 
 class Directory(object):
+    sort_kind = 'Name[^]'
+
     def __init__(self, path, height, width, begy, begx):
         self.win = curses.newwin(height, width, begy, begx)
         self.statwin = curses.newwin(1, self.win.getmaxyx()[0], self.win.getmaxyx()[1], self.win.getbegyx()[1])
@@ -509,7 +521,6 @@ class Directory(object):
         self.mark_size = '0'
         self.cursor = 0
         self.scrolltop = 0
-        self.sort_kind = 'Name[^]'
         self.maskreg = None
         self.list = None
         self.list_title = None
@@ -1079,7 +1090,7 @@ class FileStat(object):
     time_format = '%y-%m-%d %H:%M'
 
     def __init__(self, name):
-        self.name = util.unistr(name)
+        self.name = name
         self.marked = False
 
         self.lstat = os.lstat(name)
@@ -1123,6 +1134,11 @@ class FileStat(object):
     def get_file_name(self, path):
         if self.view_name:
             return self.view_name
+
+        try:
+            util.unistr(self.name)
+        except UnicodeDecodeError:
+            return '????? (invalid encoding)'
 
         if self.view_ext and not self.isdir() and not self.islink():
             fname = self.name.replace(util.extname(self.name), '')
@@ -1252,7 +1268,11 @@ class FileStat(object):
         nlink = self.stat.st_nlink
         size = self.stat.st_size
         mtime = time.strftime(self.time_format, time.localtime(self.stat.st_mtime))
-        name = self.name
+        try:
+            util.unistr(self.name)
+            name = self.name
+        except UnicodeDecodeError:
+            name = '????? (invalid encoding)'
 
         fstat = '%s %s %s %s %d %s %s' % (perm, nlink, user, group, size, mtime, name)
         fstat = util.mbs_ljust(fstat, pyful.stdscr.maxx-1)
