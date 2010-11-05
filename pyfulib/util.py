@@ -89,22 +89,34 @@ def wait_restore():
 
 
 def mbslen(string):
-    return len(unistr(string))
+    try:
+        return len(unistr(string))
+    except UnicodeDecodeError:
+        return len(string)
 
 def insertstr(string, ins, length):
-    string = unistr(string)
+    try:
+        string = unistr(string)
+    except UnicodeDecodeError:
+        return string
     f = string[:length]
     b = string[length:]
     return f + ins + b
 
 def rmstr(string, length):
-    string = unistr(string)
+    try:
+        string = unistr(string)
+    except UnicodeDecodeError:
+        pass
     f = string[:length]
     b = string[length+1:]
     return f + b
 
 def slicestr(string, start, end):
-    string = unistr(string)
+    try:
+        string = unistr(string)
+    except UnicodeDecodeError:
+        pass
     f = string[:start]
     b = string[end:]
     return f + b
@@ -131,54 +143,64 @@ def unix_dirname(path):
 
 
 def termwidth(string, length=None):
-    string = unistr(string)
-    if length is None:
-        length = len(string)
-    string = string[:length]
-    width = len(string)
-    for c in string:
-        if unicodedata.east_asian_width(c) in "WF":
-            width += 1
-    return width
+    try:
+        string = unistr(string)
+        if length is None:
+            length = len(string)
+        string = string[:length]
+        width = len(string)
+        for c in string:
+            if unicodedata.east_asian_width(c) in "WF":
+                width += 1
+        return width
+    except UnicodeDecodeError:
+        return len(string)
 
 def mbs_ljust(string, length, pad=" "):
-    string = unistr(string)
-    width = 0
-    cut = False
-    for i, c in enumerate(string):
-        if length <= width:
-            string = string[0:i-1]
-            cut = True
-            break
-        if unicodedata.east_asian_width(c) in "WF":
-            width += 2
+    try:
+        string = unistr(string)
+
+        width = 0
+        cut = False
+        for i, c in enumerate(string):
+            if length <= width:
+                string = string[0:i-1]
+                cut = True
+                break
+            if unicodedata.east_asian_width(c) in "WF":
+                width += 2
+            else:
+                width += 1
+        if cut:
+            space = length - termwidth(string)
         else:
-            width += 1
-    if cut:
-        space = length - termwidth(string)
-    else:
-        space = length - width
-    if space > 0:
-        string += pad * space
-    return string
+            space = length - width
+        if space > 0:
+            string += pad * space
+        return string
+    except UnicodeDecodeError:
+        return string
 
 def mbs_rjust(string, length, pad=" "):
-    string = unistr(string)
-    width = 0
-    cut = False
-    for i, c in enumerate(reversed(string)):
-        if length <= width:
-            string = string[len(string)-i:]
-            cut = True
-            break
-        if unicodedata.east_asian_width(c) in "WF":
-            width += 2
+    try:
+        string = unistr(string)
+        width = 0
+        cut = False
+        for i, c in enumerate(reversed(string)):
+            if length <= width:
+                string = string[len(string)-i:]
+                cut = True
+                break
+            if unicodedata.east_asian_width(c) in "WF":
+                width += 2
+            else:
+                width += 1
+        if cut:
+            space = length - termwidth(string)
         else:
-            width += 1
-    if cut:
-        space = length - termwidth(string)
-    else:
-        space = length - width
-    if space > 0:
-        string += pad * space
-    return string
+            space = length - width
+        if space > 0:
+            string += pad * space
+        return string
+    except UnicodeDecodeError:
+        return string
