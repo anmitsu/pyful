@@ -6,7 +6,7 @@
 
 from pyfulib.core import Pyful
 from pyfulib.command import commands
-from pyfulib.filer import Finder, FileStat
+from pyfulib.filer import Workspace, Directory, Finder, FileStat
 from pyfulib import mode
 from pyfulib import process
 from pyfulib.keymap import *
@@ -31,7 +31,36 @@ pyful.cmdline.clipboard.maxsave = 100
 mode.Mkdir.dirmode = 0o755
 mode.Newfile.filemode = 0o644
 
+# Set the prompt of shell mode.
 mode.Shell.prompt = '$'
+
+# Set the default path of the directory creating.
+Workspace.default_path = '~/'
+
+# Set the workspace layout.
+#
+# The workspace layout indicate as follows:
+#     'Tile'
+#     'Tile reverse'
+#     'Oneline'
+#     'Onecolumn'
+#     'Fullscreen'
+#
+Workspace.layout = 'Tile'
+
+# Set default kind of sorting in directory.
+#
+# The kind of sorting indicate as follows:
+#     Name[^] -> Name sort of ascending order;
+#     Name[$] -> Name sort of descending order;
+#     Size[^] -> File size sort of ascending order;
+#     Size[$] -> File size sort of descending order;
+#     Time[^] -> Time sort of ascending order;
+#     Time[$] -> Time sort of descending order;
+#     Ext[^] -> File extension sort of ascending order;
+#     Ext[$] -> File extension sort of descending order.
+#
+Directory.sort_kind = 'Name[^]'
 
 # Distinguish upper case and lower case at a finder?
 Finder.smartcase = True
@@ -377,17 +406,18 @@ pyful.menu.items["editor"] = (
 
 # The program launcher example.
 pyful.menu.items['launcher'] = (
-    ('(t)erminator' , KEY_t, lambda: process.spawn('terminator %&')),
-    ('(h)top'       , KEY_h, lambda: process.spawn('htop %T')),
-    ('(m)c'         , KEY_m, lambda: process.spawn('mc %T')),
-    ('(M)OC'        , KEY_M, lambda: process.spawn('mocp %T')),
-    ('(w)3m'        , KEY_w, lambda: process.spawn('w3m google.com %T')),
-    ('(f)irefox'    , KEY_f, lambda: process.spawn('firefox %&')),
-    ('(T)hunderbird', KEY_T, lambda: process.spawn('thunderbird %&')),
-    ('(a)marok'     , KEY_a, lambda: process.spawn('amarok %&')),
-    ('(g)imp'       , KEY_g, lambda: process.spawn('gimp %&')),
-    ('(n)autilus'   , KEY_n, lambda: process.spawn('nautilus --no-desktop %D %&')),
-    ('(s)ynaptic'   , KEY_s, lambda: process.spawn('gksu synaptic %&')),
+    ('(h)top'           , KEY_h, lambda: process.spawn('htop %T')),
+    ('(m)c'             , KEY_m, lambda: process.spawn('mc %T')),
+    ('(M)OC'            , KEY_M, lambda: process.spawn('mocp %T')),
+    ('(w)3m'            , KEY_w, lambda: process.spawn('w3m google.com %T')),
+    ('(f)irefox'        , KEY_f, lambda: process.spawn('firefox %&')),
+    ('(T)hunderbird'    , KEY_T, lambda: process.spawn('thunderbird %&')),
+    ('(a)marok'         , KEY_a, lambda: process.spawn('amarok %&')),
+    ('(g)imp'           , KEY_g, lambda: process.spawn('gimp %&')),
+    ('(t)erminator'     , KEY_t, lambda: process.spawn('terminator %&')),
+    ('(n)autilus'       , KEY_n, lambda: process.spawn('nautilus --no-desktop %D %&')),
+    ('(s)ystem-monitor' , KEY_s, lambda: process.spawn('gnome-system-monitor %&')),
+    ('(S)ynaptic'       , KEY_S, lambda: process.spawn('gksu synaptic %&')),
     )
 
 # Update the filer keymap.
