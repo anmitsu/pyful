@@ -141,7 +141,7 @@ def unzip(src, dstdir=''):
     def _expand_zip(src):
         try:
             zipf = zipfile.ZipFile(src, 'r')
-        except Exception as e:
+        except IOError as e:
             pyful.message.error("%s: %s" % (e.__class__.__name__, e[-1]))
             return
 
@@ -152,9 +152,6 @@ def unzip(src, dstdir=''):
             except UnicodeDecodeError:
                 pyful.message.error("UnicodeDecodeError: Not support `%s' encoding" % fname)
                 continue
-            zips = zipf.read(fname)
-            perm = info.external_attr >> 16 & 0o777
-            date = list(info.date_time) + [-1, -1, -1]
 
             path_dirname = util.unix_dirname(path)
             if not os.path.exists(path_dirname):
@@ -165,12 +162,17 @@ def unzip(src, dstdir=''):
                     continue
 
             try:
-                with open(path, 'wb', perm) as fdst:
-                    fdst.write(zips)
+                source = zipf.open(fname, pwd=path)
+                target = open(path, 'wb')
+                shutil.copyfileobj(source, target)
+                source.close()
+                target.close()
             except IOError as e:
                 pyful.message.error("%s: %s" % (e.__class__.__name__, e[-1]))
                 continue
 
+            perm = info.external_attr >> 16 & 0o777
+            date = list(info.date_time) + [-1, -1, -1]
             os.chmod(path, perm)
             atime = mtime = time.mktime(date)
             os.utime(path, (atime, mtime))
@@ -194,7 +196,7 @@ def zip(src, dst, wrap=''):
 
     try:
         zipf = zipfile.ZipFile(dst, 'w', compression=zipfile.ZIP_DEFLATED)
-    except Exception as e:
+    except IOError as e:
         pyful.message.error("%s: %s" % (e.__class__.__name__, e[-1]))
         return
 
