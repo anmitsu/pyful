@@ -1090,7 +1090,10 @@ class FileStat(object):
     time_format = '%y-%m-%d %H:%M'
 
     def __init__(self, name):
-        self.name = name
+        try:
+            self.name = util.unistr(name)
+        except UnicodeDecodeError:
+            self.name = name
         self.marked = False
 
         self.lstat = os.lstat(name)
