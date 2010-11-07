@@ -1037,7 +1037,7 @@ class Finder(object):
         except Exception as e:
             return
 
-        self.results = [f.name for f in self.cache if not f.name.startswith(os.pardir) and reg.search(f.name)]
+        self.results = [f.name for f in self.cache if f.name != os.pardir and reg.search(f.name)]
 
         self.dir.reload()
         self.dir.setcursor(1)
