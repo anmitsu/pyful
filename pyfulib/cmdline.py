@@ -394,6 +394,11 @@ class History(ui.InfoBox):
         self.start()
 
     def start(self):
+        try:
+            util.unistr(self.cmdline.string)
+        except UnicodeDecodeError:
+            return
+
         self.source = None
         info = []
         for item in self.index(self.cmdline.mode.__class__.__name__):
