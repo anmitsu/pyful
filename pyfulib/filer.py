@@ -511,7 +511,7 @@ class Directory(object):
         self.pathhistory = [self.path]
         self.pathhistory_cursor = 0
         self.pathhistory_max = 20
-        self.files = [FileStat('..')]
+        self.files = [FileStat(os.pardir)]
         self.mark_files = []
         self.mark_size = '0'
         self.cursor = 0
@@ -629,7 +629,7 @@ class Directory(object):
     def diskread(self):
         marks = [f.name for f in self.mark_files]
         self.win.erase()
-        self.files[:] = [FileStat('..')]
+        self.files[:] = [FileStat(os.pardir)]
         self.mark_files[:] = []
 
         if self.finder.active:
@@ -730,7 +730,7 @@ class Directory(object):
 
     def markon(self):
         f = self.file
-        if f.name == '..':
+        if f.name == os.pardir:
             return
         f.marked = True
         self.mark_files.append(f)
@@ -738,7 +738,7 @@ class Directory(object):
 
     def markoff(self):
         f = self.file
-        if f.name == '..':
+        if f.name == os.pardir:
             return
         f.marked = False
         try:
@@ -749,7 +749,7 @@ class Directory(object):
 
     def mark_toggle(self):
         f = self.file
-        if f.name == '..':
+        if f.name == os.pardir:
             return
         if f.marked:
             f.marked = False
@@ -765,7 +765,7 @@ class Directory(object):
 
     def mark(self, pattern):
         for f in self.files:
-            if f.name == '..':
+            if f.name == os.pardir:
                 continue
             if pattern.search(f.name):
                 f.marked = True
@@ -776,7 +776,7 @@ class Directory(object):
     def mark_all(self):
         self.mark_files[:] = []
         for f in self.files:
-            if f.name == '..':
+            if f.name == os.pardir:
                 continue
             f.marked = True
             self.mark_files.append(f)
@@ -827,9 +827,9 @@ class Directory(object):
 
     def sort_name(self):
         def _sort(x, y):
-            if x.name == '..':
+            if x.name == os.pardir:
                 return -1
-            if y.name == '..':
+            if y.name == os.pardir:
                 return 1
             return util.cmp(x.name, y.name)
         self.files.sort(key=util.cmp_to_key(_sort))
@@ -837,9 +837,9 @@ class Directory(object):
 
     def sort_name_rev(self):
         def _sort(x, y):
-            if x.name == '..':
+            if x.name == os.pardir:
                 return -1
-            if y.name == '..':
+            if y.name == os.pardir:
                 return 1
             return util.cmp(y.name, x.name)
         self.files.sort(key=util.cmp_to_key(_sort))
@@ -847,9 +847,9 @@ class Directory(object):
 
     def sort_size(self):
         def _sort(x, y):
-            if x.name == '..':
+            if x.name == os.pardir:
                 return -1
-            if y.name == '..':
+            if y.name == os.pardir:
                 return 1
             ret = util.cmp(x.stat.st_size, y.stat.st_size)
             if ret == 0:
@@ -861,9 +861,9 @@ class Directory(object):
 
     def sort_size_rev(self):
         def _sort(x, y):
-            if x.name == '..':
+            if x.name == os.pardir:
                 return -1
-            if y.name == '..':
+            if y.name == os.pardir:
                 return 1
             ret = util.cmp(y.stat.st_size, x.stat.st_size)
             if ret == 0:
@@ -875,9 +875,9 @@ class Directory(object):
 
     def sort_time(self):
         def _sort(x, y):
-            if x.name == '..':
+            if x.name == os.pardir:
                 return -1
-            if y.name == '..':
+            if y.name == os.pardir:
                 return 1
             ret = util.cmp(x.stat.st_mtime, y.stat.st_mtime)
             if ret == 0:
@@ -889,9 +889,9 @@ class Directory(object):
 
     def sort_time_rev(self):
         def _sort(x, y):
-            if x.name == '..':
+            if x.name == os.pardir:
                 return -1
-            if y.name == '..':
+            if y.name == os.pardir:
                 return 1
             ret = util.cmp(y.stat.st_mtime, x.stat.st_mtime)
             if ret == 0:
@@ -903,9 +903,9 @@ class Directory(object):
 
     def sort_ext(self):
         def _sort(x, y):
-            if x.name == '..':
+            if x.name == os.pardir:
                 return -1
-            if y.name == '..':
+            if y.name == os.pardir:
                 return 1
             ret = util.cmp(util.extname(x.name), util.extname(y.name))
             if ret == 0:
@@ -917,9 +917,9 @@ class Directory(object):
 
     def sort_ext_rev(self):
         def _sort(x, y):
-            if x.name == '..':
+            if x.name == os.pardir:
                 return -1
-            if y.name == '..':
+            if y.name == os.pardir:
                 return 1
             ret = util.cmp(util.extname(y.name), util.extname(x.name))
             if ret == 0:
@@ -1037,7 +1037,7 @@ class Finder(object):
         except Exception as e:
             return
 
-        self.results = [f.name for f in self.cache if not f.name.startswith('..') and reg.search(f.name)]
+        self.results = [f.name for f in self.cache if not f.name.startswith(os.pardir) and reg.search(f.name)]
 
         self.dir.reload()
         self.dir.setcursor(1)
