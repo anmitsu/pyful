@@ -55,7 +55,7 @@ class Cmdline(object):
         try:
             util.unistr(string)
             self.history.append(string)
-        except UnicodeDecodeError:
+        except UnicodeError:
             pass
         self.mode.execute(string)
 
@@ -63,7 +63,7 @@ class Cmdline(object):
         try:
             util.unistr(self.string)
             self.history.append(self.string)
-        except UnicodeDecodeError:
+        except UnicodeError:
             pass
         self.finish()
 
@@ -83,7 +83,7 @@ class Cmdline(object):
         i = self.cursor + 1
         try:
             s = util.unistr(self.string)
-        except UnicodeDecodeError:
+        except UnicodeError:
             s = self.string
         while i < util.mbslen(self.string):
             c = s[i]
@@ -99,7 +99,7 @@ class Cmdline(object):
         i = self.cursor - 1
         try:
             s = util.unistr(self.string)
-        except UnicodeDecodeError:
+        except UnicodeError:
             s = self.string
         while 0 < i:
             c = s[i-1]
@@ -132,7 +132,7 @@ class Cmdline(object):
         try:
             delword = util.unistr(self.string)[self.cursor:i]
             self.clipboard.yank(delword)
-        except UnicodeDecodeError:
+        except UnicodeError:
             pass
         self.string = util.slicestr(self.string, self.cursor, i)
         self.history.restart()
@@ -143,7 +143,7 @@ class Cmdline(object):
         i = self.cursor - 1
         try:
             s = util.unistr(self.string)
-        except UnicodeDecodeError:
+        except UnicodeError:
             s = self.string
         while 0 < i:
             c = s[i-1]
@@ -153,7 +153,7 @@ class Cmdline(object):
         try:
             delword = util.unistr(self.string)[:self.cursor]
             self.clipboard.yank(delword)
-        except UnicodeDecodeError:
+        except UnicodeError:
             pass
         self.string = util.slicestr(self.string, i, self.cursor)
         self.cursor = i
@@ -164,7 +164,7 @@ class Cmdline(object):
             self.string = util.unistr(self.string)
             killword = self.string[self.cursor:]
             self.clipboard.yank(killword)
-        except UnicodeDecodeError:
+        except UnicodeError:
             pass
         self.string = self.string[:self.cursor]
         self.history.restart()
@@ -206,7 +206,7 @@ class Cmdline(object):
 
         try:
             curpos = util.termwidth(prompt+self.string, util.mbslen(prompt)+self.cursor)
-        except UnicodeDecodeError:
+        except UnicodeError:
             curpos = 0
         if curpos < pyful.stdscr.maxx:
             pyful.stdscr.cmdwin.move(0, curpos)
@@ -306,12 +306,12 @@ class Cmdline(object):
                 return
             try:
                 s = util.unistr(c)
-            except UnicodeDecodeError:
+            except UnicodeError:
                 self._stringcue.append(c)
                 try:
                     s = util.unistr("".join(self._stringcue))
                     self._stringcue[:] = []
-                except UnicodeDecodeError:
+                except UnicodeError:
                     return
             length = util.mbslen(self.string)
             self.string = util.insertstr(self.string, s, self.cursor)
@@ -396,7 +396,7 @@ class History(ui.InfoBox):
     def start(self):
         try:
             util.unistr(self.cmdline.string)
-        except UnicodeDecodeError:
+        except UnicodeError:
             return
 
         self.source = None

@@ -149,8 +149,8 @@ def unzip(src, dstdir=''):
             fname = info.filename
             try:
                 path = os.path.join(dstdir, fname)
-            except UnicodeDecodeError:
-                pyful.message.error("UnicodeDecodeError: Not support `%s' encoding" % fname)
+            except UnicodeError:
+                pyful.message.error("UnicodeError: Not support `%s' encoding" % fname)
                 continue
 
             path_dirname = util.unix_dirname(path)

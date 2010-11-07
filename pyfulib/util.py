@@ -49,7 +49,7 @@ def cmp_to_key(_cmp):
 def cmp(x, y):
     try:
         return (x > y) - (x < y)
-    except UnicodeDecodeError:
+    except UnicodeError:
         return 0
 
 def uniq(ls):
@@ -94,13 +94,13 @@ def wait_restore():
 def mbslen(string):
     try:
         return len(unistr(string))
-    except UnicodeDecodeError:
+    except UnicodeError:
         return len(string)
 
 def insertstr(string, ins, length):
     try:
         string = unistr(string)
-    except UnicodeDecodeError:
+    except UnicodeError:
         return string
     f = string[:length]
     b = string[length:]
@@ -109,7 +109,7 @@ def insertstr(string, ins, length):
 def rmstr(string, length):
     try:
         string = unistr(string)
-    except UnicodeDecodeError:
+    except UnicodeError:
         pass
     f = string[:length]
     b = string[length+1:]
@@ -118,7 +118,7 @@ def rmstr(string, length):
 def slicestr(string, start, end):
     try:
         string = unistr(string)
-    except UnicodeDecodeError:
+    except UnicodeError:
         pass
     f = string[:start]
     b = string[end:]
@@ -156,7 +156,7 @@ def termwidth(string, length=None):
             if unicodedata.east_asian_width(c) in "WF":
                 width += 1
         return width
-    except UnicodeDecodeError:
+    except UnicodeError:
         return len(string)
 
 def mbs_ljust(string, length, pad=" "):
@@ -181,7 +181,7 @@ def mbs_ljust(string, length, pad=" "):
         if space > 0:
             string += pad * space
         return string
-    except UnicodeDecodeError:
+    except UnicodeError:
         return string
 
 def mbs_rjust(string, length, pad=" "):
@@ -205,5 +205,5 @@ def mbs_rjust(string, length, pad=" "):
         if space > 0:
             string += pad * space
         return string
-    except UnicodeDecodeError:
+    except UnicodeError:
         return string

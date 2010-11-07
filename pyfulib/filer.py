@@ -189,7 +189,7 @@ class Filer(object):
             if util.termwidth(path) > width:
                 try:
                     util.unistr(path)
-                except UnicodeDecodeError:
+                except UnicodeError:
                     continue
 
                 for name in util.unistr(path).split(os.sep)[:-1]:
@@ -1022,12 +1022,12 @@ class Finder(object):
     def insert(self, c):
         try:
             s = util.unistr(c)
-        except UnicodeDecodeError:
+        except UnicodeError:
             self._stringcue.append(c)
             try:
                 s = util.unistr("".join(self._stringcue))
                 self._stringcue[:] = []
-            except UnicodeDecodeError:
+            except UnicodeError:
                 return
 
         self.string += s
@@ -1092,7 +1092,7 @@ class FileStat(object):
     def __init__(self, name):
         try:
             self.name = util.unistr(name)
-        except UnicodeDecodeError:
+        except UnicodeError:
             self.name = name
         self.marked = False
 
@@ -1140,7 +1140,7 @@ class FileStat(object):
 
         try:
             util.unistr(self.name)
-        except UnicodeDecodeError:
+        except UnicodeError:
             return '????? (invalid encoding)'
 
         if self.view_ext and not self.isdir() and not self.islink():
@@ -1274,7 +1274,7 @@ class FileStat(object):
         try:
             util.unistr(self.name)
             name = self.name
-        except UnicodeDecodeError:
+        except UnicodeError:
             name = '????? (invalid encoding)'
 
         fstat = '%s %s %s %s %d %s %s' % (perm, nlink, user, group, size, mtime, name)
