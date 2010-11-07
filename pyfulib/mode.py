@@ -641,7 +641,8 @@ class Zip(object):
             if self.wrap is None:
                 self.wrap = path
                 ext = '.zip'
-                pyful.cmdline.restart(os.path.join(pyful.filer.workspace.nextdir.path, self.wrap + ext), -len(ext))
+                zippath = os.path.join(pyful.filer.workspace.nextdir.path, self.wrap + ext)
+                pyful.cmdline.restart(zippath, -len(ext))
             else:
                 filectrl.zip(pyful.filer.dir.get_mark_files(), path, self.wrap)
                 pyful.filer.dir.mark_clear()
@@ -649,7 +650,8 @@ class Zip(object):
         elif self.src is None:
             self.src = path
             ext = '.zip'
-            pyful.cmdline.restart(os.path.join(pyful.filer.workspace.nextdir.path, self.src + ext), -len(ext))
+            zippath = os.path.join(pyful.filer.workspace.nextdir.path, self.src + ext)
+            pyful.cmdline.restart(zippath, -len(ext))
         else:
             filectrl.zip(self.src, path)
             pyful.filer.workspace.all_reload()
