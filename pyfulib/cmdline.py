@@ -53,7 +53,7 @@ class Cmdline(object):
         string = self.string
         self.finish()
         try:
-            util.unistr(self.string)
+            util.unistr(string)
             self.history.append(string)
         except UnicodeDecodeError:
             pass
