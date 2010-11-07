@@ -187,11 +187,6 @@ class Filer(object):
 
         for i, path in enumerate([d.path for d in self.workspace.dirs]):
             if util.termwidth(path) > width:
-                try:
-                    util.unistr(path)
-                except UnicodeError:
-                    continue
-
                 for name in util.unistr(path).split(os.sep)[:-1]:
                     if name:
                         path = path.replace(name, name[0])
@@ -516,7 +511,7 @@ class Directory(object):
         self.pathhistory = [self.path]
         self.pathhistory_cursor = 0
         self.pathhistory_max = 20
-        self.files = []
+        self.files = [FileStat('..')]
         self.mark_files = []
         self.mark_size = '0'
         self.cursor = 0
@@ -651,12 +646,15 @@ class Directory(object):
                 if  not os.path.isdir(f) and not self.maskreg.search(f):
                     continue
 
-            fs = FileStat(f)
-            if fs.name in marks:
-                fs.marked = True
-                marks.remove(fs.name)
-                self.mark_files.append(fs)
-            self.files.append(fs)
+            try:
+                fs = FileStat(f)
+                if fs.name in marks:
+                    fs.marked = True
+                    marks.remove(fs.name)
+                    self.mark_files.append(fs)
+                self.files.append(fs)
+            except UnicodeError:
+                self.invalid_encoding_error(f)
         return self
 
     def reload(self):
@@ -668,6 +666,31 @@ class Directory(object):
         self.diskread()
         self.sort()
         return self
+
+    def invalid_encoding_error(self, fname):
+        fs = FileStat(fname, force=True)
+        size = fs.get_file_size() + ' (%s)' % fs.stat.st_size
+        time = fs.get_mtime()
+        user = fs.get_user_name()
+        group = fs.get_group_name()
+        nlink = str(fs.stat.st_nlink)
+        perm = fs.get_permission()
+        msglist = ['The file of invalid encoding status',
+                   '===================================', '',
+                   'permission: '+perm, 'nlink: '+nlink,
+                   'user: '+user, 'group: '+group,
+                   'size: '+size, 'time: '+time]
+
+        ret = pyful.message.confirm('Invalid encoding error. What do you do?',
+                                    ['ignore', 'rename', 'delete'], msglist)
+        if ret is None or ret == 'ignore':
+            return False
+        elif ret == 'rename':
+            from pyfulib import mode
+            pyful.cmdline.start(mode.Rename(fname), '')
+        elif ret == 'delete':
+            from pyfulib import filectrl
+            filectrl.delete(fname)
 
     def chdir(self, path, history=True):
         self.list = None
@@ -1089,11 +1112,14 @@ class FileStat(object):
     view_mtime = True
     time_format = '%y-%m-%d %H:%M'
 
-    def __init__(self, name):
-        try:
+    def __init__(self, name, force=False):
+        if force:
+            try:
+                self.name = util.unistr(name)
+            except UnicodeError:
+                self.name = name
+        else:
             self.name = util.unistr(name)
-        except UnicodeError:
-            self.name = name
         self.marked = False
 
         self.lstat = os.lstat(name)
@@ -1138,11 +1164,6 @@ class FileStat(object):
         if self.view_name:
             return self.view_name
 
-        try:
-            util.unistr(self.name)
-        except UnicodeError:
-            return '????? (invalid encoding)'
-
         if self.view_ext and not self.isdir() and not self.islink():
             fname = self.name.replace(util.extname(self.name), '')
         else:
@@ -1176,26 +1197,20 @@ class FileStat(object):
         if self.view_ext and not self.isdir() and not self.islink():
             fstat += ' %s ' % util.extname(self.name)
         if self.view_user:
-            try:
-                fstat += ' %s ' % pwd.getpwuid(self.stat.st_uid)[0]
-            except:
-                fstat += ' %s ' % 'unknown'
+            fstat += ' %s ' % self.get_user_name()
         if self.view_group:
-            try:
-                fstat += ' %s ' % grp.getgrgid(self.stat.st_gid)[0]
-            except:
-                fstat += ' %s ' % 'unknown'
+            fstat += ' %s ' % self.get_group_name()
         if self.view_nlink:
             fstat += ' %3s ' % self.stat.st_nlink
         if self.view_size:
             if self.isdir():
                 fstat += ' %7s ' % '<DIR>'
             else:
-                fstat += ' %7s ' % self.__get_file_size()
+                fstat += ' %7s ' % self.get_file_size()
         if self.view_permission:
-            fstat += ' %s ' % self.__get_permission()
+            fstat += ' %s ' % self.get_permission()
         if self.view_mtime:
-            fstat += ' %s' % time.strftime(self.time_format, time.localtime(self.stat.st_mtime))
+            fstat += ' %s ' % self.get_mtime()
 
         self.view_stat = fstat
         return self.view_stat
@@ -1213,7 +1228,7 @@ class FileStat(object):
             attr = look.colors['EXECUTABLE']
         return attr
 
-    def __get_file_size(self):
+    def get_file_size(self):
         s = self.stat.st_size
         if s > 1024**3:
             return '%.1fG' % (float(s) / (1024**3))
@@ -1224,7 +1239,22 @@ class FileStat(object):
         else:
             return str(s)
 
-    def __get_permission(self):
+    def get_user_name(self):
+        try:
+            return pwd.getpwuid(self.stat.st_uid)[0]
+        except:
+            return 'unknown'
+
+    def get_group_name(self):
+        try:
+            return grp.getgrgid(self.stat.st_gid)[0]
+        except:
+            return 'unknown'
+
+    def get_mtime(self):
+            return time.strftime(self.time_format, time.localtime(self.stat.st_mtime))
+
+    def get_permission(self):
         perm = ''
         if stat.S_ISDIR(self.lstat.st_mode): perm += 'd'
         elif stat.S_ISLNK(self.lstat.st_mode): perm += 'l'
@@ -1262,7 +1292,7 @@ class FileStat(object):
 
         pyful.stdscr.cmdwin.erase()
 
-        perm = self.__get_permission()
+        perm = self.get_permission()
         try:
             user = pwd.getpwuid(self.stat.st_uid)[0]
         except:
@@ -1271,11 +1301,7 @@ class FileStat(object):
         nlink = self.stat.st_nlink
         size = self.stat.st_size
         mtime = time.strftime(self.time_format, time.localtime(self.stat.st_mtime))
-        try:
-            util.unistr(self.name)
-            name = self.name
-        except UnicodeError:
-            name = '????? (invalid encoding)'
+        name = self.name
 
         fstat = '%s %s %s %s %d %s %s' % (perm, nlink, user, group, size, mtime, name)
         fstat = util.mbs_ljust(fstat, pyful.stdscr.maxx-1)

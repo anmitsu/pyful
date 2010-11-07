@@ -382,9 +382,19 @@ class Newfile(object):
         pyful.filer.dir.setcursor(pyful.filer.dir.get_index(path))
 
 class Rename(object):
+    def __init__(self, path=None):
+        if path is None:
+            self.path = pyful.filer.file.name
+        else:
+            self.path = path
+
     @property
     def prompt(self):
-        return "Rename (%s):" % pyful.filer.file.name
+        try:
+            util.unistr(self.path)
+            return "Rename (%s):" % self.path
+        except UnicodeError:
+            return "Rename invalid encoding to:"
 
     def complete(self, comp):
         return comp.comp_files()
@@ -395,9 +405,9 @@ class Rename(object):
             return
 
         try:
-            os.renames(pyful.filer.file.name, path)
+            os.renames(self.path, path)
         except Exception as e:
-            pyful.message.error("rename: %s" % e[1])
+            pyful.message.exception(e)
         pyful.filer.workspace.all_reload()
 
 class Replace(object):

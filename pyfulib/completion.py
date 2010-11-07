@@ -77,6 +77,11 @@ class Completion(ui.InfoBox):
         if string is None:
             string = self.cursor_item()
 
+        try:
+            util.unistr(string)
+        except UnicodeError:
+            return self.finish()
+
         from pyfulib.mode import Shell
         if isinstance(self.cmdline.mode, Shell):
             psquote = False

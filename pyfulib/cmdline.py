@@ -52,19 +52,11 @@ class Cmdline(object):
     def execute(self):
         string = self.string
         self.finish()
-        try:
-            util.unistr(string)
-            self.history.append(string)
-        except UnicodeError:
-            pass
+        self.history.append(string)
         self.mode.execute(string)
 
     def escape(self):
-        try:
-            util.unistr(self.string)
-            self.history.append(self.string)
-        except UnicodeError:
-            pass
+        self.history.append(self.string)
         self.finish()
 
     def settop(self):
@@ -81,10 +73,7 @@ class Cmdline(object):
 
     def forward_word(self):
         i = self.cursor + 1
-        try:
-            s = util.unistr(self.string)
-        except UnicodeError:
-            s = self.string
+        s = util.unistr(self.string)
         while i < util.mbslen(self.string):
             c = s[i]
             if self.wordbreakchars.search(c):
@@ -97,10 +86,7 @@ class Cmdline(object):
             return
 
         i = self.cursor - 1
-        try:
-            s = util.unistr(self.string)
-        except UnicodeError:
-            s = self.string
+        s = util.unistr(self.string)
         while 0 < i:
             c = s[i-1]
             if self.wordbreakchars.search(c):
@@ -129,11 +115,8 @@ class Cmdline(object):
             if self.wordbreakchars.search(c):
                 break
             i += 1
-        try:
-            delword = util.unistr(self.string)[self.cursor:i]
-            self.clipboard.yank(delword)
-        except UnicodeError:
-            pass
+        delword = util.unistr(self.string)[self.cursor:i]
+        self.clipboard.yank(delword)
         self.string = util.slicestr(self.string, self.cursor, i)
         self.history.restart()
 
@@ -141,31 +124,22 @@ class Cmdline(object):
         if not self.cursor:
             return
         i = self.cursor - 1
-        try:
-            s = util.unistr(self.string)
-        except UnicodeError:
-            s = self.string
+        s = util.unistr(self.string)
         while 0 < i:
             c = s[i-1]
             if self.wordbreakchars.search(c):
                 break
             i -= 1
-        try:
-            delword = util.unistr(self.string)[:self.cursor]
-            self.clipboard.yank(delword)
-        except UnicodeError:
-            pass
+        delword = util.unistr(self.string)[:self.cursor]
+        self.clipboard.yank(delword)
         self.string = util.slicestr(self.string, i, self.cursor)
         self.cursor = i
         self.history.restart()
 
     def kill_line(self):
-        try:
-            self.string = util.unistr(self.string)
-            killword = self.string[self.cursor:]
-            self.clipboard.yank(killword)
-        except UnicodeError:
-            pass
+        self.string = util.unistr(self.string)
+        killword = self.string[self.cursor:]
+        self.clipboard.yank(killword)
         self.string = self.string[:self.cursor]
         self.history.restart()
 
@@ -204,10 +178,7 @@ class Cmdline(object):
         except Exception as e:
             pyful.message.error("curses error: " + str(e))
 
-        try:
-            curpos = util.termwidth(prompt+self.string, util.mbslen(prompt)+self.cursor)
-        except UnicodeError:
-            curpos = 0
+        curpos = util.termwidth(prompt+self.string, util.mbslen(prompt)+self.cursor)
         if curpos < pyful.stdscr.maxx:
             pyful.stdscr.cmdwin.move(0, curpos)
         pyful.stdscr.cmdwin.noutrefresh()
@@ -394,11 +365,6 @@ class History(ui.InfoBox):
         self.start()
 
     def start(self):
-        try:
-            util.unistr(self.cmdline.string)
-        except UnicodeError:
-            return
-
         self.source = None
         info = []
         for item in self.index(self.cmdline.mode.__class__.__name__):

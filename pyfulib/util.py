@@ -23,9 +23,10 @@ import unicodedata
 try:
     unicode
     def unistr(string):
-        return string.decode()
+        return string.decode('utf-8')
 except:
     def unistr(string):
+        string.encode('utf-8')
         return string
 
 def cmp_to_key(_cmp):
@@ -47,10 +48,7 @@ def cmp_to_key(_cmp):
     return K
 
 def cmp(x, y):
-    try:
-        return (x > y) - (x < y)
-    except UnicodeError:
-        return 0
+    return (x > y) - (x < y)
 
 def uniq(ls):
     out = []
@@ -73,11 +71,11 @@ def string_to_safe(string):
 
 def quote(string):
     if re.search("[']", string):
-        return re.sub("^|$", '"', string)
+        return '"%s"' % string
     elif re.search("[\"]", string):
-        return re.sub("^|$", "'", string)
+        return "'%s'" % string
     elif re.search("\s", string):
-        return re.sub("^|$", '"', string)
+        return '"%s"' % string
     else:
         return string
 
@@ -92,34 +90,22 @@ def wait_restore():
 
 
 def mbslen(string):
-    try:
-        return len(unistr(string))
-    except UnicodeError:
-        return len(string)
+    return len(unistr(string))
 
 def insertstr(string, ins, length):
-    try:
-        string = unistr(string)
-    except UnicodeError:
-        return string
+    string = unistr(string)
     f = string[:length]
     b = string[length:]
     return f + ins + b
 
 def rmstr(string, length):
-    try:
-        string = unistr(string)
-    except UnicodeError:
-        pass
+    string = unistr(string)
     f = string[:length]
     b = string[length+1:]
     return f + b
 
 def slicestr(string, start, end):
-    try:
-        string = unistr(string)
-    except UnicodeError:
-        pass
+    string = unistr(string)
     f = string[:start]
     b = string[end:]
     return f + b
@@ -146,64 +132,55 @@ def unix_dirname(path):
 
 
 def termwidth(string, length=None):
-    try:
-        string = unistr(string)
-        if length is None:
-            length = len(string)
-        string = string[:length]
-        width = len(string)
-        for c in string:
-            if unicodedata.east_asian_width(c) in "WF":
-                width += 1
-        return width
-    except UnicodeError:
-        return len(string)
+    string = unistr(string)
+    if length is None:
+        length = len(string)
+    string = string[:length]
+    width = len(string)
+    for c in string:
+        if unicodedata.east_asian_width(c) in "WF":
+            width += 1
+    return width
 
 def mbs_ljust(string, length, pad=" "):
-    try:
-        string = unistr(string)
+    string = unistr(string)
 
-        width = 0
-        cut = False
-        for i, c in enumerate(string):
-            if length <= width:
-                string = string[0:i-1]
-                cut = True
-                break
-            if unicodedata.east_asian_width(c) in "WF":
-                width += 2
-            else:
-                width += 1
-        if cut:
-            space = length - termwidth(string)
+    width = 0
+    cut = False
+    for i, c in enumerate(string):
+        if length <= width:
+            string = string[0:i-1]
+            cut = True
+            break
+        if unicodedata.east_asian_width(c) in "WF":
+            width += 2
         else:
-            space = length - width
-        if space > 0:
-            string += pad * space
-        return string
-    except UnicodeError:
-        return string
+            width += 1
+    if cut:
+        space = length - termwidth(string)
+    else:
+        space = length - width
+    if space > 0:
+        string += pad * space
+    return string
 
 def mbs_rjust(string, length, pad=" "):
-    try:
-        string = unistr(string)
-        width = 0
-        cut = False
-        for i, c in enumerate(reversed(string)):
-            if length <= width:
-                string = string[len(string)-i:]
-                cut = True
-                break
-            if unicodedata.east_asian_width(c) in "WF":
-                width += 2
-            else:
-                width += 1
-        if cut:
-            space = length - termwidth(string)
+    string = unistr(string)
+    width = 0
+    cut = False
+    for i, c in enumerate(reversed(string)):
+        if length <= width:
+            string = string[len(string)-i:]
+            cut = True
+            break
+        if unicodedata.east_asian_width(c) in "WF":
+            width += 2
         else:
-            space = length - width
-        if space > 0:
-            string += pad * space
-        return string
-    except UnicodeError:
-        return string
+            width += 1
+    if cut:
+        space = length - termwidth(string)
+    else:
+        space = length - width
+    if space > 0:
+        string += pad * space
+    return string
