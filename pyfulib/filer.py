@@ -242,18 +242,18 @@ class Filer(object):
         except IOError:
             os.makedirs(util.unix_dirname(path))
             f = open(path, 'w')
-        f.write('[workspace size]\n')
-        f.write(str(len(self.workspaces))+'\n')
+        f.write('[workspace size]'+os.linesep)
+        f.write(str(len(self.workspaces))+os.linesep)
         for ws in self.workspaces:
-            f.write('[workspace title]\n')
-            f.write(ws.title+'\n')
-            f.write('[workspace size]\n')
-            f.write(str(len(ws.dirs))+'\n')
+            f.write('[workspace title]'+os.linesep)
+            f.write(ws.title+os.linesep)
+            f.write('[workspace size]'+os.linesep)
+            f.write(str(len(ws.dirs))+os.linesep)
             for d in ws.dirs:
-                f.write('[workspace path]\n')
-                f.write(d.path+'\n')
-                f.write('[sort kind]\n')
-                f.write(d.sort_kind+'\n')
+                f.write('[workspace path]'+os.linesep)
+                f.write(d.path+os.linesep)
+                f.write('[sort kind]'+os.linesep)
+                f.write(d.sort_kind+os.linesep)
         f.close()
 
     def loadfile(self, path):
@@ -261,20 +261,20 @@ class Filer(object):
             f = open(os.path.expanduser(path), 'r')
             f.readline()
             self.workspaces = []
-            ws_i = int(f.readline().rstrip('\n'))
+            ws_i = int(f.readline().rstrip(os.linesep))
             for i in range(0, ws_i):
                 f.readline()
-                title = f.readline().rstrip('\n')
+                title = f.readline().rstrip(os.linesep)
                 self.workspaces.append(Workspace(title))
 
                 f.readline()
-                d_i = int(f.readline().rstrip('\n'))
+                d_i = int(f.readline().rstrip(os.linesep))
                 for j in range(0, d_i):
                     f.readline()
-                    path = f.readline().rstrip('\n')
+                    path = f.readline().rstrip(os.linesep)
                     self.workspaces[-1].dirs.append(Directory(path, 10, 10, 1, 0))
                     f.readline()
-                    self.workspaces[-1].dirs[-1].sort_kind = f.readline().rstrip('\n')
+                    self.workspaces[-1].dirs[-1].sort_kind = f.readline().rstrip(os.linesep)
             f.close()
         except:
             pass

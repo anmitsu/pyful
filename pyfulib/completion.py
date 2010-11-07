@@ -336,7 +336,7 @@ class AptGet(object):
 
     def comp_pkgnames(self):
         (out, err) = subprocess.Popen(["apt-cache", "pkgnames"], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-        li = out.split("\n")
+        li = out.split(os.linesep)
         ret = [item for item in li if item.startswith(self.comp.parser.nowstr)]
         return ret
 
@@ -344,7 +344,7 @@ class AptGet(object):
         (out, err) = subprocess.Popen(["dpkg", "-l"], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
 
         pkgs = []
-        for i, line in enumerate(out.split("\n")):
+        for i, line in enumerate(out.split(os.linesep)):
             if i > 4:
                 li = line.split()
                 if len(li) > 2 and li[1].startswith(self.comp.parser.nowstr):
@@ -397,7 +397,7 @@ class AptCache(object):
 
     def comp_pkgnames(self):
         (out, err) = subprocess.Popen(["apt-cache", "pkgnames"], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-        li = out.split("\n")
+        li = out.split(os.linesep)
         ret = [item for item in li if item.startswith(self.comp.parser.nowstr)]
         return ret
 

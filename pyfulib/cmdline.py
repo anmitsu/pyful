@@ -310,7 +310,7 @@ class History(ui.InfoBox):
                 for i, line in enumerate(f):
                     if self._maxsave <= i:
                         break
-                    self.index(key).append(line.strip("\n"))
+                    self.index(key).append(line.strip(os.linesep))
         except IOError:
             return
 
@@ -321,7 +321,7 @@ class History(ui.InfoBox):
                 os.makedirs(dirname)
             with open(os.path.expanduser(path), "w") as f:
                 for cmd in self.index(key):
-                    f.write(cmd+"\n")
+                    f.write(cmd+os.linesep)
         except IOError:
             return
 
@@ -411,7 +411,7 @@ class Clipboard(ui.InfoBox):
                 for i, line in enumerate(f):
                     if self._maxsave <= i:
                         break
-                    self.__class__.clip.append(line.strip("\n"))
+                    self.__class__.clip.append(line.strip(os.linesep))
         except IOError:
             return
 
@@ -419,7 +419,7 @@ class Clipboard(ui.InfoBox):
         try:
             with open(os.path.expanduser(path), "w") as f:
                 for c in self.__class__.clip:
-                    f.write(c+"\n")
+                    f.write(c+os.linesep)
         except IOError:
             return
 
@@ -503,7 +503,7 @@ class Output(ui.InfoBox):
         if info:
             self.cmdline.history.hide()
             reg = re.compile("[\r\t]")
-            self.show([reg.sub("", item) for item in info.split("\n") if item != ''])
+            self.show([reg.sub("", item) for item in info.split(os.linesep) if item != ''])
 
     def terminal(self):
         pass
@@ -511,4 +511,6 @@ class Output(ui.InfoBox):
     def finish(self):
         self.hide()
         self.cmdline.history.start()
+
+
 
