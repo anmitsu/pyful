@@ -34,26 +34,26 @@ pyful = Pyful()
 def chmod(path, mode):
     try:
         os.chmod(path, int(mode, 8))
-    except EnvironmentError as e:
-        pyful.message.error("%s: %s" % (e.__class__.__name__, e[-1]))
+    except Exception as e:
+        pyful.message.exception(e)
 
 def chown(path, uid, gid):
     if not isinstance(uid, int):
         try:
             uid = pwd.getpwnam(uid)[2]
         except KeyError as e:
-            pyful.message.error("%s: %s" % (e.__class__.__name__, e[-1]))
+            pyful.message.exception(e)
             return
     if not isinstance(gid, int):
         try:
             gid = grp.getgrnam(gid)[2]
         except KeyError as e:
-            pyful.message.error("%s: %s" % (e.__class__.__name__, e[-1]))
+            pyful.message.exception(e)
             return
     try:
         os.chown(path, uid, gid)
     except EnvironmentError as e:
-        pyful.message.error("%s: %s" % (e.__class__.__name__, e[-1]))
+        pyful.message.exception(e)
 
 def copy(src, dst):
     Filectrl().copy(src, dst)
@@ -65,7 +65,7 @@ def delete(path):
         else:
             shutil.rmtree(path)
     except EnvironmentError as e:
-        pyful.message.error("%s: %s" % (e.__class__.__name__, e[-1]))
+        pyful.message.exception(e)
 
 def link(src, dst):
     try:
@@ -73,7 +73,7 @@ def link(src, dst):
             dst = os.path.join(dst, util.unix_basename(src))
         os.link(src, dst)
     except EnvironmentError as e:
-        pyful.message.error("%s: %s" % (e.__class__.__name__, e[-1]))
+        pyful.message.exception(e)
 
 def symlink(src, dst):
     try:
@@ -81,19 +81,19 @@ def symlink(src, dst):
             dst = os.path.join(dst, util.unix_basename(src))
         os.symlink(src, dst)
     except EnvironmentError as e:
-        pyful.message.error("%s: %s" % (e.__class__.__name__, e[-1]))
+        pyful.message.exception(e)
 
 def mkdir(path, mode=0o755):
     try:
         os.makedirs(path, mode)
     except EnvironmentError as e:
-        pyful.message.error("%s: %s" % (e.__class__.__name__, e[-1]))
+        pyful.message.exception(e)
 
 def mknod(path, mode=0o644):
     try:
         os.mknod(path, mode)
     except EnvironmentError as e:
-        pyful.message.error("%s: %s" % (e.__class__.__name__, e[-1]))
+        pyful.message.exception(e)
 
 def move(src, dst):
     Filectrl().move(src, dst)
@@ -130,7 +130,7 @@ def replace(src, dst):
         try:
             os.rename(src, dst)
         except EnvironmentError as e:
-            pyful.message.error("%s: %s" % (e.__class__.__name__, e[-1]))
+            pyful.message.exception(e)
             break
 
 def unzip(src, dstdir=''):
@@ -142,7 +142,7 @@ def unzip(src, dstdir=''):
         try:
             zipf = zipfile.ZipFile(src, 'r')
         except IOError as e:
-            pyful.message.error("%s: %s" % (e.__class__.__name__, e[-1]))
+            pyful.message.exception(e)
             return
 
         for info in zipf.infolist():
@@ -158,7 +158,7 @@ def unzip(src, dstdir=''):
                 try:
                     os.makedirs(path_dirname)
                 except OSError as e:
-                    pyful.message.error("%s: %s" % (e.__class__.__name__, e[-1]))
+                    pyful.message.exception(e)
                     continue
 
             try:
@@ -168,7 +168,7 @@ def unzip(src, dstdir=''):
                 source.close()
                 target.close()
             except IOError as e:
-                pyful.message.error("%s: %s" % (e.__class__.__name__, e[-1]))
+                pyful.message.exception(e)
                 continue
 
             perm = info.external_attr >> 16 & 0o777
@@ -197,7 +197,7 @@ def zip(src, dst, wrap=''):
     try:
         zipf = zipfile.ZipFile(dst, 'w', compression=zipfile.ZIP_DEFLATED)
     except IOError as e:
-        pyful.message.error("%s: %s" % (e.__class__.__name__, e[-1]))
+        pyful.message.exception(e)
         return
 
     def _write_zip(src):
@@ -481,7 +481,7 @@ class FileJob(object):
                 self.copyfileobj(self.src, self.dst)
                 shutil.copystat(self.src, self.dst)
         except Exception as e:
-            pyful.message.error("%s: %s" % (e.__class__.__name__, e[-1]))
+            pyful.message.exception(e)
 
     def move(self, thread):
         self.thread = thread
@@ -502,5 +502,5 @@ class FileJob(object):
                 if thread.active:
                     delete(self.src)
             else:
-                pyful.message.error("%s: %s" % (e.__class__.__name__, e[-1]))
+                pyful.message.exception(e)
 

@@ -68,7 +68,7 @@ class Process(object):
             exec(cmd)
             util.wait_restore()
         except Exception as e:
-            pyful.message.error('%s: %s' % (e.__class__.__name__, str(e)))
+            pyful.message.exception(e)
 
     def system(self, cmd):
         if self.background:
@@ -82,8 +82,8 @@ class Process(object):
                 pass
             else:
                 util.wait_restore()
-        except OSError as e:
-            pyful.message.error('%s: %s' % (e.__class__.__name__, str(e)))
+        except Exception as e:
+            pyful.message.exception(e)
 
     def screen(self, cmd, title):
         subprocess.Popen(["screen", "-t", title, self.shell[0], self.shell[1], "%s; python %s -e" % (cmd, pyful.binpath)])

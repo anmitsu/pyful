@@ -53,6 +53,9 @@ class Message(object):
         self.view()
         self.start_timer(timex)
 
+    def exception(self, except_cls):
+        self.error('%s: %s' % (except_cls.__class__.__name__, str(except_cls)))
+
     def confirm(self, msg, options, msglist=None, position=0):
         self.active = True
         pyful.view()
