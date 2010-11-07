@@ -47,7 +47,10 @@ def cmp_to_key(_cmp):
     return K
 
 def cmp(x, y):
-    return (x > y) - (x < y)
+    try:
+        return (x > y) - (x < y)
+    except UnicodeDecodeError:
+        return 0
 
 def uniq(ls):
     out = []
