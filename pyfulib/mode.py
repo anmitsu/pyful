@@ -56,8 +56,8 @@ class Mx(object):
         from pyfulib.command import commands
         try:
             commands[cmd]()
-        except Exception as e:
-            pyful.message.error(str(e))
+        except KeyError:
+            pyful.message.error("Undefined command `%s'" % cmd)
 
 class ChangeWorkspaceTitle(object):
     prompt = 'Change workspace title:'
