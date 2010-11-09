@@ -335,7 +335,7 @@ class UnzipThread(threading.Thread):
             head, tail = os.path.split(head)
         if head and tail and not os.path.exists(head):
             try:
-                self.makedirs(head, mode)
+                self.makedirs(myzip, head, mode)
             except OSError as e:
                 if e.errno != errno.EEXIST:
                     raise
@@ -394,7 +394,7 @@ class ZipThread(threading.Thread):
         self.active = True
         if isinstance(src, list):
             self.src = [util.abspath(f) for f in src]
-            self.src_dirname = os.getcwd() + os.sep
+            self.src_dirname = util.unistr(os.getcwd()) + os.sep
         else:
             self.src = util.abspath(src)
             self.src_dirname = util.unix_dirname(self.src) + os.sep
@@ -436,24 +436,25 @@ class ZipThread(threading.Thread):
         self.active = False
         self.join()
 
+    def _write(self, myzip, source, arcname):
+        self.title = "Adding: " + arcname
+        view_threads()
+        myzip.write(source, os.path.join(self.wrap, arcname))
+        if not self.active:
+            raise KeyboardInterrupt
+
     def write(self, myzip, source):
         if os.path.isdir(source):
+            arcname = source.replace(os.path.commonprefix([source, self.src_dirname]), '')
+            self._write(myzip, source, arcname)
             for root, dnames, fnames in os.walk(source):
                 for name in fnames+dnames:
                     path = os.path.normpath(os.path.join(root, name))
                     arcname = path.replace(os.path.commonprefix([path, self.src_dirname]), '')
-                    self.title = "Adding: " + arcname
-                    view_threads()
-                    myzip.write(path, os.path.join(self.wrap, arcname))
-                    if not self.active:
-                        raise KeyboardInterrupt
+                    self._write(myzip, path, arcname)
         else:
             arcname = source.replace(os.path.commonprefix([source, self.src_dirname]), '')
-            self.title = "Adding: " + arcname
-            view_threads()
-            myzip.write(source, os.path.join(self.wrap, arcname))
-            if not self.active:
-                raise KeyboardInterrupt
+            self._write(myzip, source, arcname)
 
 class CopyThread(threading.Thread):
     def __init__(self, ctrl, title):
