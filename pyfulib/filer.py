@@ -1252,7 +1252,7 @@ class FileStat(object):
             return 'unknown'
 
     def get_mtime(self):
-            return time.strftime(self.time_format, time.localtime(self.stat.st_mtime))
+        return time.strftime(self.time_format, time.localtime(self.stat.st_mtime))
 
     def get_permission(self):
         perm = ''
