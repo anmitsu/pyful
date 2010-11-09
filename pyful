@@ -87,4 +87,14 @@ if __name__ == '__main__':
         if pyful.started:
             pyful.exit_function()
     finally:
-        pyful.stdscr.destroy()
+        if pyful.stdscr:
+            pyful.stdscr.destroy()
+
+
+
+
+
+
+
+
+
