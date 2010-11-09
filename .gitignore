@@ -1,5 +1,7 @@
+*.py[co]
+
+*.egg
+*.egg-info
 build
 dist
 MANIFEST
-*.pyc
-
