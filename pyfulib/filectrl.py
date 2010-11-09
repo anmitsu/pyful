@@ -302,9 +302,9 @@ class UnzipThread(threading.Thread):
     def run(self):
         if isinstance(self.src, list):
             for f in self.src:
-                self.expand(f)
+                self.extract(f)
         else:
-            self.expand(self.src)
+            self.extract(self.src)
         self.active = False
 
     def kill(self):
@@ -346,7 +346,7 @@ class UnzipThread(threading.Thread):
         os.mkdir(abspath, mode)
         self.copy_external_attr(myzip, path)
 
-    def expand(self, srczippath):
+    def extract(self, srczippath):
         import zipfile
 
         try:
@@ -364,10 +364,10 @@ class UnzipThread(threading.Thread):
                 pyful.message.error("UnicodeError: Not support `%s' encoding" % fname)
                 continue
 
-            zipf_dirname = util.unix_dirname(fname)
-            if not os.path.isdir(os.path.join(self.dstdir, zipf_dirname)):
+            myzip_dirname = util.unix_dirname(fname)
+            if not os.path.isdir(os.path.join(self.dstdir, myzip_dirname)):
                 try:
-                    self.makedirs(myzip, zipf_dirname)
+                    self.makedirs(myzip, myzip_dirname)
                 except OSError as e:
                     pyful.message.exception(e)
                     continue
