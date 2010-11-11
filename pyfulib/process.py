@@ -77,6 +77,7 @@ class Process(object):
             curses.endwin()
             os.system("clear")
         try:
+            pyful.resetsignal()
             subprocess.call(cmd, shell=True)
             if self.quick or self.background:
                 pass
@@ -84,6 +85,10 @@ class Process(object):
                 util.wait_restore()
         except Exception as e:
             pyful.message.exception(e)
+        except KeyboardInterrupt as e:
+            pass
+        finally:
+            pyful.setsignal()
 
     def screen(self, cmd, title):
         subprocess.Popen(["screen", "-t", title, self.shell[0], self.shell[1], "%s; python %s -e" % (cmd, pyful.binpath)])
