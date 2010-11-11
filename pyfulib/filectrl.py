@@ -648,10 +648,8 @@ class MoveThread(threading.Thread):
                     pyful.message.error("Move canceled")
                     break
 
-        def _sort(x, y):
-            return util.cmp(len(y.split(os.sep)), len(x.split(os.sep)))
-
-        self.ctrl.dirlist.sort(key=util.cmp_to_key(_sort))
+        self.ctrl.dirlist.sort()
+        self.ctrl.dirlist.reverse()
         for d in self.ctrl.dirlist:
             try:
                 os.rmdir(d)
