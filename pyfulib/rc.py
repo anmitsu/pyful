@@ -214,6 +214,11 @@ myfilerkeymap = {
     (0, KEY_RETURN, '.mark'): commands['enter_mark'],
     (0, KEY_RETURN, '.link'): commands['enter_link'],
     (0, KEY_RETURN, '.exec'): commands['enter_exec'],
+    (0, KEY_RETURN, '.tar'): commands['untar'],
+    (0, KEY_RETURN, '.tgz'): commands['untar'],
+    (0, KEY_RETURN, '.gz' ): commands['untar'],
+    (0, KEY_RETURN, '.bz2'): commands['untar'],
+    (0, KEY_RETURN, '.zip'): commands['unzip'],
     }
 
 myfinderkeymap = {
