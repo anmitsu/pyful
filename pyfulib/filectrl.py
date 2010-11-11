@@ -353,6 +353,7 @@ class TarThread(threading.Thread):
         except FilectrlCancel:
             pass
         tar.close()
+        os.chmod(self.dst, 0o644)
         self.active = False
 
     def kill(self):
