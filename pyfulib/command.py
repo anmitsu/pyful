@@ -42,8 +42,10 @@ commands = {
     'rename'   : lambda: _rename(),
     'symlink'  : lambda: _symlink(),
     'trashbox' : lambda: _trashbox(),
-    'unzip'    : lambda: _unzip(),
+    'tar'      : lambda: _tar(),
+    'untar'    : lambda: _untar(),
     'zip'      : lambda: _zip(),
+    'unzip'    : lambda: _unzip(),
     'chdir'    : lambda: pyful.cmdline.start(mode.Chdir(), pyful.filer.dir.path),
     'chmod'    : lambda: pyful.cmdline.start(mode.Chmod(), ''),
     'chown'    : lambda: pyful.cmdline.start(mode.Chown(), ''),
@@ -210,9 +212,9 @@ def _pack():
     if "zip" == ret:
         _zip()
     elif ret == "tgz":
-        pyful.cmdline.start(mode.Shell(), "tar cvfz %D2.tgz %m", -7)
+        _tar('gzip')
     elif ret == "bz2":
-        pyful.cmdline.start(mode.Shell(), "tar cvfj %D2.bz2 %m", -7)
+        _tar('bzip2')
     elif ret == "tar":
         pyful.cmdline.start(mode.Shell(), "tar cvf %D2.tar %m", -7)
     elif ret == "rar":
@@ -223,9 +225,9 @@ def _pack2():
     if ret == "zip":
         _zip()
     elif ret == "tgz":
-        pyful.cmdline.start(mode.Shell(), "tar -cvfz %D.tgz %m", -7)
+        _tar('gzip')
     elif ret == "bz2":
-        pyful.cmdline.start(mode.Shell(), "tar cvfj %D.bz2 %m", -7)
+        _tar('bzip2')
     elif ret == "tar":
         pyful.cmdline.start(mode.Shell(), "tar cvf %D.tar %m", -7)
     elif ret == "rar":
@@ -350,14 +352,29 @@ def _trashbox():
     else:
         pyful.cmdline.start(mode.TrashBox(), pyful.filer.file.name)
 
-def _unzip():
+def _tar(tarmode=None):
+    if tarmode is None:
+        tarmode = pyful.message.confirm("Tar mode:", ["gzip", "bzip2", "tar"])
+
     if pyful.filer.dir.ismark():
-        pyful.cmdline.start(mode.UnZip(), pyful.filer.workspace.nextdir.path)
+        pyful.cmdline.start(mode.Tar(tarmode), '')
     else:
-        pyful.cmdline.start(mode.UnZip(), pyful.filer.file.name)
+        pyful.cmdline.start(mode.Tar(tarmode), pyful.filer.file.name)
+
+def _untar():
+    if pyful.filer.dir.ismark():
+        pyful.cmdline.start(mode.UnTar(), pyful.filer.workspace.nextdir.path)
+    else:
+        pyful.cmdline.start(mode.UnTar(), pyful.filer.file.name)
 
 def _zip():
     if pyful.filer.dir.ismark():
         pyful.cmdline.start(mode.Zip(), '')
     else:
         pyful.cmdline.start(mode.Zip(), pyful.filer.file.name)
+
+def _unzip():
+    if pyful.filer.dir.ismark():
+        pyful.cmdline.start(mode.UnZip(), pyful.filer.workspace.nextdir.path)
+    else:
+        pyful.cmdline.start(mode.UnZip(), pyful.filer.file.name)
