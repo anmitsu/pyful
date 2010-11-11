@@ -143,10 +143,16 @@ class Confirm(object):
             self.cursor = size - 1
         for i, s in enumerate(self.options):
             if self.cursor == i:
-                pyful.stdscr.cmdwin.addstr(s, curses.A_REVERSE)
-                pyful.stdscr.cmdwin.addstr(" ", 0)
+                try:
+                    pyful.stdscr.cmdwin.addstr(s, curses.A_REVERSE)
+                    pyful.stdscr.cmdwin.addstr(" ", 0)
+                except Exception:
+                    pass
             else:
-                pyful.stdscr.cmdwin.addstr(s+" ", 0)
+                try:
+                    pyful.stdscr.cmdwin.addstr(s+" ", 0)
+                except Exception:
+                    pass
         maxxy = pyful.stdscr.cmdwin.getmaxyx()
         pyful.stdscr.cmdwin.move(maxxy[0]-1, maxxy[1]-1)
         pyful.stdscr.cmdwin.noutrefresh()

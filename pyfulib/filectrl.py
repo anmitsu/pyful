@@ -161,7 +161,10 @@ def view_threads():
     pyful.stdscr.cmdwin.erase()
     pyful.stdscr.cmdwin.move(0, 1)
     for i, t in enumerate(Filectrl.threads):
-        pyful.stdscr.cmdwin.addstr("[%s] %s " % (str(i+1), t.title), curses.A_BOLD)
+        try:
+            pyful.stdscr.cmdwin.addstr("[%s] %s " % (str(i+1), t.title), curses.A_BOLD)
+        except Exception:
+            pass
     pyful.stdscr.cmdwin.move(1, pyful.stdscr.maxx-1)
     pyful.stdscr.cmdwin.noutrefresh()
     curses.doupdate()
