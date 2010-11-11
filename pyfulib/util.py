@@ -23,6 +23,9 @@ import unicodedata
 try:
     unicode
     def unistr(string):
+        return string.decode('utf-8')
+
+    def force_decode(string):
         try:
             return string.decode('utf-8')
         except UnicodeError:
@@ -33,6 +36,8 @@ try:
 except:
     def unistr(string):
         string.encode('utf-8')
+        return string
+    def force_decode(string):
         return string
 
 def cmp_to_key(_cmp):

@@ -473,7 +473,7 @@ class UnzipThread(threading.Thread):
                 return
         perm = info.external_attr >> 16
         date = list(info.date_time) + [-1, -1, -1]
-        path = util.unistr(path)
+        path = util.force_decode(path)
         abspath = os.path.join(self.dstdir, path)
         os.chmod(abspath, perm)
         atime = mtime = time.mktime(date)
@@ -509,7 +509,7 @@ class UnzipThread(threading.Thread):
             if not self.active:
                 break
             fname = info.filename
-            unifname = util.unistr(fname)
+            unifname = util.force_decode(fname)
             try:
                 path = os.path.join(self.dstdir, unifname)
             except UnicodeError:
