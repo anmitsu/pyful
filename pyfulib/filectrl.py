@@ -389,6 +389,7 @@ class UntarThread(threading.Thread):
         else:
             self.src = util.abspath(src)
         self.dstdir = util.abspath(dstdir)
+        self.directories = []
 
     def run(self):
         try:
@@ -399,6 +400,13 @@ class UntarThread(threading.Thread):
                 self._extract(self.src)
         except FilectrlCancel:
             pass
+
+        self.directories.sort(key=lambda a: a.name)
+        self.directories.reverse()
+        for info in self.directories:
+            dirpath = os.path.join(self.dstdir, info.name)
+            os.utime(dirpath, (info.mtime, info.mtime))
+
         self.active = False
 
     def _extract(self, source):
@@ -415,6 +423,8 @@ class UntarThread(threading.Thread):
                 self.title = "Untar: " + info.name
                 view_threads()
                 tar.extract(info, self.dstdir)
+                if info.isdir():
+                    self.directories.append(info)
         finally:
             tar.close()
 
