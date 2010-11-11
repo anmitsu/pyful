@@ -23,7 +23,13 @@ import unicodedata
 try:
     unicode
     def unistr(string):
-        return string.decode('utf-8')
+        try:
+            return string.decode('utf-8')
+        except UnicodeError:
+            try:
+                return string.decode('cp932')
+            except UnicodeError:
+                return string.decode('ascii')
 except:
     def unistr(string):
         string.encode('utf-8')
