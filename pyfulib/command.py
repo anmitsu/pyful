@@ -81,6 +81,7 @@ commands = {
     'enter_exec': lambda: pyful.cmdline.start(mode.Shell(), ' ./%f', 1),
     'enter_dir' : lambda: pyful.filer.dir.enter_dir(),
     'enter_link': lambda: pyful.filer.dir.enter_link(),
+    'open_listfile': lambda: pyful.filer.dir.open_listfile(pyful.filer.file.name),
 
     'chdir_parent'   : lambda: pyful.filer.dir.chdir('..'),
     'chdir_root'     : lambda: pyful.filer.dir.chdir('/'),
