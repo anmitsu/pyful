@@ -598,32 +598,73 @@ class Utime(object):
                 pyful.message.error(str(e))
             pyful.filer.workspace.all_reload()
 
-class UnZip(object):
-    def __init__(self):
+class Tar(object):
+    def __init__(self, tarmode):
         self.src = None
+        self.wrap = None
+        self.tarmode = tarmode
 
     @property
     def prompt(self):
         if pyful.filer.dir.ismark():
-            return 'Mark files unzip to:'
+            if self.wrap is None:
+                return 'Mark files wrap is:'
+            else:
+                return 'Mark files %s to:' % self.tarmode
         elif self.src is None:
-            return 'Unzip from:'
+            return '%s from:' % self.tarmode
         else:
-            return 'Unzip from %s to:' % self.src
+            return '%s from %s to:' % (self.tarmode, self.src)
 
     def complete(self, comp):
         return comp.comp_files()
 
     def execute(self, path):
         if pyful.filer.dir.ismark():
-            filectrl.unzip(pyful.filer.dir.get_mark_files(), path)
+            if self.wrap is None:
+                self.wrap = path
+                ext = filectrl.TarThread.tarexts[self.tarmode]
+                tarpath = os.path.join(pyful.filer.workspace.nextdir.path, self.wrap + ext)
+                pyful.cmdline.restart(tarpath, -len(ext))
+            else:
+                filectrl.tar(pyful.filer.dir.get_mark_files(), path, self.tarmode, self.wrap)
+                pyful.filer.dir.mark_clear()
+                pyful.filer.workspace.all_reload()
+        elif self.src is None:
+            self.src = path
+            ext = filectrl.TarThread.tarexts[self.tarmode]
+            tarpath = os.path.join(pyful.filer.workspace.nextdir.path, self.src + ext)
+            pyful.cmdline.restart(tarpath, -len(ext))
+        else:
+            filectrl.tar(self.src, path, self.tarmode)
+            pyful.filer.workspace.all_reload()
+
+class UnTar(object):
+    def __init__(self):
+        self.src = None
+
+    @property
+    def prompt(self):
+        if pyful.filer.dir.ismark():
+            return 'Mark files untar to:'
+        elif self.src is None:
+            return 'Untar from:'
+        else:
+            return 'Untar from %s to:' % self.src
+
+    def complete(self, comp):
+        return comp.comp_files()
+
+    def execute(self, path):
+        if pyful.filer.dir.ismark():
+            filectrl.untar(pyful.filer.dir.get_mark_files(), path)
             pyful.filer.dir.mark_clear()
             pyful.filer.workspace.all_reload()
         elif self.src is None:
             self.src = path
             pyful.cmdline.restart(pyful.filer.workspace.nextdir.path)
         else:
-            filectrl.unzip(self.src, path)
+            filectrl.untar(self.src, path)
             pyful.filer.workspace.all_reload()
 
 class Zip(object):
@@ -664,4 +705,32 @@ class Zip(object):
             pyful.cmdline.restart(zippath, -len(ext))
         else:
             filectrl.zip(self.src, path)
+            pyful.filer.workspace.all_reload()
+
+class UnZip(object):
+    def __init__(self):
+        self.src = None
+
+    @property
+    def prompt(self):
+        if pyful.filer.dir.ismark():
+            return 'Mark files unzip to:'
+        elif self.src is None:
+            return 'Unzip from:'
+        else:
+            return 'Unzip from %s to:' % self.src
+
+    def complete(self, comp):
+        return comp.comp_files()
+
+    def execute(self, path):
+        if pyful.filer.dir.ismark():
+            filectrl.unzip(pyful.filer.dir.get_mark_files(), path)
+            pyful.filer.dir.mark_clear()
+            pyful.filer.workspace.all_reload()
+        elif self.src is None:
+            self.src = path
+            pyful.cmdline.restart(pyful.filer.workspace.nextdir.path)
+        else:
+            filectrl.unzip(self.src, path)
             pyful.filer.workspace.all_reload()
