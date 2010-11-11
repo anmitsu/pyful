@@ -122,13 +122,13 @@ def replace(src, dst):
             continue
 
         if os.path.exists(os.path.join(pyful.filer.dir.path, dst)):
-            ret = pyful.message.confirm("File exist - (%s). Continue?" % dst, ["Yes", "No"])
+            ret = pyful.message.confirm("File exist - (%s). Override?" % dst, ["Yes", "No"])
             if ret == "Yes":
-                continue
+                pass
             elif ret == "No" or ret is None:
-                break
+                continue
         try:
-            os.rename(src, dst)
+            os.renames(src, dst)
         except EnvironmentError as e:
             pyful.message.exception(e)
             break
@@ -138,6 +138,12 @@ def unzip(src, dstdir=''):
 
 def zip(src, dst, wrap=''):
     Filectrl().zip(src, dst, wrap)
+
+def tar(src, dst, tarmode='gzip', wrap=''):
+    Filectrl().tar(src, dst, tarmode, wrap)
+
+def untar(src, dstdir='.'):
+    Filectrl().untar(src, dstdir)
 
 def kill_thread():
     threads = list([str(th) for th in Filectrl.threads])
@@ -160,6 +166,9 @@ def view_threads():
     pyful.stdscr.cmdwin.noutrefresh()
     curses.doupdate()
 
+class FilectrlCancel(Exception):
+    pass
+
 class Filectrl(object):
     threads = []
 
@@ -174,7 +183,7 @@ class Filectrl(object):
         def _checkfile(src, dst):
             ret = self.check_override(src, dst)
             if ret == "cancel":
-                raise KeyboardInterrupt
+                raise FilectrlCancel
             if ret == "yes":
                 return FileJob(src, dst)
 
@@ -279,6 +288,14 @@ class Filectrl(object):
         self.thread = MoveThread(self, "Move")
         self.thread_loop()
 
+    def tar(self, src, dst, tarmode='gzip', wrap=''):
+        self.thread = TarThread(src, dst, tarmode, wrap)
+        self.thread_loop()
+
+    def untar(self, src, dstdir='.'):
+        self.thread = UntarThread(src, dstdir)
+        self.thread_loop()
+
     def unzip(self, src, dstdir=''):
         self.thread = UnzipThread(src, dstdir)
         self.thread_loop()
@@ -286,6 +303,126 @@ class Filectrl(object):
     def zip(self, src, dst, wrap):
         self.thread = ZipThread(src, dst, wrap)
         self.thread_loop()
+
+class TarThread(threading.Thread):
+    tarmodes = {'tar': '', 'gzip': 'gz', 'bzip2': 'bz2'}
+    tarexts = {'tar': '.tar', 'gzip': '.tgz', 'bzip2': '.bz2'}
+
+    def __init__(self, src, dst, tarmode='gzip', wrap=''):
+        threading.Thread.__init__(self)
+        self.setDaemon(True)
+        self.active = True
+        self.title = 'Reading...'
+        if isinstance(src, list):
+            self.src = [util.abspath(f) for f in src]
+            self.src_dirname = util.unistr(os.getcwd()) + os.sep
+        else:
+            self.src = util.abspath(src)
+            self.src_dirname = util.unix_dirname(self.src) + os.sep
+        self.dst = util.abspath(dst)
+        self.tarmode = tarmode
+        self.wrap = wrap
+
+    def run(self):
+        import tarfile
+        mode = self.tarmodes[self.tarmode]
+        ext = self.tarexts[self.tarmode]
+        if not self.dst.endswith(ext):
+            self.dst += ext
+
+        try:
+            unicode
+            self.dst = self.dst.encode()
+        except:
+            pass
+
+        try:
+            tar = tarfile.open(self.dst, 'w|'+mode)
+        except Exception as e:
+            return pyful.message.exception(e)
+
+        try:
+            if isinstance(self.src, list):
+                for f in self.src:
+                    self._add(tar, f)
+            else:
+                self._add(tar, self.src)
+        except FilectrlCancel:
+            pass
+        tar.close()
+        self.active = False
+
+    def kill(self):
+        self.title = "Waiting..."
+        view_threads()
+        self.active = False
+        self.join()
+
+    def _add(self, tar, source):
+        if os.path.isdir(source):
+            self.__add(tar, source)
+            for root, dnames, fnames in os.walk(source):
+                for name in fnames+dnames:
+                    path = os.path.normpath(os.path.join(root, name))
+                    self.__add(tar, path)
+        else:
+            self.__add(tar, source)
+
+    def __add(self, tar, source):
+        arcname = source.replace(os.path.commonprefix([source, self.src_dirname]), '')
+        self.title = "Adding: " + arcname
+        view_threads()
+        tar.add(source, os.path.join(self.wrap, arcname), recursive=False)
+        if not self.active:
+            raise FilectrlCancel
+
+class UntarThread(threading.Thread):
+    tarmodes = {'.tar': '', '.tgz': 'gz', '.gz': 'gz', '.bz2': 'bz2',}
+
+    def __init__(self, src, dstdir='.'):
+        threading.Thread.__init__(self)
+        self.setDaemon(True)
+        self.active = True
+        self.title = 'Reading...'
+        if isinstance(src, list):
+            self.src = [util.abspath(f) for f in src]
+        else:
+            self.src = util.abspath(src)
+        self.dstdir = util.abspath(dstdir)
+
+    def run(self):
+        try:
+            if isinstance(self.src, list):
+                for f in self.src:
+                    self._extract(f)
+            else:
+                self._extract(self.src)
+        except FilectrlCancel:
+            pass
+        self.active = False
+
+    def _extract(self, source):
+        import tarfile
+        mode = self.tarmodes.get(util.extname(source), 'gz')
+        try:
+            tar = tarfile.open(source, 'r:'+mode)
+        except Exception as e:
+            return pyful.message.exception(e)
+        try:
+            for info in tar.getmembers():
+                if not self.active:
+                    raise FilectrlCancel
+                self.title = "Untar: " + info.name
+                view_threads()
+                tar.extract(info, self.dstdir)
+        finally:
+            tar.close()
+
+    def kill(self):
+        self.title = "Waiting..."
+        view_threads()
+        self.active = False
+        self.join()
 
 class UnzipThread(threading.Thread):
     def __init__(self, src, dstdir=''):
@@ -298,6 +435,7 @@ class UnzipThread(threading.Thread):
         else:
             self.src = util.abspath(src)
         self.dstdir = util.abspath(dstdir)
+        self.dirattrcopy = []
 
     def run(self):
         if isinstance(self.src, list):
@@ -305,6 +443,8 @@ class UnzipThread(threading.Thread):
                 self.extract(f)
         else:
             self.extract(self.src)
+        for f in self.dirattrcopy:
+            f()
         self.active = False
 
     def kill(self):
@@ -321,15 +461,16 @@ class UnzipThread(threading.Thread):
                 info = myzip.getinfo(path)
             except KeyError:
                 return
-        perm = info.external_attr >> 16 & 0o777
+        perm = info.external_attr >> 16
         date = list(info.date_time) + [-1, -1, -1]
+        path = util.unistr(path)
         abspath = os.path.join(self.dstdir, path)
         os.chmod(abspath, perm)
         atime = mtime = time.mktime(date)
         os.utime(abspath, (atime, mtime))
 
-    def makedirs(self, myzip, path, mode=0o755):
-        abspath = os.path.join(self.dstdir, path)
+    def makedirs(self, myzip, unipath, oripath, mode=0o755):
+        abspath = os.path.join(self.dstdir, unipath)
         head, tail = os.path.split(abspath)
         if not tail:
             head, tail = os.path.split(head)
@@ -341,40 +482,42 @@ class UnzipThread(threading.Thread):
                     raise
             if tail == os.curdir:
                 return
-        self.title = 'Creating: ' + path
+        self.title = 'Creating: ' + unipath
         view_threads()
         os.mkdir(abspath, mode)
-        self.copy_external_attr(myzip, path)
+        self.dirattrcopy.append(lambda: self.copy_external_attr(myzip, oripath))
 
     def extract(self, srczippath):
         import zipfile
 
         try:
             myzip = zipfile.ZipFile(srczippath, 'r')
-        except IOError as e:
+        except Exception as e:
             return pyful.message.exception(e)
 
         for info in myzip.infolist():
             if not self.active:
                 break
             fname = info.filename
+            unifname = util.unistr(fname)
             try:
-                path = os.path.join(self.dstdir, fname)
+                path = os.path.join(self.dstdir, unifname)
             except UnicodeError:
                 pyful.message.error("UnicodeError: Not support `%s' encoding" % fname)
                 continue
 
-            myzip_dirname = util.unix_dirname(fname)
-            if not os.path.isdir(os.path.join(self.dstdir, myzip_dirname)):
+            myzip_unidirname = util.unix_dirname(unifname)
+            myzip_oridirname = util.unix_dirname(fname)
+            if not os.path.isdir(os.path.join(self.dstdir, myzip_unidirname)):
                 try:
-                    self.makedirs(myzip, myzip_dirname)
+                    self.makedirs(myzip, myzip_unidirname, myzip_oridirname)
                 except OSError as e:
                     pyful.message.exception(e)
                     continue
             try:
                 source = myzip.open(fname, pwd=path)
                 target = open(path, 'wb')
-                self.title = 'Inflating: ' + fname
+                self.title = 'Inflating: ' + unifname
                 view_threads()
                 shutil.copyfileobj(source, target)
                 source.close()
@@ -387,7 +530,7 @@ class UnzipThread(threading.Thread):
         myzip.close()
 
 class ZipThread(threading.Thread):
-    def __init__(self, src, dst, wrap=None):
+    def __init__(self, src, dst, wrap=''):
         threading.Thread.__init__(self)
         self.setDaemon(True)
         self.title = 'Zip'
@@ -413,20 +556,17 @@ class ZipThread(threading.Thread):
 
         try:
             myzip = zipfile.ZipFile(self.dst, 'w', compression=zipfile.ZIP_DEFLATED)
-        except IOError as e:
+        except Exception as e:
             return pyful.message.exception(e)
 
-        if isinstance(self.src, list):
-            for path in self.src:
-                try:
+        try:
+            if isinstance(self.src, list):
+                for path in self.src:
                     self.write(myzip, path)
-                except KeyboardInterrupt:
-                    break
-        else:
-            try:
+            else:
                 self.write(myzip, self.src)
-            except KeyboardInterrupt:
-                pass
+        except FilectrlCancel:
+            pass
         myzip.close()
         self.active = False
 
@@ -436,25 +576,23 @@ class ZipThread(threading.Thread):
         self.active = False
         self.join()
 
-    def _write(self, myzip, source, arcname):
+    def _write(self, myzip, source):
+        arcname = source.replace(os.path.commonprefix([source, self.src_dirname]), '')
         self.title = "Adding: " + arcname
         view_threads()
         myzip.write(source, os.path.join(self.wrap, arcname))
         if not self.active:
-            raise KeyboardInterrupt
+            raise FilectrlCancel
 
     def write(self, myzip, source):
         if os.path.isdir(source):
-            arcname = source.replace(os.path.commonprefix([source, self.src_dirname]), '')
-            self._write(myzip, source, arcname)
+            self._write(myzip, source)
             for root, dnames, fnames in os.walk(source):
                 for name in fnames+dnames:
                     path = os.path.normpath(os.path.join(root, name))
-                    arcname = path.replace(os.path.commonprefix([path, self.src_dirname]), '')
-                    self._write(myzip, path, arcname)
+                    self._write(myzip, path)
         else:
-            arcname = source.replace(os.path.commonprefix([source, self.src_dirname]), '')
-            self._write(myzip, source, arcname)
+            self._write(myzip, source)
 
 class CopyThread(threading.Thread):
     def __init__(self, ctrl, title):
@@ -471,7 +609,7 @@ class CopyThread(threading.Thread):
             if isinstance(j, FileJob):
                 try:
                     j.copy(self)
-                except KeyboardInterrupt:
+                except FilectrlCancel:
                     pyful.message.error("Copy canceled")
                     break
 
@@ -493,7 +631,7 @@ class MoveThread(threading.Thread):
             if isinstance(j, FileJob):
                 try:
                     j.move(self)
-                except KeyboardInterrupt:
+                except FilectrlCancel:
                     pyful.message.error("Move canceled")
                     break
 
