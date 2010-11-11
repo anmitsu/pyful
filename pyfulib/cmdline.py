@@ -238,7 +238,7 @@ class Cmdline(object):
         reg = re.compile("([\s;|>]|[^%]&)")
         for s in reg.split(string):
             attr = 0
-            if re.search("^(?:%[&TmMdDfFxX])+$", s):
+            if re.search("^(?:%[&TqmMdDfFxX])+$", s):
                 attr = look.colors['CMDLINEMACRO']
             elif re.search("^[;|>&]$", s):
                 attr = look.colors['CMDLINESEPARATOR']
@@ -257,7 +257,7 @@ class Cmdline(object):
         reg = re.compile("([\s;.()])")
         for s in reg.split(string):
             attr = 0
-            if re.search("^(?:%[&TmMdDfFxX])+$", s):
+            if re.search("^(?:%[&TqmMdDfFxX])+$", s):
                 attr = look.colors['CMDLINEMACRO']
             elif re.search("^[;]$", s):
                 attr = look.colors['CMDLINESEPARATOR']
@@ -511,6 +511,4 @@ class Output(ui.InfoBox):
     def finish(self):
         self.hide()
         self.cmdline.history.start()
-
-
 
