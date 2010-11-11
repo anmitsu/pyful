@@ -606,7 +606,7 @@ class Directory(object):
                 if os.path.isdir(entrypath):
                     for ep in _globdir(entrypath, patternname):
                         yield ep
-                if fnmatch.fnmatch(e, patternname):
+                if fnmatch.fnmatch(util.unistr(e), patternname):
                     yield os.path.normpath(entrypath)
 
         self.list = list(_globdir(os.curdir, pattern))
