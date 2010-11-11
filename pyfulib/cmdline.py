@@ -494,6 +494,9 @@ class Output(ui.InfoBox):
             pyful.message.error("edit: %s" % str(e))
 
     def infoarea(self, string=None):
+        from pyfulib import mode
+        if not isinstance(self.cmdline.mode, mode.Shell):
+            return
         if string is None:
             string = self.cmdline.string
         cmd = process.expandmacro(string, True)
