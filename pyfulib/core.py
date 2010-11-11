@@ -173,6 +173,9 @@ class Pyful(Singleton):
             self.refresh()
         signal.signal(signal.SIGWINCH, _signal)
 
+    def resetsignal(self):
+        signal.signal(signal.SIGWINCH, signal.SIG_IGN)
+
     def load_rcfile(self, path=None):
         if path is None:
             default = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'rc.py')
