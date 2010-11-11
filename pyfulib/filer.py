@@ -613,7 +613,17 @@ class Directory(object):
         self.reload()
 
     def open_listfile(self, path):
-        pass
+        self.list_title = "File:(%s)" % path
+        self.list = []
+        try:
+            with open(path, "r") as f:
+                for line in f:
+                    line = line.strip(os.linesep)
+                    if os.path.exists(line):
+                        self.list.append(line.replace(self.path, ''))
+        except Exception as e:
+            pyful.message.exception(e)
+        self.reload()
 
     def reset(self):
         if self.ismark():
