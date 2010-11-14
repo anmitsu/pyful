@@ -186,7 +186,7 @@ class Cmdline(object):
             elif self.mode.__class__.__name__ == "Eval":
                 self.print_color_eval(self.string)
             else:
-                pyful.stdscr.cmdwin.addstr(self.string)
+                self.print_color_default(self.string)
         except Exception as e:
             pyful.message.error("curses error: " + str(e))
 
@@ -243,6 +243,14 @@ class Cmdline(object):
     def mx(self, string='', pos=0):
         from pyfulib import mode
         self.start(mode.Mx(), string, pos)
+
+    def print_color_default(self, string):
+        reg = re.compile("([\s;.()])")
+        for s in reg.split(string):
+            attr = 0
+            if re.search("^(?:%[mMdDfFxX])+$", s):
+                attr = look.colors['CMDLINEMACRO']
+            pyful.stdscr.cmdwin.addstr(s, attr)
 
     def print_color_shell(self, string):
         prg = False
