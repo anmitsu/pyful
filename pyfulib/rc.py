@@ -57,6 +57,8 @@ Workspace.layout = 'Tile'
 #     Size[$] -> File size sort of descending order;
 #     Time[^] -> Time sort of ascending order;
 #     Time[$] -> Time sort of descending order;
+#     Permission[^] -> Permission sort of ascending order;
+#     Permission[$] -> Permission sort of descending order;
 #     Ext[^] -> File extension sort of ascending order;
 #     Ext[$] -> File extension sort of descending order.
 #
