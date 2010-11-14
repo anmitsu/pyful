@@ -1163,6 +1163,9 @@ class FileStat(object):
     view_size = True
     view_mtime = True
     time_format = '%y-%m-%d %H:%M'
+    time_24_flag = '!'
+    time_week_flag = '#'
+    time_yore_flag = ' '
 
     def __init__(self, name, force=False):
         if force:
@@ -1304,7 +1307,14 @@ class FileStat(object):
             return 'unknown'
 
     def get_mtime(self):
-        return time.strftime(self.time_format, time.localtime(self.stat.st_mtime))
+        tstr = time.strftime(self.time_format, time.localtime(self.stat.st_mtime))
+        diff = time.time() - self.stat.st_mtime
+        if diff < 60*60*24:
+            return self.time_24_flag + tstr
+        elif diff < 60*60*24*7:
+            return self.time_week_flag + tstr
+        else:
+            return self.time_yore_flag + tstr
 
     def get_permission(self):
         perm = ''
