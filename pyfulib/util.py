@@ -166,6 +166,8 @@ def expandmacro(string, shell=False):
         ret = filename.sub(quote(fname.replace(ext, "")), ret)
     else:
         ret = filename.sub(fname.replace(ext, ""), ret)
+
+    ret = re.sub('\\\\(%[mMdDfFxX])', r'\1', ret)
     return ret
 
 def wait_restore():
