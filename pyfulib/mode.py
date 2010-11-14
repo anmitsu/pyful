@@ -34,7 +34,7 @@ class Shell(object):
         return comp.comp_program_options()
 
     def execute(self, cmd):
-        process.spawn(cmd)
+        process.spawn(cmd, expandmacro=False)
 
 class Eval(object):
     prompt = 'Eval:'
