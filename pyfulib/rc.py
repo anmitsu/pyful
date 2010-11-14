@@ -219,6 +219,7 @@ myfilerkeymap = {
     (0, KEY_RETURN, '.gz' ): commands['untar'],
     (0, KEY_RETURN, '.bz2'): commands['untar'],
     (0, KEY_RETURN, '.zip'): commands['unzip'],
+    (0, KEY_RETURN, '.list'): commands['open_listfile'],
     }
 
 myfinderkeymap = {
