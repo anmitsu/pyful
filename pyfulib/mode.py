@@ -598,18 +598,22 @@ class Utime(object):
             pyful.filer.workspace.all_reload()
 
 class Tar(object):
-    def __init__(self, tarmode):
+    def __init__(self, tarmode, each=False):
         self.src = None
         self.wrap = None
         self.tarmode = tarmode
+        self.each = each
 
     @property
     def prompt(self):
-        if pyful.filer.dir.ismark():
+        if pyful.filer.dir.ismark() or self.each:
             if self.wrap is None:
                 return 'Mark files wrap is:'
             else:
-                return 'Mark files %s to:' % self.tarmode
+                if self.each:
+                    return 'Mark files %s each to:' % self.tarmode
+                else:
+                    return 'Mark files %s to:' % self.tarmode
         elif self.src is None:
             return '%s from:' % self.tarmode
         else:
@@ -619,14 +623,20 @@ class Tar(object):
         return comp.comp_files()
 
     def execute(self, path):
-        if pyful.filer.dir.ismark():
+        if pyful.filer.dir.ismark() or self.each:
             if self.wrap is None:
                 self.wrap = path
-                ext = filectrl.TarThread.tarexts[self.tarmode]
-                tarpath = os.path.join(pyful.filer.workspace.nextdir.path, self.wrap + ext)
-                pyful.cmdline.restart(tarpath, -len(ext))
+                if self.each:
+                    pyful.cmdline.restart(pyful.filer.workspace.nextdir.path)
+                else:
+                    ext = filectrl.TarThread.tarexts[self.tarmode]
+                    tarpath = os.path.join(pyful.filer.workspace.nextdir.path, self.wrap + ext)
+                    pyful.cmdline.restart(tarpath, -len(ext))
             else:
-                filectrl.tar(pyful.filer.dir.get_mark_files(), path, self.tarmode, self.wrap)
+                if self.each:
+                    filectrl.tareach(pyful.filer.dir.get_mark_files(), path, self.tarmode, self.wrap)
+                else:
+                    filectrl.tar(pyful.filer.dir.get_mark_files(), path, self.tarmode, self.wrap)
                 pyful.filer.dir.mark_clear()
                 pyful.filer.workspace.all_reload()
         elif self.src is None:
