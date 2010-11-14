@@ -35,7 +35,7 @@ def python(cmd):
 def system(cmd):
     Process().system(cmd)
 
-def expandmacro(string, flg):
+def expandmacro(string, flg=True):
     return Process().expandmacro(string, flg)
 
 class Process(object):
