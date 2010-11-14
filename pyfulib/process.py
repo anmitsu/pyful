@@ -26,7 +26,9 @@ from pyfulib.core import Pyful
 
 pyful = Pyful()
 
-def spawn(cmd, title=None):
+def spawn(cmd, title=None, expandmacro=True):
+    if expandmacro:
+        cmd = util.expandmacro(cmd, shell=True)
     Process().spawn(cmd, title)
 
 def python(cmd):
@@ -45,7 +47,6 @@ class Process(object):
         self.background = False
 
     def spawn(self, cmd, title=None):
-        cmd = util.expandmacro(cmd, shell=True)
         cmd = self.parsemacro(cmd)
         if title is None:
             title = cmd
