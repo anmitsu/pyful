@@ -51,9 +51,13 @@ class Cmdline(object):
 
     def execute(self):
         string = self.string
+        if self.mode.__class__.__name__ == 'Shell':
+            expand_string = util.expandmacro(self.string, shell=True)
+        else:
+            expand_string = util.expandmacro(self.string, shell=False)
         self.finish()
         self.history.append(string)
-        self.mode.execute(string)
+        self.mode.execute(expand_string)
 
     def escape(self):
         self.history.append(self.string)
@@ -202,12 +206,11 @@ class Cmdline(object):
 
     def start(self, mode, string='', pos=0):
         self.mode = mode
-        cmd = process.expandmacro(string, False)
-        self.string = cmd
+        self.string = string
         if pos > 0:
             self.cursor = pos - 1
         else:
-            self.cursor = util.mbslen(cmd) + pos
+            self.cursor = util.mbslen(self.string) + pos
         self.active = True
         self.history.start()
 
@@ -499,7 +502,7 @@ class Output(ui.InfoBox):
             return
         if string is None:
             string = self.cmdline.string
-        cmd = process.expandmacro(string, True)
+        cmd = util.expandmacro(string)
         (out, err) = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).communicate()
 
         info = (out + err)
