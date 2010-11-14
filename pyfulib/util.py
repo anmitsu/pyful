@@ -90,6 +90,84 @@ def quote(string):
     else:
         return string
 
+def expandmacro(string, shell=False):
+    ret = string
+    from pyfulib.core import Pyful
+    pyful = Pyful()
+
+    marks = ''
+    for f in pyful.filer.dir.get_mark_files():
+        if shell:
+            marks += string_to_safe(f) + ' '
+        else:
+            marks += f + ' '
+    ret = re.sub('(?<!\\\\)%m', marks, ret)
+
+    marks = ''
+    for f in pyful.filer.dir.get_mark_files():
+        if shell:
+            marks += abspath(string_to_safe(f)) + ' '
+        else:
+            marks += abspath(f) + ' '
+    ret = re.sub('(?<!\\\\)%M', marks, ret)
+
+    filename = re.compile('(?<!\\\\)%d(?!2)')
+    path = unix_basename(pyful.filer.dir.path) + os.sep
+    if shell:
+        ret = filename.sub(quote(path), ret)
+    else:
+        ret = filename.sub(path, ret)
+
+    filename = re.compile('(?<!\\\\)%d2')
+    path = unix_basename(pyful.filer.workspace.nextdir.path) + os.sep
+    if shell:
+        ret = filename.sub(quote(path), ret)
+    else:
+        ret = filename.sub(path, ret)
+
+    filename = re.compile('(?<!\\\\)%D(?!2)')
+    if shell:
+        ret = filename.sub(quote(pyful.filer.dir.path), ret)
+    else:
+        ret = filename.sub(pyful.filer.dir.path, ret)
+
+    filename = re.compile('(?<!\\\\)%D2')
+    if shell:
+        ret = filename.sub(quote(pyful.filer.workspace.nextdir.path), ret)
+    else:
+        ret = filename.sub(pyful.filer.workspace.nextdir.path, ret)
+
+    filename = re.compile('(?<!\\\\)%f')
+    if shell:
+        ret = filename.sub(quote(pyful.filer.file.name), ret)
+    else:
+        ret = filename.sub(pyful.filer.file.name, ret)
+
+    filename = re.compile('(?<!\\\\)%F')
+    path = abspath(pyful.filer.file.name)
+    if shell:
+        ret = filename.sub(quote(path), ret)
+    else:
+        ret = filename.sub(path, ret)
+
+    filename = re.compile('(?<!\\\\)%x')
+    fname = unix_basename(pyful.filer.file.name)
+    ext = extname(pyful.filer.file.name)
+    if shell:
+        ret = filename.sub(quote(fname.replace(ext, "")), ret)
+    else:
+        ret = filename.sub(fname.replace(ext, ""), ret)
+
+    filename = re.compile('(?<!\\\\)%X')
+    fname = unix_basename(pyful.filer.file.name)
+    ext = extname(pyful.filer.file.name)
+    fname = abspath(fname)
+    if shell:
+        ret = filename.sub(quote(fname.replace(ext, "")), ret)
+    else:
+        ret = filename.sub(fname.replace(ext, ""), ret)
+    return ret
+
 def wait_restore():
     while 1:
         try:

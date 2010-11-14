@@ -35,9 +35,6 @@ def python(cmd):
 def system(cmd):
     Process().system(cmd)
 
-def expandmacro(string, flg=True):
-    return Process().expandmacro(string, flg)
-
 class Process(object):
     shell = ("/bin/bash", "-c")
     terminal_emulator = ("x-terminal-emulator", "-e")
@@ -48,7 +45,8 @@ class Process(object):
         self.background = False
 
     def spawn(self, cmd, title=None):
-        cmd = self.expandmacro(cmd, True)
+        cmd = util.expandmacro(cmd, shell=True)
+        cmd = self.parsemacro(cmd)
         if title is None:
             title = cmd
         if self.exterminal and not self.background:
@@ -96,99 +94,15 @@ class Process(object):
     def terminal(self, cmd):
         subprocess.Popen([self.terminal_emulator[0], self.terminal_emulator[1], cmd])
 
-    def expandmacro(self, string, flg):
-        self.quick = False
-        self.background = False
-        self.exterminal = False
-        ret = ""
-        squote = False
-        dquote = False
-
-        i = 0
-        while i < len(string):
-            c = string[i]
-            if "'" == c:
-                if not dquote:
-                    squote = not squote
-                    ret += "'"
-            elif '"' == c:
-                if not squote:
-                    dquote = not dquote
-                    ret += '"'
-            elif "%" == c and not dquote and not squote:
-                i += 1
-                c_next = string[i]
-                if "q" == c_next:
-                    if flg:
-                        self.quick = True
-                    else:
-                        ret += "%q"
-                elif "&" == c_next:
-                    if flg:
-                        self.background = True
-                    else:
-                        ret += "%&"
-                elif "T" == c_next:
-                    if flg:
-                        self.exterminal = True
-                    else:
-                        ret += "%T"
-                elif "m" == c_next:
-                    if flg:
-                        for f in pyful.filer.dir.get_mark_files():
-                            ret += util.string_to_safe(f) + " "
-                    else:
-                        ret += "%m"
-                elif "M" == c_next:
-                    if flg:
-                        for f in pyful.filer.dir.get_mark_files():
-                            ret += util.abspath(util.string_to_safe(f)) + " "
-                    else:
-                        ret += "%M"
-                elif "d" == c_next:
-                    try:
-                        string[i+1]
-                    except IndexError:
-                        path = util.unix_basename(pyful.filer.dir.path) + os.sep
-                        ret += util.quote(path)
-                        i += 1
-                        continue
-                    if "2" == string[i+1]:
-                        i += 1
-                        path = util.unix_basename(pyful.filer.workspace.nextdir.path) + os.sep
-                        ret += util.quote(path)
-                    else:
-                        path = util.unix_basename(pyful.filer.dir.path) + os.sep
-                        ret += util.quote(path)
-                elif "D" == c_next:
-                    try:
-                        string[i+1]
-                    except IndexError:
-                        ret += util.quote(pyful.filer.dir.path)
-                        i += 1
-                        continue
-                    if "2" == string[i+1]:
-                        i += 1
-                        ret += util.quote(pyful.filer.workspace.nextdir.path)
-                    else:
-                        ret += util.quote(pyful.filer.dir.path)
-                elif "f" == c_next:
-                    ret += util.quote(pyful.filer.file.name)
-                elif "F" == c_next:
-                    path = util.abspath(pyful.filer.file.name)
-                    ret += util.quote(path)
-                elif "x" == c_next:
-                    fname = util.unix_basename(pyful.filer.file.name)
-                    ext = util.extname(pyful.filer.file.name)
-                    ret += util.quote(fname.replace(ext, ""))
-                elif "X" == c_next:
-                    fname = util.unix_basename(pyful.filer.file.name)
-                    ext = util.extname(pyful.filer.file.name)
-                    fname = util.abspath(fname)
-                    ret += util.quote(fname.replace(ext, ""))
-                else:
-                    ret += "%" + c_next
-            else:
-                ret += c
-            i += 1
+    def parsemacro(self, string):
+        ret = string
+        if re.search('(?!\\\\)%&', string):
+            self.background = True
+            ret = re.sub('(?!\\\\)%&', '', ret)
+        if re.search('(?!\\\\)%q', string):
+            self.quick = True
+            ret = re.sub('(?!\\\\)%q', '', ret)
+        if re.search('(?!\\\\)%T', string):
+            self.exterminal = True
+            ret = re.sub('(?!\\\\)%T', '', ret)
         return ret
