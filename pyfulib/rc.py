@@ -253,6 +253,7 @@ mycmdlinekeymap = {
     (0, KEY_CTRL_C   ): lambda: pyful.cmdline.escape(),
     (0, KEY_ESCAPE   ): lambda: pyful.cmdline.escape(),
     (0, KEY_RETURN   ): lambda: pyful.cmdline.execute(),
+    (1, KEY_e        ): lambda: pyful.cmdline.expandmacro(),
     (0, KEY_CTRL_Y   ): lambda: pyful.cmdline.clipboard.paste(),
     (1, KEY_y        ): lambda: pyful.cmdline.clipboard.start(),
     (0, KEY_CTRL_I   ): lambda: pyful.cmdline.completion.start(),
