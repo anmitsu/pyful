@@ -44,6 +44,7 @@ commands = {
     'symlink'  : lambda: _symlink(),
     'trashbox' : lambda: _trashbox(),
     'tar'      : lambda: _tar(),
+    'tareach'  : lambda: _tareach(),
     'untar'    : lambda: _untar(),
     'zip'      : lambda: _zip(),
     'zipeach'  : lambda: _zipeach(),
@@ -365,6 +366,13 @@ def _tar(tarmode=None):
         pyful.cmdline.start(mode.Tar(tarmode), '')
     else:
         pyful.cmdline.start(mode.Tar(tarmode), pyful.filer.file.name)
+
+def _tareach(tarmode=None):
+    if tarmode is None:
+        tarmode = pyful.message.confirm("Tar mode:", ["gzip", "bzip2", "tar"])
+        if tarmode is None:
+            return
+    pyful.cmdline.start(mode.Tar(tarmode, each=True), '')
 
 def _untar():
     if pyful.filer.dir.ismark():
