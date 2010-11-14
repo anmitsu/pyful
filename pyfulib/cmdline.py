@@ -245,19 +245,19 @@ class Cmdline(object):
         self.start(mode.Mx(), string, pos)
 
     def print_color_default(self, string):
-        reg = re.compile("([\s;.()])")
+        reg = re.compile("([\s;.()]|(?<!\\\\)%[mMdDfFxX])")
         for s in reg.split(string):
             attr = 0
-            if re.search("^(?:%[mMdDfFxX])+$", s):
+            if re.search("^%[mMdDfFxX]$", s):
                 attr = look.colors['CMDLINEMACRO']
             pyful.stdscr.cmdwin.addstr(s, attr)
 
     def print_color_shell(self, string):
         prg = False
-        reg = re.compile("([\s;|>]|[^%]&)")
+        reg = re.compile("([\s;|>]|[^%]&|(?<!\\\\)%[mMdDfFxX])")
         for s in reg.split(string):
             attr = 0
-            if re.search("^(?:%[&TqmMdDfFxX])+$", s):
+            if re.search("^%[&TqmMdDfFxX]$", s):
                 attr = look.colors['CMDLINEMACRO']
             elif re.search("^[;|>&]$", s):
                 attr = look.colors['CMDLINESEPARATOR']
@@ -273,10 +273,10 @@ class Cmdline(object):
             pyful.stdscr.cmdwin.addstr(s, attr)
 
     def print_color_eval(self, string):
-        reg = re.compile("([\s;.()])")
+        reg = re.compile("([\s;.()]|(?<!\\\\)%[mMdDfFxX])")
         for s in reg.split(string):
             attr = 0
-            if re.search("^(?:%[&TqmMdDfFxX])+$", s):
+            if re.search("^%[&TqmMdDfFxX]$", s):
                 attr = look.colors['CMDLINEMACRO']
             elif re.search("^[;]$", s):
                 attr = look.colors['CMDLINESEPARATOR']
