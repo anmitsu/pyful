@@ -43,8 +43,7 @@ class Eval(object):
         return comp.comp_python_builtin_functions()
 
     def execute(self, cmd):
-        proc = process.Process()
-        proc.python(proc.expandmacro(cmd, True))
+        process.python(cmd)
 
 class Mx(object):
     prompt = 'M-x'
