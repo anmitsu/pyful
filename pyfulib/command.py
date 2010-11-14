@@ -144,6 +144,7 @@ commands = {
 
     'mark_all'     : lambda: pyful.filer.dir.mark_all(),
     'mark_toggle'  : lambda: pyful.filer.dir.mark_toggle(),
+    'mark_toggle_all': lambda: pyful.filer.dir.mark_toggle_all(),
     'mark_clear'   : lambda: pyful.filer.dir.mark_clear(),
     'mark_source'  : lambda: pyful.filer.dir.mark(_source_filter),
     'mark_archive' : lambda: pyful.filer.dir.mark(_archive_filter),
