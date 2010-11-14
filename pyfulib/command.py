@@ -66,7 +66,6 @@ commands = {
     'kill_thread'    : lambda: filectrl.kill_thread(),
     'fileviewer'     : lambda: _fileviewer(),
     'pack'           : lambda: _pack(),
-    'pack2'          : lambda: _pack2(),
     'unpack'         : lambda: _unpack(),
     'unpack2'        : lambda: _unpack2(),
     'spawn_editor'   : lambda: _spawn_editor(),
@@ -210,7 +209,6 @@ def _fileviewer():
     else:
         process.spawn(pager+" %f")
 
-
 def _pack():
     ret = pyful.message.confirm("Pack type:", ["zip", "tgz", "bz2", "tar", "rar"])
     if "zip" == ret:
@@ -220,22 +218,9 @@ def _pack():
     elif ret == "bz2":
         _tar('bzip2')
     elif ret == "tar":
-        pyful.cmdline.start(mode.Shell(), "tar cvf %D2.tar %m", -7)
+        _tar('tar')
     elif ret == "rar":
         pyful.cmdline.start(mode.Shell(), "rar u %D2.rar %m", -7)
-
-def _pack2():
-    ret = pyful.message.confirm("Pack type:", ["zip", "tgz", "bz2", "tar", "rar"])
-    if ret == "zip":
-        _zip()
-    elif ret == "tgz":
-        _tar('gzip')
-    elif ret == "bz2":
-        _tar('bzip2')
-    elif ret == "tar":
-        pyful.cmdline.start(mode.Shell(), "tar cvf %D.tar %m", -7)
-    elif ret == "rar":
-        pyful.cmdline.start(mode.Shell(), "rar u %D.rar %m", -7)
 
 def _unpack():
     ext = util.extname(pyful.filer.file.name)
