@@ -830,6 +830,10 @@ class Directory(object):
             self.sort_time()
         elif self.sort_kind == 'Time[$]':
             self.sort_time_rev()
+        elif self.sort_kind == 'Permission[^]':
+            self.sort_permission()
+        elif self.sort_kind == 'Permission[$]':
+            self.sort_permission_rev()
         elif self.sort_kind == 'Ext[^]':
             self.sort_ext()
         elif self.sort_kind == 'Ext[$]':
@@ -882,6 +886,34 @@ class Directory(object):
                 return ret
         self.files.sort(key=util.cmp_to_key(_sort))
         self.sort_kind = 'Size[$]'
+
+    def sort_permission(self):
+        def _sort(x, y):
+            if x.name == os.pardir:
+                return -1
+            if y.name == os.pardir:
+                return 1
+            ret = util.cmp(x.stat.st_mode, y.stat.st_mode)
+            if ret == 0:
+                return util.cmp(x.name, y.name)
+            else:
+                return ret
+        self.files.sort(key=util.cmp_to_key(_sort))
+        self.sort_kind = 'Permission[^]'
+
+    def sort_permission_rev(self):
+        def _sort(x, y):
+            if x.name == os.pardir:
+                return -1
+            if y.name == os.pardir:
+                return 1
+            ret = util.cmp(y.stat.st_mode, x.stat.st_mode)
+            if ret == 0:
+                return util.cmp(y.name, x.name)
+            else:
+                return ret
+        self.files.sort(key=util.cmp_to_key(_sort))
+        self.sort_kind = 'Permission[$]'
 
     def sort_time(self):
         def _sort(x, y):
