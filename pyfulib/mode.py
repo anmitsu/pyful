@@ -667,17 +667,21 @@ class UnTar(object):
             pyful.filer.workspace.all_reload()
 
 class Zip(object):
-    def __init__(self):
+    def __init__(self, each=False):
         self.src = None
         self.wrap = None
+        self.each = each
 
     @property
     def prompt(self):
-        if pyful.filer.dir.ismark():
+        if pyful.filer.dir.ismark() or self.each:
             if self.wrap is None:
                 return 'Mark files wrap is:'
             else:
-                return 'Mark files zip to:'
+                if self.each:
+                    return 'Mark files zip each to:'
+                else:
+                    return 'Mark files zip to:'
         elif self.src is None:
             return 'Zip from:'
         else:
@@ -687,14 +691,20 @@ class Zip(object):
         return comp.comp_files()
 
     def execute(self, path):
-        if pyful.filer.dir.ismark():
+        if pyful.filer.dir.ismark() or self.each:
             if self.wrap is None:
                 self.wrap = path
-                ext = '.zip'
-                zippath = os.path.join(pyful.filer.workspace.nextdir.path, self.wrap + ext)
-                pyful.cmdline.restart(zippath, -len(ext))
+                if self.each:
+                    pyful.cmdline.restart(pyful.filer.workspace.nextdir.path)
+                else:
+                    ext = '.zip'
+                    zippath = os.path.join(pyful.filer.workspace.nextdir.path, self.wrap + ext)
+                    pyful.cmdline.restart(zippath, -len(ext))
             else:
-                filectrl.zip(pyful.filer.dir.get_mark_files(), path, self.wrap)
+                if self.each:
+                    filectrl.zipeach(pyful.filer.dir.get_mark_files(), path, self.wrap)
+                else:
+                    filectrl.zip(pyful.filer.dir.get_mark_files(), path, self.wrap)
                 pyful.filer.dir.mark_clear()
                 pyful.filer.workspace.all_reload()
         elif self.src is None:
