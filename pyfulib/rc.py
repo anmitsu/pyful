@@ -378,6 +378,8 @@ pyful.menu.items['sort'] = (
     ('(S)ize reverse'      , KEY_S, commands['sort_size_rev']),
     ('(t)ime'              , KEY_t, commands['sort_time']),
     ('(T)ime reverse'      , KEY_T, commands['sort_time_rev']),
+    ('(p)ermission'        , KEY_p, commands['sort_permission']),
+    ('(P)ermission reverse', KEY_P, commands['sort_permission_rev']),
     )
 
 pyful.menu.items["mark"] = (
