@@ -187,7 +187,6 @@ myfilerkeymap = {
     (0, KEY_SLASH    ): commands['finder_start'],
     (0, KEY_v        ): commands['fileviewer'],
     (0, KEY_P        ): commands['pack'],
-    (0, KEY_p        ): commands['pack2'],
     (0, KEY_U        ): commands['unpack2'],
     (0, KEY_u        ): commands['unpack'],
     (0, KEY_END      ): commands['mark_all'],
