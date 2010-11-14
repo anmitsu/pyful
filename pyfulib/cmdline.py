@@ -59,6 +59,14 @@ class Cmdline(object):
         self.history.append(string)
         self.mode.execute(expand_string)
 
+    def expandmacro(self):
+        if self.mode.__class__.__name__ == 'Shell':
+            self.string = util.expandmacro(self.string, shell=True)
+        else:
+            self.string = util.expandmacro(self.string, shell=False)
+        self.cursor += util.mbslen(self.string)
+        self.history.restart()
+
     def escape(self):
         self.history.append(self.string)
         self.finish()
