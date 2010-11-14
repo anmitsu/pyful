@@ -139,6 +139,11 @@ def unzip(src, dstdir=''):
 def zip(src, dst, wrap=''):
     Filectrl().zip(src, dst, wrap)
 
+def zipeach(src, dst, wrap=''):
+    if not isinstance(src, list):
+        return pyful.message.error("source must present `list'")
+    Filectrl().zipeach(src, dst, wrap)
+
 def tar(src, dst, tarmode='gzip', wrap=''):
     Filectrl().tar(src, dst, tarmode, wrap)
 
@@ -306,6 +311,12 @@ class Filectrl(object):
     def zip(self, src, dst, wrap):
         self.thread = ZipThread(src, dst, wrap)
         self.thread_loop()
+
+    def zipeach(self, src, dst, wrap):
+        for f in src:
+            path = os.path.join(dst, f)
+            self.thread = ZipThread(f, path, wrap)
+            self.thread_loop()
 
 class TarThread(threading.Thread):
     tarmodes = {'tar': '', 'gzip': 'gz', 'bzip2': 'bz2'}
