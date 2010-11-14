@@ -101,7 +101,7 @@ def expandmacro(string, shell=False):
             marks += string_to_safe(f) + ' '
         else:
             marks += f + ' '
-    ret = re.sub('(?<!\\\\)%m', marks, ret)
+    ret = re.sub('(?<!\\\\)%m', marks[:-1], ret)
 
     marks = ''
     for f in pyful.filer.dir.get_mark_files():
@@ -109,7 +109,7 @@ def expandmacro(string, shell=False):
             marks += abspath(string_to_safe(f)) + ' '
         else:
             marks += abspath(f) + ' '
-    ret = re.sub('(?<!\\\\)%M', marks, ret)
+    ret = re.sub('(?<!\\\\)%M', marks[:-1], ret)
 
     filename = re.compile('(?<!\\\\)%d(?!2)')
     path = unix_basename(pyful.filer.dir.path) + os.sep
