@@ -162,7 +162,7 @@ def _spawn_editor():
         editor = pyful.environs['EDITOR']
     except KeyError:
         editor = 'vim'
-    process.spawn('%s %s' % (editor, pyful.filer.file.name))
+    process.spawn(editor+' %f')
 
 def _spawn_shell():
     try:
