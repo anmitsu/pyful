@@ -344,6 +344,8 @@ def _trashbox():
 def _tar(tarmode=None):
     if tarmode is None:
         tarmode = pyful.message.confirm("Tar mode:", ["gzip", "bzip2", "tar"])
+        if tarmode is None:
+            return
 
     if pyful.filer.dir.ismark():
         pyful.cmdline.start(mode.Tar(tarmode), '')
