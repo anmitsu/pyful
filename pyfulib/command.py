@@ -46,6 +46,7 @@ commands = {
     'tar'      : lambda: _tar(),
     'untar'    : lambda: _untar(),
     'zip'      : lambda: _zip(),
+    'zipeach'  : lambda: _zipeach(),
     'unzip'    : lambda: _unzip(),
     'chdir'    : lambda: pyful.cmdline.start(mode.Chdir(), pyful.filer.dir.path),
     'chmod'    : lambda: pyful.cmdline.start(mode.Chmod(), ''),
@@ -376,6 +377,9 @@ def _zip():
         pyful.cmdline.start(mode.Zip(), '')
     else:
         pyful.cmdline.start(mode.Zip(), pyful.filer.file.name)
+
+def _zipeach():
+    pyful.cmdline.start(mode.Zip(each=True), '')
 
 def _unzip():
     if pyful.filer.dir.ismark():
