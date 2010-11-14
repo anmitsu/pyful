@@ -327,9 +327,12 @@ class Filectrl(object):
         self.thread_loop()
 
     def zipeach(self, src, dst, wrap):
+        threadlist = []
         for f in src:
             path = os.path.join(dst, f)
-            self.thread = ZipThread(f, path, wrap)
+            threadlist.append(ZipThread(f, path, wrap))
+        for t in threadlist:
+            self.thread = t
             self.thread_loop()
 
 class TarThread(threading.Thread):
