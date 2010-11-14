@@ -19,6 +19,7 @@
 import os
 import sys
 import re
+import glob
 
 from pyfulib.core import Pyful
 from pyfulib import mode
@@ -64,6 +65,7 @@ commands = {
 
     'open_at_system' : lambda: process.spawn("xdg-open %f %&"),
     'kill_thread'    : lambda: filectrl.kill_thread(),
+    'drivejump'      : lambda: _drivejump(),
     'fileviewer'     : lambda: _fileviewer(),
     'pack'           : lambda: _pack(),
     'unpack'         : lambda: _unpack(),
@@ -188,6 +190,17 @@ def _switch_workspace():
         if w.title == ret:
             pyful.filer.focus_workspace(i)
             break
+
+def _drivejump():
+    pyful.menu.items['Drives'] = {}
+    li = []
+    for i, f in enumerate(glob.glob('/media/*')+glob.glob('/mnt/*')):
+        def _wrap(path):
+            return lambda: pyful.filer.dir.chdir(path)
+        num = str(i+1)
+        li.append(('(%s) %s' % (num, f), ord(num), _wrap(f)))
+    pyful.menu.items['Drives'] = li
+    pyful.menu.show('Drives')
 
 def _fileviewer():
     ext = util.extname(pyful.filer.file.name)
