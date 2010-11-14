@@ -476,13 +476,14 @@ class UnzipThread(threading.Thread):
             except KeyError:
                 return
         perm = info.external_attr >> 16
-        if perm == 0:
-            perm = 0o644
-        elif perm <= 16:
-            perm = 0o755
         date = list(info.date_time) + [-1, -1, -1]
         path = util.force_decode(path)
         abspath = os.path.join(self.dstdir, path)
+        if perm == 0:
+            if os.path.isdir(abspath):
+                perm = 0o755
+            else:
+                perm = 0o644
         os.chmod(abspath, perm)
         atime = mtime = time.mktime(date)
         os.utime(abspath, (atime, mtime))
