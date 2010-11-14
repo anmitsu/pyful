@@ -16,7 +16,7 @@ pyful = Pyful()
 
 # Set environments of pyful.
 pyful.environs['EDITOR'] = 'vim'
-pyful.environs['PAGER'] = 'lv'
+pyful.environs['PAGER'] = 'less'
 pyful.environs['TRASHBOX'] = '~/.pyful/trashbox'
 
 # Set proc attributes.
