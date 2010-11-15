@@ -86,7 +86,7 @@ commands = {
     'enter_link': lambda: pyful.filer.dir.enter_link(),
     'open_listfile': lambda: pyful.filer.dir.open_listfile(pyful.filer.file.name),
 
-    'chdir_parent'   : lambda: pyful.filer.dir.chdir('..'),
+    'chdir_parent'   : lambda: pyful.filer.dir.chdir(os.pardir),
     'chdir_root'     : lambda: pyful.filer.dir.chdir('/'),
     'chdir_home'     : lambda: pyful.filer.dir.chdir(os.environ['HOME']),
     'chdir_neighbor' : lambda: pyful.filer.dir.chdir(pyful.filer.workspace.nextdir.path),
