@@ -89,12 +89,3 @@ if __name__ == '__main__':
     finally:
         if pyful.started:
             pyful.stdscr.destroy()
-
-
-
-
-
-
-
-
-
