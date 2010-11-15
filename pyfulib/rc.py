@@ -59,6 +59,8 @@ Workspace.layout = 'Tile'
 #     Time[$] -> Time sort of descending order;
 #     Permission[^] -> Permission sort of ascending order;
 #     Permission[$] -> Permission sort of descending order;
+#     Link[^] -> Link sort of ascending order;
+#     Link[$] -> Link sort of descending order;
 #     Ext[^] -> File extension sort of ascending order;
 #     Ext[$] -> File extension sort of descending order.
 #
@@ -379,6 +381,8 @@ pyful.menu.items['sort'] = (
     ('(S)ize reverse'      , KEY_S, commands['sort_size_rev']),
     ('(t)ime'              , KEY_t, commands['sort_time']),
     ('(T)ime reverse'      , KEY_T, commands['sort_time_rev']),
+    ('(l)ink'              , KEY_l, commands['sort_nlink']),
+    ('(L)ink reverse'      , KEY_L, commands['sort_nlink_rev']),
     ('(p)ermission'        , KEY_p, commands['sort_permission']),
     ('(P)ermission reverse', KEY_P, commands['sort_permission_rev']),
     )
