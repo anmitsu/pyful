@@ -142,6 +142,8 @@ commands = {
     'sort_size_rev' : lambda: pyful.filer.dir.sort_size_rev(),
     'sort_time'     : lambda: pyful.filer.dir.sort_time(),
     'sort_time_rev' : lambda: pyful.filer.dir.sort_time_rev(),
+    'sort_nlink'    : lambda: pyful.filer.dir.sort_nlink(),
+    'sort_nlink_rev': lambda: pyful.filer.dir.sort_nlink_rev(),
     'sort_permission'     : lambda: pyful.filer.dir.sort_permission(),
     'sort_permission_rev' : lambda: pyful.filer.dir.sort_permission_rev(),
 
