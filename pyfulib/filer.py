@@ -828,26 +828,18 @@ class Directory(object):
         return len(self.mark_files) != 0
 
     def sort(self):
-        if self.sort_kind == 'Name[^]':
-            self.sort_name()
-        elif self.sort_kind == 'Name[$]':
-            self.sort_name_rev()
-        elif self.sort_kind == 'Size[^]':
-            self.sort_size()
-        elif self.sort_kind == 'Size[$]':
-            self.sort_size_rev()
-        elif self.sort_kind == 'Time[^]':
-            self.sort_time()
-        elif self.sort_kind == 'Time[$]':
-            self.sort_time_rev()
-        elif self.sort_kind == 'Permission[^]':
-            self.sort_permission()
-        elif self.sort_kind == 'Permission[$]':
-            self.sort_permission_rev()
-        elif self.sort_kind == 'Ext[^]':
-            self.sort_ext()
-        elif self.sort_kind == 'Ext[$]':
-            self.sort_ext_rev()
+        if self.sort_kind == 'Name[^]': self.sort_name()
+        elif self.sort_kind == 'Name[$]': self.sort_name_rev()
+        elif self.sort_kind == 'Size[^]': self.sort_size()
+        elif self.sort_kind == 'Size[$]': self.sort_size_rev()
+        elif self.sort_kind == 'Time[^]': self.sort_time()
+        elif self.sort_kind == 'Time[$]': self.sort_time_rev()
+        elif self.sort_kind == 'Permission[^]': self.sort_permission()
+        elif self.sort_kind == 'Permission[$]': self.sort_permission_rev()
+        elif self.sort_kind == 'Link[^]': self.sort_nlink()
+        elif self.sort_kind == 'Link[$]': self.sort_nlink_rev()
+        elif self.sort_kind == 'Ext[^]': self.sort_ext()
+        elif self.sort_kind == 'Ext[$]': self.sort_ext_rev()
 
     def sort_name(self):
         def _sort(x, y):
@@ -952,6 +944,34 @@ class Directory(object):
                 return ret
         self.files.sort(key=util.cmp_to_key(_sort))
         self.sort_kind = 'Time[$]'
+
+    def sort_nlink(self):
+        def _sort(x, y):
+            if x.name == os.pardir:
+                return -1
+            if y.name == os.pardir:
+                return 1
+            ret = util.cmp(x.stat.st_nlink, y.stat.st_nlink)
+            if ret == 0:
+                return util.cmp(x.name, y.name)
+            else:
+                return ret
+        self.files.sort(key=util.cmp_to_key(_sort))
+        self.sort_kind = 'Link[^]'
+
+    def sort_nlink_rev(self):
+        def _sort(x, y):
+            if x.name == os.pardir:
+                return -1
+            if y.name == os.pardir:
+                return 1
+            ret = util.cmp(y.stat.st_nlink, x.stat.st_nlink)
+            if ret == 0:
+                return util.cmp(y.name, x.name)
+            else:
+                return ret
+        self.files.sort(key=util.cmp_to_key(_sort))
+        self.sort_kind = 'Link[$]'
 
     def sort_ext(self):
         def _sort(x, y):
