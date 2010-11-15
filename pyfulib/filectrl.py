@@ -381,7 +381,12 @@ class TarThread(threading.Thread):
         except FilectrlCancel:
             pass
         tar.close()
+
+        if not isinstance(self.src, list):
+            lst = os.lstat(self.src)
+            os.utime(self.dst, (lst.st_mtime, lst.st_mtime))
         os.chmod(self.dst, 0o644)
+
         self.active = False
 
     def kill(self):
@@ -615,6 +620,11 @@ class ZipThread(threading.Thread):
         except FilectrlCancel:
             pass
         myzip.close()
+
+        if not isinstance(self.src, list):
+            lst = os.lstat(self.src)
+            os.utime(self.dst, (lst.st_mtime, lst.st_mtime))
+
         self.active = False
 
     def kill(self):
