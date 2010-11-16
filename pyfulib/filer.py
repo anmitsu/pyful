@@ -672,7 +672,7 @@ class Directory(object):
         try:
             util.chdir(self.path)
         except EnvironmentError as e:
-            pyful.message.error("%s: %s (%s)" % (e.__class__.__name__, str(e), 'reload'))
+            pyful.message.exception(e)
             self.chdir('/')
         self.diskread()
         self.sort()
@@ -718,8 +718,7 @@ class Directory(object):
         try:
             util.chdir(path)
         except EnvironmentError as e:
-            pyful.message.error("%s: %s (%s)" % (e.__class__.__name__, str(e), 'chdir'))
-            return
+            return pyful.message.exception(e)
 
         if history:
             self.pathhistory_update(path)
