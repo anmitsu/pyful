@@ -611,7 +611,7 @@ class Directory(object):
                 for line in f:
                     line = line.strip(os.linesep)
                     if os.path.exists(line):
-                        self.list.append(line.replace(self.path, ''))
+                        self.list.append(re.sub(self.path+'?'+os.sep, '', line))
         except Exception as e:
             pyful.message.exception(e)
         self.reload()
