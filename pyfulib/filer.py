@@ -1318,17 +1318,17 @@ class FileStat(object):
         return self.view_stat
 
     def get_attr(self):
-        attr = 0
         if self.islink():
             if self.isdir():
-                attr = look.colors['LINKDIR']
+                return look.colors['LINKDIR']
             else:
-                attr = look.colors['LINK']
+                return look.colors['LINK']
         elif self.isdir():
-            attr = look.colors['DIRECTORY']
+            return look.colors['DIRECTORY']
         elif self.isexec():
-            attr = look.colors['EXECUTABLE']
-        return attr
+            return look.colors['EXECUTABLE']
+        else:
+            return 0
 
     def get_file_size(self):
         s = self.stat.st_size
