@@ -794,15 +794,15 @@ class Directory(object):
         self.mark_files = util.uniq(self.mark_files)
         self.mark_size = self.get_mark_size()
 
-    def mark_all(self, filetype=None):
-        if filetype is None:
-            filetype = 'all'
+    def mark_all(self, filetype='all'):
         self.mark_files[:] = []
-
         for f in self.files:
             if f.name == os.pardir:
                 continue
-            if filetype == 'file':
+            if filetype == 'all':
+                f.marked = True
+                self.mark_files.append(f)
+            elif filetype == 'file':
                 if not f.isdir():
                     f.marked = True
                     self.mark_files.append(f)
@@ -838,10 +838,6 @@ class Directory(object):
                     self.mark_files.append(f)
                 else:
                     f.marked = False
-            elif filetype == 'all':
-                f.marked = True
-                self.mark_files.append(f)
-
         self.mark_size = self.get_mark_size()
 
     def mark_clear(self):
