@@ -758,20 +758,6 @@ class Directory(object):
             pass
         self.mark_size = self.get_mark_size()
 
-    def mark_dir_all(self):
-        self.mark_files[:] = []
-        for f in self.files:
-            if f.name == os.pardir:
-                continue
-            if f.isdir():
-                f.marked = True
-                self.mark_files.append(f)
-            else:
-                if f.marked:
-                    self.mark_files.remove(f)
-                f.marked = False
-        self.mark_size = self.get_mark_size()
-
     def mark_toggle(self):
         f = self.file
         if f.name == os.pardir:
@@ -808,13 +794,54 @@ class Directory(object):
         self.mark_files = util.uniq(self.mark_files)
         self.mark_size = self.get_mark_size()
 
-    def mark_all(self):
+    def mark_all(self, filetype=None):
+        if filetype is None:
+            filetype = 'all'
         self.mark_files[:] = []
+
         for f in self.files:
             if f.name == os.pardir:
                 continue
-            f.marked = True
-            self.mark_files.append(f)
+            if filetype == 'file':
+                if not f.isdir():
+                    f.marked = True
+                    self.mark_files.append(f)
+                else:
+                    f.marked = False
+            elif filetype == 'directory':
+                if f.isdir():
+                    f.marked = True
+                    self.mark_files.append(f)
+                else:
+                    f.marked = False
+            elif filetype == 'symlink':
+                if f.islink():
+                    f.marked = True
+                    self.mark_files.append(f)
+                else:
+                    f.marked = False
+            elif filetype == 'executable':
+                if f.isexec() and not f.isdir():
+                    f.marked = True
+                    self.mark_files.append(f)
+                else:
+                    f.marked = False
+            elif filetype == 'socket':
+                if f.issocket():
+                    f.marked = True
+                    self.mark_files.append(f)
+                else:
+                    f.marked = False
+            elif filetype == 'fifo':
+                if f.isfifo():
+                    f.marked = True
+                    self.mark_files.append(f)
+                else:
+                    f.marked = False
+            elif filetype == 'all':
+                f.marked = True
+                self.mark_files.append(f)
+
         self.mark_size = self.get_mark_size()
 
     def mark_clear(self):
