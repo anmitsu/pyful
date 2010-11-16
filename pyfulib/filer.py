@@ -65,32 +65,7 @@ class Filer(object):
         self.workspace.view()
 
     def input(self, meta, key):
-        if self.finder.active:
-            try:
-                c = chr(key)
-            except ValueError:
-                return
-            if (meta, key) in self.finder.keymap:
-                return self.finder.keymap[(meta, key)]()
-            elif c > " " and not meta:
-                return self.finder.insert(c)
-
-        km = self.keymap
-        f = self.file
-        ext  = util.extname(f.name)
-        if ext != '' and (meta, key, ext) in km:
-            km[(meta, key, ext)]()
-        elif self.file.marked and (meta, key, '.mark') in km:
-            km[(meta, key, '.mark')]()
-        elif f.islink() and (meta, key, '.link') in km:
-            km[(meta, key, '.link')]()
-        elif f.isdir() and (meta, key, '.dir') in km:
-            km[(meta, key, '.dir')]()
-        elif f.isexec() and (meta, key, '.exec') in km:
-            km[(meta, key, '.exec')]()
-        else:
-            if (meta, key) in km:
-                km[(meta, key)]()
+        self.dir.input(meta, key)
 
     def create_workspace(self, title=None):
         if title is None:
@@ -536,6 +511,33 @@ class Directory(object):
                 return self.finder.keymap[(meta, key)]()
             elif c > " " and not meta:
                 return self.finder.insert(c)
+
+    def input(self, meta, key):
+        if self.finder.active:
+            try:
+                c = chr(key)
+            except ValueError:
+                return
+            if (meta, key) in self.finder.keymap:
+                return self.finder.keymap[(meta, key)]()
+            elif c > " " and not meta:
+                return self.finder.insert(c)
+        keymap = self.keymap
+        f = self.file
+        ext  = util.extname(f.name)
+        if ext != '' and (meta, key, ext) in keymap:
+            keymap[(meta, key, ext)]()
+        elif self.file.marked and (meta, key, '.mark') in keymap:
+            keymap[(meta, key, '.mark')]()
+        elif f.islink() and (meta, key, '.link') in keymap:
+            keymap[(meta, key, '.link')]()
+        elif f.isdir() and (meta, key, '.dir') in keymap:
+            keymap[(meta, key, '.dir')]()
+        elif f.isexec() and (meta, key, '.exec') in keymap:
+            keymap[(meta, key, '.exec')]()
+        else:
+            if (meta, key) in keymap:
+                keymap[(meta, key)]()
 
     def settop(self):
         self.cursor = 0
