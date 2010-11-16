@@ -654,7 +654,7 @@ class Directory(object):
             if not os.path.lexists(f):
                 continue
             if self.maskreg:
-                if  not os.path.isdir(f) and not self.maskreg.search(f):
+                if not os.path.isdir(f) and not self.maskreg.search(f):
                     continue
 
             try:
@@ -1318,13 +1318,13 @@ class FileStat(object):
     def get_user_name(self):
         try:
             return pwd.getpwuid(self.stat.st_uid)[0]
-        except:
+        except KeyError:
             return 'unknown'
 
     def get_group_name(self):
         try:
             return grp.getgrgid(self.stat.st_gid)[0]
-        except:
+        except KeyError:
             return 'unknown'
 
     def get_mtime(self):
@@ -1376,11 +1376,8 @@ class FileStat(object):
         pyful.stdscr.cmdwin.erase()
 
         perm = self.get_permission()
-        try:
-            user = pwd.getpwuid(self.stat.st_uid)[0]
-        except:
-            user = ''
-        group = grp.getgrgid(self.stat.st_gid)[0]
+        user = self.get_user_name()
+        group = self.get_group_name()
         nlink = self.stat.st_nlink
         size = self.stat.st_size
         mtime = time.strftime(self.time_format, time.localtime(self.stat.st_mtime))
