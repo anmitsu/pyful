@@ -761,7 +761,7 @@ class Directory(object):
     def mark_toggle(self):
         f = self.file
         if f.name == os.pardir:
-            return
+            return self.mvcursor(+1)
         if f.marked:
             f.marked = False
             try:
