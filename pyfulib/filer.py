@@ -502,16 +502,6 @@ class Directory(object):
         except IndexError:
             return self.files[0]
 
-        if self.finder.active:
-            try:
-                c = chr(key)
-            except ValueError:
-                return
-            if (meta, key) in self.finder.keymap:
-                return self.finder.keymap[(meta, key)]()
-            elif c > " " and not meta:
-                return self.finder.insert(c)
-
     def input(self, meta, key):
         if self.finder.active:
             try:
