@@ -73,6 +73,13 @@ Finder.smartcase = True
 # It conforms to the strftime format from time module.
 FileStat.time_format = '%y-%m-%d %H:%M'
 
+# Set the flag of file modified within 24 hours.
+FileStat.time_24_flag = '!'
+# Set the flag of file modified within a week.
+FileStat.time_week_flag = '#'
+# Set the flag of file modified more in old time.
+FileStat.time_yore_flag = ' '
+
 # Display the file extension?
 FileStat.view_ext = True
 # Display the file permission?
