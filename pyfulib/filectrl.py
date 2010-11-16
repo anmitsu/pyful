@@ -308,7 +308,7 @@ class Filectrl(object):
     def tareach(self, src, dst, tarmode='gzip', wrap=''):
         threadlist = []
         for f in src:
-            path = os.path.join(dst, f)
+            path = os.path.join(dst, util.unix_basename(f))
             threadlist.append(TarThread(f, path, tarmode, wrap))
         for t in threadlist:
             self.thread = t
@@ -329,7 +329,7 @@ class Filectrl(object):
     def zipeach(self, src, dst, wrap):
         threadlist = []
         for f in src:
-            path = os.path.join(dst, f)
+            path = os.path.join(dst, util.unix_basename(f))
             threadlist.append(ZipThread(f, path, wrap))
         for t in threadlist:
             self.thread = t
