@@ -35,8 +35,6 @@ from pyfulib import filectrl
 pyful = Pyful()
 
 class Filer(object):
-    _keymap = {}
-
     def __init__(self):
         self.titlebar = None
         self.workspaces = []
@@ -44,7 +42,7 @@ class Filer(object):
 
     @property
     def keymap(self):
-        return self.__class__._keymap
+        return Directory.keymap
 
     @property
     def workspace(self):
@@ -77,21 +75,22 @@ class Filer(object):
             elif c > " " and not meta:
                 return self.finder.insert(c)
 
+        km = self.keymap
         f = self.file
         ext  = util.extname(f.name)
-        if ext != '' and (meta, key, ext) in self._keymap:
-            self._keymap[(meta, key, ext)]()
-        elif self.file.marked and (meta, key, '.mark') in self._keymap:
-            self._keymap[(meta, key, '.mark')]()
-        elif f.islink() and (meta, key, '.link') in self._keymap:
-            self._keymap[(meta, key, '.link')]()
-        elif f.isdir() and (meta, key, '.dir') in self._keymap:
-            self._keymap[(meta, key, '.dir')]()
-        elif f.isexec() and (meta, key, '.exec') in self._keymap:
-            self._keymap[(meta, key, '.exec')]()
+        if ext != '' and (meta, key, ext) in km:
+            km[(meta, key, ext)]()
+        elif self.file.marked and (meta, key, '.mark') in km:
+            km[(meta, key, '.mark')]()
+        elif f.islink() and (meta, key, '.link') in km:
+            km[(meta, key, '.link')]()
+        elif f.isdir() and (meta, key, '.dir') in km:
+            km[(meta, key, '.dir')]()
+        elif f.isexec() and (meta, key, '.exec') in km:
+            km[(meta, key, '.exec')]()
         else:
-            if (meta, key) in self._keymap:
-                self._keymap[(meta, key)]()
+            if (meta, key) in km:
+                km[(meta, key)]()
 
     def create_workspace(self, title=None):
         if title is None:
@@ -502,6 +501,7 @@ class Workspace(object):
 
 class Directory(object):
     sort_kind = 'Name[^]'
+    keymap = {}
 
     def __init__(self, path, height, width, begy, begx):
         self.win = curses.newwin(height, width, begy, begx)
