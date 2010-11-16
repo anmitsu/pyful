@@ -380,6 +380,18 @@ class Newfile(object):
         pyful.filer.workspace.all_reload()
         pyful.filer.dir.setcursor(pyful.filer.dir.get_index(path))
 
+class OpenListfile(object):
+    prompt = 'Open list file:'
+
+    def complete(self, comp):
+        return comp.comp_files()
+
+    def execute(self, path):
+        if os.path.exists(path):
+            pyful.filer.dir.open_listfile(path)
+        else:
+            pyful.message.error('No such list file: ' + path)
+
 class Rename(object):
     def __init__(self, path=None):
         if path is None:
