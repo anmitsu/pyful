@@ -66,6 +66,7 @@ commands = {
     'mx'       : lambda: pyful.cmdline.start(mode.Mx(), ''),
 
     'open_at_system' : lambda: process.spawn("xdg-open %f %&"),
+    'open_listfile'  : lambda: pyful.cmdline.start(mode.OpenListfile(), ''),
     'kill_thread'    : lambda: filectrl.kill_thread(),
     'drivejump'      : lambda: _drivejump(),
     'fileviewer'     : lambda: _fileviewer(),
@@ -84,7 +85,7 @@ commands = {
     'enter_exec': lambda: pyful.cmdline.start(mode.Shell(), ' ./%f', 1),
     'enter_dir' : lambda: pyful.filer.dir.enter_dir(),
     'enter_link': lambda: pyful.filer.dir.enter_link(),
-    'open_listfile': lambda: pyful.filer.dir.open_listfile(pyful.filer.file.name),
+    'enter_listfile': lambda: pyful.filer.dir.open_listfile(pyful.filer.file.name),
 
     'chdir_parent'   : lambda: pyful.filer.dir.chdir(os.pardir),
     'chdir_root'     : lambda: pyful.filer.dir.chdir('/'),
