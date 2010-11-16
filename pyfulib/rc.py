@@ -191,7 +191,7 @@ myfilerkeymap = {
     (0, KEY_P        ): commands['pack'],
     (0, KEY_U        ): commands['unpack2'],
     (0, KEY_u        ): commands['unpack'],
-    (0, KEY_END      ): commands['mark_all'],
+    (0, KEY_END      ): commands['mark_toggle_all'],
     (0, KEY_SPACE    ): commands['mark_toggle'],
     (0, KEY_CTRL_R   ): commands['refresh_window'],
     (0, KEY_RETURN   ): commands['open_at_system'],
