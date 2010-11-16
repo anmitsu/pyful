@@ -301,11 +301,10 @@ class Workspace(object):
     @property
     def nextdir(self):
         s = self.cursor + 1
-        try:
-            self.dirs[s]
-        except IndexError:
+        if s >= len(self.dirs):
             return self.dirs[0]
-        return self.dirs[s]
+        else:
+            return self.dirs[s]
 
     @property
     def prevdir(self):
