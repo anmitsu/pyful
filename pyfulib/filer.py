@@ -758,6 +758,20 @@ class Directory(object):
             pass
         self.mark_size = self.get_mark_size()
 
+    def mark_dir_all(self):
+        self.mark_files[:] = []
+        for f in self.files:
+            if f.name == os.pardir:
+                continue
+            if f.isdir():
+                f.marked = True
+                self.mark_files.append(f)
+            else:
+                if f.marked:
+                    self.mark_files.remove(f)
+                f.marked = False
+        self.mark_size = self.get_mark_size()
+
     def mark_toggle(self):
         f = self.file
         if f.name == os.pardir:
