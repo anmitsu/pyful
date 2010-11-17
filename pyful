@@ -73,8 +73,8 @@ if __name__ == '__main__':
         pyful.setsignal()
         pyful.binpath = os.path.abspath(__file__)
 
-        pyful.start_curses()
         pyful.load_rcfile(__options__.config)
+        pyful.start_curses()
         pyful.init_function()
 
         pyful.stdscr.refresh()
