@@ -7,6 +7,7 @@
 from pyfulib.core import Pyful
 from pyfulib.command import commands
 from pyfulib.filer import Workspace, Directory, Finder, FileStat
+from pyfulib import ui
 from pyfulib import mode
 from pyfulib import process
 from pyfulib.keymap import *
@@ -94,6 +95,10 @@ FileStat.view_group = False
 FileStat.view_size = True
 # Display the change time of file?
 FileStat.view_mtime = True
+
+# Set zoom attribute of infobox.
+# Infobox is an area displaying information of cmdline and message.
+ui.InfoBox.zoom = 0
 
 # Registration of program initialization.
 #
@@ -342,8 +347,8 @@ mymenukeymap = {
     }
 
 # Update the keymap of pyful.
-pyful.filer.keymap.update(myfilerkeymap)
-pyful.filer.finder.keymap.update(myfinderkeymap)
+Directory.keymap.update(myfilerkeymap)
+Finder.keymap.update(myfinderkeymap)
 pyful.cmdline.keymap.update(mycmdlinekeymap)
 pyful.cmdline.keymap.update(mycmdlinekeymap)
 pyful.cmdline.clipboard.keymap.update(myclipboardkeymap)
