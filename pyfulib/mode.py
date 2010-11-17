@@ -765,3 +765,17 @@ class UnZip(object):
         else:
             filectrl.unzip(self.src, path)
             pyful.filer.workspace.all_reload()
+
+class ZoomInfoBox(object):
+    prompt = 'Zoom infobox:'
+
+    def complete(self, comp):
+        return [str(x*10) for x in range(-10, 11)]
+
+    def execute(self, zoom):
+        from pyfulib import ui
+        try:
+            zoom = int(zoom)
+            ui.zoom_infobox(zoom)
+        except ValueError as e:
+            pyful.message.exception(e)
