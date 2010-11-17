@@ -27,9 +27,7 @@ from pyfulib.keymap import *
 pyful = Pyful()
 
 def init_ui():
-    height = pyful.stdscr.maxy//2
-    odd = pyful.stdscr.maxy % 2
-    InfoBox.win = curses.newwin(height+odd, pyful.stdscr.maxx, height-2, 0)
+    InfoBox.resize()
 
 def zoom_infobox(zoom):
     InfoBox.zoom = zoom
