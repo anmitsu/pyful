@@ -178,18 +178,12 @@ class Pyful(Singleton):
 
     def load_rcfile(self, path=None):
         if path is None:
-            default = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'rc.py')
-            usr = os.path.expanduser(self.environs['RCFILE'])
-            if os.path.exists(usr):
-                with open(usr, 'r') as rc:
-                    exec(rc.read(), locals())
-            else:
-                with open(default, 'r') as rc:
-                    exec(rc.read(), locals())
-        else:
-            with open(path, 'r') as rc:
-                exec(rc.read(), locals())
-            self.environs['RCFILE'] = path
+            path = os.path.expanduser(self.environs['RCFILE'])
+            if not os.path.exists(path):
+                path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'rc.py')
+        with open(path, 'r') as rc:
+            exec(rc.read(), locals())
+        self.environs['RCFILE'] = path
 
     def check_rcfile_version(self, version):
         pass
