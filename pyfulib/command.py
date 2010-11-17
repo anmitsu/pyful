@@ -155,6 +155,8 @@ commands = {
     'mark_exec'    : lambda: pyful.filer.dir.mark_all('executable'),
     'mark_socket'  : lambda: pyful.filer.dir.mark_all('socket'),
     'mark_fifo'    : lambda: pyful.filer.dir.mark_all('fifo'),
+    'mark_chr'     : lambda: pyful.filer.dir.mark_all('chr'),
+    'mark_block'   : lambda: pyful.filer.dir.mark_all('block'),
     'mark_toggle'  : lambda: pyful.filer.dir.mark_toggle(),
     'mark_toggle_all': lambda: pyful.filer.dir.mark_toggle_all(),
     'mark_clear'   : lambda: pyful.filer.dir.mark_clear(),
