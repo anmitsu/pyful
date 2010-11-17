@@ -827,6 +827,18 @@ class Directory(object):
                     self.mark_files.append(f)
                 else:
                     f.marked = False
+            elif filetype == 'chr':
+                if f.ischr():
+                    f.marked = True
+                    self.mark_files.append(f)
+                else:
+                    f.marked = False
+            elif filetype == 'block':
+                if f.isblock():
+                    f.marked = True
+                    self.mark_files.append(f)
+                else:
+                    f.marked = False
         self.mark_size = self.get_mark_size()
 
     def mark_clear(self):
