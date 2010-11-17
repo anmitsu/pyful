@@ -1122,7 +1122,7 @@ class Directory(object):
                 self.file.view()
 
 class Finder(object):
-    _keymap = {}
+    keymap = {}
     smartcase = True
     history = [""]
 
@@ -1134,10 +1134,6 @@ class Finder(object):
         self.h_select = 0
         self.active = False
         self._stringcue = []
-
-    @property
-    def keymap(self):
-        return self.__class__._keymap
 
     def find(self, pattern):
         try:
