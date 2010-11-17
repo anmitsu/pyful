@@ -1249,6 +1249,12 @@ class FileStat(object):
     def issocket(self):
         return stat.S_ISSOCK(self.stat.st_mode)
 
+    def ischr(self):
+        return stat.S_ISCHR(self.lstat.st_mode)
+
+    def isblock(self):
+        return stat.S_ISBLK(self.lstat.st_mode)
+
     def isexec(self):
         return stat.S_IEXEC & self.stat.st_mode
 
