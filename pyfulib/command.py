@@ -65,7 +65,7 @@ commands = {
     'eval'     : lambda: pyful.cmdline.start(mode.Eval(), ''),
     'mx'       : lambda: pyful.cmdline.start(mode.Mx(), ''),
 
-    'open_at_system' : lambda: process.spawn("xdg-open %f %&"),
+    'open_at_system' : lambda: _open_at_system(),
     'open_listfile'  : lambda: pyful.cmdline.start(mode.OpenListfile(), ''),
     'zoom_infobox'   : lambda: pyful.cmdline.start(mode.ZoomInfoBox(), ''),
     'google_search'  : lambda: pyful.cmdline.start(mode.WebSearch('Google'), ''),
@@ -176,6 +176,12 @@ commands = {
     'mask_music'   : lambda: pyful.filer.dir.mask(_music_filter),
     'mask_video'   : lambda: pyful.filer.dir.mask(_video_filter),
     }
+
+def _open_at_system():
+    try:
+        process.spawn("xdg-open %f %&")
+    except Exception as e:
+        pyful.message.exception(e)
 
 def _spawn_editor():
     try:
