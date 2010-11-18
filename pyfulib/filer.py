@@ -1325,22 +1325,22 @@ class FileStat(object):
 
         fstat = ''
         if self.view_ext and not self.isdir() and not self.islink():
-            fstat += ' %s ' % util.extname(self.name)
+            fstat += ' %s' % util.extname(self.name)
         if self.view_user:
-            fstat += ' %s ' % self.get_user_name()
+            fstat += ' %s' % self.get_user_name()
         if self.view_group:
-            fstat += ' %s ' % self.get_group_name()
+            fstat += ' %s' % self.get_group_name()
         if self.view_nlink:
-            fstat += ' %3s ' % self.stat.st_nlink
+            fstat += ' %3s' % self.stat.st_nlink
         if self.view_size:
             if self.isdir():
-                fstat += ' %7s ' % '<DIR>'
+                fstat += ' %7s' % '<DIR>'
             else:
-                fstat += ' %7s ' % self.get_file_size()
+                fstat += ' %7s' % self.get_file_size()
         if self.view_permission:
-            fstat += ' %s ' % self.get_permission()
+            fstat += ' %s' % self.get_permission()
         if self.view_mtime:
-            fstat += ' %s ' % self.get_mtime()
+            fstat += ' %s' % self.get_mtime()
 
         self.view_stat = fstat
         return self.view_stat
