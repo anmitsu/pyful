@@ -531,12 +531,11 @@ myassociation = {
 pyful.filer.keymap.update(myassociation)
 
 if not pyful.started:
-    import os
+    import os, sys
     if'screen' in os.environ['TERM']:
         # Change GNU SCREEN's title.
-        print('\033kpyful\033\\')
+        sys.stdout.write('\033kpyful\033\\')
     else:
         # Change terminal emulator's title.
         import socket
-        print('\033]0;pyful@%s\007' % socket.gethostname())
-
+        sys.stdout.write('\033]0;pyful@%s\007' % socket.gethostname())
