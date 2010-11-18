@@ -350,7 +350,6 @@ mymenukeymap = {
 Directory.keymap.update(myfilerkeymap)
 Finder.keymap.update(myfinderkeymap)
 pyful.cmdline.keymap.update(mycmdlinekeymap)
-pyful.cmdline.keymap.update(mycmdlinekeymap)
 pyful.cmdline.clipboard.keymap.update(myclipboardkeymap)
 pyful.cmdline.completion.keymap.update(mycompletionkeymap)
 pyful.cmdline.output.keymap.update(myoutputkeymap)
