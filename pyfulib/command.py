@@ -68,6 +68,7 @@ commands = {
     'open_at_system' : lambda: process.spawn("xdg-open %f %&"),
     'open_listfile'  : lambda: pyful.cmdline.start(mode.OpenListfile(), ''),
     'zoom_infobox'   : lambda: pyful.cmdline.start(mode.ZoomInfoBox(), ''),
+    'google_search'  : lambda: pyful.cmdline.start(mode.WebSearch('Google'), ''),
     'kill_thread'    : lambda: filectrl.kill_thread(),
     'drivejump'      : lambda: _drivejump(),
     'fileviewer'     : lambda: _fileviewer(),
