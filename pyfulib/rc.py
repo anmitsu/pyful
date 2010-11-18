@@ -282,6 +282,9 @@ mycmdlinekeymap = {
     (1, KEY_LSS      ): lambda: pyful.cmdline.history.settop(),
     (1, KEY_GTR      ): lambda: pyful.cmdline.history.setbottom(),
     (0, KEY_CTRL_X   ): lambda: pyful.cmdline.history.delete(),
+    (1, KEY_PLUS     ): commands['zoom_in_infobox'],
+    (1, KEY_MINUS    ): commands['zoom_out_infobox'],
+    (1, KEY_EQUAL    ): commands['zoom_normal_infobox'],
     }
 
 myclipboardkeymap = {
@@ -298,6 +301,9 @@ myclipboardkeymap = {
     (0, KEY_CTRL_C): lambda: pyful.cmdline.clipboard.finish(),
     (0, KEY_ESCAPE): lambda: pyful.cmdline.clipboard.finish(),
     (0, KEY_RETURN): lambda: pyful.cmdline.clipboard.insert(),
+    (1, KEY_PLUS     ): commands['zoom_in_infobox'],
+    (1, KEY_MINUS    ): commands['zoom_out_infobox'],
+    (1, KEY_EQUAL    ): commands['zoom_normal_infobox'],
     }
 
 mycompletionkeymap = {
@@ -314,6 +320,9 @@ mycompletionkeymap = {
     (0, KEY_CTRL_C): lambda: pyful.cmdline.completion.finish(),
     (0, KEY_ESCAPE): lambda: pyful.cmdline.completion.finish(),
     (0, KEY_RETURN): lambda: pyful.cmdline.completion.insert(),
+    (1, KEY_PLUS     ): commands['zoom_in_infobox'],
+    (1, KEY_MINUS    ): commands['zoom_out_infobox'],
+    (1, KEY_EQUAL    ): commands['zoom_normal_infobox'],
     }
 
 myoutputkeymap = {
@@ -329,6 +338,9 @@ myoutputkeymap = {
     (0, KEY_CTRL_C): lambda: pyful.cmdline.output.finish(),
     (0, KEY_ESCAPE): lambda: pyful.cmdline.output.finish(),
     (0, KEY_RETURN): lambda: pyful.cmdline.output.edit(),
+    (1, KEY_PLUS     ): commands['zoom_in_infobox'],
+    (1, KEY_MINUS    ): commands['zoom_out_infobox'],
+    (1, KEY_EQUAL    ): commands['zoom_normal_infobox'],
     }
 
 mymenukeymap = {
