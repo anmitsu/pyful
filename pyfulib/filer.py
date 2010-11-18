@@ -157,7 +157,11 @@ class Filer(object):
             length += util.termwidth(ws.title) + 2
         self.titlebar.addstr(' | ', curses.A_BOLD)
 
-        width = (pyful.stdscr.maxx-length-4) // len(self.workspace.dirs)
+        dirlen = len(self.workspace.dirs)
+        width = (pyful.stdscr.maxx-length-4) // dirlen
+        odd = (pyful.stdscr.maxx-length-4) % dirlen
+        if width < 5:
+            return self.titlebar.noutrefresh()
 
         for i, path in enumerate([d.path for d in self.workspace.dirs]):
             if util.termwidth(path) > width:
@@ -167,8 +171,11 @@ class Filer(object):
                     if util.termwidth(path) <= width:
                         break
             num = '[%d] ' % (i+1)
-            string = num + util.mbs_rjust(path, width-len(num))
-
+            if i == 0:
+                w = width-len(num)+odd
+            else:
+                w = width-len(num)
+            string = num + util.mbs_rjust(path, w)
             if i == self.workspace.cursor:
                 self.titlebar.addstr(string, curses.A_REVERSE)
             else:
