@@ -148,20 +148,24 @@ class Filer(object):
         self.titlebar.erase()
         self.titlebar.move(0, 0)
 
-        length = 0
+        length = reduce(lambda x,y: x+y, [util.termwidth(w.title)+2 for w in self.workspaces])
+
+        if pyful.stdscr.maxx-length < 5:
+            return pyful.message.error('terminal size very small')
+
         for i, ws in enumerate(self.workspaces):
             if self.cursor == i:
                 self.titlebar.addstr(' '+ws.title+' ', look.colors['WKSELECTED'])
             else:
                 self.titlebar.addstr(' '+ws.title+' ')
-            length += util.termwidth(ws.title) + 2
         self.titlebar.addstr(' | ', curses.A_BOLD)
 
         dirlen = len(self.workspace.dirs)
         width = (pyful.stdscr.maxx-length-4) // dirlen
         odd = (pyful.stdscr.maxx-length-4) % dirlen
         if width < 5:
-            return self.titlebar.noutrefresh()
+            self.titlebar.noutrefresh()
+            return pyful.message.error('terminal size very small')
 
         for i, path in enumerate([d.path for d in self.workspace.dirs]):
             if util.termwidth(path) > width:
