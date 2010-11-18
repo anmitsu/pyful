@@ -104,7 +104,7 @@ commands = {
 
     'switch_workspace'        : lambda: _switch_workspace(),
     'create_workspace'        : lambda: pyful.cmdline.start(mode.CreateWorkspace(), ''),
-    'close_workspace '        : lambda: pyful.filer.close_workspace(),
+    'close_workspace'         : lambda: pyful.filer.close_workspace(),
     'change_workspace_title'  : lambda: pyful.cmdline.start(mode.ChangeWorkspaceTitle(), ""),
     'change_workspace_layout' : lambda: _change_workspace_layout(),
     'view_next_workspace'     : lambda: pyful.filer.next_workspace(),
