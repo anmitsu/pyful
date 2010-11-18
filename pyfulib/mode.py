@@ -244,6 +244,7 @@ class WebSearch(object):
     def execute(self, word):
         import webbrowser
         if self.engine == 'Google':
+            word = word.replace(' ', '+')
             search = 'google.com/search?&q=%s' % word
         else:
             pass
