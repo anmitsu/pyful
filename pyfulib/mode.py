@@ -230,6 +230,28 @@ class GlobDir(object):
             GlobDir.default = pattern
             pyful.filer.dir.globdir(pattern)
 
+class WebSearch(object):
+    def __init__(self, engine='Google'):
+        self.engine = engine
+
+    @property
+    def prompt(self):
+        return '%s search:' % self.engine
+
+    def complete(self, comp):
+        return comp.comp_files()
+
+    def execute(self, word):
+        import webbrowser
+        if self.engine == 'Google':
+            search = 'google.com/search?&q=%s' % word
+        else:
+            pass
+        try:
+            webbrowser.open(search, new=2)
+        except Exception as e:
+            pyful.message.exception(e)
+
 class Link(object):
     def __init__(self):
         self.src = None
