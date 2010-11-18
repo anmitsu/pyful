@@ -660,15 +660,14 @@ class CopyThread(threading.Thread):
         self.active = True
 
     def run(self):
-        for j in self.ctrl.jobs:
-            if not self.active:
-                break
-            if isinstance(j, FileJob):
-                try:
-                    j.copy(self)
-                except FilectrlCancel:
-                    pyful.message.error("Copy canceled")
+        try:
+            for j in self.ctrl.jobs:
+                if not self.active:
                     break
+                if isinstance(j, FileJob):
+                    j.copy(self)
+        except FilectrlCancel:
+            pyful.message.error("Copy canceled")
 
     def kill(self):
         self.active = False
@@ -682,15 +681,14 @@ class MoveThread(threading.Thread):
         self.active = True
 
     def run(self):
-        for j in self.ctrl.jobs:
-            if not self.active:
-                break
-            if isinstance(j, FileJob):
-                try:
-                    j.move(self)
-                except FilectrlCancel:
-                    pyful.message.error("Move canceled")
+        try:
+            for j in self.ctrl.jobs:
+                if not self.active:
                     break
+                if isinstance(j, FileJob):
+                    j.move(self)
+        except FilectrlCancel:
+            pyful.message.error("Move canceled")
 
         self.ctrl.dirlist.sort()
         self.ctrl.dirlist.reverse()
