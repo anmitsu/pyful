@@ -1081,6 +1081,9 @@ class Directory(object):
         self.win.move(0, 2)
         self.win.addstr(self.path, curses.A_BOLD)
 
+        if width < 30:
+            return pyful.message.error('terminal size very small')
+
         line = 0
         for i in range(self.scrolltop, size):
             line += 1
