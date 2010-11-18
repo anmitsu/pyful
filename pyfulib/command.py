@@ -24,6 +24,7 @@ import glob
 from pyfulib.core import Pyful
 from pyfulib import mode
 from pyfulib import util
+from pyfulib import ui
 from pyfulib import filectrl
 from pyfulib import process
 
@@ -67,7 +68,10 @@ commands = {
 
     'open_at_system' : lambda: _open_at_system(),
     'open_listfile'  : lambda: pyful.cmdline.start(mode.OpenListfile(), ''),
-    'zoom_infobox'   : lambda: pyful.cmdline.start(mode.ZoomInfoBox(), ''),
+    'zoom_infobox'       : lambda: pyful.cmdline.start(mode.ZoomInfoBox(), ''),
+    'zoom_in_infobox'    : lambda: ui.zoom_infobox(ui.InfoBox.zoom+5),
+    'zoom_out_infobox'   : lambda: ui.zoom_infobox(ui.InfoBox.zoom-5),
+    'zoom_normal_infobox': lambda: ui.zoom_infobox(0),
     'google_search'  : lambda: pyful.cmdline.start(mode.WebSearch('Google'), ''),
     'kill_thread'    : lambda: filectrl.kill_thread(),
     'drivejump'      : lambda: _drivejump(),
