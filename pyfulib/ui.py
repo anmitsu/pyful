@@ -61,13 +61,13 @@ class InfoBox(object):
 
     @classmethod
     def resize(cls):
-        height = pyful.stdscr.maxy//2 + cls.zoom
-        if height > pyful.stdscr.maxy:
+        odd = pyful.stdscr.maxy % 2
+        height = pyful.stdscr.maxy//2 + cls.zoom + odd
+        if height > pyful.stdscr.maxy-2:
             height = pyful.stdscr.maxy - 2
         elif height < 0:
             height = 3
-        odd = pyful.stdscr.maxy % 2
-        cls.win = curses.newwin(height+odd, pyful.stdscr.maxx, pyful.stdscr.maxy-height-2, 0)
+        cls.win = curses.newwin(height, pyful.stdscr.maxx, pyful.stdscr.maxy-height-2, 0)
 
     @property
     def info(self):
