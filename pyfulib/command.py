@@ -77,6 +77,7 @@ commands = {
     'unpack2'        : lambda: _unpack2(),
     'spawn_editor'   : lambda: _spawn_editor(),
     'spawn_shell'    : lambda: _spawn_shell(),
+    'spawn_terminal' : lambda: _spawn_terminal(),
     'exit'           : lambda: _exit(),
 
     'reload_rcfile'  : lambda: pyful.load_rcfile(),
@@ -189,6 +190,12 @@ def _spawn_shell():
     except KeyError:
         shell = '/bin/bash'
     process.spawn(shell, shell)
+
+def _spawn_terminal():
+    try:
+        process.spawn(process.Process.terminal_emulator[0]+' %&')
+    except Exception as e:
+        pyful.message.exception(e)
 
 def _exit():
     ret =  pyful.message.confirm('Exit?', ['Yes', 'No'])
