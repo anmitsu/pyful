@@ -703,7 +703,7 @@ class WebSearch(object):
         import webbrowser
         if self.engine == 'Google':
             word = word.replace(' ', '+')
-            search = 'google.com/search?&q=%s' % word
+            search = 'http://www.google.com/search?&q=%s' % word
         else:
             pass
         try:
