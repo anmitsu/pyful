@@ -794,9 +794,12 @@ class Directory(object):
         self.mark_files = util.uniq(self.mark_files)
         self.mark_size = self.get_mark_size()
 
-    def mark_all(self, filetype='all'):
+    def mark_below_cursor(self, filetype='all'):
+        self.mark_all(filetype, self.cursor)
+
+    def mark_all(self, filetype='all', start=0):
         self.mark_files[:] = []
-        for f in self.files:
+        for f in self.files[start:]:
             if f.name == os.pardir:
                 continue
             if filetype == 'all':
