@@ -92,7 +92,6 @@ class Chmod(object):
         if pyful.filer.dir.ismark():
             for f in pyful.filer.dir.get_mark_files():
                 filectrl.chmod(f, mode)
-            pyful.filer.dir.mark_clear()
         else:
             filectrl.chmod(pyful.filer.file.name, mode)
         pyful.filer.workspace.all_reload()
@@ -256,7 +255,6 @@ class Link(object):
             for f in pyful.filer.dir.get_mark_files():
                 dst = os.path.join(path, util.unix_basename(f))
                 filectrl.link(f, dst)
-            pyful.filer.dir.mark_clear()
             pyful.filer.workspace.all_reload()
         elif self.src is None:
             self.src = path
@@ -482,7 +480,6 @@ class Symlink(object):
             for f in pyful.filer.dir.get_mark_files():
                 dst = os.path.join(path, os.path.basename(f))
                 filectrl.symlink(f, dst)
-            pyful.filer.dir.mark_clear()
             pyful.filer.workspace.all_reload()
         elif self.src is None:
             self.src = path
@@ -649,7 +646,6 @@ class Tar(object):
                     filectrl.tareach(pyful.filer.dir.get_mark_files(), path, self.tarmode, self.wrap)
                 else:
                     filectrl.tar(pyful.filer.dir.get_mark_files(), path, self.tarmode, self.wrap)
-                pyful.filer.dir.mark_clear()
                 pyful.filer.workspace.all_reload()
         elif self.src is None:
             self.src = path
@@ -679,7 +675,6 @@ class UnTar(object):
     def execute(self, path):
         if pyful.filer.dir.ismark():
             filectrl.untar(pyful.filer.dir.get_mark_files(), path)
-            pyful.filer.dir.mark_clear()
             pyful.filer.workspace.all_reload()
         elif self.src is None:
             self.src = path
@@ -750,7 +745,6 @@ class Zip(object):
                     filectrl.zipeach(pyful.filer.dir.get_mark_files(), path, self.wrap)
                 else:
                     filectrl.zip(pyful.filer.dir.get_mark_files(), path, self.wrap)
-                pyful.filer.dir.mark_clear()
                 pyful.filer.workspace.all_reload()
         elif self.src is None:
             self.src = path
@@ -780,7 +774,6 @@ class UnZip(object):
     def execute(self, path):
         if pyful.filer.dir.ismark():
             filectrl.unzip(pyful.filer.dir.get_mark_files(), path)
-            pyful.filer.dir.mark_clear()
             pyful.filer.workspace.all_reload()
         elif self.src is None:
             self.src = path
