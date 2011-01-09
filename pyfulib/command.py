@@ -192,7 +192,10 @@ commands = {
 
 def _open_at_system():
     try:
-        process.spawn("xdg-open %f %&")
+        if pyful.environs['PLATFORM'] == 'cygwin':
+            process.spawn("cygstart %f %&")
+        else:
+            process.spawn("xdg-open %f %&")
     except Exception as e:
         pyful.message.exception(e)
 
