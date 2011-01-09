@@ -54,11 +54,17 @@ class Completion(ui.InfoBox):
             self.cmdline.input(meta, key)
 
     def loadprograms(self):
+        osname = pyful.environs['PLATFORM']
         self.programs[:] = []
         for path in os.environ['PATH'].split(os.pathsep):
             if os.path.exists(path):
                 for name in os.listdir(path):
-                    self.programs.append(name)
+                    if osname == 'cygwin':
+                        ext = util.extname(name)
+                        if ext == '.exe':
+                            self.programs.append(name.replace(ext, ""))
+                    else:
+                        self.programs.append(name)
         self.programs = sorted(self.programs)
 
     def get_maxrow(self):
