@@ -17,6 +17,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import os
+import sys
 import curses
 import signal
 import shutil
@@ -84,6 +85,7 @@ class Pyful(Singleton):
         'PAGER': 'less',
         'TRASHBOX': '~/.pyful/trashbox',
         'RCFILE': '~/.pyful/rc.py',
+        'PLATFORM': sys.platform
         }
     __initfuncs = []
     __exitfuncs = []
