@@ -98,13 +98,10 @@ def mknod(path, mode=0o644):
 def move(src, dst):
     Filectrl().move(src, dst)
 
-def replace(src, dst):
+def replace(pattern, repstr):
     buf = []
     for f in pyful.filer.dir.get_mark_files():
-        try:
-            buf.append(re.sub(src, r""+dst, f))
-        except:
-            return pyful.message.error("Regexp error")
+        buf.append(pattern.sub(r""+repstr, f))
 
     msg = []
     size = len(buf)
