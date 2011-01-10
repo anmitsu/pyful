@@ -442,7 +442,7 @@ class Replace(object):
             pyful.filer.workspace.all_reload()
         elif self.pattern is None:
             try:
-                self.pattern = re.compile(pattern)
+                self.pattern = re.compile(util.unistr(pattern))
             except Exception:
                 return pyful.message.error("Argument error: Can't complile `%s'" % pattern)
             pyful.cmdline.restart("")
