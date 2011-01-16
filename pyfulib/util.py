@@ -85,7 +85,7 @@ def quote(string):
         return '"%s"' % string
     elif re.search("[\"]", string):
         return "'%s'" % string
-    elif re.search("\s", string):
+    elif re.search("[\s!\#\$&\(\)~\|\[\]\{\}\*;\?<>]", string):
         return '"%s"' % string
     else:
         return string
