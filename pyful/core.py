@@ -91,16 +91,16 @@ class Pyful(Singleton):
     __exitfuncs = []
 
     def init_instance(self):
-        from pyfulib.message import Message
+        from pyful.message import Message
         self.message = Message()
 
-        from pyfulib.cmdline import Cmdline
+        from pyful.cmdline import Cmdline
         self.cmdline = Cmdline()
 
-        from pyfulib.filer import Filer
+        from pyful.filer import Filer
         self.filer = Filer()
 
-        from pyfulib.menu import Menu
+        from pyful.menu import Menu
         self.menu = Menu()
 
     def start_curses(self):
@@ -110,10 +110,10 @@ class Pyful(Singleton):
             self.filer.titlebar = curses.newwin(1, self.stdscr.maxx, 0, 0)
             self.filer.default_init()
 
-            from pyfulib import ui
+            from pyful import ui
             ui.init_ui()
 
-            from pyfulib import look
+            from pyful import look
             look.init_colors()
 
     def atinit(self, func, *args, **kwargs):
@@ -167,7 +167,7 @@ class Pyful(Singleton):
         self.stdscr.resize()
         self.stdscr.resize_cmdwin()
         self.filer.workspace.resize()
-        from pyfulib import ui
+        from pyful import ui
         ui.InfoBox.resize()
 
     def setsignal(self):

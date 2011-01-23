@@ -20,12 +20,12 @@ import os
 import re
 import time
 
-from pyfulib.core import Pyful
-from pyfulib import filectrl
-from pyfulib import process
-from pyfulib import util
+from pyful.core import Pyful
+from pyful import filectrl
+from pyful import process
+from pyful import util
 
-pyful = Pyful()
+core = Pyful()
 
 class Shell(object):
     prompt = '$'
@@ -52,11 +52,11 @@ class Mx(object):
         return comp.comp_pyful_commands()
 
     def execute(self, cmd):
-        from pyfulib.command import commands
+        from pyful.command import commands
         try:
             commands[cmd]()
         except KeyError:
-            pyful.message.error("Undefined command `%s'" % cmd)
+            core.message.error("Undefined command `%s'" % cmd)
 
 class ChangeWorkspaceTitle(object):
     prompt = 'Change workspace title:'
@@ -65,7 +65,7 @@ class ChangeWorkspaceTitle(object):
         return comp.comp_files()
 
     def execute(self, title):
-        pyful.filer.workspace.chtitle(title)
+        core.filer.workspace.chtitle(title)
 
 class Chdir(object):
     prompt = 'Chdir to:'
@@ -74,27 +74,27 @@ class Chdir(object):
         return comp.comp_dirs()
 
     def execute(self, path):
-        pyful.filer.dir.chdir(path)
+        core.filer.dir.chdir(path)
 
 class Chmod(object):
     @property
     def prompt(self):
-        if pyful.filer.dir.ismark():
+        if core.filer.dir.ismark():
             return "Chmod mark files:"
         else:
-            mode = "%o" % pyful.filer.file.stat.st_mode
-            return "Chmod (%s - %s):" % (pyful.filer.file.name, mode)
+            mode = "%o" % core.filer.file.stat.st_mode
+            return "Chmod (%s - %s):" % (core.filer.file.name, mode)
 
     def complete(self, comp):
         pass
 
     def execute(self, mode):
-        if pyful.filer.dir.ismark():
-            for f in pyful.filer.dir.get_mark_files():
+        if core.filer.dir.ismark():
+            for f in core.filer.dir.get_mark_files():
                 filectrl.chmod(f, mode)
         else:
-            filectrl.chmod(pyful.filer.file.name, mode)
-        pyful.filer.workspace.all_reload()
+            filectrl.chmod(core.filer.file.name, mode)
+        core.filer.workspace.all_reload()
 
 class Chown(object):
     def __init__(self):
@@ -122,13 +122,13 @@ class Chown(object):
                 self.user = -1
             else:
                 self.user = string
-            pyful.cmdline.restart("")
+            core.cmdline.restart("")
         else:
             if string == "":
                 self.group = -1
             else:
                 self.group = string
-            filectrl.chown(pyful.filer.file.name, self.user, self.group)
+            filectrl.chown(core.filer.file.name, self.user, self.group)
 
 class Copy(object):
     def __init__(self):
@@ -136,7 +136,7 @@ class Copy(object):
 
     @property
     def prompt(self):
-        if pyful.filer.dir.ismark():
+        if core.filer.dir.ismark():
             return "Copy mark files to:"
         elif self.src:
             return "Copy from %s to:" % self.src
@@ -149,14 +149,14 @@ class Copy(object):
         return comp.comp_files()
 
     def execute(self, path):
-        if pyful.filer.dir.ismark():
+        if core.filer.dir.ismark():
             if not path.endswith(os.sep) and not os.path.isdir(path):
-                pyful.message.error("Copy error: Destination is not directory")
+                core.message.error("Copy error: Destination is not directory")
                 return
-            filectrl.copy(pyful.filer.dir.get_mark_files(), path)
+            filectrl.copy(core.filer.dir.get_mark_files(), path)
         elif self.src is None:
             self.src = path
-            pyful.cmdline.restart(pyful.filer.workspace.nextdir.path)
+            core.cmdline.restart(core.filer.workspace.nextdir.path)
         else:
             filectrl.copy(self.src, path)
 
@@ -167,7 +167,7 @@ class CreateWorkspace(object):
         return comp.comp_files()
 
     def execute(self, title):
-        pyful.filer.create_workspace(title)
+        core.filer.create_workspace(title)
 
 class Delete(object):
     @property
@@ -178,12 +178,12 @@ class Delete(object):
         return comp.comp_files()
 
     def execute(self, path):
-        msg = path.replace(pyful.filer.dir.path, "")
-        ret = pyful.message.confirm("Delete? (%s):"%msg, ["No", "Yes"])
+        msg = path.replace(core.filer.dir.path, "")
+        ret = core.message.confirm("Delete? (%s):"%msg, ["No", "Yes"])
         if ret == "No" or ret is None:
             return
         filectrl.delete(path)
-        pyful.filer.workspace.all_reload()
+        core.filer.workspace.all_reload()
 
 class Glob(object):
     default = ""
@@ -200,12 +200,12 @@ class Glob(object):
 
     def execute(self, pattern):
         if not self.default == "" and pattern == "":
-            pyful.filer.dir.glob(self.default)
+            core.filer.dir.glob(self.default)
         else:
             if pattern == "":
                 return
             Glob.default = pattern
-            pyful.filer.dir.glob(pattern)
+            core.filer.dir.glob(pattern)
 
 class GlobDir(object):
     default = ""
@@ -222,12 +222,12 @@ class GlobDir(object):
 
     def execute(self, pattern):
         if not self.default == "" and pattern == "":
-            pyful.filer.dir.globdir(self.default)
+            core.filer.dir.globdir(self.default)
         else:
             if pattern == "":
                 return
             GlobDir.default = pattern
-            pyful.filer.dir.globdir(pattern)
+            core.filer.dir.globdir(pattern)
 
 class Link(object):
     def __init__(self):
@@ -235,7 +235,7 @@ class Link(object):
 
     @property
     def prompt(self):
-        if pyful.filer.dir.ismark():
+        if core.filer.dir.ismark():
             return "Link mark files to:"
         elif self.src:
             return "Link from `%s' to:" % self.src
@@ -248,20 +248,20 @@ class Link(object):
         return comp.comp_files()
 
     def execute(self, path):
-        if pyful.filer.dir.ismark():
+        if core.filer.dir.ismark():
             if not path.endswith(os.sep) and not os.path.isdir(path):
-                pyful.message.error("Error: Destination is not directory")
+                core.message.error("Error: Destination is not directory")
                 return
-            for f in pyful.filer.dir.get_mark_files():
+            for f in core.filer.dir.get_mark_files():
                 dst = os.path.join(path, util.unix_basename(f))
                 filectrl.link(f, dst)
-            pyful.filer.workspace.all_reload()
+            core.filer.workspace.all_reload()
         elif self.src is None:
             self.src = path
-            pyful.cmdline.restart(pyful.filer.workspace.nextdir.path)
+            core.cmdline.restart(core.filer.workspace.nextdir.path)
         else:
             filectrl.link(self.src, path)
-            pyful.filer.workspace.all_reload()
+            core.filer.workspace.all_reload()
 
 class Mark(object):
     default = None
@@ -278,15 +278,15 @@ class Mark(object):
 
     def execute(self, pattern):
         if self.default and pattern == "":
-            pyful.filer.dir.mark(self.default)
+            core.filer.dir.mark(self.default)
         else:
             try:
                 reg = re.compile(pattern)
             except Exception as e:
-                pyful.message.error("Regexp error: " + str(e))
+                core.message.error("Regexp error: " + str(e))
                 return
             self.__class__.default = reg
-            pyful.filer.dir.mark(reg)
+            core.filer.dir.mark(reg)
 
 class Mask(object):
     default = None
@@ -303,23 +303,23 @@ class Mask(object):
 
     def execute(self, pattern):
         if self.default and pattern == "":
-            pyful.filer.dir.mask(self.default)
+            core.filer.dir.mask(self.default)
         else:
             try:
                 reg = re.compile(pattern)
             except:
-                return pyful.message.error("Argument error: Can't complile `%s'" % pattern)
+                return core.message.error("Argument error: Can't complile `%s'" % pattern)
             self.__class__.default = reg
-            pyful.filer.dir.mask(reg)
+            core.filer.dir.mask(reg)
 
 class Menu(object):
     prompt = 'Menu name:'
 
     def complete(self, comp):
-        return list(pyful.menu.items.keys())
+        return list(core.menu.items.keys())
 
     def execute(self, name):
-        pyful.menu.show(name)
+        core.menu.show(name)
 
 class Mkdir(object):
     dirmode = 0o755
@@ -330,8 +330,8 @@ class Mkdir(object):
 
     def execute(self, path):
         filectrl.mkdir(path, self.dirmode)
-        pyful.filer.workspace.all_reload()
-        pyful.filer.dir.setcursor(pyful.filer.dir.get_index(util.unix_basename(path)))
+        core.filer.workspace.all_reload()
+        core.filer.dir.setcursor(core.filer.dir.get_index(util.unix_basename(path)))
 
 class Move(object):
     def __init__(self):
@@ -339,7 +339,7 @@ class Move(object):
 
     @property
     def prompt(self):
-        if pyful.filer.dir.ismark():
+        if core.filer.dir.ismark():
             return "Move mark files to:"
         elif self.src:
             return "Move from %s to:" % self.src
@@ -352,14 +352,14 @@ class Move(object):
         return comp.comp_files()
 
     def execute(self, path):
-        if pyful.filer.dir.ismark():
+        if core.filer.dir.ismark():
             if not path.endswith(os.sep) and not os.path.isdir(path):
-                pyful.message.error("Move error: Destination is not directory")
+                core.message.error("Move error: Destination is not directory")
                 return
-            filectrl.move(pyful.filer.dir.get_mark_files(), path)
+            filectrl.move(core.filer.dir.get_mark_files(), path)
         elif self.src is None:
             self.src = path
-            pyful.cmdline.restart(pyful.filer.workspace.nextdir.path)
+            core.cmdline.restart(core.filer.workspace.nextdir.path)
         else:
             filectrl.move(self.src, path)
 
@@ -372,11 +372,11 @@ class Newfile(object):
 
     def execute(self, path):
         if os.path.exists(util.abspath(path)):
-            pyful.message.error("Error: file exists - %s" % path)
+            core.message.error("Error: file exists - %s" % path)
             return
         filectrl.mknod(path, self.filemode)
-        pyful.filer.workspace.all_reload()
-        pyful.filer.dir.setcursor(pyful.filer.dir.get_index(path))
+        core.filer.workspace.all_reload()
+        core.filer.dir.setcursor(core.filer.dir.get_index(path))
 
 class OpenListfile(object):
     prompt = 'Open list file:'
@@ -386,14 +386,14 @@ class OpenListfile(object):
 
     def execute(self, path):
         if os.path.exists(path):
-            pyful.filer.dir.open_listfile(path)
+            core.filer.dir.open_listfile(path)
         else:
-            pyful.message.error('No such list file: ' + path)
+            core.message.error('No such list file: ' + path)
 
 class Rename(object):
     def __init__(self, path=None):
         if path is None:
-            self.path = pyful.filer.file.name
+            self.path = core.filer.file.name
         else:
             self.path = path
 
@@ -410,14 +410,14 @@ class Rename(object):
 
     def execute(self, path):
         if os.path.exists(path):
-            pyful.message.error("Error: File exist - %s" % path)
+            core.message.error("Error: File exist - %s" % path)
             return
 
         try:
             os.renames(self.path, path)
         except Exception as e:
-            pyful.message.exception(e)
-        pyful.filer.workspace.all_reload()
+            core.message.exception(e)
+        core.filer.workspace.all_reload()
 
 class Replace(object):
     default = []
@@ -438,21 +438,21 @@ class Replace(object):
     def execute(self, pattern):
         if not pattern and not self.pattern and self.default:
             filectrl.replace(self.default[0], self.default[1])
-            pyful.filer.dir.mark_clear()
-            pyful.filer.workspace.all_reload()
+            core.filer.dir.mark_clear()
+            core.filer.workspace.all_reload()
         elif self.pattern is None:
             try:
                 self.pattern = re.compile(util.unistr(pattern))
             except Exception:
-                return pyful.message.error("Argument error: Can't complile `%s'" % pattern)
-            pyful.cmdline.restart("")
+                return core.message.error("Argument error: Can't complile `%s'" % pattern)
+            core.cmdline.restart("")
         else:
             filectrl.replace(self.pattern, pattern)
             Replace.default[:] = []
             Replace.default.append(self.pattern)
             Replace.default.append(pattern)
-            pyful.filer.dir.mark_clear()
-            pyful.filer.workspace.all_reload()
+            core.filer.dir.mark_clear()
+            core.filer.workspace.all_reload()
 
 class Symlink(object):
     def __init__(self):
@@ -460,7 +460,7 @@ class Symlink(object):
 
     @property
     def prompt(self):
-        if pyful.filer.dir.ismark():
+        if core.filer.dir.ismark():
             return "Symlink mark files to:"
         elif self.src:
             return "Symlink from `%s' to:" % self.src
@@ -473,20 +473,20 @@ class Symlink(object):
         return comp.comp_files()
 
     def execute(self, path):
-        if pyful.filer.dir.ismark():
+        if core.filer.dir.ismark():
             if not path.endswith(os.sep) and not os.path.isdir(path):
-                pyful.message.error("Symlink error: Destination is not directory")
+                core.message.error("Symlink error: Destination is not directory")
                 return
-            for f in pyful.filer.dir.get_mark_files():
+            for f in core.filer.dir.get_mark_files():
                 dst = os.path.join(path, os.path.basename(f))
                 filectrl.symlink(f, dst)
-            pyful.filer.workspace.all_reload()
+            core.filer.workspace.all_reload()
         elif self.src is None:
             self.src = path
-            pyful.cmdline.restart(pyful.filer.workspace.nextdir.path)
+            core.cmdline.restart(core.filer.workspace.nextdir.path)
         else:
             filectrl.symlink(self.src, path)
-            pyful.filer.workspace.all_reload()
+            core.filer.workspace.all_reload()
 
 class TrashBox(object):
     prompt = "Trashbox:"
@@ -495,14 +495,14 @@ class TrashBox(object):
         return comp.comp_dirs()
 
     def execute(self, path):
-        trashbox = os.path.expanduser(pyful.environs['TRASHBOX'])
-        msg = path.replace(pyful.filer.dir.path, "")
-        ret = pyful.message.confirm("Move `%s' to trashbox? " % msg, ["No", "Yes"])
+        trashbox = os.path.expanduser(core.environs['TRASHBOX'])
+        msg = path.replace(core.filer.dir.path, "")
+        ret = core.message.confirm("Move `%s' to trashbox? " % msg, ["No", "Yes"])
         if ret == "No" or ret is None:
             return
 
         filectrl.move(path, trashbox)
-        pyful.filer.workspace.all_reload()
+        core.filer.workspace.all_reload()
 
 class Utime(object):
     def __init__(self):
@@ -548,16 +548,16 @@ class Utime(object):
             if os.path.exists(st):
                 self.path = st
                 self.timesec = time.localtime(os.stat(self.path).st_mtime)
-                pyful.cmdline.restart("")
+                core.cmdline.restart("")
             else:
-                return pyful.message.error("%s doesn't exist." % st)
+                return core.message.error("%s doesn't exist." % st)
 
         elif len(self.sttime) == 0:
             if st == "":
                 self.sttime.append(self.timesec[0])
             else:
                 self.sttime.append(int(st))
-            pyful.cmdline.restart("")
+            core.cmdline.restart("")
         elif len(self.sttime) == 1:
             if st == "":
                 self.sttime.append(self.timesec[1])
@@ -565,7 +565,7 @@ class Utime(object):
                 self.sttime.append(int(st))
             else:
                 self.sttime.append(self.timesec[1])
-            pyful.cmdline.restart("")
+            core.cmdline.restart("")
         elif len(self.sttime) == 2:
             if st == "":
                 self.sttime.append(self.timesec[2])
@@ -573,7 +573,7 @@ class Utime(object):
                 self.sttime.append(int(st))
             else:
                 self.sttime.append(self.timesec[2])
-            pyful.cmdline.restart("")
+            core.cmdline.restart("")
         elif len(self.sttime) == 3:
             if st == "":
                 self.sttime.append(self.timesec[3])
@@ -581,7 +581,7 @@ class Utime(object):
                 self.sttime.append(int(st))
             else:
                 self.sttime.append(self.timesec[3])
-            pyful.cmdline.restart("")
+            core.cmdline.restart("")
         elif len(self.sttime) == 4:
             if st == "":
                 self.sttime.append(self.timesec[4])
@@ -589,7 +589,7 @@ class Utime(object):
                 self.sttime.append(int(st))
             else:
                 self.sttime.append(self.timesec[4])
-            pyful.cmdline.restart("")
+            core.cmdline.restart("")
         elif len(self.sttime) == 5:
             if st == "":
                 self.sttime.append(self.timesec[5])
@@ -603,8 +603,8 @@ class Utime(object):
                 atime = mtime = time.mktime(tuple(self.sttime))
                 os.utime(self.path, (atime, mtime))
             except Exception as e:
-                pyful.message.error(str(e))
-            pyful.filer.workspace.all_reload()
+                core.message.error(str(e))
+            core.filer.workspace.all_reload()
 
 class Tar(object):
     def __init__(self, tarmode, each=False):
@@ -615,7 +615,7 @@ class Tar(object):
 
     @property
     def prompt(self):
-        if pyful.filer.dir.ismark() or self.each:
+        if core.filer.dir.ismark() or self.each:
             if self.wrap is None:
                 return 'Mark files wrap is:'
             else:
@@ -632,29 +632,29 @@ class Tar(object):
         return comp.comp_files()
 
     def execute(self, path):
-        if pyful.filer.dir.ismark() or self.each:
+        if core.filer.dir.ismark() or self.each:
             if self.wrap is None:
                 self.wrap = path
                 if self.each:
-                    pyful.cmdline.restart(pyful.filer.workspace.nextdir.path)
+                    core.cmdline.restart(core.filer.workspace.nextdir.path)
                 else:
                     ext = filectrl.TarThread.tarexts[self.tarmode]
-                    tarpath = os.path.join(pyful.filer.workspace.nextdir.path, self.wrap + ext)
-                    pyful.cmdline.restart(tarpath, -len(ext))
+                    tarpath = os.path.join(core.filer.workspace.nextdir.path, self.wrap + ext)
+                    core.cmdline.restart(tarpath, -len(ext))
             else:
                 if self.each:
-                    filectrl.tareach(pyful.filer.dir.get_mark_files(), path, self.tarmode, self.wrap)
+                    filectrl.tareach(core.filer.dir.get_mark_files(), path, self.tarmode, self.wrap)
                 else:
-                    filectrl.tar(pyful.filer.dir.get_mark_files(), path, self.tarmode, self.wrap)
-                pyful.filer.workspace.all_reload()
+                    filectrl.tar(core.filer.dir.get_mark_files(), path, self.tarmode, self.wrap)
+                core.filer.workspace.all_reload()
         elif self.src is None:
             self.src = path
             ext = filectrl.TarThread.tarexts[self.tarmode]
-            tarpath = os.path.join(pyful.filer.workspace.nextdir.path, self.src + ext)
-            pyful.cmdline.restart(tarpath, -len(ext))
+            tarpath = os.path.join(core.filer.workspace.nextdir.path, self.src + ext)
+            core.cmdline.restart(tarpath, -len(ext))
         else:
             filectrl.tar(self.src, path, self.tarmode)
-            pyful.filer.workspace.all_reload()
+            core.filer.workspace.all_reload()
 
 class UnTar(object):
     def __init__(self):
@@ -662,7 +662,7 @@ class UnTar(object):
 
     @property
     def prompt(self):
-        if pyful.filer.dir.ismark():
+        if core.filer.dir.ismark():
             return 'Mark files untar to:'
         elif self.src is None:
             return 'Untar from:'
@@ -673,15 +673,15 @@ class UnTar(object):
         return comp.comp_files()
 
     def execute(self, path):
-        if pyful.filer.dir.ismark():
-            filectrl.untar(pyful.filer.dir.get_mark_files(), path)
-            pyful.filer.workspace.all_reload()
+        if core.filer.dir.ismark():
+            filectrl.untar(core.filer.dir.get_mark_files(), path)
+            core.filer.workspace.all_reload()
         elif self.src is None:
             self.src = path
-            pyful.cmdline.restart(pyful.filer.workspace.nextdir.path)
+            core.cmdline.restart(core.filer.workspace.nextdir.path)
         else:
             filectrl.untar(self.src, path)
-            pyful.filer.workspace.all_reload()
+            core.filer.workspace.all_reload()
 
 class WebSearch(object):
     def __init__(self, engine='Google'):
@@ -704,7 +704,7 @@ class WebSearch(object):
         try:
             webbrowser.open(search, new=2)
         except Exception as e:
-            pyful.message.exception(e)
+            core.message.exception(e)
 
 class Zip(object):
     def __init__(self, each=False):
@@ -714,7 +714,7 @@ class Zip(object):
 
     @property
     def prompt(self):
-        if pyful.filer.dir.ismark() or self.each:
+        if core.filer.dir.ismark() or self.each:
             if self.wrap is None:
                 return 'Mark files wrap is:'
             else:
@@ -731,29 +731,29 @@ class Zip(object):
         return comp.comp_files()
 
     def execute(self, path):
-        if pyful.filer.dir.ismark() or self.each:
+        if core.filer.dir.ismark() or self.each:
             if self.wrap is None:
                 self.wrap = path
                 if self.each:
-                    pyful.cmdline.restart(pyful.filer.workspace.nextdir.path)
+                    core.cmdline.restart(core.filer.workspace.nextdir.path)
                 else:
                     ext = '.zip'
-                    zippath = os.path.join(pyful.filer.workspace.nextdir.path, self.wrap + ext)
-                    pyful.cmdline.restart(zippath, -len(ext))
+                    zippath = os.path.join(core.filer.workspace.nextdir.path, self.wrap + ext)
+                    core.cmdline.restart(zippath, -len(ext))
             else:
                 if self.each:
-                    filectrl.zipeach(pyful.filer.dir.get_mark_files(), path, self.wrap)
+                    filectrl.zipeach(core.filer.dir.get_mark_files(), path, self.wrap)
                 else:
-                    filectrl.zip(pyful.filer.dir.get_mark_files(), path, self.wrap)
-                pyful.filer.workspace.all_reload()
+                    filectrl.zip(core.filer.dir.get_mark_files(), path, self.wrap)
+                core.filer.workspace.all_reload()
         elif self.src is None:
             self.src = path
             ext = '.zip'
-            zippath = os.path.join(pyful.filer.workspace.nextdir.path, self.src + ext)
-            pyful.cmdline.restart(zippath, -len(ext))
+            zippath = os.path.join(core.filer.workspace.nextdir.path, self.src + ext)
+            core.cmdline.restart(zippath, -len(ext))
         else:
             filectrl.zip(self.src, path)
-            pyful.filer.workspace.all_reload()
+            core.filer.workspace.all_reload()
 
 class UnZip(object):
     def __init__(self):
@@ -761,7 +761,7 @@ class UnZip(object):
 
     @property
     def prompt(self):
-        if pyful.filer.dir.ismark():
+        if core.filer.dir.ismark():
             return 'Mark files unzip to:'
         elif self.src is None:
             return 'Unzip from:'
@@ -772,15 +772,15 @@ class UnZip(object):
         return comp.comp_files()
 
     def execute(self, path):
-        if pyful.filer.dir.ismark():
-            filectrl.unzip(pyful.filer.dir.get_mark_files(), path)
-            pyful.filer.workspace.all_reload()
+        if core.filer.dir.ismark():
+            filectrl.unzip(core.filer.dir.get_mark_files(), path)
+            core.filer.workspace.all_reload()
         elif self.src is None:
             self.src = path
-            pyful.cmdline.restart(pyful.filer.workspace.nextdir.path)
+            core.cmdline.restart(core.filer.workspace.nextdir.path)
         else:
             filectrl.unzip(self.src, path)
-            pyful.filer.workspace.all_reload()
+            core.filer.workspace.all_reload()
 
 class ZoomInfoBox(object):
     prompt = 'Zoom infobox:'
@@ -789,9 +789,9 @@ class ZoomInfoBox(object):
         return [str(x*10) for x in range(-10, 11)]
 
     def execute(self, zoom):
-        from pyfulib import ui
+        from pyful import ui
         try:
             zoom = int(zoom)
             ui.zoom_infobox(zoom)
         except ValueError as e:
-            pyful.message.exception(e)
+            core.message.exception(e)

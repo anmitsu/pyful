@@ -22,8 +22,13 @@
 import os
 import sys
 
+if __name__ == '__main__':
+    libdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if os.path.exists(os.path.join(libdir, "pyful")):
+        sys.path.insert(0, libdir)
+
 from optparse import OptionParser
-from pyfulib.version import __version__
+from pyful.version import __version__
 
 def option_parse():
     usage = "usage: %prog [options]"
@@ -43,7 +48,7 @@ def option_parse():
         sys.exit(0)
 
     if options.enter:
-        from pyfulib import util
+        from pyful import util
         util.wait_restore()
         sys.exit(0)
 
@@ -63,29 +68,29 @@ locale.setlocale(locale.LC_ALL, "")
 imp.reload(sys)
 sys.setdefaultencoding("utf-8")
 
-from pyfulib import core
+from pyful.core import Pyful
 
 if __name__ == '__main__':
     try:
-        pyful = core.Pyful()
-        pyful.init_instance()
+        core = Pyful()
+        core.init_instance()
 
-        pyful.setsignal()
-        pyful.binpath = os.path.abspath(__file__)
+        core.setsignal()
+        core.binpath = os.path.abspath(__file__)
 
-        pyful.load_rcfile(__options__.config)
-        pyful.start_curses()
-        pyful.init_function()
+        core.load_rcfile(__options__.config)
+        core.start_curses()
+        core.init_function()
 
-        pyful.stdscr.refresh()
-        pyful.view()
-        pyful.started = True
+        core.stdscr.refresh()
+        core.view()
+        core.started = True
 
-        pyful.main_loop()
+        core.main_loop()
     except SystemExit:
-        pyful.create_config()
-        if pyful.started:
-            pyful.exit_function()
+        core.create_config()
+        if core.started:
+            core.exit_function()
     finally:
-        if pyful.stdscr:
-            pyful.stdscr.destroy()
+        if core.stdscr:
+            core.stdscr.destroy()

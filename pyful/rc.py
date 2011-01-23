@@ -4,29 +4,32 @@
 # This file is executed in the local namespace and not generate module.
 #
 
-from pyfulib.core import Pyful
-from pyfulib.command import commands
-from pyfulib.filer import Workspace, Directory, Finder, FileStat
-from pyfulib import ui
-from pyfulib import mode
-from pyfulib import process
-from pyfulib.keymap import *
+from pyful.core import Pyful
+from pyful.command import commands
+from pyful.filer import Workspace, Directory, Finder, FileStat
+from pyful import ui
+from pyful import mode
+from pyful import process
+from pyful.keymap import *
 
 # Get PYthon File management UtiLity.
-pyful = Pyful()
+core = Pyful()
+filer = Pyful().filer
+cmdline = Pyful().cmdline
+menu = Pyful().menu
 
-# Set environments of pyful.
-pyful.environs['EDITOR'] = 'vim'
-pyful.environs['PAGER'] = 'less'
-pyful.environs['TRASHBOX'] = '~/.pyful/trashbox'
+# Set environments of core.
+core.environs['EDITOR'] = 'vim'
+core.environs['PAGER'] = 'less'
+core.environs['TRASHBOX'] = '~/.pyful/trashbox'
 
 # Set proc attributes.
 process.Process.shell = ('/bin/bash', '-c')
 process.Process.terminal_emulator = ('x-terminal-emulator', '-e')
 
 # Set cmdline attributes.
-pyful.cmdline.history.maxsave = 10000
-pyful.cmdline.clipboard.maxsave = 100
+cmdline.history.maxsave = 10000
+cmdline.clipboard.maxsave = 100
 
 # Set the mode of mkdir and newfile in octal number.
 mode.Mkdir.dirmode = 0o755
@@ -103,18 +106,19 @@ ui.InfoBox.zoom = 0
 # Registration of program initialization.
 #
 # The first argument of `atinit' is the function object
-# called when initializing pyful.
+# called when initializing core.
 # And the other arguments of `atinit' are a arguments of it.
 #
 # For example, add the following command when
 # you load the history of `replace' in cmdline:
-# >>> pyful.atinit(pyful.cmdline.history.loadfile, '~/.pyful/history/replace', 'Replace')
+# >>> core.atinit(cmdline.history.loadfile, '~/.pyful/history/replace', 'Replace')
 #
-pyful.atinit(pyful.filer.loadfile, '~/.pyful/info')
-pyful.atinit(pyful.cmdline.clipboard.loadfile, '~/.pyful/clipboard')
-pyful.atinit(pyful.cmdline.history.loadfile, '~/.pyful/history/shell', 'Shell')
-pyful.atinit(pyful.cmdline.history.loadfile, '~/.pyful/history/eval', 'Eval')
-pyful.atinit(pyful.cmdline.history.loadfile, '~/.pyful/history/mx', 'Mx')
+core.atinit(filer.loadfile, '~/.pyful/info')
+core.atinit(cmdline.clipboard.loadfile, '~/.pyful/clipboard')
+core.atinit(cmdline.history.loadfile, '~/.pyful/history/shell', 'Shell')
+core.atinit(cmdline.history.loadfile, '~/.pyful/history/eval', 'Eval')
+core.atinit(cmdline.history.loadfile, '~/.pyful/history/replace', 'Replace')
+core.atinit(cmdline.history.loadfile, '~/.pyful/history/mx', 'Mx')
 
 # Registration of program termination.
 #
@@ -122,15 +126,16 @@ pyful.atinit(pyful.cmdline.history.loadfile, '~/.pyful/history/mx', 'Mx')
 #
 # For example, add the following command when
 # you preserve the history of `replace' in cmdline:
-# >>> pyful.atexit(pyful.cmdline.history.savefile, '~/.pyful/history/replace', 'Replace')
+# >>> core.atexit(cmdline.history.savefile, '~/.pyful/history/replace', 'Replace')
 #
-pyful.atexit(pyful.filer.savefile, '~/.pyful/info')
-pyful.atexit(pyful.cmdline.clipboard.savefile, '~/.pyful/clipboard')
-pyful.atexit(pyful.cmdline.history.savefile, '~/.pyful/history/shell', 'Shell')
-pyful.atexit(pyful.cmdline.history.savefile, '~/.pyful/history/eval', 'Eval')
-pyful.atexit(pyful.cmdline.history.savefile, '~/.pyful/history/mx', 'Mx')
+core.atexit(filer.savefile, '~/.pyful/info')
+core.atexit(cmdline.clipboard.savefile, '~/.pyful/clipboard')
+core.atexit(cmdline.history.savefile, '~/.pyful/history/shell', 'Shell')
+core.atexit(cmdline.history.savefile, '~/.pyful/history/eval', 'Eval')
+core.atexit(cmdline.history.savefile, '~/.pyful/history/mx', 'Mx')
+core.atexit(cmdline.history.savefile, '~/.pyful/history/replace', 'Replace')
 
-# Define the keymap of pyful.
+# Define the keymap of core.
 #
 # A key of the keymap dictionary is the tuple that consist of
 # (meta, key) with the escape sequence and the keymap constant.
@@ -147,48 +152,48 @@ pyful.atexit(pyful.cmdline.history.savefile, '~/.pyful/history/mx', 'Mx')
 #     '.exec' represent the executable file;
 #     '.mark' represent the mark file.
 #
-# See keymap constants from pyfulib.keymap module.
+# See keymap constants from pyful.keymap module.
 #
 myfilerkeymap = {
-    (1, KEY_f        ): lambda: pyful.filer.next_workspace(),
-    (1, KEY_b        ): lambda: pyful.filer.prev_workspace(),
-    (1, KEY_1        ): lambda: pyful.filer.focus_workspace(0),
-    (1, KEY_2        ): lambda: pyful.filer.focus_workspace(1),
-    (1, KEY_3        ): lambda: pyful.filer.focus_workspace(2),
-    (1, KEY_4        ): lambda: pyful.filer.focus_workspace(3),
-    (1, KEY_5        ): lambda: pyful.filer.focus_workspace(4),
-    (1, KEY_F        ): lambda: pyful.filer.swap_workspace_inc(),
-    (1, KEY_B        ): lambda: pyful.filer.swap_workspace_dec(),
-    (1, KEY_EXCLAM   ): lambda: pyful.filer.mvdir_workspace_to(0),
-    (1, KEY_DQUOTE   ): lambda: pyful.filer.mvdir_workspace_to(1),
-    (1, KEY_SHARP    ): lambda: pyful.filer.mvdir_workspace_to(2),
-    (1, KEY_DOLLAR   ): lambda: pyful.filer.mvdir_workspace_to(3),
-    (1, KEY_PERCENT  ): lambda: pyful.filer.mvdir_workspace_to(4),
-    (0, KEY_CTRL_I   ): lambda: pyful.filer.workspace.mvcursor(+1),
-    (0, KEY_CTRL_F   ): lambda: pyful.filer.workspace.mvcursor(+1),
-    (0, KEY_CTRL_B   ): lambda: pyful.filer.workspace.mvcursor(-1),
-    (0, KEY_RIGHT    ): lambda: pyful.filer.workspace.mvcursor(+1),
-    (0, KEY_LEFT     ): lambda: pyful.filer.workspace.mvcursor(-1),
-    (0, KEY_F        ): lambda: pyful.filer.workspace.swap_dir_inc(),
-    (0, KEY_B        ): lambda: pyful.filer.workspace.swap_dir_dec(),
-    (1, KEY_RETURN   ): lambda: pyful.filer.workspace.create_dir(),
-    (1, KEY_C        ): lambda: pyful.filer.workspace.close_dir(),
-    (0, KEY_CTRL_W   ): lambda: pyful.filer.workspace.close_dir(),
-    (0, KEY_CTRL_L   ): lambda: pyful.filer.workspace.all_reload(),
-    (0, KEY_CTRL_N   ): lambda: pyful.filer.dir.mvcursor(+1),
-    (0, KEY_DOWN     ): lambda: pyful.filer.dir.mvcursor(+1),
-    (0, KEY_CTRL_P   ): lambda: pyful.filer.dir.mvcursor(-1),
-    (0, KEY_UP       ): lambda: pyful.filer.dir.mvcursor(-1),
-    (0, KEY_CTRL_D   ): lambda: pyful.filer.dir.mvcursor(+5),
-    (0, KEY_CTRL_U   ): lambda: pyful.filer.dir.mvcursor(-5),
-    (0, KEY_CTRL_V   ): lambda: pyful.filer.dir.pagedown(),
-    (1, KEY_v        ): lambda: pyful.filer.dir.pageup(),
-    (0, KEY_CTRL_A   ): lambda: pyful.filer.dir.settop(),
-    (1, KEY_LSS      ): lambda: pyful.filer.dir.settop(),
-    (0, KEY_CTRL_E   ): lambda: pyful.filer.dir.setbottom(),
-    (1, KEY_GTR      ): lambda: pyful.filer.dir.setbottom(),
-    (0, KEY_CTRL_G   ): lambda: pyful.filer.dir.reset(),
-    (0, KEY_ESCAPE   ): lambda: pyful.filer.dir.reset(),
+    (1, KEY_f        ): lambda: filer.next_workspace(),
+    (1, KEY_b        ): lambda: filer.prev_workspace(),
+    (1, KEY_1        ): lambda: filer.focus_workspace(0),
+    (1, KEY_2        ): lambda: filer.focus_workspace(1),
+    (1, KEY_3        ): lambda: filer.focus_workspace(2),
+    (1, KEY_4        ): lambda: filer.focus_workspace(3),
+    (1, KEY_5        ): lambda: filer.focus_workspace(4),
+    (1, KEY_F        ): lambda: filer.swap_workspace_inc(),
+    (1, KEY_B        ): lambda: filer.swap_workspace_dec(),
+    (1, KEY_EXCLAM   ): lambda: filer.mvdir_workspace_to(0),
+    (1, KEY_DQUOTE   ): lambda: filer.mvdir_workspace_to(1),
+    (1, KEY_SHARP    ): lambda: filer.mvdir_workspace_to(2),
+    (1, KEY_DOLLAR   ): lambda: filer.mvdir_workspace_to(3),
+    (1, KEY_PERCENT  ): lambda: filer.mvdir_workspace_to(4),
+    (0, KEY_CTRL_I   ): lambda: filer.workspace.mvcursor(+1),
+    (0, KEY_CTRL_F   ): lambda: filer.workspace.mvcursor(+1),
+    (0, KEY_CTRL_B   ): lambda: filer.workspace.mvcursor(-1),
+    (0, KEY_RIGHT    ): lambda: filer.workspace.mvcursor(+1),
+    (0, KEY_LEFT     ): lambda: filer.workspace.mvcursor(-1),
+    (0, KEY_F        ): lambda: filer.workspace.swap_dir_inc(),
+    (0, KEY_B        ): lambda: filer.workspace.swap_dir_dec(),
+    (1, KEY_RETURN   ): lambda: filer.workspace.create_dir(),
+    (1, KEY_C        ): lambda: filer.workspace.close_dir(),
+    (0, KEY_CTRL_W   ): lambda: filer.workspace.close_dir(),
+    (0, KEY_CTRL_L   ): lambda: filer.workspace.all_reload(),
+    (0, KEY_CTRL_N   ): lambda: filer.dir.mvcursor(+1),
+    (0, KEY_DOWN     ): lambda: filer.dir.mvcursor(+1),
+    (0, KEY_CTRL_P   ): lambda: filer.dir.mvcursor(-1),
+    (0, KEY_UP       ): lambda: filer.dir.mvcursor(-1),
+    (0, KEY_CTRL_D   ): lambda: filer.dir.mvcursor(+5),
+    (0, KEY_CTRL_U   ): lambda: filer.dir.mvcursor(-5),
+    (0, KEY_CTRL_V   ): lambda: filer.dir.pagedown(),
+    (1, KEY_v        ): lambda: filer.dir.pageup(),
+    (0, KEY_CTRL_A   ): lambda: filer.dir.settop(),
+    (1, KEY_LSS      ): lambda: filer.dir.settop(),
+    (0, KEY_CTRL_E   ): lambda: filer.dir.setbottom(),
+    (1, KEY_GTR      ): lambda: filer.dir.setbottom(),
+    (0, KEY_CTRL_G   ): lambda: filer.dir.reset(),
+    (0, KEY_ESCAPE   ): lambda: filer.dir.reset(),
     (1, KEY_w        ): commands['switch_workspace'],
     (1, KEY_h        ): commands['chdir_backward'],
     (1, KEY_l        ): commands['chdir_forward'],
@@ -238,134 +243,134 @@ myfilerkeymap = {
     }
 
 myfinderkeymap = {
-    (1, KEY_n        ): lambda: pyful.filer.finder.history_select(-1),
-    (1, KEY_p        ): lambda: pyful.filer.finder.history_select(+1),
-    (0, KEY_CTRL_G   ): lambda: pyful.filer.finder.finish(),
-    (0, KEY_ESCAPE   ): lambda: pyful.filer.finder.finish(),
-    (0, KEY_CTRL_C   ): lambda: pyful.filer.finder.finish(),
-    (0, KEY_CTRL_H   ): lambda: pyful.filer.finder.delete_backward_char(),
-    (0, KEY_BACKSPACE): lambda: pyful.filer.finder.delete_backward_char(),
+    (1, KEY_n        ): lambda: filer.finder.history_select(-1),
+    (1, KEY_p        ): lambda: filer.finder.history_select(+1),
+    (0, KEY_CTRL_G   ): lambda: filer.finder.finish(),
+    (0, KEY_ESCAPE   ): lambda: filer.finder.finish(),
+    (0, KEY_CTRL_C   ): lambda: filer.finder.finish(),
+    (0, KEY_CTRL_H   ): lambda: filer.finder.delete_backward_char(),
+    (0, KEY_BACKSPACE): lambda: filer.finder.delete_backward_char(),
     }
 
 mycmdlinekeymap = {
-    (0, KEY_CTRL_F   ): lambda: pyful.cmdline.forward_char(),
-    (0, KEY_RIGHT    ): lambda: pyful.cmdline.forward_char(),
-    (0, KEY_CTRL_B   ): lambda: pyful.cmdline.backward_char(),
-    (0, KEY_LEFT     ): lambda: pyful.cmdline.backward_char(),
-    (1, KEY_f        ): lambda: pyful.cmdline.forward_word(),
-    (1, KEY_b        ): lambda: pyful.cmdline.backward_word(),
-    (0, KEY_CTRL_D   ): lambda: pyful.cmdline.delete_char(),
-    (0, KEY_CTRL_H   ): lambda: pyful.cmdline.delete_backward_char(),
-    (0, KEY_BACKSPACE): lambda: pyful.cmdline.delete_backward_char(),
-    (1, KEY_d        ): lambda: pyful.cmdline.delete_forward_word(),
-    (1, KEY_h        ): lambda: pyful.cmdline.delete_backward_word(),
-    (0, KEY_CTRL_W   ): lambda: pyful.cmdline.delete_backward_word(),
-    (0, KEY_CTRL_K   ): lambda: pyful.cmdline.kill_line(),
-    (0, KEY_CTRL_U   ): lambda: pyful.cmdline.kill_line_all(),
-    (0, KEY_CTRL_A   ): lambda: pyful.cmdline.settop(),
-    (0, KEY_CTRL_E   ): lambda: pyful.cmdline.setbottom(),
-    (0, KEY_CTRL_G   ): lambda: pyful.cmdline.escape(),
-    (0, KEY_CTRL_C   ): lambda: pyful.cmdline.escape(),
-    (0, KEY_ESCAPE   ): lambda: pyful.cmdline.escape(),
-    (0, KEY_RETURN   ): lambda: pyful.cmdline.execute(),
-    (1, KEY_m        ): lambda: pyful.cmdline.expandmacro(),
-    (0, KEY_CTRL_Y   ): lambda: pyful.cmdline.clipboard.paste(),
-    (1, KEY_y        ): lambda: pyful.cmdline.clipboard.start(),
-    (0, KEY_CTRL_I   ): lambda: pyful.cmdline.completion.start(),
-    (1, KEY_j        ): lambda: pyful.cmdline.output.infoarea(),
-    (0, KEY_CTRL_N   ): lambda: pyful.cmdline.history.mvcursor(+1),
-    (0, KEY_DOWN     ): lambda: pyful.cmdline.history.mvcursor(+1),
-    (0, KEY_CTRL_P   ): lambda: pyful.cmdline.history.mvcursor(-1),
-    (0, KEY_UP       ): lambda: pyful.cmdline.history.mvcursor(-1),
-    (0, KEY_CTRL_V   ): lambda: pyful.cmdline.history.pagedown(),
-    (1, KEY_v        ): lambda: pyful.cmdline.history.pageup(),
-    (1, KEY_LSS      ): lambda: pyful.cmdline.history.settop(),
-    (1, KEY_GTR      ): lambda: pyful.cmdline.history.setbottom(),
-    (0, KEY_CTRL_X   ): lambda: pyful.cmdline.history.delete(),
+    (0, KEY_CTRL_F   ): lambda: cmdline.forward_char(),
+    (0, KEY_RIGHT    ): lambda: cmdline.forward_char(),
+    (0, KEY_CTRL_B   ): lambda: cmdline.backward_char(),
+    (0, KEY_LEFT     ): lambda: cmdline.backward_char(),
+    (1, KEY_f        ): lambda: cmdline.forward_word(),
+    (1, KEY_b        ): lambda: cmdline.backward_word(),
+    (0, KEY_CTRL_D   ): lambda: cmdline.delete_char(),
+    (0, KEY_CTRL_H   ): lambda: cmdline.delete_backward_char(),
+    (0, KEY_BACKSPACE): lambda: cmdline.delete_backward_char(),
+    (1, KEY_d        ): lambda: cmdline.delete_forward_word(),
+    (1, KEY_h        ): lambda: cmdline.delete_backward_word(),
+    (0, KEY_CTRL_W   ): lambda: cmdline.delete_backward_word(),
+    (0, KEY_CTRL_K   ): lambda: cmdline.kill_line(),
+    (0, KEY_CTRL_U   ): lambda: cmdline.kill_line_all(),
+    (0, KEY_CTRL_A   ): lambda: cmdline.settop(),
+    (0, KEY_CTRL_E   ): lambda: cmdline.setbottom(),
+    (0, KEY_CTRL_G   ): lambda: cmdline.escape(),
+    (0, KEY_CTRL_C   ): lambda: cmdline.escape(),
+    (0, KEY_ESCAPE   ): lambda: cmdline.escape(),
+    (0, KEY_RETURN   ): lambda: cmdline.execute(),
+    (1, KEY_m        ): lambda: cmdline.expandmacro(),
+    (0, KEY_CTRL_Y   ): lambda: cmdline.clipboard.paste(),
+    (1, KEY_y        ): lambda: cmdline.clipboard.start(),
+    (0, KEY_CTRL_I   ): lambda: cmdline.completion.start(),
+    (1, KEY_j        ): lambda: cmdline.output.infoarea(),
+    (0, KEY_CTRL_N   ): lambda: cmdline.history.mvcursor(+1),
+    (0, KEY_DOWN     ): lambda: cmdline.history.mvcursor(+1),
+    (0, KEY_CTRL_P   ): lambda: cmdline.history.mvcursor(-1),
+    (0, KEY_UP       ): lambda: cmdline.history.mvcursor(-1),
+    (0, KEY_CTRL_V   ): lambda: cmdline.history.pagedown(),
+    (1, KEY_v        ): lambda: cmdline.history.pageup(),
+    (1, KEY_LSS      ): lambda: cmdline.history.settop(),
+    (1, KEY_GTR      ): lambda: cmdline.history.setbottom(),
+    (0, KEY_CTRL_X   ): lambda: cmdline.history.delete(),
     (1, KEY_PLUS     ): commands['zoom_in_infobox'],
     (1, KEY_MINUS    ): commands['zoom_out_infobox'],
     (1, KEY_EQUAL    ): commands['zoom_normal_infobox'],
     }
 
 myclipboardkeymap = {
-    (0, KEY_CTRL_N): lambda: pyful.cmdline.clipboard.mvcursor(1),
-    (0, KEY_DOWN  ): lambda: pyful.cmdline.clipboard.mvcursor(1),
-    (0, KEY_CTRL_V): lambda: pyful.cmdline.clipboard.pagedown(),
-    (0, KEY_CTRL_D): lambda: pyful.cmdline.clipboard.pagedown(),
-    (0, KEY_CTRL_P): lambda: pyful.cmdline.clipboard.mvcursor(-1),
-    (0, KEY_UP    ): lambda: pyful.cmdline.clipboard.mvcursor(-1),
-    (1, KEY_v     ): lambda: pyful.cmdline.clipboard.pageup(),
-    (0, KEY_CTRL_U): lambda: pyful.cmdline.clipboard.pageup(),
-    (0, KEY_CTRL_X): lambda: pyful.cmdline.clipboard.delete(),
-    (0, KEY_CTRL_G): lambda: pyful.cmdline.clipboard.finish(),
-    (0, KEY_CTRL_C): lambda: pyful.cmdline.clipboard.finish(),
-    (0, KEY_ESCAPE): lambda: pyful.cmdline.clipboard.finish(),
-    (0, KEY_RETURN): lambda: pyful.cmdline.clipboard.insert(),
+    (0, KEY_CTRL_N): lambda: cmdline.clipboard.mvcursor(1),
+    (0, KEY_DOWN  ): lambda: cmdline.clipboard.mvcursor(1),
+    (0, KEY_CTRL_V): lambda: cmdline.clipboard.pagedown(),
+    (0, KEY_CTRL_D): lambda: cmdline.clipboard.pagedown(),
+    (0, KEY_CTRL_P): lambda: cmdline.clipboard.mvcursor(-1),
+    (0, KEY_UP    ): lambda: cmdline.clipboard.mvcursor(-1),
+    (1, KEY_v     ): lambda: cmdline.clipboard.pageup(),
+    (0, KEY_CTRL_U): lambda: cmdline.clipboard.pageup(),
+    (0, KEY_CTRL_X): lambda: cmdline.clipboard.delete(),
+    (0, KEY_CTRL_G): lambda: cmdline.clipboard.finish(),
+    (0, KEY_CTRL_C): lambda: cmdline.clipboard.finish(),
+    (0, KEY_ESCAPE): lambda: cmdline.clipboard.finish(),
+    (0, KEY_RETURN): lambda: cmdline.clipboard.insert(),
     (1, KEY_PLUS     ): commands['zoom_in_infobox'],
     (1, KEY_MINUS    ): commands['zoom_out_infobox'],
     (1, KEY_EQUAL    ): commands['zoom_normal_infobox'],
     }
 
 mycompletionkeymap = {
-    (0, KEY_CTRL_N): lambda: pyful.cmdline.completion.mvcursor(+pyful.cmdline.completion.maxrow),
-    (0, KEY_DOWN  ): lambda: pyful.cmdline.completion.mvcursor(+pyful.cmdline.completion.maxrow),
-    (0, KEY_CTRL_P): lambda: pyful.cmdline.completion.mvcursor(-pyful.cmdline.completion.maxrow),
-    (0, KEY_UP    ): lambda: pyful.cmdline.completion.mvcursor(-pyful.cmdline.completion.maxrow),
-    (0, KEY_CTRL_I): lambda: pyful.cmdline.completion.mvcursor(+1),
-    (0, KEY_CTRL_F): lambda: pyful.cmdline.completion.mvcursor(+1),
-    (0, KEY_RIGHT ): lambda: pyful.cmdline.completion.mvcursor(+1),
-    (0, KEY_CTRL_B): lambda: pyful.cmdline.completion.mvcursor(-1),
-    (0, KEY_LEFT  ): lambda: pyful.cmdline.completion.mvcursor(-1),
-    (0, KEY_CTRL_G): lambda: pyful.cmdline.completion.finish(),
-    (0, KEY_CTRL_C): lambda: pyful.cmdline.completion.finish(),
-    (0, KEY_ESCAPE): lambda: pyful.cmdline.completion.finish(),
-    (0, KEY_RETURN): lambda: pyful.cmdline.completion.insert(),
+    (0, KEY_CTRL_N): lambda: cmdline.completion.mvcursor(+cmdline.completion.maxrow),
+    (0, KEY_DOWN  ): lambda: cmdline.completion.mvcursor(+cmdline.completion.maxrow),
+    (0, KEY_CTRL_P): lambda: cmdline.completion.mvcursor(-cmdline.completion.maxrow),
+    (0, KEY_UP    ): lambda: cmdline.completion.mvcursor(-cmdline.completion.maxrow),
+    (0, KEY_CTRL_I): lambda: cmdline.completion.mvcursor(+1),
+    (0, KEY_CTRL_F): lambda: cmdline.completion.mvcursor(+1),
+    (0, KEY_RIGHT ): lambda: cmdline.completion.mvcursor(+1),
+    (0, KEY_CTRL_B): lambda: cmdline.completion.mvcursor(-1),
+    (0, KEY_LEFT  ): lambda: cmdline.completion.mvcursor(-1),
+    (0, KEY_CTRL_G): lambda: cmdline.completion.finish(),
+    (0, KEY_CTRL_C): lambda: cmdline.completion.finish(),
+    (0, KEY_ESCAPE): lambda: cmdline.completion.finish(),
+    (0, KEY_RETURN): lambda: cmdline.completion.insert(),
     (1, KEY_PLUS     ): commands['zoom_in_infobox'],
     (1, KEY_MINUS    ): commands['zoom_out_infobox'],
     (1, KEY_EQUAL    ): commands['zoom_normal_infobox'],
     }
 
 myoutputkeymap = {
-    (0, KEY_CTRL_N): lambda: pyful.cmdline.output.mvcursor(1),
-    (0, KEY_DOWN  ): lambda: pyful.cmdline.output.mvcursor(1),
-    (0, KEY_CTRL_V): lambda: pyful.cmdline.output.pagedown(),
-    (0, KEY_CTRL_D): lambda: pyful.cmdline.output.pagedown(),
-    (0, KEY_CTRL_P): lambda: pyful.cmdline.output.mvcursor(-1),
-    (0, KEY_UP    ): lambda: pyful.cmdline.output.mvcursor(-1),
-    (1, KEY_v     ): lambda: pyful.cmdline.output.pageup(),
-    (0, KEY_CTRL_U): lambda: pyful.cmdline.output.pageup(),
-    (0, KEY_CTRL_G): lambda: pyful.cmdline.output.finish(),
-    (0, KEY_CTRL_C): lambda: pyful.cmdline.output.finish(),
-    (0, KEY_ESCAPE): lambda: pyful.cmdline.output.finish(),
-    (0, KEY_RETURN): lambda: pyful.cmdline.output.edit(),
+    (0, KEY_CTRL_N): lambda: cmdline.output.mvcursor(1),
+    (0, KEY_DOWN  ): lambda: cmdline.output.mvcursor(1),
+    (0, KEY_CTRL_V): lambda: cmdline.output.pagedown(),
+    (0, KEY_CTRL_D): lambda: cmdline.output.pagedown(),
+    (0, KEY_CTRL_P): lambda: cmdline.output.mvcursor(-1),
+    (0, KEY_UP    ): lambda: cmdline.output.mvcursor(-1),
+    (1, KEY_v     ): lambda: cmdline.output.pageup(),
+    (0, KEY_CTRL_U): lambda: cmdline.output.pageup(),
+    (0, KEY_CTRL_G): lambda: cmdline.output.finish(),
+    (0, KEY_CTRL_C): lambda: cmdline.output.finish(),
+    (0, KEY_ESCAPE): lambda: cmdline.output.finish(),
+    (0, KEY_RETURN): lambda: cmdline.output.edit(),
     (1, KEY_PLUS     ): commands['zoom_in_infobox'],
     (1, KEY_MINUS    ): commands['zoom_out_infobox'],
     (1, KEY_EQUAL    ): commands['zoom_normal_infobox'],
     }
 
 mymenukeymap = {
-    (0, KEY_CTRL_N): lambda: pyful.menu.mvcursor(+1),
-    (0, KEY_DOWN  ): lambda: pyful.menu.mvcursor(+1),
-    (0, KEY_CTRL_P): lambda: pyful.menu.mvcursor(-1),
-    (0, KEY_UP    ): lambda: pyful.menu.mvcursor(-1),
-    (0, KEY_CTRL_D): lambda: pyful.menu.mvcursor(+5),
-    (0, KEY_CTRL_V): lambda: pyful.menu.mvcursor(+5),
-    (0, KEY_CTRL_U): lambda: pyful.menu.mvcursor(-5),
-    (1, KEY_v     ): lambda: pyful.menu.mvcursor(-5),
-    (0, KEY_CTRL_G): lambda: pyful.menu.hide(),
-    (0, KEY_CTRL_C): lambda: pyful.menu.hide(),
-    (0, KEY_ESCAPE): lambda: pyful.menu.hide(),
-    (0, KEY_RETURN): lambda: pyful.menu.run(),
+    (0, KEY_CTRL_N): lambda: menu.mvcursor(+1),
+    (0, KEY_DOWN  ): lambda: menu.mvcursor(+1),
+    (0, KEY_CTRL_P): lambda: menu.mvcursor(-1),
+    (0, KEY_UP    ): lambda: menu.mvcursor(-1),
+    (0, KEY_CTRL_D): lambda: menu.mvcursor(+5),
+    (0, KEY_CTRL_V): lambda: menu.mvcursor(+5),
+    (0, KEY_CTRL_U): lambda: menu.mvcursor(-5),
+    (1, KEY_v     ): lambda: menu.mvcursor(-5),
+    (0, KEY_CTRL_G): lambda: menu.hide(),
+    (0, KEY_CTRL_C): lambda: menu.hide(),
+    (0, KEY_ESCAPE): lambda: menu.hide(),
+    (0, KEY_RETURN): lambda: menu.run(),
     }
 
-# Update the keymap of pyful.
+# Update the keymap of core.
 Directory.keymap.update(myfilerkeymap)
 Finder.keymap.update(myfinderkeymap)
-pyful.cmdline.keymap.update(mycmdlinekeymap)
-pyful.cmdline.clipboard.keymap.update(myclipboardkeymap)
-pyful.cmdline.completion.keymap.update(mycompletionkeymap)
-pyful.cmdline.output.keymap.update(myoutputkeymap)
-pyful.menu.keymap.update(mymenukeymap)
+cmdline.keymap.update(mycmdlinekeymap)
+cmdline.clipboard.keymap.update(myclipboardkeymap)
+cmdline.completion.keymap.update(mycompletionkeymap)
+cmdline.output.keymap.update(myoutputkeymap)
+menu.keymap.update(mymenukeymap)
 
 # Define the menu.
 #
@@ -377,7 +382,7 @@ pyful.menu.keymap.update(mymenukeymap)
 #     - The second element is the keymap constant;
 #     - The third element is the callable function of no argument.
 #
-pyful.menu.items['filer'] = (
+menu.items['filer'] = (
     ('toggle (e)xtension' , KEY_e, commands['toggle_view_ext']),
     ('toggle (p)ermission', KEY_p, commands['toggle_view_permission']),
     ('toggle n(l)ink'     , KEY_l, commands['toggle_view_nlink']),
@@ -387,7 +392,7 @@ pyful.menu.items['filer'] = (
     ('toggle m(t)ime'     , KEY_t, commands['toggle_view_mtime']),
     )
 
-pyful.menu.items['layout'] = (
+menu.items['layout'] = (
     ('(t)ile'        , KEY_t, commands['layout_tile']),
     ('(T)ile reverse', KEY_T, commands['layout_tile_rev']),
     ('one(l)ine'     , KEY_l, commands['layout_oneline']),
@@ -395,7 +400,7 @@ pyful.menu.items['layout'] = (
     ('(f)ullscreen'  , KEY_f, commands['layout_fullscreen']),
     )
 
-pyful.menu.items['sort'] = (
+menu.items['sort'] = (
     ('(n)ame'              , KEY_n, commands['sort_name']),
     ('(N)ame reverse'      , KEY_N, commands['sort_name_rev']),
     ('(e)xtension'         , KEY_e, commands['sort_ext']),
@@ -410,7 +415,7 @@ pyful.menu.items['sort'] = (
     ('(P)ermission reverse', KEY_P, commands['sort_permission_rev']),
     )
 
-pyful.menu.items["mark"] = (
+menu.items["mark"] = (
     ("(r)egex mark", KEY_r, commands['mark']),
     ("(S)ource"    , KEY_S, commands['mark_source']),
     ("(A)rchive"   , KEY_A, commands['mark_archive']),
@@ -421,7 +426,7 @@ pyful.menu.items["mark"] = (
     ("mark (c)lear", KEY_c, commands['mark_clear']),
     )
 
-pyful.menu.items["mask"] = (
+menu.items["mask"] = (
     ('(m)ask'   , KEY_m, commands['mask']),
     ('(S)ource' , KEY_S, commands['mask_source']),
     ('(A)rchive', KEY_A, commands['mask_archive']),
@@ -432,7 +437,7 @@ pyful.menu.items["mask"] = (
     )
 
 # The editor launcher example.
-pyful.menu.items["editor"] = (
+menu.items["editor"] = (
     ("(e)macs"              , KEY_e, lambda: process.spawn("emacs -nw %f")),
     ("(E)macs new terminal" , KEY_E, lambda: process.spawn("emacs -nw %f %T")),
     ("emacs (f)rame"        , KEY_f, lambda: process.spawn("emacs %f")),
@@ -442,7 +447,7 @@ pyful.menu.items["editor"] = (
     )
 
 # The program launcher example.
-pyful.menu.items['launcher'] = (
+menu.items['launcher'] = (
     ('(h)top'           , KEY_h, lambda: process.spawn('htop %T')),
     ('(m)c'             , KEY_m, lambda: process.spawn('mc %T')),
     ('(M)OC'            , KEY_M, lambda: process.spawn('mocp %T')),
@@ -458,14 +463,14 @@ pyful.menu.items['launcher'] = (
     )
 
 # Update the filer keymap.
-pyful.filer.keymap.update({
-        (0 , KEY_V     ): lambda: pyful.menu.show('filer'),
-        (0 , KEY_s     ): lambda: pyful.menu.show('sort'),
-        (0 , KEY_L     ): lambda: pyful.menu.show('layout'),
-        (0 , KEY_STAR  ): lambda: pyful.menu.show('mark'),
-        (0 , KEY_PLUS  ): lambda: pyful.menu.show('mask'),
-        (0 , KEY_E     ): lambda: pyful.menu.show('editor'),
-        (0 , KEY_SCOLON): lambda: pyful.menu.show('launcher'),
+filer.keymap.update({
+        (0 , KEY_V     ): lambda: menu.show('filer'),
+        (0 , KEY_s     ): lambda: menu.show('sort'),
+        (0 , KEY_L     ): lambda: menu.show('layout'),
+        (0 , KEY_STAR  ): lambda: menu.show('mark'),
+        (0 , KEY_PLUS  ): lambda: menu.show('mask'),
+        (0 , KEY_E     ): lambda: menu.show('editor'),
+        (0 , KEY_SCOLON): lambda: menu.show('launcher'),
         })
 
 # The file association example.
@@ -502,47 +507,47 @@ pyful.filer.keymap.update({
 #
 
 # Define a image file associate the menu item.
-pyful.menu.items['image'] = (
+menu.items['image'] = (
     ('(d)isplay'    , KEY_d, lambda: process.spawn('display %f %&')),
     ('(g)imp'       , KEY_g, lambda: process.spawn('gimp %f %&')),
     )
 
 # Define a music file associate the menu item.
-pyful.menu.items['music'] = (
+menu.items['music'] = (
     ('(m)player'  , KEY_m, lambda: process.spawn('mplayer %m')),
     ('(M)OC'      , KEY_M, lambda: process.spawn('mocp -a %m %&')),
     ('(a)marok'   , KEY_a, lambda: process.spawn('amarok %f %&')),
     )
 
 # Define a video file associate the menu item.
-pyful.menu.items['video'] = (
+menu.items['video'] = (
     ('(m)player'  , KEY_m, lambda: process.spawn('mplayer %f')),
     ('(v)lc'      , KEY_v, lambda: process.spawn('vlc %f %&')),
     )
 
 myassociation = {
-    (0 , KEY_RETURN , '.py'   ): lambda: pyful.cmdline.shell('python %f'),
-    (0 , KEY_RETURN , '.rb'   ): lambda: pyful.cmdline.shell('ruby %f'),
-    (0 , KEY_RETURN , '.sh'   ): lambda: pyful.cmdline.shell('sh %f'),
-    (0 , KEY_RETURN , '.exe'  ): lambda: pyful.cmdline.shell('wine %f'),
-    (0 , KEY_RETURN , '.c'    ): lambda: pyful.cmdline.shell('gcc %f'),
-    (0 , KEY_RETURN , '.java' ): lambda: pyful.cmdline.shell('javac %f'),
-    (0 , KEY_RETURN , '.class'): lambda: pyful.cmdline.shell('java %x'),
-    (0 , KEY_RETURN , '.jar'  ): lambda: pyful.cmdline.shell('java -jar %f'),
-    (0 , KEY_RETURN , '.jpg'  ): lambda: pyful.menu.show('image'),
-    (0 , KEY_RETURN , '.gif'  ): lambda: pyful.menu.show('image'),
-    (0 , KEY_RETURN , '.png'  ): lambda: pyful.menu.show('image'),
-    (0 , KEY_RETURN , '.bmp'  ): lambda: pyful.menu.show('image'),
-    (0 , KEY_RETURN , '.mp3'  ): lambda: pyful.menu.show('music'),
-    (0 , KEY_RETURN , '.flac' ): lambda: pyful.menu.show('music'),
-    (0 , KEY_RETURN , '.avi'  ): lambda: pyful.menu.show('video'),
-    (0 , KEY_RETURN , '.mp4'  ): lambda: pyful.menu.show('video'),
-    (0 , KEY_RETURN , '.flv'  ): lambda: pyful.menu.show('video'),
+    (0 , KEY_RETURN , '.py'   ): lambda: cmdline.shell('python %f'),
+    (0 , KEY_RETURN , '.rb'   ): lambda: cmdline.shell('ruby %f'),
+    (0 , KEY_RETURN , '.sh'   ): lambda: cmdline.shell('sh %f'),
+    (0 , KEY_RETURN , '.exe'  ): lambda: cmdline.shell('wine %f'),
+    (0 , KEY_RETURN , '.c'    ): lambda: cmdline.shell('gcc %f'),
+    (0 , KEY_RETURN , '.java' ): lambda: cmdline.shell('javac %f'),
+    (0 , KEY_RETURN , '.class'): lambda: cmdline.shell('java %x'),
+    (0 , KEY_RETURN , '.jar'  ): lambda: cmdline.shell('java -jar %f'),
+    (0 , KEY_RETURN , '.jpg'  ): lambda: menu.show('image'),
+    (0 , KEY_RETURN , '.gif'  ): lambda: menu.show('image'),
+    (0 , KEY_RETURN , '.png'  ): lambda: menu.show('image'),
+    (0 , KEY_RETURN , '.bmp'  ): lambda: menu.show('image'),
+    (0 , KEY_RETURN , '.mp3'  ): lambda: menu.show('music'),
+    (0 , KEY_RETURN , '.flac' ): lambda: menu.show('music'),
+    (0 , KEY_RETURN , '.avi'  ): lambda: menu.show('video'),
+    (0 , KEY_RETURN , '.mp4'  ): lambda: menu.show('video'),
+    (0 , KEY_RETURN , '.flv'  ): lambda: menu.show('video'),
     }
 
-pyful.filer.keymap.update(myassociation)
+filer.keymap.update(myassociation)
 
-if not pyful.started:
+if not core.started:
     import os, sys
     if'screen' in os.environ['TERM']:
         # Change GNU SCREEN's title.
@@ -551,3 +556,4 @@ if not pyful.started:
         # Change terminal emulator's title.
         import socket
         sys.stdout.write('\033]0;pyful@%s\007' % socket.gethostname())
+

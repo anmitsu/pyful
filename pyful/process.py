@@ -21,10 +21,10 @@ import re
 import curses
 import subprocess
 
-from pyfulib import util
-from pyfulib.core import Pyful
+from pyful import util
+from pyful.core import Pyful
 
-pyful = Pyful()
+core = Pyful()
 
 def spawn(cmd, title=None, expandmacro=True):
     if expandmacro:
@@ -67,7 +67,7 @@ class Process(object):
             exec(cmd)
             util.wait_restore()
         except Exception as e:
-            pyful.message.exception(e)
+            core.message.exception(e)
 
     def system(self, cmd):
         if self.background:
@@ -76,21 +76,21 @@ class Process(object):
             curses.endwin()
             os.system("clear")
         try:
-            pyful.resetsignal()
+            core.resetsignal()
             subprocess.call(cmd, shell=True)
             if self.quick or self.background:
                 pass
             else:
                 util.wait_restore()
         except Exception as e:
-            pyful.message.exception(e)
+            core.message.exception(e)
         except KeyboardInterrupt as e:
             pass
         finally:
-            pyful.setsignal()
+            core.setsignal()
 
     def screen(self, cmd, title):
-        subprocess.Popen(["screen", "-t", title, self.shell[0], self.shell[1], "%s; python %s -e" % (cmd, pyful.binpath)])
+        subprocess.Popen(["screen", "-t", title, self.shell[0], self.shell[1], "%s; python %s -e" % (cmd, core.binpath)])
 
     def terminal(self, cmd):
         subprocess.Popen([self.terminal_emulator[0], self.terminal_emulator[1], cmd])

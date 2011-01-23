@@ -19,12 +19,12 @@
 import curses
 import re
 
-from pyfulib import util
-from pyfulib import look
-from pyfulib.core import Pyful
-from pyfulib.keymap import *
+from pyful import util
+from pyful import look
+from pyful.core import Pyful
+from pyful.keymap import *
 
-pyful = Pyful()
+core = Pyful()
 
 def init_ui():
     InfoBox.resize()
@@ -61,16 +61,16 @@ class InfoBox(object):
 
     @classmethod
     def resize(cls):
-        odd = pyful.stdscr.maxy % 2
-        base = pyful.stdscr.maxy//2 + odd
+        odd = core.stdscr.maxy % 2
+        base = core.stdscr.maxy//2 + odd
         height = base + cls.zoom
-        if height > pyful.stdscr.maxy-2:
-            height = pyful.stdscr.maxy - 2
+        if height > core.stdscr.maxy-2:
+            height = core.stdscr.maxy - 2
             cls.zoom = height - base
         elif height < 3:
             height = 3
             cls.zoom = height - base - 2
-        cls.win = curses.newwin(height, pyful.stdscr.maxx, pyful.stdscr.maxy-height-2, 0)
+        cls.win = curses.newwin(height, core.stdscr.maxx, core.stdscr.maxy-height-2, 0)
 
     @property
     def info(self):

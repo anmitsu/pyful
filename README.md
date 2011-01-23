@@ -30,7 +30,7 @@ if the installation is normally completed:
 If the installation on the system is unnecessary,
 the application is started by only executing the following command:
 
-     $ python ./pyful
+     $ python ./bin/pyful
 
 Dependencies
 ------------

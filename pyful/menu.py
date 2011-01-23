@@ -18,11 +18,11 @@
 
 import curses
 
-from pyfulib import util
-from pyfulib.core import Pyful
-from pyfulib.keymap import *
+from pyful import util
+from pyful.core import Pyful
+from pyful.keymap import *
 
-pyful = Pyful()
+core = Pyful()
 
 class Menu(object):
     keymap = {}
@@ -48,7 +48,7 @@ class Menu(object):
 
     def show(self, name):
         if name not in self.items:
-            pyful.message.error("Undefined menu `%s'" % name)
+            core.message.error("Undefined menu `%s'" % name)
             return
         self.title = name
         self.active = self._items[name]

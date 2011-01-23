@@ -23,11 +23,11 @@ import subprocess
 import pwd
 import grp
 
-from pyfulib.core import Pyful
-from pyfulib import util
-from pyfulib import ui
+from pyful.core import Pyful
+from pyful import util
+from pyful import ui
 
-pyful = Pyful()
+core = Pyful()
 
 class Completion(ui.InfoBox):
     program_options = {}
@@ -54,7 +54,7 @@ class Completion(ui.InfoBox):
             self.cmdline.input(meta, key)
 
     def loadprograms(self):
-        osname = pyful.environs['PLATFORM']
+        osname = core.environs['PLATFORM']
         self.programs[:] = []
         for path in os.environ['PATH'].split(os.pathsep):
             if os.path.exists(path):
@@ -73,7 +73,7 @@ class Completion(ui.InfoBox):
             width = util.termwidth(item)
             if width > length:
                 length = width
-        maxrow = pyful.stdscr.maxx // (length+4)
+        maxrow = core.stdscr.maxx // (length+4)
         if maxrow:
             return maxrow
         else:
@@ -88,7 +88,7 @@ class Completion(ui.InfoBox):
         except UnicodeError:
             return self.finish()
 
-        from pyfulib.mode import Shell
+        from pyful.mode import Shell
         if isinstance(self.cmdline.mode, Shell):
             psquote = False
             pdquote = False
@@ -167,7 +167,7 @@ class Completion(ui.InfoBox):
                        if item.startswith(self.parser.nowstr)])
 
     def comp_pyful_commands(self):
-        from pyfulib.command import commands
+        from pyful.command import commands
         return sorted([cmd for cmd in list(commands.keys())
                        if cmd.startswith(self.parser.nowstr)])
 

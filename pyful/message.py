@@ -19,12 +19,12 @@
 import curses
 from threading import Timer
 
-from pyfulib.core import Pyful
-from pyfulib import look
-from pyfulib import ui
-from pyfulib.keymap import *
+from pyful.core import Pyful
+from pyful import look
+from pyful import ui
+from pyful.keymap import *
 
-pyful = Pyful()
+core = Pyful()
 
 class Message(object):
     def __init__(self):
@@ -58,12 +58,12 @@ class Message(object):
 
     def confirm(self, msg, options, msglist=None, position=0):
         self.active = True
-        pyful.view()
+        core.view()
         cnf = Confirm(msg, options, msglist)
         cnf.setcursor(position)
         while cnf.active:
             cnf.view()
-            (meta, key) = pyful.stdscr.getch()
+            (meta, key) = core.stdscr.getch()
             cnf.input(meta, key)
         self.active = False
         return cnf.result
@@ -71,22 +71,22 @@ class Message(object):
     def hide(self):
         self.msg = ""
         self.active = False
-        pyful.stdscr.cmdwin.erase()
-        pyful.stdscr.cmdwin.noutrefresh()
-        pyful.view()
+        core.stdscr.cmdwin.erase()
+        core.stdscr.cmdwin.noutrefresh()
+        core.view()
 
     def view(self):
-        pyful.stdscr.cmdwin.erase()
-        pyful.stdscr.cmdwin.move(0, 1)
+        core.stdscr.cmdwin.erase()
+        core.stdscr.cmdwin.move(0, 1)
 
         if self.type == "puts":
-            pyful.stdscr.cmdwin.addstr(self.msg, look.colors['MSGPUT'])
+            core.stdscr.cmdwin.addstr(self.msg, look.colors['MSGPUT'])
         elif self.type == "error":
-            pyful.stdscr.cmdwin.addstr(self.msg, look.colors['MSGERR'])
+            core.stdscr.cmdwin.addstr(self.msg, look.colors['MSGERR'])
 
-        (l, c) = pyful.stdscr.cmdwin.getmaxyx()
-        pyful.stdscr.cmdwin.move(l-1, c-1)
-        pyful.stdscr.cmdwin.noutrefresh()
+        (l, c) = core.stdscr.cmdwin.getmaxyx()
+        core.stdscr.cmdwin.move(l-1, c-1)
+        core.stdscr.cmdwin.noutrefresh()
 
 class Confirm(object):
     keymap = {}
@@ -126,17 +126,17 @@ class Confirm(object):
         self.active = False
         if self.box:
             self.box.hide()
-        pyful.view()
+        core.view()
 
     def view(self):
         if self.box:
             self.box.view()
 
-        pyful.stdscr.cmdwin.erase()
-        pyful.stdscr.cmdwin.move(0, 1)
+        core.stdscr.cmdwin.erase()
+        core.stdscr.cmdwin.move(0, 1)
 
         size = len(self.options)
-        pyful.stdscr.cmdwin.addstr(self.msg+" ", look.colors['MSGCONFIRM'])
+        core.stdscr.cmdwin.addstr(self.msg+" ", look.colors['MSGCONFIRM'])
         if self.cursor < 0:
             self.cursor = 0
         elif self.cursor > size - 1:
@@ -144,18 +144,18 @@ class Confirm(object):
         for i, s in enumerate(self.options):
             if self.cursor == i:
                 try:
-                    pyful.stdscr.cmdwin.addstr(s, curses.A_REVERSE)
-                    pyful.stdscr.cmdwin.addstr(" ", 0)
+                    core.stdscr.cmdwin.addstr(s, curses.A_REVERSE)
+                    core.stdscr.cmdwin.addstr(" ", 0)
                 except Exception:
                     pass
             else:
                 try:
-                    pyful.stdscr.cmdwin.addstr(s+" ", 0)
+                    core.stdscr.cmdwin.addstr(s+" ", 0)
                 except Exception:
                     pass
-        maxxy = pyful.stdscr.cmdwin.getmaxyx()
-        pyful.stdscr.cmdwin.move(maxxy[0]-1, maxxy[1]-1)
-        pyful.stdscr.cmdwin.noutrefresh()
+        maxxy = core.stdscr.cmdwin.getmaxyx()
+        core.stdscr.cmdwin.move(maxxy[0]-1, maxxy[1]-1)
+        core.stdscr.cmdwin.noutrefresh()
         curses.doupdate()
 
     def input(self, meta, key):

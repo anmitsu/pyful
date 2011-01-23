@@ -11,6 +11,6 @@ setup(name = "pyful",
       description = "Python file management utility",
       author = "anmitsu",
       author_email = "anmitsu.s@gmail.com",
-      packages = ["pyfulib"],
-      scripts = ["pyful"],
+      packages = ["pyful"],
+      scripts = ["bin/pyful"],
       )
