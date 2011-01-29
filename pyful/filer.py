@@ -148,7 +148,9 @@ class Filer(object):
         self.titlebar.erase()
         self.titlebar.move(0, 0)
 
-        length = reduce(lambda x,y: x+y, [util.termwidth(w.title)+2 for w in self.workspaces])
+        length = 0
+        for titlewidth in [util.termwidth(w.title)+2 for w in self.workspaces]:
+            length += titlewidth
 
         if core.stdscr.maxx-length < 5:
             return core.message.error('terminal size very small')
