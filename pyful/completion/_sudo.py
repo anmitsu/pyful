@@ -14,7 +14,6 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-
 class Sudo(object):
     _dict = None
 
@@ -51,7 +50,6 @@ class Sudo(object):
         return sorted(ret)
 
     def comp_other_prgs(self):
-        from pyful.completion import optionsdict
         optlist = list(optionsdict.keys())
         for arg in reversed(self.comp.parser.current_cmdline.split()):
             if arg != "sudo" and arg in optlist:
@@ -73,4 +71,7 @@ class Sudo(object):
             return value()
         else:
             return value
+
+from pyful.completion import optionsdict
+optionsdict.update({"sudo": Sudo})
 

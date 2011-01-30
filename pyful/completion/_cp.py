@@ -82,3 +82,6 @@ class Cp(object):
             return value()
         else:
             return value
+
+from pyful.completion import optionsdict
+optionsdict.update({"cp": Cp})

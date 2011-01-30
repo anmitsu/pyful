@@ -123,3 +123,8 @@ class AptCache(object):
             return value()
         else:
             return value
+
+from pyful.completion import optionsdict
+optionsdict.update({"apt-get": AptGet,
+                    "apt-cache": AptCache,
+                    })

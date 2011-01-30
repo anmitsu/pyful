@@ -27,6 +27,7 @@ from pyful import util
 from pyful import ui
 
 core = Pyful()
+optionsdict = {}
 
 class Completion(ui.InfoBox):
     program_options = {}
@@ -38,6 +39,7 @@ class Completion(ui.InfoBox):
         self.parser = None
         self.programs = []
         self.loadprograms()
+        self.loadoptions()
 
     def pagedown(self):
         self.mvcursor(self.maxrow * self.win.getmaxyx()[0] - self.maxrow*2)
@@ -51,6 +53,14 @@ class Completion(ui.InfoBox):
         else:
             self.finish()
             self.cmdline.input(meta, key)
+
+    def loadoptions(self):
+        readdir = os.path.dirname(util.abspath(__file__))
+        for f in os.listdir(readdir):
+            path = os.path.join(readdir, f)
+            if util.extname(path) == ".py" and f.startswith('_') and f != "__init__.py":
+                with open(path, 'r') as opt:
+                    exec(opt.read(), locals())
 
     def loadprograms(self):
         osname = core.environs['PLATFORM']
@@ -249,15 +259,3 @@ class Parser(object):
         fs = string[pos:]
         return (ps, ns, fs)
 
-from pyful.completion import _apt
-from pyful.completion import _cp
-from pyful.completion import _make
-from pyful.completion import _sudo
-
-optionsdict = {
-    "apt-get": _apt.AptGet,
-    "apt-cache": _apt.AptCache,
-    "cp": _cp.Cp,
-    "make": _make.Make,
-    "sudo": _sudo.Sudo,
-    }
