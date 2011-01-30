@@ -239,7 +239,7 @@ def mbs_ljust(string, length, pad=" "):
     width = 0
     cut = False
     for i, c in enumerate(string):
-        if length <= width:
+        if length-1 <= width:
             string = string[0:i-1]
             cut = True
             break
@@ -260,7 +260,7 @@ def mbs_rjust(string, length, pad=" "):
     width = 0
     cut = False
     for i, c in enumerate(reversed(string)):
-        if length <= width:
+        if length-1 <= width:
             string = string[len(string)-i:]
             cut = True
             break
