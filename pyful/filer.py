@@ -170,17 +170,18 @@ class Filer(object):
             return core.message.error('terminal size very small')
 
         for i, path in enumerate([d.path for d in self.workspace.dirs]):
-            if util.termwidth(path) > width:
+            num = '[%d] ' % (i+1)
+            numlen = len(num)
+            if util.termwidth(path)+numlen+1 > width:
                 for name in util.unistr(path).split(os.sep)[:-1]:
                     if name:
                         path = path.replace(name, name[0])
-                    if util.termwidth(path) <= width:
+                    if util.termwidth(path)+numlen+1 <= width:
                         break
-            num = '[%d] ' % (i+1)
             if i == 0:
-                w = width-len(num)+odd
+                w = width-numlen+odd
             else:
-                w = width-len(num)
+                w = width-numlen
             string = num + util.mbs_rjust(path, w)
             if i == self.workspace.cursor:
                 self.titlebar.addstr(string, curses.A_REVERSE)
