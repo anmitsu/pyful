@@ -42,7 +42,7 @@ class Sudo(object):
             }
 
     def default(self):
-        return self.comp.comp_programs()
+        return (self.comp.comp_programs()+self.comp.comp_files())
 
     def options(self):
         ret = [opt for opt in self._dict.keys()
