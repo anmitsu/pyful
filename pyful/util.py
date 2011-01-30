@@ -221,6 +221,14 @@ def unix_basename(path):
 def unix_dirname(path):
     return os.path.dirname(path.rstrip(os.path.sep))
 
+def path_omission(path, width):
+    if termwidth(path) > width:
+        for name in unistr(path).split(os.sep)[:-1]:
+            if name:
+                path = path.replace(name, name[0])
+            if termwidth(path) <= width:
+                break
+    return path
 
 def termwidth(string, length=None):
     string = unistr(string)

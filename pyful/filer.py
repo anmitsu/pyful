@@ -172,12 +172,7 @@ class Filer(object):
         for i, path in enumerate([d.path for d in self.workspace.dirs]):
             num = '[%d] ' % (i+1)
             numlen = len(num)
-            if util.termwidth(path)+numlen+1 > width:
-                for name in util.unistr(path).split(os.sep)[:-1]:
-                    if name:
-                        path = path.replace(name, name[0])
-                    if util.termwidth(path)+numlen+1 <= width:
-                        break
+            path = util.path_omission(path, width-numlen-1)
             if i == 0:
                 w = width-numlen+odd
             else:
