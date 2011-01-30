@@ -225,7 +225,7 @@ def path_omission(path, width):
     if termwidth(path) > width:
         for name in unistr(path).split(os.sep)[:-1]:
             if name:
-                path = path.replace(name, name[0])
+                path = path.replace(name, name[0], 1)
             if termwidth(path) <= width:
                 break
     return path
