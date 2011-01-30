@@ -18,11 +18,9 @@ import os
 import subprocess
 
 class AptGet(object):
-    _dict = None
-
     def __init__(self, comp):
         self.comp = comp
-        self.__class__._dict = {
+        self.arguments = {
             'autoclean'      : [],
             'autoremove'     : self.comp_dpkglist,
             'build-dep'      : self.comp_pkgnames,
@@ -40,7 +38,7 @@ class AptGet(object):
             }
 
     def options(self):
-        ret = [opt for opt in self._dict.keys()
+        ret = [opt for opt in self.arguments.keys()
                if opt.startswith(self.comp.parser.nowstr)
                and not opt in self.comp.parser.options]
         return sorted(ret)
@@ -67,7 +65,7 @@ class AptGet(object):
 
     def complete(self):
         opt = self.comp.parser.current_option
-        value = self._dict.get(opt, self.default)
+        value = self.arguments.get(opt, self.default)
 
         if hasattr(value, "__call__"):
             return value()
@@ -75,11 +73,9 @@ class AptGet(object):
             return value
 
 class AptCache(object):
-    _dict = None
-
     def __init__(self, comp):
         self.comp = comp
-        self.__class__._dict = {
+        self.arguments = {
             'add'      : [],
             'depends'  : self.comp_pkgnames,
             'dotty'    : self.comp_pkgnames,
@@ -104,7 +100,7 @@ class AptCache(object):
         return self.options()
 
     def options(self):
-        ret = [opt for opt in self._dict.keys()
+        ret = [opt for opt in self.arguments.keys()
                if opt.startswith(self.comp.parser.nowstr)
                and not opt in self.comp.parser.options]
         return sorted(ret)
@@ -117,7 +113,7 @@ class AptCache(object):
 
     def complete(self):
         opt = self.comp.parser.current_option
-        value = self._dict.get(opt, self.default)
+        value = self.arguments.get(opt, self.default)
 
         if hasattr(value, "__call__"):
             return value()

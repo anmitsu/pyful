@@ -15,11 +15,9 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 class Sudo(object):
-    _dict = None
-
     def __init__(self, comp):
         self.comp = comp
-        self.__class__._dict = {
+        self.arguments = {
             "-E": self.comp.comp_programs,
             "-H": self.comp.comp_programs,
             "-K": self.comp.comp_programs,
@@ -44,7 +42,7 @@ class Sudo(object):
         return (self.comp.comp_programs()+self.comp.comp_files())
 
     def options(self):
-        ret = [opt for opt in self._dict.keys()
+        ret = [opt for opt in self.arguments.keys()
                if opt.startswith(self.comp.parser.nowstr)
                and not opt in self.comp.parser.options]
         return sorted(ret)
@@ -65,7 +63,7 @@ class Sudo(object):
             return candidate
 
         opt = self.comp.parser.current_option
-        value = self._dict.get(opt, self.default)
+        value = self.arguments.get(opt, self.default)
 
         if hasattr(value, "__call__"):
             return value()

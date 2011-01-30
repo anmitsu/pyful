@@ -15,11 +15,9 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 class Cp(object):
-    _dict = None
-
     def __init__(self, comp):
         self.comp = comp
-        self.__class__._dict = {
+        self.arguments = {
             '--archive'                : self.comp.comp_files,
             '--copy-contents'          : self.comp.comp_files,
             '--dereference'            : self.comp.comp_files,
@@ -66,7 +64,7 @@ class Cp(object):
         return self.comp.comp_files()
 
     def options(self):
-        ret = [opt for opt in self._dict.keys()
+        ret = [opt for opt in self.arguments.keys()
                if opt.startswith(self.comp.parser.nowstr)
                and not opt in self.comp.parser.options]
         return sorted(ret)
@@ -76,7 +74,7 @@ class Cp(object):
             return self.options()
 
         opt = self.comp.parser.current_option
-        value = self._dict.get(opt, self.default)
+        value = self.arguments.get(opt, self.default)
 
         if hasattr(value, "__call__"):
             return value()
