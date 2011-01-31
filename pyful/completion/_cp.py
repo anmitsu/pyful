@@ -14,72 +14,56 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-class Cp(object):
+from pyful.completion import CompletionFunction
+from pyful.completion import optionsdict
+
+class Cp(CompletionFunction):
     def __init__(self, comp):
-        self.comp = comp
-        self.arguments = {
-            '--archive'                : self.comp.comp_files,
-            '--copy-contents'          : self.comp.comp_files,
-            '--dereference'            : self.comp.comp_files,
-            '--force'                  : self.comp.comp_files,
-            '--interactive'            : self.comp.comp_files,
-            '--link'                   : self.comp.comp_files,
-            '--one-file-system'        : self.comp.comp_files,
-            '--parents'                : self.comp.comp_files,
-            '--recursive'              : self.comp.comp_files,
-            '--remove-destination'     : self.comp.comp_files,
-            '--strip-trailing-slashes' : self.comp.comp_files,
-            '--symbolic-link'          : self.comp.comp_files,
-            '--update'                 : self.comp.comp_files,
-            '--verbose'                : self.comp.comp_files,
-            '-H' : self.comp.comp_files,
-            '-L' : self.comp.comp_files,
-            '-P' : self.comp.comp_files,
-            '-S' : [],
-            '-R' : self.comp.comp_files,
-            '-b' : self.comp.comp_files,
-            '-d' : self.comp.comp_files,
-            '-p' : self.comp.comp_files,
-            '-a' : self.comp.comp_files,
-            '-f' : self.comp.comp_files,
-            '-i' : self.comp.comp_files,
-            '-l' : self.comp.comp_files,
-            '-r' : self.comp.comp_files,
-            '-s' : self.comp.comp_files,
-            '-u' : self.comp.comp_files,
-            '-v' : self.comp.comp_files,
-            '-x' : self.comp.comp_files,
-            '--backup='          : ['existing', 'never', 'nil', 'none', 'numbered', 'off', 'simple', 't'],
-            '--help'             : self.comp.comp_files,
-            '--no-preserve='     : ['all', 'links', 'mode', 'ownership', 'timestamps'],
-            '--preserve='        : ['all', 'links', 'mode', 'ownership', 'timestamps'],
-            '--reply='           : ['no', 'query', 'yes'],
-            '--sparse='          : ['always', 'auto', 'never'],
-            '--suffix'           : [],
-            '--target-directory=': self.comp.comp_dirs,
-            '--version'          : self.comp.comp_files,
+        arguments = {
+            '--archive': comp.comp_files,
+            '--copy-contents': comp.comp_files,
+            '--dereference': comp.comp_files,
+            '--force': comp.comp_files,
+            '--interactive': comp.comp_files,
+            '--link': comp.comp_files,
+            '--one-file-system': comp.comp_files,
+            '--parents': comp.comp_files,
+            '--recursive': comp.comp_files,
+            '--remove-destination': comp.comp_files,
+            '--strip-trailing-slashes': comp.comp_files,
+            '--symbolic-link': comp.comp_files,
+            '--update': comp.comp_files,
+            '--verbose': comp.comp_files,
+            '-H': comp.comp_files,
+            '-L': comp.comp_files,
+            '-P': comp.comp_files,
+            '-S': [],
+            '-R': comp.comp_files,
+            '-b': comp.comp_files,
+            '-d': comp.comp_files,
+            '-p': comp.comp_files,
+            '-a': comp.comp_files,
+            '-f': comp.comp_files,
+            '-i': comp.comp_files,
+            '-l': comp.comp_files,
+            '-r': comp.comp_files,
+            '-s': comp.comp_files,
+            '-u': comp.comp_files,
+            '-v': comp.comp_files,
+            '-x': comp.comp_files,
+            '--backup=': ['existing', 'never', 'nil', 'none', 'numbered', 'off', 'simple', 't'],
+            '--help': comp.comp_files,
+            '--no-preserve=': ['all', 'links', 'mode', 'ownership', 'timestamps'],
+            '--preserve=': ['all', 'links', 'mode', 'ownership', 'timestamps'],
+            '--reply=': ['no', 'query', 'yes'],
+            '--sparse=': ['always', 'auto', 'never'],
+            '--suffix': [],
+            '--target-directory=': comp.comp_dirs,
+            '--version': comp.comp_files,
             }
+        CompletionFunction.__init__(self, comp, arguments)
 
     def default(self):
         return self.comp.comp_files()
 
-    def options(self):
-        ret = [opt for opt in self.arguments.keys()
-               if opt.startswith(self.comp.parser.nowstr)
-               and not opt in self.comp.parser.options]
-        return sorted(ret)
-
-    def complete(self):
-        if self.comp.parser.nowstr.startswith("-"):
-            return self.options()
-
-        opt = self.comp.parser.current_option
-        value = self.arguments.get(opt, self.default)
-
-        if hasattr(value, "__call__"):
-            return value()
-        else:
-            return value
-
-from pyful.completion import optionsdict
 optionsdict.update({"cp": Cp})

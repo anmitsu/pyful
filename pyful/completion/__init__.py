@@ -259,3 +259,26 @@ class Parser(object):
         fs = string[pos:]
         return (ps, ns, fs)
 
+class CompletionFunction(object):
+    def __init__(self, comp, arguments):
+        self.comp = comp
+        self.arguments = arguments
+
+    def default(self):
+        return self.options()
+
+    def options(self):
+        ret = [opt for opt in self.arguments.keys()
+               if opt.startswith(self.comp.parser.nowstr)
+               and not opt in self.comp.parser.options]
+        return sorted(ret)
+
+    def complete(self):
+        if self.comp.parser.nowstr.startswith("-"):
+            return self.options()
+
+        value = self.arguments.get(self.comp.parser.current_option, self.default)
+        if hasattr(value, "__call__"):
+            return value()
+        else:
+            return value

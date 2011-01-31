@@ -16,67 +16,70 @@
 
 import os
 
-class Make(object):
-    def __init__(self, comp):
-        self.comp = comp
-        self.arguments = {
-            '--directory='               : lambda: self.comp.comp_dirs(),
-            '--debug'                    : [],
-            '--environment-overrides'    : [],
-            '--file='                    : lambda: self.comp.comp_files(),
-            '--makefile='                : lambda: self.comp.comp_files(),
-            '--help'                     : [],
-            '--ignore-errors'            : [],
-            '--include-dir='             : lambda: self.comp.comp_dirs(),
-            '--jobs='                    : [],
-            '--keep-going'               : [],
-            '--load-average='            : [],
-            '--max-load='                : [],
-            '--just-print'               : [],
-            '--dry-run'                  : [],
-            '--recon'                    : [],
-            '--old-file='                : lambda: self.comp.comp_files(),
-            '--assume-old='              : lambda: self.comp.comp_files(),
-            '--print-data-base'          : [],
-            '--question'                 : [],
-            '--no-builtin-rules'         : [],
-            '--silent'                   : [],
-            '--quiet'                    : [],
-            '--no-keep-going'            : [],
-            '--stop'                     : [],
-            '--touch'                    : [],
-            '--version'                  : [],
-            '--print-directory'          : [],
-            '--no-print-directory'       : [],
-            '--what-if='                 : lambda: self.comp.comp_files(),
-            '--new-file='                : lambda: self.comp.comp_files(),
-            '--assume-new='              : lambda: self.comp.comp_files(),
-            '--warn-undefined-variables' : [],
+from pyful.completion import CompletionFunction
+from pyful.completion import optionsdict
 
-            '-b' : [],
-            '-m' : [],
-            '-C' : lambda: self.comp.comp_dirs(),
-            '-d' : [],
-            '-e' : [],
-            '-f' : lambda: self.comp.comp_files(),
-            '-h' : [],
-            '-i' : [],
-            '-I' : lambda: self.comp.comp_dirs(),
-            '-j' : [],
-            '-k' : [],
-            '-l' : [],
-            '-n' : [],
-            '-o' : lambda: self.comp.comp_files(),
-            '-p' : [],
-            '-q' : [],
-            '-r' : [],
-            '-s' : [],
-            '-S' : [],
-            '-t' : [],
-            '-v' : [],
-            '-w' : [],
-            '-W' : lambda: self.comp.comp_files(),
+class Make(CompletionFunction):
+    def __init__(self, comp):
+        arguments = {
+            '--directory=': lambda: self.comp.comp_dirs(),
+            '--debug': [],
+            '--environment-overrides': [],
+            '--file=': lambda: self.comp.comp_files(),
+            '--makefile=': lambda: self.comp.comp_files(),
+            '--help': [],
+            '--ignore-errors': [],
+            '--include-dir=': lambda: self.comp.comp_dirs(),
+            '--jobs=': [],
+            '--keep-going': [],
+            '--load-average=': [],
+            '--max-load=': [],
+            '--just-print': [],
+            '--dry-run': [],
+            '--recon': [],
+            '--old-file=': lambda: self.comp.comp_files(),
+            '--assume-old=': lambda: self.comp.comp_files(),
+            '--print-data-base': [],
+            '--question': [],
+            '--no-builtin-rules': [],
+            '--silent': [],
+            '--quiet': [],
+            '--no-keep-going': [],
+            '--stop': [],
+            '--touch': [],
+            '--version': [],
+            '--print-directory': [],
+            '--no-print-directory': [],
+            '--what-if=': lambda: self.comp.comp_files(),
+            '--new-file=': lambda: self.comp.comp_files(),
+            '--assume-new=': lambda: self.comp.comp_files(),
+            '--warn-undefined-variables': [],
+
+            '-b': [],
+            '-m': [],
+            '-C': lambda: self.comp.comp_dirs(),
+            '-d': [],
+            '-e': [],
+            '-f': lambda: self.comp.comp_files(),
+            '-h': [],
+            '-i': [],
+            '-I': lambda: self.comp.comp_dirs(),
+            '-j': [],
+            '-k': [],
+            '-l': [],
+            '-n': [],
+            '-o': lambda: self.comp.comp_files(),
+            '-p': [],
+            '-q': [],
+            '-r': [],
+            '-s': [],
+            '-S': [],
+            '-t': [],
+            '-v': [],
+            '-w': [],
+            '-W': lambda: self.comp.comp_files(),
             }
+        CompletionFunction.__init__(self, comp, arguments)
 
     def default(self):
         fname = ""
@@ -88,7 +91,6 @@ class Make(object):
             fname = "Makefile"
         if not fname:
             return []
-
         command = []
         with open(fname) as f:
             for line in f:
@@ -98,23 +100,4 @@ class Make(object):
                         command.append(tmp[0])
         return sorted(command)
 
-    def options(self):
-        ret = [opt for opt in self.arguments.keys()
-               if opt.startswith(self.comp.parser.nowstr)
-               and not opt in self.comp.parser.options]
-        return sorted(ret)
-
-    def complete(self):
-        if self.comp.parser.nowstr.startswith("-"):
-            return self.options()
-
-        opt = self.comp.parser.current_option
-        value = self.arguments.get(opt, self.default)
-
-        if hasattr(value, "__call__"):
-            return value()
-        else:
-            return value
-
-from pyful.completion import optionsdict
 optionsdict.update({"make": Make})
