@@ -20,7 +20,7 @@ import os
 import re
 import time
 
-from pyful.core import Pyful
+from pyful import Pyful
 from pyful import filectrl
 from pyful import process
 from pyful import util

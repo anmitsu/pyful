@@ -4,7 +4,7 @@
 # This file is executed in the local namespace and not generate module.
 #
 
-from pyful.core import Pyful
+from pyful import Pyful
 from pyful.command import commands
 from pyful.filer import Workspace, Directory, Finder, FileStat
 from pyful import ui

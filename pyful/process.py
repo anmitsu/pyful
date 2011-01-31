@@ -22,7 +22,7 @@ import curses
 import subprocess
 
 from pyful import util
-from pyful.core import Pyful
+from pyful import Pyful
 
 core = Pyful()
 

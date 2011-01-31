@@ -19,7 +19,7 @@
 import curses
 from threading import Timer
 
-from pyful.core import Pyful
+from pyful import Pyful
 from pyful import look
 from pyful import ui
 from pyful.keymap import *

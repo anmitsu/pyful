@@ -26,7 +26,7 @@ import time
 import pwd
 import grp
 
-from pyful.core import Pyful
+from pyful import Pyful
 from pyful import util
 from pyful import look
 from pyful import filectrl

@@ -21,7 +21,7 @@ import re
 
 from pyful import util
 from pyful import look
-from pyful.core import Pyful
+from pyful import Pyful
 from pyful.keymap import *
 
 core = Pyful()

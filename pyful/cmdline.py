@@ -20,7 +20,7 @@ import os
 import re
 import subprocess
 
-from pyful.core import Pyful
+from pyful import Pyful
 from pyful import completion
 from pyful import util
 from pyful import look

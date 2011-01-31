@@ -92,7 +92,7 @@ def quote(string):
 
 def expandmacro(string, shell=False):
     ret = string
-    from pyful.core import Pyful
+    from pyful import Pyful
     core = Pyful()
 
     marks = ''

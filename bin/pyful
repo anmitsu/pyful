@@ -68,7 +68,7 @@ locale.setlocale(locale.LC_ALL, "")
 imp.reload(sys)
 sys.setdefaultencoding("utf-8")
 
-from pyful.core import Pyful
+from pyful import Pyful
 
 if __name__ == '__main__':
     try:

@@ -21,7 +21,7 @@ import sys
 import re
 import glob
 
-from pyful.core import Pyful
+from pyful import Pyful
 from pyful import mode
 from pyful import util
 from pyful import ui
