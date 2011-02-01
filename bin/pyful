@@ -28,7 +28,7 @@ if __name__ == '__main__':
         sys.path.insert(0, libdir)
 
 from optparse import OptionParser
-from pyful.version import __version__
+from pyful import __version__
 
 def option_parse():
     usage = "usage: %prog [options]"
