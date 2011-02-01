@@ -16,6 +16,8 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+__version__ = "0.2"
+
 import os
 import sys
 import curses
@@ -200,5 +202,3 @@ class Pyful(Singleton):
             default = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'rc.py')
             shutil.copy(default, rcfile)
 
-# Create Pyful instance of singleton
-Pyful()
