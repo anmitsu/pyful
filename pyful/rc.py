@@ -85,9 +85,9 @@ FileStat.time_week_flag = '#'
 FileStat.time_yore_flag = ' '
 
 # Display the file extension?
-FileStat.view_ext = True
+FileStat.view_ext = False
 # Display the file permission?
-FileStat.view_permission = True
+FileStat.view_permission = False
 # Display the number of link?
 FileStat.view_nlink = False
 # Display the user name of file?
