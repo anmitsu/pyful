@@ -39,10 +39,6 @@ class Filer(Singleton):
         self.cursor = 0
         self.core = Pyful()
         self.message = Message()
-        self.count = 0
-
-    def __init__(self):
-        self.count += 1
 
     @property
     def keymap(self):
