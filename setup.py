@@ -4,7 +4,7 @@ from distutils.core import setup
 
 import pyful
 
-setup(name = "Pyful",
+setup(name = "pyful",
       version = pyful.__version__,
       description = "Python file management utility",
       long_description = pyful.__doc__,
