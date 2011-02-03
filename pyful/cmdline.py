@@ -31,7 +31,7 @@ from pyful.message import Message
 from pyful.keymap import *
 
 class Cmdline(Singleton):
-    _keymap = {}
+    keymap = {}
     wordbreakchars = re.compile("[._/\s\t\n\"\\`'@$><=:|&{(]")
 
     def __init_of_singleton__(self):
@@ -47,10 +47,6 @@ class Cmdline(Singleton):
 
         self.core = Pyful()
         self.message = Message()
-
-    @property
-    def keymap(self):
-        return self.__class__._keymap
 
     def execute(self):
         string = self.string
@@ -288,8 +284,8 @@ class Cmdline(Singleton):
             self.core.stdscr.cmdwin.addstr(s, attr)
 
     def cmdline_input(self, meta, key):
-        if (meta, key) in self._keymap:
-            self._keymap[(meta, key)]()
+        if (meta, key) in self.keymap:
+            self.keymap[(meta, key)]()
         else:
             try:
                 c = chr(key)
