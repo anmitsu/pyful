@@ -23,8 +23,7 @@ import subprocess
 
 from pyful import util
 from pyful import Pyful
-
-core = Pyful()
+from pyful.message import Message
 
 def spawn(cmd, title=None, expandmacro=True):
     if expandmacro:
@@ -45,6 +44,8 @@ class Process(object):
         self.quick = False
         self.exterminal = False
         self.background = False
+        self.core = Pyful()
+        self.message = Message()
 
     def spawn(self, cmd, title=None):
         cmd = self.parsemacro(cmd)
@@ -67,7 +68,7 @@ class Process(object):
             exec(cmd)
             util.wait_restore()
         except Exception as e:
-            core.message.exception(e)
+            self.message.exception(e)
 
     def system(self, cmd):
         if self.background:
@@ -76,21 +77,21 @@ class Process(object):
             curses.endwin()
             os.system("clear")
         try:
-            core.resetsignal()
+            self.core.resetsignal()
             subprocess.call(cmd, shell=True)
             if self.quick or self.background:
                 pass
             else:
                 util.wait_restore()
         except Exception as e:
-            core.message.exception(e)
+            self.message.exception(e)
         except KeyboardInterrupt as e:
             pass
         finally:
-            core.setsignal()
+            self.core.setsignal()
 
     def screen(self, cmd, title):
-        subprocess.Popen(["screen", "-t", title, self.shell[0], self.shell[1], "%s; python %s -e" % (cmd, core.binpath)])
+        subprocess.Popen(["screen", "-t", title, self.shell[0], self.shell[1], "%s; python %s -e" % (cmd, self.core.binpath)])
 
     def terminal(self, cmd):
         subprocess.Popen([self.terminal_emulator[0], self.terminal_emulator[1], cmd])

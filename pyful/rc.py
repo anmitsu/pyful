@@ -6,7 +6,9 @@
 
 from pyful import Pyful
 from pyful.command import commands
-from pyful.filer import Workspace, Directory, Finder, FileStat
+from pyful.cmdline import Cmdline
+from pyful.filer import Filer, Workspace, Directory, Finder, FileStat
+from pyful.menu import Menu
 from pyful import ui
 from pyful import mode
 from pyful import process
@@ -14,9 +16,9 @@ from pyful.keymap import *
 
 # Get PYthon File management UtiLity.
 core = Pyful()
-filer = Pyful().filer
-cmdline = Pyful().cmdline
-menu = Pyful().menu
+filer = Filer()
+cmdline = Cmdline()
+menu = Menu()
 
 # Set environments of core.
 core.environs['EDITOR'] = 'vim'

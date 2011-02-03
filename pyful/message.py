@@ -20,18 +20,18 @@ import curses
 from threading import Timer
 
 from pyful import Pyful
+from pyful import Singleton
 from pyful import look
 from pyful import ui
 from pyful.keymap import *
 
-core = Pyful()
-
-class Message(object):
-    def __init__(self):
+class Message(Singleton):
+    def __init_of_singleton__(self):
         self.msg = ""
         self.type = "puts"
         self.active = False
         self.timer = None
+        self.core = Pyful()
 
     def start_timer(self, timex):
         if self.timer:
@@ -58,12 +58,12 @@ class Message(object):
 
     def confirm(self, msg, options, msglist=None, position=0):
         self.active = True
-        core.view()
+        self.core.view()
         cnf = Confirm(msg, options, msglist)
         cnf.setcursor(position)
         while cnf.active:
             cnf.view()
-            (meta, key) = core.stdscr.getch()
+            (meta, key) = self.core.stdscr.getch()
             cnf.input(meta, key)
         self.active = False
         return cnf.result
@@ -71,22 +71,22 @@ class Message(object):
     def hide(self):
         self.msg = ""
         self.active = False
-        core.stdscr.cmdwin.erase()
-        core.stdscr.cmdwin.noutrefresh()
-        core.view()
+        self.core.stdscr.cmdwin.erase()
+        self.core.stdscr.cmdwin.noutrefresh()
+        self.core.view()
 
     def view(self):
-        core.stdscr.cmdwin.erase()
-        core.stdscr.cmdwin.move(0, 1)
+        self.core.stdscr.cmdwin.erase()
+        self.core.stdscr.cmdwin.move(0, 1)
 
         if self.type == "puts":
-            core.stdscr.cmdwin.addstr(self.msg, look.colors['MSGPUT'])
+            self.core.stdscr.cmdwin.addstr(self.msg, look.colors['MSGPUT'])
         elif self.type == "error":
-            core.stdscr.cmdwin.addstr(self.msg, look.colors['MSGERR'])
+            self.core.stdscr.cmdwin.addstr(self.msg, look.colors['MSGERR'])
 
-        (l, c) = core.stdscr.cmdwin.getmaxyx()
-        core.stdscr.cmdwin.move(l-1, c-1)
-        core.stdscr.cmdwin.noutrefresh()
+        (l, c) = self.core.stdscr.cmdwin.getmaxyx()
+        self.core.stdscr.cmdwin.move(l-1, c-1)
+        self.core.stdscr.cmdwin.noutrefresh()
 
 class Confirm(object):
     keymap = {}
@@ -111,6 +111,7 @@ class Confirm(object):
             (0, KEY_ESCAPE): lambda: self.hide(),
             (0, KEY_RETURN): lambda: self.get_cursor_item(),
             }
+        self.core = Pyful()
 
     def setcursor(self, x):
         self.cursor = x
@@ -126,17 +127,17 @@ class Confirm(object):
         self.active = False
         if self.box:
             self.box.hide()
-        core.view()
+        self.core.view()
 
     def view(self):
         if self.box:
             self.box.view()
 
-        core.stdscr.cmdwin.erase()
-        core.stdscr.cmdwin.move(0, 1)
+        self.core.stdscr.cmdwin.erase()
+        self.core.stdscr.cmdwin.move(0, 1)
 
         size = len(self.options)
-        core.stdscr.cmdwin.addstr(self.msg+" ", look.colors['MSGCONFIRM'])
+        self.core.stdscr.cmdwin.addstr(self.msg+" ", look.colors['MSGCONFIRM'])
         if self.cursor < 0:
             self.cursor = 0
         elif self.cursor > size - 1:
@@ -144,18 +145,18 @@ class Confirm(object):
         for i, s in enumerate(self.options):
             if self.cursor == i:
                 try:
-                    core.stdscr.cmdwin.addstr(s, curses.A_REVERSE)
-                    core.stdscr.cmdwin.addstr(" ", 0)
+                    self.core.stdscr.cmdwin.addstr(s, curses.A_REVERSE)
+                    self.core.stdscr.cmdwin.addstr(" ", 0)
                 except Exception:
                     pass
             else:
                 try:
-                    core.stdscr.cmdwin.addstr(s+" ", 0)
+                    self.core.stdscr.cmdwin.addstr(s+" ", 0)
                 except Exception:
                     pass
-        maxxy = core.stdscr.cmdwin.getmaxyx()
-        core.stdscr.cmdwin.move(maxxy[0]-1, maxxy[1]-1)
-        core.stdscr.cmdwin.noutrefresh()
+        maxxy = self.core.stdscr.cmdwin.getmaxyx()
+        self.core.stdscr.cmdwin.move(maxxy[0]-1, maxxy[1]-1)
+        self.core.stdscr.cmdwin.noutrefresh()
         curses.doupdate()
 
     def input(self, meta, key):

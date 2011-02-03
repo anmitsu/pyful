@@ -21,10 +21,7 @@ import re
 
 from pyful import util
 from pyful import look
-from pyful import Pyful
 from pyful.keymap import *
-
-core = Pyful()
 
 def init_ui():
     InfoBox.resize()
@@ -61,6 +58,8 @@ class InfoBox(object):
 
     @classmethod
     def resize(cls):
+        from pyful import Pyful
+        core = Pyful()
         odd = core.stdscr.maxy % 2
         base = core.stdscr.maxy//2 + odd
         height = base + cls.zoom

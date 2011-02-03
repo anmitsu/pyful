@@ -26,7 +26,6 @@ from pyful import Pyful
 from pyful import util
 from pyful import ui
 
-core = Pyful()
 optionsdict = {}
 
 class Completion(ui.InfoBox):
@@ -38,6 +37,8 @@ class Completion(ui.InfoBox):
         self.maxrow = 1
         self.parser = None
         self.programs = []
+        self.core = Pyful()
+
         self.loadprograms()
         self.loadoptions()
 
@@ -63,7 +64,7 @@ class Completion(ui.InfoBox):
                     exec(opt.read(), locals())
 
     def loadprograms(self):
-        osname = core.environs['PLATFORM']
+        osname = self.core.environs['PLATFORM']
         self.programs[:] = []
         for path in os.environ['PATH'].split(os.pathsep):
             if os.path.exists(path):
@@ -82,7 +83,7 @@ class Completion(ui.InfoBox):
             width = util.termwidth(item)
             if width > length:
                 length = width
-        maxrow = core.stdscr.maxx // (length+4)
+        maxrow = self.core.stdscr.maxx // (length+4)
         if maxrow:
             return maxrow
         else:

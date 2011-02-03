@@ -73,8 +73,13 @@ class Singleton(object):
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, '_singleton_instances'):
             cls._singleton_instances = {}
-            cls._singleton_instances[hash(cls)] = super(Singleton, cls).__new__(cls, *args, **kwargs)
+            instance = super(Singleton, cls).__new__(cls, *args, **kwargs)
+            cls._singleton_instances[hash(cls)] = instance
+            instance.__init_of_singleton__(*args, **kwargs)
         return cls._singleton_instances[hash(cls)]
+
+    def __init_of_singleton__(self, *args, **kwargs):
+        raise(Exception, "Singleton class must override this method.")
 
 class Pyful(Singleton):
     """PYthon File management UtiLity"""
@@ -92,7 +97,7 @@ class Pyful(Singleton):
     __initfuncs = []
     __exitfuncs = []
 
-    def init_instance(self):
+    def __init_of_singleton__(self):
         from pyful.message import Message
         self.message = Message()
 

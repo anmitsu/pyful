@@ -28,32 +28,34 @@ import errno
 
 from pyful import util
 from pyful import Pyful
+from pyful.filer import Filer
+from pyful.message import Message
 
-core = Pyful()
+_message = Message()
 
 def chmod(path, mode):
     try:
         os.chmod(path, int(mode, 8))
     except Exception as e:
-        core.message.exception(e)
+        _message.exception(e)
 
 def chown(path, uid, gid):
     if not isinstance(uid, int):
         try:
             uid = pwd.getpwnam(uid)[2]
         except KeyError as e:
-            core.message.exception(e)
+            _message.exception(e)
             return
     if not isinstance(gid, int):
         try:
             gid = grp.getgrnam(gid)[2]
         except KeyError as e:
-            core.message.exception(e)
+            _message.exception(e)
             return
     try:
         os.chown(path, uid, gid)
     except EnvironmentError as e:
-        core.message.exception(e)
+        _message.exception(e)
 
 def copy(src, dst):
     Filectrl().copy(src, dst)
@@ -65,7 +67,7 @@ def delete(path):
         else:
             shutil.rmtree(path)
     except EnvironmentError as e:
-        core.message.exception(e)
+        _message.exception(e)
 
 def link(src, dst):
     try:
@@ -73,7 +75,7 @@ def link(src, dst):
             dst = os.path.join(dst, util.unix_basename(src))
         os.link(src, dst)
     except EnvironmentError as e:
-        core.message.exception(e)
+        _message.exception(e)
 
 def symlink(src, dst):
     try:
@@ -81,45 +83,46 @@ def symlink(src, dst):
             dst = os.path.join(dst, util.unix_basename(src))
         os.symlink(src, dst)
     except EnvironmentError as e:
-        core.message.exception(e)
+        _message.exception(e)
 
 def mkdir(path, mode=0o755):
     try:
         os.makedirs(path, mode)
     except EnvironmentError as e:
-        core.message.exception(e)
+        _message.exception(e)
 
 def mknod(path, mode=0o644):
     try:
         os.mknod(path, mode)
     except EnvironmentError as e:
-        core.message.exception(e)
+        _message.exception(e)
 
 def move(src, dst):
     Filectrl().move(src, dst)
 
 def replace(pattern, repstr):
     buf = []
-    for f in core.filer.dir.get_mark_files():
+    filer = Filer()
+    for f in filer.dir.get_mark_files():
         buf.append(pattern.sub(r""+repstr, f))
 
     msg = []
     size = len(buf)
 
     for i in range(0, size):
-        msg.append("%s -> %s" % (core.filer.dir.get_mark_files()[i], buf[i]))
+        msg.append("%s -> %s" % (filer.dir.get_mark_files()[i], buf[i]))
 
-    ret = core.message.confirm("Replace:", ["Start", "Cancel"], msg)
+    ret = _message.confirm("Replace:", ["Start", "Cancel"], msg)
     if ret != "Start":
         return
 
-    for i, src in enumerate(core.filer.dir.get_mark_files()):
+    for i, src in enumerate(filer.dir.get_mark_files()):
         dst = buf[i]
         if src == dst:
             continue
 
-        if os.path.exists(os.path.join(core.filer.dir.path, dst)):
-            ret = core.message.confirm("File exist - (%s). Override?" % dst, ["Yes", "No"])
+        if os.path.exists(os.path.join(filer.dir.path, dst)):
+            ret = _message.confirm("File exist - (%s). Override?" % dst, ["Yes", "No"])
             if ret == "Yes":
                 pass
             elif ret == "No" or ret is None:
@@ -127,7 +130,7 @@ def replace(pattern, repstr):
         try:
             os.renames(src, dst)
         except EnvironmentError as e:
-            core.message.exception(e)
+            _message.exception(e)
             break
 
 def unzip(src, dstdir=''):
@@ -138,7 +141,7 @@ def zip(src, dst, wrap=''):
 
 def zipeach(src, dst, wrap=''):
     if not isinstance(src, list):
-        return core.message.error("source must present `list'")
+        return _message.error("source must present `list'")
     Filectrl().zipeach(src, dst, wrap)
 
 def tar(src, dst, tarmode='gzip', wrap=''):
@@ -146,7 +149,7 @@ def tar(src, dst, tarmode='gzip', wrap=''):
 
 def tareach(src, dst, tarmode='gzip', wrap=''):
     if not isinstance(src, list):
-        return core.message.error("source must present `list'")
+        return _message.error("source must present `list'")
     Filectrl().tareach(src, dst, tarmode, wrap)
 
 def untar(src, dstdir='.'):
@@ -155,15 +158,17 @@ def untar(src, dstdir='.'):
 def kill_thread():
     threads = list([str(th) for th in Filectrl.threads])
     if len(threads) == 0:
-        core.message.error("Thread doesn't exist.")
+        _message.error("Thread doesn't exist.")
         return
-    ret = core.message.confirm("Kill thread: ", threads)
+    ret = _message.confirm("Kill thread: ", threads)
     for th in Filectrl.threads:
         if str(th) == ret:
             th.kill()
 
 def view_threads():
-    if core.cmdline.active or core.message.active:
+    from pyful.cmdline import Cmdline
+    core = Pyful()
+    if Cmdline().active or _message.active:
         return
     core.stdscr.cmdwin.erase()
     core.stdscr.cmdwin.move(0, 1)
@@ -188,6 +193,7 @@ class Filectrl(object):
         self.jobs = None
         self.dirlist = []
         self.threadevent = threading.Event()
+        self.core = Pyful()
 
     def filejob_generator(self, src, dst):
         def _checkfile(src, dst):
@@ -239,7 +245,7 @@ class Filectrl(object):
             dtime = time.strftime("%y-%m-%d %H:%M:%S", time.localtime(dstat.st_mtime))
             msglist = ["source", "path: " + src, "size: " + ssize, "time: " + stime, "",
                        "destination", "path: " + dst, "size: " + dsize, "time: " + dtime]
-            ret = core.message.confirm("Override?", ["Yes", "No", "Yes(all)", "No(all)", "Cancel"], msglist)
+            ret = _message.confirm("Override?", ["Yes", "No", "Yes(all)", "No(all)", "Cancel"], msglist)
             self.threadevent.set()
             if ret == "Yes":
                 return "yes"
@@ -262,15 +268,15 @@ class Filectrl(object):
 
     def thread_loop(self):
         Filectrl.threads.append(self.thread)
-        core.view()
+        self.core.view()
         self.threadevent.set()
         self.thread.start()
         while self.thread.isAlive():
             self.threadevent.wait()
-            core.main_loop_nodelay()
+            self.core.main_loop_nodelay()
         Filectrl.threads.remove(self.thread)
-        core.filer.workspace.all_reload()
-        core.view()
+        Filer().workspace.all_reload()
+        self.core.view()
 
     def copy(self, src, dst):
         if isinstance(src, list):
@@ -367,7 +373,7 @@ class TarThread(threading.Thread):
         try:
             tar = tarfile.open(self.dst, 'w|'+mode)
         except Exception as e:
-            return core.message.exception(e)
+            return _message.exception(e)
 
         try:
             if isinstance(self.src, list):
@@ -449,7 +455,7 @@ class UntarThread(threading.Thread):
         try:
             tar = tarfile.open(source, 'r:'+mode)
         except Exception as e:
-            return core.message.exception(e)
+            return _message.exception(e)
         try:
             for info in tar.getmembers():
                 if not self.active:
@@ -542,7 +548,7 @@ class UnzipThread(threading.Thread):
         try:
             myzip = zipfile.ZipFile(srczippath, 'r')
         except Exception as e:
-            return core.message.exception(e)
+            return _message.exception(e)
 
         for info in myzip.infolist():
             if not self.active:
@@ -552,7 +558,7 @@ class UnzipThread(threading.Thread):
             try:
                 path = os.path.join(self.dstdir, unifname)
             except UnicodeError:
-                core.message.error("UnicodeError: Not support `%s' encoding" % fname)
+                _message.error("UnicodeError: Not support `%s' encoding" % fname)
                 continue
 
             myzip_unidirname = util.unix_dirname(unifname)
@@ -561,7 +567,7 @@ class UnzipThread(threading.Thread):
                 try:
                     self.makedirs(myzip, myzip_unidirname, myzip_oridirname)
                 except OSError as e:
-                    core.message.exception(e)
+                    _message.exception(e)
                     continue
             try:
                 source = myzip.open(fname, pwd=path)
@@ -574,7 +580,7 @@ class UnzipThread(threading.Thread):
                 self.copy_external_attr(myzip, fname)
             except IOError as e:
                 if errno.EISDIR != e[0]:
-                    core.message.exception(e)
+                    _message.exception(e)
                     continue
         myzip.close()
 
@@ -601,12 +607,12 @@ class ZipThread(threading.Thread):
 
         if not isinstance(self.src, list):
             if not os.path.exists(self.src):
-                return core.message.error('No such file or directory (%s)' % self.src)
+                return _message.error('No such file or directory (%s)' % self.src)
 
         try:
             myzip = zipfile.ZipFile(self.dst, 'w', compression=zipfile.ZIP_DEFLATED)
         except Exception as e:
-            return core.message.exception(e)
+            return _message.exception(e)
 
         try:
             if isinstance(self.src, list):
@@ -664,7 +670,7 @@ class CopyThread(threading.Thread):
                 if isinstance(j, FileJob):
                     j.copy(self)
         except FilectrlCancel:
-            core.message.error("Copy canceled")
+            _message.error("Copy canceled")
 
     def kill(self):
         self.active = False
@@ -685,7 +691,7 @@ class MoveThread(threading.Thread):
                 if isinstance(j, FileJob):
                     j.move(self)
         except FilectrlCancel:
-            core.message.error("Move canceled")
+            _message.error("Move canceled")
 
         self.ctrl.dirlist.sort()
         self.ctrl.dirlist.reverse()
@@ -759,7 +765,7 @@ class FileJob(object):
                 self.copyfileobj(self.src, self.dst)
                 shutil.copystat(self.src, self.dst)
         except Exception as e:
-            core.message.exception(e)
+            _message.exception(e)
 
     def move(self, thread):
         self.thread = thread
@@ -780,5 +786,5 @@ class FileJob(object):
                 if thread.active:
                     delete(self.src)
             else:
-                core.message.exception(e)
+                _message.exception(e)
 

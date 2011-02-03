@@ -21,20 +21,20 @@ import re
 import subprocess
 
 from pyful import Pyful
+from pyful import Singleton
 from pyful import completion
 from pyful import util
 from pyful import look
 from pyful import process
 from pyful import ui
+from pyful.message import Message
 from pyful.keymap import *
 
-core = Pyful()
-
-class Cmdline(object):
+class Cmdline(Singleton):
     _keymap = {}
     wordbreakchars = re.compile("[._/\s\t\n\"\\`'@$><=:|&{(]")
 
-    def __init__(self):
+    def __init_of_singleton__(self):
         self.string = ""
         self.cursor = 0
         self.active = False
@@ -44,6 +44,9 @@ class Cmdline(object):
         self.clipboard = Clipboard(self)
         self.output = Output(self)
         self.completion = completion.Completion(self)
+
+        self.core = Pyful()
+        self.message = Message()
 
     @property
     def keymap(self):
@@ -176,10 +179,10 @@ class Cmdline(object):
         elif self.cursor > util.mbslen(self.string):
             self.cursor = util.mbslen(self.string)
 
-        core.stdscr.cmdwin.erase()
-        core.stdscr.cmdwin.move(0, 0)
+        self.core.stdscr.cmdwin.erase()
+        self.core.stdscr.cmdwin.move(0, 0)
         prompt = " %s " % self.mode.prompt
-        core.stdscr.cmdwin.addstr(prompt, look.colors['CMDLINE'])
+        self.core.stdscr.cmdwin.addstr(prompt, look.colors['CMDLINE'])
         try:
             if self.mode.__class__.__name__ == "Shell":
                 self.print_color_shell(self.string)
@@ -188,12 +191,12 @@ class Cmdline(object):
             else:
                 self.print_color_default(self.string)
         except Exception as e:
-            core.message.error("curses error: " + str(e))
+            self.message.error("curses error: " + str(e))
 
         curpos = util.termwidth(prompt+self.string, util.mbslen(prompt)+self.cursor)
-        if curpos < core.stdscr.maxx:
-            core.stdscr.cmdwin.move(0, curpos)
-        core.stdscr.cmdwin.noutrefresh()
+        if curpos < self.core.stdscr.maxx:
+            self.core.stdscr.cmdwin.move(0, curpos)
+        self.core.stdscr.cmdwin.noutrefresh()
 
     def input(self, meta, key):
         if self.completion.active:
@@ -206,8 +209,8 @@ class Cmdline(object):
             self.cmdline_input(meta, key)
 
     def finish(self):
-        core.stdscr.cmdwin.erase()
-        core.stdscr.cmdwin.noutrefresh()
+        self.core.stdscr.cmdwin.erase()
+        self.core.stdscr.cmdwin.noutrefresh()
         self.string = ""
         self.cursor = 0
         self.active = False
@@ -250,7 +253,7 @@ class Cmdline(object):
             attr = 0
             if re.search("^%[mMdDfFxX]$", s):
                 attr = look.colors['CMDLINEMACRO']
-            core.stdscr.cmdwin.addstr(s, attr)
+            self.core.stdscr.cmdwin.addstr(s, attr)
 
     def print_color_shell(self, string):
         prg = False
@@ -270,7 +273,7 @@ class Cmdline(object):
                     prg = True
                 else:
                     attr = look.colors['CMDLINENOPROGRAM']
-            core.stdscr.cmdwin.addstr(s, attr)
+            self.core.stdscr.cmdwin.addstr(s, attr)
 
     def print_color_eval(self, string):
         reg = re.compile("([\s;.()]|(?<!\\\\)%[mMdDfFxX])")
@@ -282,7 +285,7 @@ class Cmdline(object):
                 attr = look.colors['CMDLINESEPARATOR']
             elif s in __builtins__.keys():
                 attr = look.colors['CMDLINEPYFUNCTION']
-            core.stdscr.cmdwin.addstr(s, attr)
+            self.core.stdscr.cmdwin.addstr(s, attr)
 
     def cmdline_input(self, meta, key):
         if (meta, key) in self._keymap:
@@ -508,9 +511,9 @@ class Output(ui.InfoBox):
             li = self.cursor_item().split(":")
             fname = li[0]
             lnum = li[1]
-            process.spawn("%s +%s %s" % (core.environs['EDITOR'], lnum, fname))
+            process.spawn("%s +%s %s" % (self.core.environs['EDITOR'], lnum, fname))
         except Exception as e:
-            core.message.error("edit: %s" % str(e))
+            self.message.error("edit: %s" % str(e))
 
     def infoarea(self, string=None):
         from pyful import mode

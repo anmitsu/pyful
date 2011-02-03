@@ -27,18 +27,22 @@ import pwd
 import grp
 
 from pyful import Pyful
+from pyful import Singleton
 from pyful import util
 from pyful import look
-from pyful import filectrl
+from pyful.message import Message
 
-# Get PYthon File management UtiLity.
-core = Pyful()
-
-class Filer(object):
-    def __init__(self):
+class Filer(Singleton):
+    def __init_of_singleton__(self):
         self.titlebar = None
         self.workspaces = []
         self.cursor = 0
+        self.core = Pyful()
+        self.message = Message()
+        self.count = 0
+
+    def __init__(self):
+        self.count += 1
 
     @property
     def keymap(self):
@@ -150,8 +154,8 @@ class Filer(object):
 
         length = sum([util.termwidth(w.title)+2 for w in self.workspaces])
 
-        if core.stdscr.maxx-length < 5:
-            return core.message.error('terminal size very small')
+        if self.core.stdscr.maxx-length < 5:
+            return self.message.error('terminal size very small')
 
         for i, ws in enumerate(self.workspaces):
             if self.cursor == i:
@@ -161,11 +165,11 @@ class Filer(object):
         self.titlebar.addstr(' | ', curses.A_BOLD)
 
         dirlen = len(self.workspace.dirs)
-        width = (core.stdscr.maxx-length-4) // dirlen
-        odd = (core.stdscr.maxx-length-4) % dirlen
+        width = (self.core.stdscr.maxx-length-4) // dirlen
+        odd = (self.core.stdscr.maxx-length-4) % dirlen
         if width < 5:
             self.titlebar.noutrefresh()
-            return core.message.error('terminal size very small')
+            return self.message.error('terminal size very small')
 
         for i, path in enumerate([d.path for d in self.workspace.dirs]):
             num = '[%d] ' % (i+1)
@@ -274,6 +278,7 @@ class Workspace(object):
         self.title = title
         self.dirs = []
         self.cursor = 0
+        self.core = Pyful()
 
     @property
     def dir(self):
@@ -300,8 +305,8 @@ class Workspace(object):
             path = self.default_path
         path = os.path.expanduser(path)
         size = len(self.dirs)
-        height = core.stdscr.maxy - 3
-        width = core.stdscr.maxx // (size+1)
+        height = self.core.stdscr.maxy - 3
+        width = self.core.stdscr.maxx // (size+1)
         begy = 1
         begx = width * size
 
@@ -348,11 +353,11 @@ class Workspace(object):
         size = len(self.dirs)
 
         if size == 1:
-            self.dirs[0].resize(core.stdscr.maxy-3, core.stdscr.maxx, 1, 0)
+            self.dirs[0].resize(self.core.stdscr.maxy-3, self.core.stdscr.maxx, 1, 0)
         else:
-            height = core.stdscr.maxy - 3
-            width = core.stdscr.maxx // 2
-            wodd = core.stdscr.maxx % 2
+            height = self.core.stdscr.maxy - 3
+            width = self.core.stdscr.maxx // 2
+            wodd = self.core.stdscr.maxx % 2
 
             if reverse:
                 self.dirs[0].resize(height, width, 1, width)
@@ -377,8 +382,8 @@ class Workspace(object):
 
     def oneline(self):
         self.layout = 'Oneline'
-        height = core.stdscr.maxy - 3
-        width = core.stdscr.maxx // len(self.dirs)
+        height = self.core.stdscr.maxy - 3
+        width = self.core.stdscr.maxx // len(self.dirs)
         for i, d in enumerate(self.dirs):
             d.win.erase()
             d.win.noutrefresh()
@@ -387,9 +392,9 @@ class Workspace(object):
 
     def onecolumn(self):
         self.layout = 'Onecolumn'
-        odd = (core.stdscr.maxy-3) % len(self.dirs)
-        height = (core.stdscr.maxy-3) // len(self.dirs)
-        width = core.stdscr.maxx
+        odd = (self.core.stdscr.maxy-3) % len(self.dirs)
+        height = (self.core.stdscr.maxy-3) // len(self.dirs)
+        width = self.core.stdscr.maxx
         size = len(self.dirs) - 1
         for i, d in enumerate(self.dirs):
             d.win.erase()
@@ -402,8 +407,8 @@ class Workspace(object):
 
     def fullscreen(self):
         self.layout = 'Fullscreen'
-        height = core.stdscr.maxy - 3
-        width = core.stdscr.maxx
+        height = self.core.stdscr.maxy - 3
+        width = self.core.stdscr.maxx
         for d in self.dirs:
             d.win.erase()
             d.win.noutrefresh()
@@ -501,6 +506,8 @@ class Directory(object):
         self.list = None
         self.list_title = None
         self.finder = Finder(self)
+        self.core = Pyful()
+        self.message = Message()
 
     @property
     def file(self):
@@ -620,7 +627,7 @@ class Directory(object):
                     if os.path.exists(line):
                         self.list.append(re.sub(self.path+'?'+os.sep, '', line))
         except Exception as e:
-            core.message.exception(e)
+            self.message.exception(e)
         self.reload()
 
     def reset(self):
@@ -669,7 +676,7 @@ class Directory(object):
         try:
             util.chdir(self.path)
         except EnvironmentError as e:
-            core.message.exception(e)
+            self.message.exception(e)
             self.chdir('/')
         self.diskread()
         self.sort()
@@ -689,13 +696,14 @@ class Directory(object):
                    'user: '+user, 'group: '+group,
                    'size: '+size, 'time: '+time]
 
-        ret = core.message.confirm('Invalid encoding error. What do you do?',
+        ret = self.message.confirm('Invalid encoding error. What do you do?',
                                     ['ignore', 'rename', 'delete'], msglist)
         if ret is None or ret == 'ignore':
             return False
         elif ret == 'rename':
             from pyful import mode
-            core.cmdline.start(mode.Rename(fname), '')
+            from pyful.cmdline import Cmdline
+            Cmdline().start(mode.Rename(fname), '')
         elif ret == 'delete':
             from pyful import filectrl
             filectrl.delete(fname)
@@ -715,7 +723,7 @@ class Directory(object):
         try:
             util.chdir(path)
         except EnvironmentError as e:
-            return core.message.exception(e)
+            return self.message.exception(e)
 
         if history:
             self.pathhistory_update(path)
@@ -1081,7 +1089,7 @@ class Directory(object):
         self.win.addstr(util.path_omission(self.path, width), curses.A_BOLD)
 
         if width < 30:
-            return core.message.error('terminal size very small')
+            return self.message.error('terminal size very small')
 
         line = 0
         for i in range(self.scrolltop, size):
@@ -1129,7 +1137,7 @@ class Directory(object):
                 # self.statwin.addstr(util.mbs_ljust(status + '  |', self.statwin.getmaxyx()[1]-2, keymap.HLINE))
                 self.statwin.addstr(status + '  |')
             except Exception as e:
-                core.message.error('Warning: status window very small')
+                self.message.error('Warning: status window very small')
             self.statwin.noutrefresh()
             if focus:
                 self.file.view()
@@ -1147,6 +1155,7 @@ class Finder(object):
         self.h_select = 0
         self.active = False
         self._stringcue = []
+        self.message = Message()
 
     def find(self, pattern):
         try:
@@ -1219,7 +1228,7 @@ class Finder(object):
         try:
             self.dir.statwin.addstr(' ' + self.string)
         except Exception as e:
-            core.message.error('Warning: status window very small')
+            self.message.error('Warning: status window very small')
         self.dir.statwin.noutrefresh()
 
 class FileStat(object):
@@ -1234,6 +1243,7 @@ class FileStat(object):
     time_24_flag = '!'
     time_week_flag = '#'
     time_yore_flag = ' '
+    core = Pyful()
 
     def __init__(self, name, force=False):
         if force:
@@ -1422,11 +1432,12 @@ class FileStat(object):
         return perm
 
     def view(self):
+        from pyful import filectrl
         if filectrl.Filectrl.threads:
             filectrl.view_threads()
             return
 
-        core.stdscr.cmdwin.erase()
+        self.core.stdscr.cmdwin.erase()
 
         perm = self.get_permission()
         user = self.get_user_name()
@@ -1437,7 +1448,7 @@ class FileStat(object):
         name = self.name
 
         fstat = '%s %s %s %s %d %s %s' % (perm, nlink, user, group, size, mtime, name)
-        fstat = util.mbs_ljust(fstat, core.stdscr.maxx-1)
-        core.stdscr.cmdwin.move(1, 0)
-        core.stdscr.cmdwin.addstr(fstat)
-        core.stdscr.cmdwin.noutrefresh()
+        fstat = util.mbs_ljust(fstat, self.core.stdscr.maxx-1)
+        self.core.stdscr.cmdwin.move(1, 0)
+        self.core.stdscr.cmdwin.addstr(fstat)
+        self.core.stdscr.cmdwin.noutrefresh()

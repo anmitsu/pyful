@@ -18,13 +18,12 @@
 
 import curses
 
+from pyful import Singleton
 from pyful import util
-from pyful import Pyful
+from pyful.message import Message
 from pyful.keymap import *
 
-core = Pyful()
-
-class Menu(object):
+class Menu(Singleton):
     keymap = {}
     _items = {}
 
@@ -34,11 +33,12 @@ class Menu(object):
         self.__class__._items.update(itm)
     items = property(getitems, setitems)
 
-    def __init__(self):
+    def __init_of_singleton__(self):
         self.win = None
         self.cursor = 0
         self.active = None
         self.title = None
+        self.message = Message()
 
     def mvcursor(self, x):
         self.cursor += x
@@ -48,7 +48,7 @@ class Menu(object):
 
     def show(self, name):
         if name not in self.items:
-            core.message.error("Undefined menu `%s'" % name)
+            self.message.error("Undefined menu `%s'" % name)
             return
         self.title = name
         self.active = self._items[name]
