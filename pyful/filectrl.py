@@ -61,13 +61,7 @@ def copy(src, dst):
     Filectrl().copy(src, dst)
 
 def delete(path):
-    try:
-        if os.path.islink(path) or not os.path.isdir(path):
-            os.remove(path)
-        else:
-            shutil.rmtree(path)
-    except EnvironmentError as e:
-        _message.exception(e)
+    Filectrl().delete(path)
 
 def link(src, dst):
     try:
@@ -277,6 +271,14 @@ class Filectrl(object):
         Filectrl.threads.remove(self.thread)
         Filer().workspace.all_reload()
         self.core.view()
+
+    def delete(self, path):
+        if isinstance(path, list):
+            path = [util.abspath(path) for f in path]
+        else:
+            path = util.abspath(path)
+        self.thread = DeleteThread(path)
+        self.thread_loop()
 
     def copy(self, src, dst):
         if isinstance(src, list):
@@ -654,6 +656,26 @@ class ZipThread(threading.Thread):
         else:
             self._write(myzip, source)
 
+class DeleteThread(threading.Thread):
+    def __init__(self, path):
+        threading.Thread.__init__(self)
+        self.setDaemon(True)
+        self.active = True
+        self.title = "Deleting: %s" % util.unix_basename(path)
+        self.path = path
+
+    def run(self):
+        try:
+            if os.path.islink(self.path) or not os.path.isdir(self.path):
+                os.remove(self.path)
+            else:
+                shutil.rmtree(self.path)
+        except EnvironmentError as e:
+            _message.exception(e)
+
+    def kill(self):
+        pass
+
 class CopyThread(threading.Thread):
     def __init__(self, ctrl, title):
         threading.Thread.__init__(self)
@@ -784,7 +806,13 @@ class FileJob(object):
             if errno.EXDEV == e[0]:
                 self.copy(thread)
                 if thread.active:
-                    delete(self.src)
+                    try:
+                        if os.path.islink(self.src) or not os.path.isdir(self.src):
+                            os.remove(self.src)
+                        else:
+                            shutil.rmtree(self.src)
+                    except EnvironmentError as e:
+                        _message.exception(e)
             else:
                 _message.exception(e)
 
