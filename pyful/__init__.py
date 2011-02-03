@@ -78,10 +78,10 @@ class Singleton(object):
             cls._singleton_instances = {}
             instance = super(Singleton, cls).__new__(cls, *args, **kwargs)
             cls._singleton_instances[hash(cls)] = instance
-            instance.__init_of_singleton__(*args, **kwargs)
+            instance.init_singleton_instance(*args, **kwargs)
         return cls._singleton_instances[hash(cls)]
 
-    def __init_of_singleton__(self, *args, **kwargs):
+    def init_singleton_instance(self):
         raise(Exception, "Singleton class must override this method.")
 
 class Pyful(Singleton):
@@ -100,7 +100,7 @@ class Pyful(Singleton):
     __initfuncs = []
     __exitfuncs = []
 
-    def __init_of_singleton__(self):
+    def init_singleton_instance(self):
         from pyful.message import Message
         self.message = Message()
 

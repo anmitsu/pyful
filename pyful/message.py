@@ -26,7 +26,7 @@ from pyful import ui
 from pyful.keymap import *
 
 class Message(Singleton):
-    def __init_of_singleton__(self):
+    def init_singleton_instance(self):
         self.msg = ""
         self.type = "puts"
         self.active = False

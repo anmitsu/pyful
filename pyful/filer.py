@@ -33,7 +33,7 @@ from pyful import look
 from pyful.message import Message
 
 class Filer(Singleton):
-    def __init_of_singleton__(self):
+    def init_singleton_instance(self):
         self.titlebar = None
         self.workspaces = []
         self.cursor = 0

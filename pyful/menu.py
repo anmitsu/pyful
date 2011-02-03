@@ -33,7 +33,7 @@ class Menu(Singleton):
         self.__class__._items.update(itm)
     items = property(getitems, setitems)
 
-    def __init_of_singleton__(self):
+    def init_singleton_instance(self):
         self.win = None
         self.cursor = 0
         self.active = None

@@ -34,7 +34,7 @@ class Cmdline(Singleton):
     keymap = {}
     wordbreakchars = re.compile("[._/\s\t\n\"\\`'@$><=:|&{(]")
 
-    def __init_of_singleton__(self):
+    def init_singleton_instance(self):
         self.string = ""
         self.cursor = 0
         self.active = False
