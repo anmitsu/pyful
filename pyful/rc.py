@@ -75,6 +75,14 @@ Directory.sort_kind = 'Name[^]'
 # Distinguish upper case and lower case at a finder?
 Finder.smartcase = True
 
+# Set PyMigemo and migemo dictionary.
+# It is necessary to install PyMigemo to use migemo.
+try:
+    import migemo
+    Finder.migemo = migemo.Migemo("/usr/share/cmigemo/utf-8/migemo-dict")
+except (ImportError, ValueError):
+    Finder.migemo = None
+
 # Set the time format of file.
 # It conforms to the strftime format from time module.
 FileStat.time_format = '%y-%m-%d %H:%M'

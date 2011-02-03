@@ -1146,6 +1146,7 @@ class Finder(object):
     keymap = {}
     smartcase = True
     history = [""]
+    migemo = None
 
     def __init__(self, dir):
         self.dir = dir
@@ -1160,8 +1161,12 @@ class Finder(object):
     def find(self, pattern):
         try:
             if self.smartcase and re.match("[A-Z]", pattern) is None:
+                if self.migemo:
+                    pattern = self.migemo.query(pattern)
                 reg = re.compile(pattern, re.IGNORECASE)
             else:
+                if self.migemo:
+                    pattern = self.migemo.query(pattern)
                 reg = re.compile(pattern)
         except Exception as e:
             return
