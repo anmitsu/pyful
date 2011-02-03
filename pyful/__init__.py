@@ -16,6 +16,9 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+"""Python file management utility.
+This application is CUI filer of the keyboard operation for Linux."""
+
 __version__ = "0.2"
 
 import os

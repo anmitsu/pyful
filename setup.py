@@ -2,17 +2,18 @@
 
 from distutils.core import setup
 
-from pyful import __version__
+import pyful
 
 setup(name = "Pyful",
-      version = __version__,
+      version = pyful.__version__,
       description = "Python file management utility",
-      long_description = "Python file management utility. This application is CUI filer of the keyboard operation for Linux.",
+      long_description = pyful.__doc__,
       author = "anmitsu",
       author_email = "anmitsu.s@gmail.com",
       url = "http://github.com/anmitsu/pyful",
       license = "GPL",
       packages = ["pyful", "pyful.completion"],
       scripts = ["bin/pyful"],
+      keywords = "filer curses linux"
       )
 
