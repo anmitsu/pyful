@@ -14,6 +14,13 @@ setup(name = "pyful",
       license = "GPL",
       packages = ["pyful", "pyful.completion"],
       scripts = ["bin/pyful"],
-      keywords = "filer curses linux"
+      keywords = "filer curses linux",
+      classifiers = ["Environment :: Console :: Curses",
+                     "License :: OSI Approved :: GNU General Public License (GPL)",
+                     "Operating System :: POSIX :: Linux",
+                     "Programming Language :: Python",
+                     "Topic :: Desktop Environment :: File Managers",
+                     "Topic :: System :: Shells",
+                     "Topic :: Utilities"],
       )
 
