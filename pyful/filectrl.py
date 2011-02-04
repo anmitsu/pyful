@@ -669,12 +669,28 @@ class DeleteThread(threading.Thread):
             if os.path.islink(self.path) or not os.path.isdir(self.path):
                 os.remove(self.path)
             else:
-                shutil.rmtree(self.path)
+                dirlist = [self.path]
+                for root, dirs, files in os.walk(self.path):
+                    if not self.active: break
+                    for f in files:
+                        self.title = "Deleting: " + f
+                        view_threads()
+                        os.remove(os.path.join(root, f))
+                    for d in dirs:
+                        dirlist.append(os.path.join(root, d))
+                dirlist.sort()
+                dirlist.reverse()
+                for d in dirlist:
+                    try:
+                        os.rmdir(d)
+                    except Exception as e:
+                        if e[0] == errno.ENOTEMPTY:
+                            pass
         except EnvironmentError as e:
             _message.exception(e)
 
     def kill(self):
-        pass
+        self.active = False
 
 class CopyThread(threading.Thread):
     def __init__(self, ctrl, title):
@@ -807,10 +823,7 @@ class FileJob(object):
                 self.copy(thread)
                 if thread.active:
                     try:
-                        if os.path.islink(self.src) or not os.path.isdir(self.src):
-                            os.remove(self.src)
-                        else:
-                            shutil.rmtree(self.src)
+                        os.remove(self.src)
                     except EnvironmentError as e:
                         _message.exception(e)
             else:
