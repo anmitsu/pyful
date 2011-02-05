@@ -46,7 +46,7 @@ def view_process():
         elif poll != None:
             (out, err) = p.communicate()
             if err:
-                Message().error(re.sub("[\r\t]", "", err))
+                Message().error(err)
             Process.procs.remove(p)
 
 class Process(object):
@@ -81,6 +81,7 @@ class Process(object):
         os.system("clear")
         try:
             exec(cmd)
+            self.message.puts("Eval: %s" % cmd)
             if not self.quick:
                 util.wait_restore()
         except Exception as e:
@@ -92,7 +93,7 @@ class Process(object):
                 proc = subprocess.Popen(cmd, shell=True, executable=self.shell[0],
                                         close_fds=True, preexec_fn=os.setsid, stdout=PIPE, stderr=PIPE)
                 self.procs.append(proc)
-                self.message.puts("%s - (%s)" % (cmd.strip(), proc.pid))
+                self.message.puts("Spawn: %s (%s)" % (cmd.strip(), proc.pid))
             except Exception as e:
                 self.message.exception(e)
         else:
@@ -105,6 +106,7 @@ class Process(object):
                 proc.wait()
                 if not self.quick:
                     util.wait_restore()
+                self.message.puts("Spawn: %s (%s)" % (cmd.strip(), proc.pid))
             except Exception as e:
                 self.message.exception(e)
             finally:
@@ -112,9 +114,11 @@ class Process(object):
 
     def screen(self, cmd, title):
         subprocess.Popen(["screen", "-t", title, self.shell[0], self.shell[1], "%s; python %s -e" % (cmd, self.core.binpath)])
+        self.message.puts("Spawn: %s (screen)" % cmd.strip())
 
     def terminal(self, cmd):
         subprocess.Popen([self.terminal_emulator[0], self.terminal_emulator[1], cmd])
+        self.message.puts("Spawn: %s (%s)" % (cmd.strip(), self.terminal_emulator[0]))
 
     def parsemacro(self, string):
         ret = string
