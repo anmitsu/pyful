@@ -77,8 +77,11 @@ class Process(object):
     def system(self, cmd):
         if self.background:
             try:
-                subprocess.Popen(cmd, shell=True, executable=self.shell[0],
-                                 close_fds=True, preexec_fn=os.setsid, stderr=PIPE)
+                proc = subprocess.Popen(cmd, shell=True, executable=self.shell[0],
+                                        close_fds=True, preexec_fn=os.setsid, stdout=PIPE, stderr=PIPE)
+                (out, err) = proc.communicate()
+                if err:
+                    self.message.error(err)
             except Exception as e:
                 self.message.exception(e)
         else:
