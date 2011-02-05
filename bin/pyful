@@ -69,22 +69,26 @@ imp.reload(sys)
 sys.setdefaultencoding("utf-8")
 
 from pyful import Pyful
+from pyful.message import Message
 
 if __name__ == '__main__':
+    core = Pyful()
+
+    core.setsignal()
+    core.binpath = os.path.abspath(__file__)
+
+    core.load_rcfile(__options__.config)
+    core.start_curses()
+    core.init_function()
+
+    core.stdscr.refresh()
+    core.started = True
+    message = Message()
+    message.puts("Loaded %s" % Pyful.environs['RCFILE'])
+    message.puts("Welcome to pyful v%s" % __version__)
+    core.view()
+
     try:
-        core = Pyful()
-
-        core.setsignal()
-        core.binpath = os.path.abspath(__file__)
-
-        core.load_rcfile(__options__.config)
-        core.start_curses()
-        core.init_function()
-
-        core.stdscr.refresh()
-        core.view()
-        core.started = True
-
         core.main_loop()
     except SystemExit:
         core.create_config()
