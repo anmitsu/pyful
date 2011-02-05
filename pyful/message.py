@@ -51,7 +51,8 @@ class Message(Singleton):
         if self.history < len(self.msg):
             self.msg.pop()
         self.view()
-        self.start_timer(timex)
+        if timex:
+            self.start_timer(timex)
 
     def error(self, string, timex=4):
         self.active = True
@@ -60,7 +61,8 @@ class Message(Singleton):
         if self.history < len(self.msg):
             self.msg.pop()
         self.view()
-        self.start_timer(timex)
+        if timex:
+            self.start_timer(timex)
 
     def exception(self, except_cls):
         self.error('%s: %s' % (except_cls.__class__.__name__, str(except_cls)))

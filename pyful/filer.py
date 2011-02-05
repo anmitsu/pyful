@@ -1432,11 +1432,6 @@ class FileStat(object):
         return perm
 
     def view(self):
-        from pyful import filectrl
-        if filectrl.Filectrl.threads:
-            filectrl.view_threads()
-            return
-
         self.core.stdscr.cmdwin.erase()
 
         perm = self.get_permission()

@@ -161,18 +161,10 @@ def kill_thread():
 
 def view_threads():
     from pyful.cmdline import Cmdline
-    core = Pyful()
-    if Cmdline().active or _message.active:
+    if Cmdline().active:
         return
-    core.stdscr.cmdwin.erase()
-    core.stdscr.cmdwin.move(0, 1)
     for i, t in enumerate(Filectrl.threads):
-        try:
-            core.stdscr.cmdwin.addstr("[%s] %s " % (str(i+1), t.title), curses.A_BOLD)
-        except Exception:
-            pass
-    core.stdscr.cmdwin.move(1, core.stdscr.maxx-1)
-    core.stdscr.cmdwin.noutrefresh()
+        _message.puts("[%s] %s" % (str(i+1), t.title), 0)
     curses.doupdate()
 
 class FilectrlCancel(Exception):
@@ -268,6 +260,10 @@ class Filectrl(object):
         while self.thread.isAlive():
             self.threadevent.wait()
             self.core.main_loop_nodelay()
+        if self.thread.error:
+            _message.exception(self.thread.error)
+        else:
+            _message.active = False
         Filectrl.threads.remove(self.thread)
         Filer().workspace.all_reload()
         self.core.view()
@@ -347,6 +343,7 @@ class TarThread(threading.Thread):
     def __init__(self, src, dst, tarmode='gzip', wrap=''):
         threading.Thread.__init__(self)
         self.setDaemon(True)
+        self.error = 0
         self.active = True
         self.title = 'Reading...'
         if isinstance(src, list):
@@ -375,7 +372,8 @@ class TarThread(threading.Thread):
         try:
             tar = tarfile.open(self.dst, 'w|'+mode)
         except Exception as e:
-            return _message.exception(e)
+            self.error = e
+            return 
 
         try:
             if isinstance(self.src, list):
@@ -424,6 +422,7 @@ class UntarThread(threading.Thread):
     def __init__(self, src, dstdir='.'):
         threading.Thread.__init__(self)
         self.setDaemon(True)
+        self.error = 0
         self.active = True
         self.title = 'Reading...'
         if isinstance(src, list):
@@ -457,7 +456,8 @@ class UntarThread(threading.Thread):
         try:
             tar = tarfile.open(source, 'r:'+mode)
         except Exception as e:
-            return _message.exception(e)
+            self.error = e
+            return 
         try:
             for info in tar.getmembers():
                 if not self.active:
@@ -480,6 +480,7 @@ class UnzipThread(threading.Thread):
     def __init__(self, src, dstdir=''):
         threading.Thread.__init__(self)
         self.setDaemon(True)
+        self.error = 0
         self.title = 'Unzip'
         self.active = True
         if isinstance(src, list):
@@ -514,7 +515,8 @@ class UnzipThread(threading.Thread):
             except KeyError:
                 return
         except Exception as e:
-            return _message.exception(e)
+            self.error = e
+            return 
         perm = info.external_attr >> 16
         date = list(info.date_time) + [-1, -1, -1]
         path = util.force_decode(path)
@@ -552,7 +554,8 @@ class UnzipThread(threading.Thread):
         try:
             myzip = zipfile.ZipFile(srczippath, 'r')
         except Exception as e:
-            return _message.exception(e)
+            self.error = e
+            return 
 
         for info in myzip.infolist():
             if not self.active:
@@ -592,6 +595,7 @@ class ZipThread(threading.Thread):
     def __init__(self, src, dst, wrap=''):
         threading.Thread.__init__(self)
         self.setDaemon(True)
+        self.error = 0
         self.title = 'Zip'
         self.active = True
         if isinstance(src, list):
@@ -616,7 +620,8 @@ class ZipThread(threading.Thread):
         try:
             myzip = zipfile.ZipFile(self.dst, 'w', compression=zipfile.ZIP_DEFLATED)
         except Exception as e:
-            return _message.exception(e)
+            self.error = e
+            return 
 
         try:
             if isinstance(self.src, list):
@@ -662,6 +667,7 @@ class DeleteThread(threading.Thread):
     def __init__(self, path):
         threading.Thread.__init__(self)
         self.setDaemon(True)
+        self.error = 0
         self.active = True
         self.title = "Deleting: %s" % util.unix_basename(path)
         self.path = path
@@ -669,6 +675,8 @@ class DeleteThread(threading.Thread):
     def run(self):
         try:
             if os.path.islink(self.path) or not os.path.isdir(self.path):
+                self.title = "Deleting: " + util.unix_basename(self.path)
+                view_threads()
                 os.remove(self.path)
             else:
                 dirlist = [self.path]
@@ -690,7 +698,7 @@ class DeleteThread(threading.Thread):
                         if e[0] == errno.ENOTEMPTY:
                             pass
         except Exception as e:
-            _message.exception(e)
+            self.error = e
 
     def kill(self):
         self.active = False
@@ -699,6 +707,7 @@ class CopyThread(threading.Thread):
     def __init__(self, ctrl, title):
         threading.Thread.__init__(self)
         self.setDaemon(True)
+        self.error = 0
         self.ctrl = ctrl
         self.title = title
         self.active = True
@@ -710,8 +719,8 @@ class CopyThread(threading.Thread):
                     break
                 if isinstance(j, FileJob):
                     j.copy(self)
-        except FilectrlCancel:
-            _message.error("Copy canceled")
+        except FilectrlCancel as e:
+            self.error = e
 
     def kill(self):
         self.active = False
@@ -720,6 +729,7 @@ class MoveThread(threading.Thread):
     def __init__(self, ctrl, title):
         threading.Thread.__init__(self)
         self.setDaemon(True)
+        self.error = 0
         self.ctrl = ctrl
         self.title = title
         self.active = True
@@ -731,8 +741,8 @@ class MoveThread(threading.Thread):
                     break
                 if isinstance(j, FileJob):
                     j.move(self)
-        except FilectrlCancel:
-            _message.error("Move canceled")
+        except FilectrlCancel as e:
+            self.error = e
 
         self.ctrl.dirlist.sort()
         self.ctrl.dirlist.reverse()
@@ -806,7 +816,7 @@ class FileJob(object):
                 self.copyfileobj(self.src, self.dst)
                 shutil.copystat(self.src, self.dst)
         except Exception as e:
-            _message.exception(e)
+            self.thread.error = e
 
     def move(self, thread):
         self.thread = thread
@@ -828,7 +838,7 @@ class FileJob(object):
                     try:
                         os.remove(self.src)
                     except EnvironmentError as e:
-                        _message.exception(e)
+                        self.thread.error = e
             else:
-                _message.exception(e)
+                self.thread.error = e
 
