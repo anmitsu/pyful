@@ -113,6 +113,9 @@ class Pyful(Singleton):
         from pyful.menu import Menu
         self.menu = Menu()
 
+        from pyful.process import view_process
+        self.view_process = view_process
+
     def start_curses(self):
         if not self.started:
             self.stdscr = StandardScreen()
@@ -146,6 +149,7 @@ class Pyful(Singleton):
             self.cmdline.view()
         elif self.message.active:
             self.message.view()
+        self.view_process()
         curses.doupdate()
 
     def input(self, meta, key):

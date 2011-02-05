@@ -38,9 +38,18 @@ def python(cmd):
 def system(cmd):
     Process().system(cmd)
 
+def view_process():
+    for p in Process.procs:
+        if p.poll():
+            (out, err) = p.communicate()
+            if err:
+                Message().error(err)
+            Process.procs.remove(p)
+
 class Process(object):
     shell = ("/bin/bash", "-c")
     terminal_emulator = ("x-terminal-emulator", "-e")
+    procs = []
 
     def __init__(self):
         self.quick = False
@@ -77,11 +86,10 @@ class Process(object):
     def system(self, cmd):
         if self.background:
             try:
-                proc = subprocess.Popen(cmd, shell=True, executable=self.shell[0],
-                                        close_fds=True, preexec_fn=os.setsid, stdout=PIPE, stderr=PIPE)
-                (out, err) = proc.communicate()
-                if err:
-                    self.message.error(err)
+                self.procs.append(
+                    subprocess.Popen(cmd, shell=True, executable=self.shell[0],
+                                     close_fds=True, preexec_fn=os.setsid, stdout=PIPE, stderr=PIPE)
+                    )
             except Exception as e:
                 self.message.exception(e)
         else:
