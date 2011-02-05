@@ -40,7 +40,7 @@ def system(cmd):
 
 def view_process():
     for p in Process.procs:
-        if p.poll():
+        if p.poll() != None:
             (out, err) = p.communicate()
             if err:
                 Message().error(err)
