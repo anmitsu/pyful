@@ -20,8 +20,7 @@ import curses
 import re
 from threading import Timer
 
-from pyful import Pyful
-from pyful import Singleton
+from pyful import Pyful, Singleton
 from pyful import look
 from pyful import ui
 from pyful import util

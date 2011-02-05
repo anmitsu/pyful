@@ -26,8 +26,7 @@ import time
 import pwd
 import grp
 
-from pyful import Pyful
-from pyful import Singleton
+from pyful import Pyful, Singleton
 from pyful import util
 from pyful import look
 from pyful.message import Message

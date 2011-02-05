@@ -20,8 +20,7 @@ import os
 import re
 import subprocess
 
-from pyful import Pyful
-from pyful import Singleton
+from pyful import Pyful, Singleton
 from pyful import completion
 from pyful import util
 from pyful import look
