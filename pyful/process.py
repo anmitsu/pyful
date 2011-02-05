@@ -20,6 +20,7 @@ import os
 import re
 import curses
 import subprocess
+from subprocess import PIPE
 
 from pyful import util
 from pyful import Pyful
@@ -31,6 +32,7 @@ def spawn(cmd, title=None, expandmacro=True):
     Process().spawn(cmd, title)
 
 def python(cmd):
+    cmd = util.expandmacro(cmd, shell=False)
     Process().python(cmd)
 
 def system(cmd):
@@ -62,33 +64,37 @@ class Process(object):
             self.system(cmd)
 
     def python(self, cmd):
+        cmd = self.parsemacro(cmd)
         curses.endwin()
         os.system("clear")
         try:
             exec(cmd)
-            util.wait_restore()
+            if not self.quick:
+                util.wait_restore()
         except Exception as e:
             self.message.exception(e)
 
     def system(self, cmd):
         if self.background:
-            cmd += " 1>%s 2>%s &" % (os.devnull, os.devnull)
+            try:
+                subprocess.Popen(cmd, shell=True, executable=self.shell[0],
+                                 close_fds=True, preexec_fn=os.setsid, stderr=PIPE)
+            except Exception as e:
+                self.message.exception(e)
         else:
             curses.endwin()
             os.system("clear")
-        try:
-            self.core.resetsignal()
-            subprocess.call(cmd, shell=True)
-            if self.quick or self.background:
-                pass
-            else:
-                util.wait_restore()
-        except Exception as e:
-            self.message.exception(e)
-        except KeyboardInterrupt as e:
-            pass
-        finally:
-            self.core.setsignal()
+            try:
+                self.core.resetsignal()
+                proc = subprocess.Popen(cmd, shell=True, executable=self.shell[0],
+                                        close_fds=True, preexec_fn=os.setsid)
+                proc.wait()
+                if not self.quick:
+                    util.wait_restore()
+            except Exception as e:
+                self.message.exception(e)
+            finally:
+                self.core.setsignal()
 
     def screen(self, cmd, title):
         subprocess.Popen(["screen", "-t", title, self.shell[0], self.shell[1], "%s; python %s -e" % (cmd, self.core.binpath)])
