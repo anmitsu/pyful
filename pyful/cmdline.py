@@ -501,13 +501,14 @@ class Output(ui.InfoBox):
     def __init__(self, cmdline):
         ui.InfoBox.__init__(self, "output")
         self.cmdline = cmdline
+        self.message = Message()
 
     def edit(self):
         try:
             li = self.cursor_item().split(":")
             fname = li[0]
             lnum = li[1]
-            process.spawn("%s +%s %s" % (self.core.environs['EDITOR'], lnum, fname))
+            process.spawn("%s +%s %s" % (Pyful.environs['EDITOR'], lnum, fname))
         except Exception as e:
             self.message.error("edit: %s" % str(e))
 
