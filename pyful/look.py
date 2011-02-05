@@ -85,7 +85,7 @@ def init_colors():
             'LINKDIR': curses.color_pair(__LINK_DIR__) | curses.A_BOLD,
             'DIRECTORY': curses.color_pair(__DIRECTORY__) | curses.A_BOLD,
             'EXECUTABLE': curses.color_pair(__EXECUTABLE__) | curses.A_BOLD,
-            'MSGPUT': curses.color_pair(__MSG_PUTS__) | curses.A_BOLD,
+            'MSGPUT': curses.color_pair(__MSG_PUTS__),
             'MSGERR': curses.color_pair(__MSG_ERROR__) | curses.A_BOLD,
             'MSGCONFIRM': curses.color_pair(__MSG_CONFIRM__) | curses.A_BOLD,
             'FINDER': curses.color_pair(__FINDER__),
