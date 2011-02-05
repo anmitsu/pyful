@@ -77,6 +77,9 @@ def flatten(ls):
         yield ls
 
 
+def shlex_unicode(string):
+    return [i.strip('"').strip("'") for i in re.split(r'(\s+|(?<!\\)".*?(?<!\\)"|(?<!\\)\'.*?(?<!\\)\')', string) if i.strip()]
+
 def string_to_safe(string):
     return re.sub("([\s!\"#\$&'\(\)~\|\[\]\{\}\*;\?<>])", r"\\\1", string)
 
