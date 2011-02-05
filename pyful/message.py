@@ -17,21 +17,27 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import curses
+import re
 from threading import Timer
 
 from pyful import Pyful
 from pyful import Singleton
 from pyful import look
 from pyful import ui
+from pyful import util
 from pyful.keymap import *
 
 class Message(Singleton):
+    history = 100
+
     def init_singleton_instance(self):
-        self.msg = ""
-        self.type = "puts"
+        self.msg = []
         self.active = False
         self.timer = None
         self.core = Pyful()
+
+    def init_messagebox(self):
+        self.messagebox = MessageBox()
 
     def start_timer(self, timex):
         if self.timer:
@@ -41,15 +47,19 @@ class Message(Singleton):
 
     def puts(self, string, timex=4):
         self.active = True
-        self.msg = string
-        self.type = "puts"
+        msg = (re.sub(r"[\n\r\t]", "", util.unistr(string)), look.colors['MSGPUT'])
+        self.msg.insert(0, msg)
+        if self.history < len(self.msg):
+            self.msg.pop()
         self.view()
         self.start_timer(timex)
 
     def error(self, string, timex=4):
         self.active = True
-        self.msg = string
-        self.type = "error"
+        msg = (re.sub(r"[\n\r\t]", "", util.unistr(string)), look.colors['MSGERR'])
+        self.msg.insert(0, msg)
+        if self.history < len(self.msg):
+            self.msg.pop()
         self.view()
         self.start_timer(timex)
 
@@ -57,7 +67,6 @@ class Message(Singleton):
         self.error('%s: %s' % (except_cls.__class__.__name__, str(except_cls)))
 
     def confirm(self, msg, options, msglist=None, position=0):
-        self.active = True
         self.core.view()
         cnf = Confirm(msg, options, msglist)
         cnf.setcursor(position)
@@ -65,32 +74,39 @@ class Message(Singleton):
             cnf.view()
             (meta, key) = self.core.stdscr.getch()
             cnf.input(meta, key)
-        self.active = False
         return cnf.result
 
     def hide(self):
-        self.msg = ""
         self.active = False
-        if not curses.isendwin():
-            self.core.stdscr.cmdwin.erase()
-            self.core.stdscr.cmdwin.noutrefresh()
-            self.core.view()
 
     def view(self):
-        self.core.stdscr.cmdwin.erase()
-        self.core.stdscr.cmdwin.move(0, 1)
+        self.messagebox.view(self.msg)
 
-        try:
-            if self.type == "puts":
-                self.core.stdscr.cmdwin.addstr(self.msg, look.colors['MSGPUT'])
-            elif self.type == "error":
-                self.core.stdscr.cmdwin.addstr(self.msg, look.colors['MSGERR'])
-        except Exception as e:
-            pass
+class MessageBox(object):
+    height = 2
 
-        (l, c) = self.core.stdscr.cmdwin.getmaxyx()
-        self.core.stdscr.cmdwin.move(l-1, c-1)
-        self.core.stdscr.cmdwin.noutrefresh()
+    def __init__(self):
+        self.core = Pyful()
+        self.win = curses.newwin(self.height+2, self.core.stdscr.maxx, self.core.stdscr.maxy-self.height-4, 0)
+
+    def resize(self):
+        self.win = curses.newwin(self.height+2, self.core.stdscr.maxx, self.core.stdscr.maxy-self.height-4, 0)
+
+    def view(self, msglist):
+        if not msglist:
+            return
+        self.win.box()
+        size = len(msglist)
+        (y,x) = self.win.getmaxyx()
+        self.win.move(0, 2)
+        self.win.addstr("Messages(%s)" % size, curses.A_BOLD)
+        (y,x) = self.win.getmaxyx()
+        for i in range(0, size):
+            if self.height <= i: break
+            self.win.move(i+1, 2)
+            msg = msglist[i]
+            self.win.addstr(util.mbs_ljust(msg[0], x-4), msg[1])
+        self.win.noutrefresh()
 
 class Confirm(object):
     keymap = {}

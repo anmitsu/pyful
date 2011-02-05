@@ -40,6 +40,12 @@ mode.Newfile.filemode = 0o644
 # Set the prompt of shell mode.
 mode.Shell.prompt = '$'
 
+# Set message history.
+message.Message.history = 100
+
+# Set height of message box.
+message.MessageBox.height = 2
+
 # Set the default path of the directory creating.
 Workspace.default_path = '~/'
 

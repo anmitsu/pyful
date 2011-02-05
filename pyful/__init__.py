@@ -123,6 +123,8 @@ class Pyful(Singleton):
             self.filer.titlebar = curses.newwin(1, self.stdscr.maxx, 0, 0)
             self.filer.default_init()
 
+            self.message.init_messagebox()
+
             from pyful import ui
             ui.init_ui()
 
@@ -183,6 +185,7 @@ class Pyful(Singleton):
         self.filer.workspace.resize()
         from pyful import ui
         ui.InfoBox.resize()
+        self.message.messagebox.resize()
 
     def setsignal(self):
         def _signal(signalnum, stackframe):
