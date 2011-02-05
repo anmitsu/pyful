@@ -79,10 +79,13 @@ class Message(Singleton):
         self.core.stdscr.cmdwin.erase()
         self.core.stdscr.cmdwin.move(0, 1)
 
-        if self.type == "puts":
-            self.core.stdscr.cmdwin.addstr(self.msg, look.colors['MSGPUT'])
-        elif self.type == "error":
-            self.core.stdscr.cmdwin.addstr(self.msg, look.colors['MSGERR'])
+        try:
+            if self.type == "puts":
+                self.core.stdscr.cmdwin.addstr(self.msg, look.colors['MSGPUT'])
+            elif self.type == "error":
+                self.core.stdscr.cmdwin.addstr(self.msg, look.colors['MSGERR'])
+        except Exception as e:
+            pass
 
         (l, c) = self.core.stdscr.cmdwin.getmaxyx()
         self.core.stdscr.cmdwin.move(l-1, c-1)

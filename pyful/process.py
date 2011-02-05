@@ -40,10 +40,13 @@ def system(cmd):
 
 def view_process():
     for p in Process.procs:
-        if p.poll() != None:
+        poll = p.poll()
+        if poll == 0:
+            Process.procs.remove(p)
+        elif poll != None:
             (out, err) = p.communicate()
             if err:
-                Message().error(err)
+                Message().error(re.sub("[\n\r\t]", "", err))
             Process.procs.remove(p)
 
 class Process(object):
