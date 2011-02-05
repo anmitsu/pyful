@@ -71,9 +71,10 @@ class Message(Singleton):
     def hide(self):
         self.msg = ""
         self.active = False
-        self.core.stdscr.cmdwin.erase()
-        self.core.stdscr.cmdwin.noutrefresh()
-        self.core.view()
+        if not curses.isendwin():
+            self.core.stdscr.cmdwin.erase()
+            self.core.stdscr.cmdwin.noutrefresh()
+            self.core.view()
 
     def view(self):
         self.core.stdscr.cmdwin.erase()
