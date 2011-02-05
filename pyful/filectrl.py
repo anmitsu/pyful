@@ -513,6 +513,8 @@ class UnzipThread(threading.Thread):
                 info = myzip.getinfo(path)
             except KeyError:
                 return
+        except Exception as e:
+            return _message.exception(e)
         perm = info.external_attr >> 16
         date = list(info.date_time) + [-1, -1, -1]
         path = util.force_decode(path)
