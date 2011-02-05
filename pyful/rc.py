@@ -9,6 +9,7 @@ from pyful.command import commands
 from pyful.cmdline import Cmdline
 from pyful.filer import Filer, Workspace, Directory, Finder, FileStat
 from pyful.menu import Menu
+from pyful import message
 from pyful import ui
 from pyful import mode
 from pyful import process
@@ -44,7 +45,7 @@ mode.Shell.prompt = '$'
 message.Message.history = 100
 
 # Set height of message box.
-message.MessageBox.height = 2
+message.MessageBox.height = 4
 
 # Set the default path of the directory creating.
 Workspace.default_path = '~/'
