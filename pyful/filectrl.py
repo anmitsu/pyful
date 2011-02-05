@@ -671,11 +671,12 @@ class DeleteThread(threading.Thread):
             else:
                 dirlist = [self.path]
                 for root, dirs, files in os.walk(self.path):
-                    if not self.active: break
                     for f in files:
                         self.title = "Deleting: " + f
                         view_threads()
                         os.remove(os.path.join(root, f))
+                        if not self.active:
+                            raise FilectrlCancel
                     for d in dirs:
                         dirlist.append(os.path.join(root, d))
                 dirlist.sort()
@@ -686,7 +687,7 @@ class DeleteThread(threading.Thread):
                     except Exception as e:
                         if e[0] == errno.ENOTEMPTY:
                             pass
-        except EnvironmentError as e:
+        except Exception as e:
             _message.exception(e)
 
     def kill(self):
