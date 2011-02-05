@@ -46,7 +46,7 @@ def view_process():
         elif poll != None:
             (out, err) = p.communicate()
             if err:
-                Message().error(re.sub("[\n\r\t]", "", err))
+                Message().error(re.sub("[\r\t]", "", err))
             Process.procs.remove(p)
 
 class Process(object):
@@ -89,10 +89,10 @@ class Process(object):
     def system(self, cmd):
         if self.background:
             try:
-                self.procs.append(
-                    subprocess.Popen(cmd, shell=True, executable=self.shell[0],
-                                     close_fds=True, preexec_fn=os.setsid, stdout=PIPE, stderr=PIPE)
-                    )
+                proc = subprocess.Popen(cmd, shell=True, executable=self.shell[0],
+                                        close_fds=True, preexec_fn=os.setsid, stdout=PIPE, stderr=PIPE)
+                self.procs.append(proc)
+                self.message.puts("%s - (%s)" % (cmd.strip(), proc.pid))
             except Exception as e:
                 self.message.exception(e)
         else:
