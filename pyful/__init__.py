@@ -19,7 +19,7 @@
 """Python file management utility.
 This application is CUI filer of the keyboard operation for Linux."""
 
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 
 import os
 import sys
