@@ -185,7 +185,7 @@ class Filectrl(object):
         def _checkfile(src, dst):
             ret = self.check_override(src, dst)
             if ret == "cancel":
-                raise FilectrlCancel
+                raise FilectrlCancel("Filejob canceled: %s -> %s" % (src, dst))
             if ret == "yes":
                 return FileJob(src, dst)
 
@@ -381,8 +381,8 @@ class TarThread(threading.Thread):
                     self._add(tar, f)
             else:
                 self._add(tar, self.src)
-        except FilectrlCancel:
-            pass
+        except FilectrlCancel as e:
+            self.error = e
         tar.close()
 
         if not isinstance(self.src, list):
@@ -414,7 +414,7 @@ class TarThread(threading.Thread):
         view_threads()
         tar.add(source, os.path.join(self.wrap, arcname), recursive=False)
         if not self.active:
-            raise FilectrlCancel
+            raise FilectrlCancel("Tar canceled: %s" % arcname)
 
 class UntarThread(threading.Thread):
     tarmodes = {'.tar': '', '.tgz': 'gz', '.gz': 'gz', '.bz2': 'bz2',}
@@ -439,8 +439,8 @@ class UntarThread(threading.Thread):
                     self._extract(f)
             else:
                 self._extract(self.src)
-        except FilectrlCancel:
-            pass
+        except FilectrlCancel as e:
+            self.error = e
 
         self.directories.sort(key=lambda a: a.name)
         self.directories.reverse()
@@ -461,7 +461,7 @@ class UntarThread(threading.Thread):
         try:
             for info in tar.getmembers():
                 if not self.active:
-                    raise FilectrlCancel
+                    raise FilectrlCancel("Untar canceled: %s" % info.name)
                 self.title = "Untar: " + info.name
                 view_threads()
                 tar.extract(info, self.dstdir)
@@ -629,8 +629,8 @@ class ZipThread(threading.Thread):
                     self.write(myzip, path)
             else:
                 self.write(myzip, self.src)
-        except FilectrlCancel:
-            pass
+        except FilectrlCancel as e:
+            self.error = e
         myzip.close()
 
         if not isinstance(self.src, list):
@@ -651,7 +651,7 @@ class ZipThread(threading.Thread):
         view_threads()
         myzip.write(source, os.path.join(self.wrap, arcname))
         if not self.active:
-            raise FilectrlCancel
+            raise FilectrlCancel("Zip canceled: %s" % arcname)
 
     def write(self, myzip, source):
         if os.path.isdir(source):
@@ -674,6 +674,8 @@ class DeleteThread(threading.Thread):
 
     def run(self):
         try:
+            if not os.access(self.path, os.R_OK):
+                raise OSError("No permission: %s" % self.path)
             if os.path.islink(self.path) or not os.path.isdir(self.path):
                 self.title = "Deleting: " + util.unix_basename(self.path)
                 view_threads()
@@ -686,12 +688,14 @@ class DeleteThread(threading.Thread):
                         view_threads()
                         os.remove(os.path.join(root, f))
                         if not self.active:
-                            raise FilectrlCancel
+                            raise FilectrlCancel("Delete canceled: %s" % f)
                     for d in dirs:
                         dirlist.append(os.path.join(root, d))
                 dirlist.sort()
                 dirlist.reverse()
                 for d in dirlist:
+                    if not os.access(d, os.R_OK):
+                        raise OSError("No permission: %s" % d)
                     try:
                         os.rmdir(d)
                     except Exception as e:
