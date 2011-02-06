@@ -380,7 +380,7 @@ def _symlink():
     if _filer.dir.ismark():
         _cmdline.start(mode.Symlink(), _filer.workspace.nextdir.path)
     else:
-        _cmdline.start(mode.Symlink(), _filer.file.name)
+        _cmdline.start(mode.Symlink(), os.path.join(_filer.dir.path, _filer.file.name))
 
 def _trashbox():
     trashbox = os.path.expanduser(_core.environs['TRASHBOX'])
