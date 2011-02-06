@@ -77,6 +77,9 @@ class Message(Singleton):
             cnf.input(meta, key)
         return cnf.result
 
+    def view_histroy(self):
+        self.confirm("Message history", ["Close"], [m[0] for m in self.msg], -1)
+
     def hide(self):
         self.active = False
 

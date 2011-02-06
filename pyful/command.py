@@ -81,6 +81,7 @@ commands = {
     'zoom_out_infobox'   : lambda: ui.zoom_infobox(ui.InfoBox.zoom-5),
     'zoom_normal_infobox': lambda: ui.zoom_infobox(0),
     'google_search'  : lambda: _cmdline.start(mode.WebSearch('Google'), ''),
+    'message_history': lambda: _message.view_histroy(),
     'kill_thread'    : lambda: filectrl.kill_thread(),
     'drivejump'      : lambda: _drivejump(),
     'fileviewer'     : lambda: _fileviewer(),
