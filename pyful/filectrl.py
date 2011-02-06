@@ -36,6 +36,7 @@ _message = Message()
 def chmod(path, mode):
     try:
         os.chmod(path, int(mode, 8))
+        _message.puts("Changed mode: %s -> %s" % (path, mode))
     except Exception as e:
         _message.exception(e)
 
@@ -68,6 +69,7 @@ def link(src, dst):
         if os.path.isdir(dst):
             dst = os.path.join(dst, util.unix_basename(src))
         os.link(src, dst)
+        _message.puts("Created hard links: %s -> %s" % (src, dst))
     except EnvironmentError as e:
         _message.exception(e)
 
@@ -76,18 +78,21 @@ def symlink(src, dst):
         if os.path.isdir(dst):
             dst = os.path.join(dst, util.unix_basename(src))
         os.symlink(src, dst)
+        _message.puts("Created symlink: %s -> %s" % (src, dst))
     except EnvironmentError as e:
         _message.exception(e)
 
 def mkdir(path, mode=0o755):
     try:
         os.makedirs(path, mode)
+        _message.puts("Created directory: %s (%o)" % (path, mode))
     except EnvironmentError as e:
         _message.exception(e)
 
 def mknod(path, mode=0o644):
     try:
         os.mknod(path, mode)
+        _message.puts("Created file: %s (%o)" % (path, mode))
     except EnvironmentError as e:
         _message.exception(e)
 
@@ -674,7 +679,7 @@ class DeleteThread(threading.Thread):
 
     def run(self):
         try:
-            if not os.access(self.path, os.R_OK):
+            if not os.access(self.path, os.R_OK) and not os.path.islink(self.path):
                 raise OSError("No permission: %s" % self.path)
             if os.path.islink(self.path) or not os.path.isdir(self.path):
                 self.title = "Deleting: " + util.unix_basename(self.path)
@@ -694,7 +699,7 @@ class DeleteThread(threading.Thread):
                 dirlist.sort()
                 dirlist.reverse()
                 for d in dirlist:
-                    if not os.access(d, os.R_OK):
+                    if not os.access(self.path, os.R_OK) and not os.path.islink(self.path):
                         raise OSError("No permission: %s" % d)
                     try:
                         os.rmdir(d)

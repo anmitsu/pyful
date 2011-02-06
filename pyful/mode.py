@@ -422,6 +422,7 @@ class Rename(object):
 
         try:
             os.renames(self.path, path)
+            _message.puts("Renamed: %s -> %s" % (self.path, path))
         except Exception as e:
             _message.exception(e)
         _filer.workspace.all_reload()
