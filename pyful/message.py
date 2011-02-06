@@ -36,6 +36,7 @@ class Message(Singleton):
         self.core = Pyful()
 
     def init_messagebox(self):
+        self.cmdline = self.core.cmdline
         self.messagebox = MessageBox()
 
     def start_timer(self, timex):
@@ -84,7 +85,8 @@ class Message(Singleton):
         self.active = False
 
     def view(self):
-        self.messagebox.view(self.msg)
+        if not self.cmdline.active:
+            self.messagebox.view(self.msg)
 
 class MessageBox(object):
     height = 2

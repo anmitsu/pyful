@@ -155,21 +155,17 @@ def untar(src, dstdir='.'):
     Filectrl().untar(src, dstdir)
 
 def kill_thread():
-    threads = list([str(th) for th in Filectrl.threads])
-    if len(threads) == 0:
+    if len(Filectrl.threads) == 0:
         _message.error("Thread doesn't exist.")
         return
-    ret = _message.confirm("Kill thread: ", threads)
+    ret = _message.confirm("Kill thread: ", [t.title for t in Filectrl.threads])
     for th in Filectrl.threads:
-        if str(th) == ret:
+        if th.title == ret:
             th.kill()
 
 def view_threads():
-    from pyful.cmdline import Cmdline
-    if Cmdline().active:
-        return
     for i, t in enumerate(Filectrl.threads):
-        _message.puts("[%s] %s" % (str(i+1), t.title), 0)
+        _message.puts("[%s] %s" % (str(i+1), t.status), 0)
     curses.doupdate()
 
 class FilectrlCancel(Exception):
@@ -268,7 +264,7 @@ class Filectrl(object):
         if self.thread.error:
             _message.exception(self.thread.error)
         else:
-            _message.active = False
+            _message.puts("Thread finished: %s" % self.thread.title)
         Filectrl.threads.remove(self.thread)
         Filer().workspace.all_reload()
         self.core.view()
@@ -291,7 +287,7 @@ class Filectrl(object):
         else:
             dst = util.abspath(dst)
         self.jobs = self.filejob_generator(src, dst)
-        self.thread = CopyThread(self, "Copy")
+        self.thread = CopyThread(self)
         self.thread_loop()
 
     def move(self, src, dst):
@@ -304,7 +300,7 @@ class Filectrl(object):
         else:
             dst = util.abspath(dst)
         self.jobs = self.filejob_generator(src, dst)
-        self.thread = MoveThread(self, "Move")
+        self.thread = MoveThread(self)
         self.thread_loop()
 
     def tar(self, src, dst, tarmode='gzip', wrap=''):
@@ -350,13 +346,15 @@ class TarThread(threading.Thread):
         self.setDaemon(True)
         self.error = 0
         self.active = True
-        self.title = 'Reading...'
+        self.status = "Reading..."
         if isinstance(src, list):
             self.src = [util.abspath(f) for f in src]
             self.src_dirname = util.unistr(os.getcwd()) + os.sep
+            self.title = "Tar: mark files"
         else:
             self.src = util.abspath(src)
             self.src_dirname = util.unix_dirname(self.src) + os.sep
+            self.title = "Tar: %s" % self.src
         self.dst = util.abspath(dst)
         self.tarmode = tarmode
         self.wrap = wrap
@@ -398,7 +396,7 @@ class TarThread(threading.Thread):
         self.active = False
 
     def kill(self):
-        self.title = "Waiting..."
+        self.status = "Waiting..."
         view_threads()
         self.active = False
         self.join()
@@ -415,7 +413,7 @@ class TarThread(threading.Thread):
 
     def __add(self, tar, source):
         arcname = source.replace(os.path.commonprefix([source, self.src_dirname]), '')
-        self.title = "Adding: " + arcname
+        self.status = "Adding: " + arcname
         view_threads()
         tar.add(source, os.path.join(self.wrap, arcname), recursive=False)
         if not self.active:
@@ -429,11 +427,13 @@ class UntarThread(threading.Thread):
         self.setDaemon(True)
         self.error = 0
         self.active = True
-        self.title = 'Reading...'
+        self.status = 'Reading...'
         if isinstance(src, list):
             self.src = [util.abspath(f) for f in src]
+            self.title = "Untar: mark files"
         else:
             self.src = util.abspath(src)
+            self.title = "Untar: %s" % self.src
         self.dstdir = util.abspath(dstdir)
         self.directories = []
 
@@ -467,7 +467,7 @@ class UntarThread(threading.Thread):
             for info in tar.getmembers():
                 if not self.active:
                     raise FilectrlCancel("Untar canceled: %s" % info.name)
-                self.title = "Untar: " + info.name
+                self.status = "Untar: " + info.name
                 view_threads()
                 tar.extract(info, self.dstdir)
                 if info.isdir():
@@ -476,7 +476,7 @@ class UntarThread(threading.Thread):
             tar.close()
 
     def kill(self):
-        self.title = "Waiting..."
+        self.status = "Waiting..."
         view_threads()
         self.active = False
         self.join()
@@ -486,12 +486,14 @@ class UnzipThread(threading.Thread):
         threading.Thread.__init__(self)
         self.setDaemon(True)
         self.error = 0
-        self.title = 'Unzip'
+        self.status = 'Reading...'
         self.active = True
         if isinstance(src, list):
             self.src = [util.abspath(f) for f in src]
+            self.title = "Unzip: mark files"
         else:
             self.src = util.abspath(src)
+            self.title = "Unzip: %s" % self.src
         self.dstdir = util.abspath(dstdir)
         self.dirattrcopy = []
 
@@ -506,7 +508,7 @@ class UnzipThread(threading.Thread):
         self.active = False
 
     def kill(self):
-        self.title = "Waiting..."
+        self.status = "Waiting..."
         view_threads()
         self.active = False
         self.join()
@@ -548,7 +550,7 @@ class UnzipThread(threading.Thread):
                     raise
             if tail == os.curdir:
                 return
-        self.title = 'Creating: ' + unipath
+        self.status = 'Creating: ' + unipath
         view_threads()
         os.mkdir(abspath, mode)
         self.dirattrcopy.append(lambda: self.copy_external_attr(myzip, oripath))
@@ -584,7 +586,7 @@ class UnzipThread(threading.Thread):
             try:
                 source = myzip.open(fname, pwd=path)
                 target = open(path, 'wb')
-                self.title = 'Inflating: ' + unifname
+                self.status = 'Inflating: ' + unifname
                 view_threads()
                 shutil.copyfileobj(source, target)
                 source.close()
@@ -601,14 +603,16 @@ class ZipThread(threading.Thread):
         threading.Thread.__init__(self)
         self.setDaemon(True)
         self.error = 0
-        self.title = 'Zip'
+        self.status = 'Reading...'
         self.active = True
         if isinstance(src, list):
             self.src = [util.abspath(f) for f in src]
             self.src_dirname = util.unistr(os.getcwd()) + os.sep
+            self.title = "Zip: mark files"
         else:
             self.src = util.abspath(src)
             self.src_dirname = util.unix_dirname(self.src) + os.sep
+            self.title = "Zip: %s" % self.src
         self.dst = util.abspath(dst)
         self.wrap = wrap
 
@@ -645,14 +649,14 @@ class ZipThread(threading.Thread):
         self.active = False
 
     def kill(self):
-        self.title = "Waiting..."
+        self.status = "Waiting..."
         view_threads()
         self.active = False
         self.join()
 
     def _write(self, myzip, source):
         arcname = source.replace(os.path.commonprefix([source, self.src_dirname]), '')
-        self.title = "Adding: " + arcname
+        self.status = "Adding: " + arcname
         view_threads()
         myzip.write(source, os.path.join(self.wrap, arcname))
         if not self.active:
@@ -674,7 +678,8 @@ class DeleteThread(threading.Thread):
         self.setDaemon(True)
         self.error = 0
         self.active = True
-        self.title = "Deleting: %s" % util.unix_basename(path)
+        self.title = "Delete: %s" % path
+        self.status = "Deleting: %s" % util.unix_basename(path)
         self.path = path
 
     def run(self):
@@ -682,14 +687,14 @@ class DeleteThread(threading.Thread):
             if not os.access(self.path, os.R_OK) and not os.path.islink(self.path):
                 raise OSError("No permission: %s" % self.path)
             if os.path.islink(self.path) or not os.path.isdir(self.path):
-                self.title = "Deleting: " + util.unix_basename(self.path)
+                self.status = "Deleting: " + util.unix_basename(self.path)
                 view_threads()
                 os.remove(self.path)
             else:
                 dirlist = [self.path]
                 for root, dirs, files in os.walk(self.path):
                     for f in files:
-                        self.title = "Deleting: " + f
+                        self.status = "Deleting: " + f
                         view_threads()
                         os.remove(os.path.join(root, f))
                         if not self.active:
@@ -713,12 +718,13 @@ class DeleteThread(threading.Thread):
         self.active = False
 
 class CopyThread(threading.Thread):
-    def __init__(self, ctrl, title):
+    def __init__(self, ctrl):
         threading.Thread.__init__(self)
         self.setDaemon(True)
         self.error = 0
         self.ctrl = ctrl
-        self.title = title
+        self.status = "Copy starting..."
+        self.title = "Copy thread: %s" % self.name
         self.active = True
 
     def run(self):
@@ -735,12 +741,13 @@ class CopyThread(threading.Thread):
         self.active = False
 
 class MoveThread(threading.Thread):
-    def __init__(self, ctrl, title):
+    def __init__(self, ctrl):
         threading.Thread.__init__(self)
         self.setDaemon(True)
         self.error = 0
         self.ctrl = ctrl
-        self.title = title
+        self.status = "Move starting..."
+        self.title = "Move thread: %s" % self.name
         self.active = True
 
     def run(self):
@@ -816,7 +823,7 @@ class FileJob(object):
                 if not os.access(self.dst, os.W_OK):
                     os.remove(self.dst)
 
-            thread.title = "Coping: " + util.unix_basename(self.src)
+            thread.status = "Coping: " + util.unix_basename(self.src)
             view_threads()
 
             if os.path.islink(self.src):
@@ -836,7 +843,7 @@ class FileJob(object):
                 if not os.access(self.dst, os.W_OK):
                     os.remove(self.dst)
 
-            thread.title = "Moving: " + util.unix_basename(self.src)
+            thread.status = "Moving: " + util.unix_basename(self.src)
             view_threads()
 
             os.rename(self.src, self.dst)
