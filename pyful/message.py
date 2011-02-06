@@ -103,7 +103,7 @@ class MessageBox(object):
         size = len(msglist)
         (y,x) = self.win.getmaxyx()
         self.win.move(0, 2)
-        self.win.addstr("Messages(%s)" % size, curses.A_BOLD)
+        self.win.addstr("Messages(%s)" % size, curses.A_BOLD|curses.A_UNDERLINE)
         (y,x) = self.win.getmaxyx()
         for i in range(0, size):
             if self.height <= i: break
