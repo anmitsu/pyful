@@ -81,7 +81,7 @@ class Completion(ui.InfoBox):
             width = util.termwidth(item)
             if width > length:
                 length = width
-        maxrow = ui.getstdscr.getmaxyx()[1] // (length+4)
+        maxrow = ui.getstdscr().getmaxyx()[1] // (length+4)
         if maxrow:
             return maxrow
         else:
