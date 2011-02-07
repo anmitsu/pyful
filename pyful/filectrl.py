@@ -52,6 +52,7 @@ def chown(path, uid, gid):
             return
     try:
         os.chown(path, uid, gid)
+        message.puts("Changed owner: %s: uid -> %s, gid -> %s" % (path, uid, gid))
     except EnvironmentError as e:
         message.exception(e)
 
@@ -125,6 +126,7 @@ def replace(pattern, repstr):
                 continue
         try:
             os.renames(src, dst)
+            message.puts("Renamed: %s -> %s" % (src, dst))
         except EnvironmentError as e:
             message.exception(e)
             break
