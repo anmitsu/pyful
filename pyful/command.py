@@ -343,15 +343,11 @@ def _copy():
 
 def _delete():
     if _filer.dir.ismark():
-        mfiles = _filer.dir.get_mark_files()
-        ret = message.confirm("Delete mark files? ", ["No", "Yes"], mfiles)
+        files = _filer.dir.get_mark_files()
+        ret = message.confirm("Delete mark files? ", ["No", "Yes"], files)
         if ret == "No" or ret is None:
             return
-        for f in mfiles:
-            filectrl.delete(f)
-
-        _filer.dir.mark_clear()
-        _filer.workspace.all_reload()
+        filectrl.delete(files)
     else:
         _cmdline.start(mode.Delete(), _filer.file.name)
 

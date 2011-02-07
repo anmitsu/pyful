@@ -17,7 +17,6 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import os
-import re
 import shutil
 import curses
 import time
@@ -267,11 +266,13 @@ class Filectrl(object):
 
     def delete(self, path):
         if isinstance(path, list):
-            path = [util.abspath(path) for f in path]
+            for path in [util.abspath(f) for f in path]:
+                self.thread = DeleteThread(path)
+                self.thread_loop()
         else:
             path = util.abspath(path)
-        self.thread = DeleteThread(path)
-        self.thread_loop()
+            self.thread = DeleteThread(path)
+            self.thread_loop()
 
     def copy(self, src, dst):
         if isinstance(src, list):
