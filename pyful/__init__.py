@@ -111,7 +111,6 @@ class Pyful(Singleton):
     def start_curses(self):
         if not self.started:
             ui.init_ui()
-            stdscr = ui.getstdscr()
 
             self.filer.default_init()
 
@@ -153,18 +152,18 @@ class Pyful(Singleton):
 
     def main_loop(self):
         while True:
+            self.view()
             (meta, key) = ui.getch()
             if key != -1:
                 self.input(meta, key)
-                self.view()
 
     def main_loop_nodelay(self):
         stdscr = ui.getstdscr()
         stdscr.timeout(10)
+        self.view()
         (meta, key) = ui.getch()
         if key != -1:
             self.input(meta, key)
-            self.view()
         stdscr.timeout(-1)
 
     def check_rcfile_version(self, version):
