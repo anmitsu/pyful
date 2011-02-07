@@ -98,26 +98,26 @@ def move(src, dst):
     Filectrl().move(src, dst)
 
 def replace(pattern, repstr):
-    buf = []
     filer = Filer()
-    for f in filer.dir.get_mark_files():
-        buf.append(pattern.sub(r""+repstr, f))
+    files = filer.dir.get_mark_files()
+    renamed = [pattern.sub(r""+repstr, f) for f in files]
 
     msg = []
-    size = len(buf)
-
-    for i in range(0, size):
-        msg.append("%s -> %s" % (filer.dir.get_mark_files()[i], buf[i]))
+    matched = []
+    for i in range(0, len(files)):
+        if files[i] != renamed[i]:
+            msg.append("%s -> %s" % (files[i], renamed[i]))
+            matched.append((files[i], renamed[i]))
+    if not matched:
+        return message.error("No pattern matched for mark files: %s " % pattern.pattern)
 
     ret = message.confirm("Replace:", ["Start", "Cancel"], msg)
     if ret != "Start":
         return
 
-    for i, src in enumerate(filer.dir.get_mark_files()):
-        dst = buf[i]
-        if src == dst:
-            continue
-
+    for member in matched:
+        src = member[0]
+        dst = member[1]
         if os.path.exists(os.path.join(filer.dir.path, dst)):
             ret = message.confirm("File exist - (%s). Override?" % dst, ["Yes", "No"])
             if ret == "Yes":
