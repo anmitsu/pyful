@@ -26,37 +26,35 @@ import pwd
 import grp
 import errno
 
-from pyful import util
 from pyful import Pyful
+from pyful import message
+from pyful import util
 from pyful.filer import Filer
-from pyful.message import Message
-
-_message = Message()
 
 def chmod(path, mode):
     try:
         os.chmod(path, int(mode, 8))
-        _message.puts("Changed mode: %s -> %s" % (path, mode))
+        message.puts("Changed mode: %s -> %s" % (path, mode))
     except Exception as e:
-        _message.exception(e)
+        message.exception(e)
 
 def chown(path, uid, gid):
     if not isinstance(uid, int):
         try:
             uid = pwd.getpwnam(uid)[2]
         except KeyError as e:
-            _message.exception(e)
+            message.exception(e)
             return
     if not isinstance(gid, int):
         try:
             gid = grp.getgrnam(gid)[2]
         except KeyError as e:
-            _message.exception(e)
+            message.exception(e)
             return
     try:
         os.chown(path, uid, gid)
     except EnvironmentError as e:
-        _message.exception(e)
+        message.exception(e)
 
 def copy(src, dst):
     Filectrl().copy(src, dst)
@@ -69,32 +67,32 @@ def link(src, dst):
         if os.path.isdir(dst):
             dst = os.path.join(dst, util.unix_basename(src))
         os.link(src, dst)
-        _message.puts("Created hard links: %s -> %s" % (src, dst))
+        message.puts("Created hard links: %s -> %s" % (src, dst))
     except EnvironmentError as e:
-        _message.exception(e)
+        message.exception(e)
 
 def symlink(src, dst):
     try:
         if os.path.isdir(dst):
             dst = os.path.join(dst, util.unix_basename(src))
         os.symlink(src, dst)
-        _message.puts("Created symlink: %s -> %s" % (src, dst))
+        message.puts("Created symlink: %s -> %s" % (src, dst))
     except EnvironmentError as e:
-        _message.exception(e)
+        message.exception(e)
 
 def mkdir(path, mode=0o755):
     try:
         os.makedirs(path, mode)
-        _message.puts("Created directory: %s (%o)" % (path, mode))
+        message.puts("Created directory: %s (%o)" % (path, mode))
     except EnvironmentError as e:
-        _message.exception(e)
+        message.exception(e)
 
 def mknod(path, mode=0o644):
     try:
         os.mknod(path, mode)
-        _message.puts("Created file: %s (%o)" % (path, mode))
+        message.puts("Created file: %s (%o)" % (path, mode))
     except EnvironmentError as e:
-        _message.exception(e)
+        message.exception(e)
 
 def move(src, dst):
     Filectrl().move(src, dst)
@@ -111,7 +109,7 @@ def replace(pattern, repstr):
     for i in range(0, size):
         msg.append("%s -> %s" % (filer.dir.get_mark_files()[i], buf[i]))
 
-    ret = _message.confirm("Replace:", ["Start", "Cancel"], msg)
+    ret = message.confirm("Replace:", ["Start", "Cancel"], msg)
     if ret != "Start":
         return
 
@@ -121,7 +119,7 @@ def replace(pattern, repstr):
             continue
 
         if os.path.exists(os.path.join(filer.dir.path, dst)):
-            ret = _message.confirm("File exist - (%s). Override?" % dst, ["Yes", "No"])
+            ret = message.confirm("File exist - (%s). Override?" % dst, ["Yes", "No"])
             if ret == "Yes":
                 pass
             elif ret == "No" or ret is None:
@@ -129,7 +127,7 @@ def replace(pattern, repstr):
         try:
             os.renames(src, dst)
         except EnvironmentError as e:
-            _message.exception(e)
+            message.exception(e)
             break
 
 def unzip(src, dstdir=''):
@@ -140,7 +138,7 @@ def zip(src, dst, wrap=''):
 
 def zipeach(src, dst, wrap=''):
     if not isinstance(src, list):
-        return _message.error("source must present `list'")
+        return message.error("source must present `list'")
     Filectrl().zipeach(src, dst, wrap)
 
 def tar(src, dst, tarmode='gzip', wrap=''):
@@ -148,7 +146,7 @@ def tar(src, dst, tarmode='gzip', wrap=''):
 
 def tareach(src, dst, tarmode='gzip', wrap=''):
     if not isinstance(src, list):
-        return _message.error("source must present `list'")
+        return message.error("source must present `list'")
     Filectrl().tareach(src, dst, tarmode, wrap)
 
 def untar(src, dstdir='.'):
@@ -156,16 +154,16 @@ def untar(src, dstdir='.'):
 
 def kill_thread():
     if len(Filectrl.threads) == 0:
-        _message.error("Thread doesn't exist.")
+        message.error("Thread doesn't exist.")
         return
-    ret = _message.confirm("Kill thread: ", [t.title for t in Filectrl.threads])
+    ret = message.confirm("Kill thread: ", [t.title for t in Filectrl.threads])
     for th in Filectrl.threads:
         if th.title == ret:
             th.kill()
 
 def view_threads():
     for i, t in enumerate(Filectrl.threads):
-        _message.puts("[%s] %s" % (str(i+1), t.status), 0)
+        message.puts("[%s] %s" % (str(i+1), t.status), 0)
     curses.doupdate()
 
 class FilectrlCancel(Exception):
@@ -180,7 +178,6 @@ class Filectrl(object):
         self.jobs = None
         self.dirlist = []
         self.threadevent = threading.Event()
-        self.core = Pyful()
 
     def filejob_generator(self, src, dst):
         def _checkfile(src, dst):
@@ -232,7 +229,7 @@ class Filectrl(object):
             dtime = time.strftime("%y-%m-%d %H:%M:%S", time.localtime(dstat.st_mtime))
             msglist = ["source", "path: " + src, "size: " + ssize, "time: " + stime, "",
                        "destination", "path: " + dst, "size: " + dsize, "time: " + dtime]
-            ret = _message.confirm("Override?", ["Yes", "No", "Yes(all)", "No(all)", "Cancel"], msglist)
+            ret = message.confirm("Override?", ["Yes", "No", "Yes(all)", "No(all)", "Cancel"], msglist)
             self.threadevent.set()
             if ret == "Yes":
                 return "yes"
@@ -255,19 +252,18 @@ class Filectrl(object):
 
     def thread_loop(self):
         Filectrl.threads.append(self.thread)
-        self.core.view()
         self.threadevent.set()
         self.thread.start()
+        main = Pyful()
         while self.thread.isAlive():
             self.threadevent.wait()
-            self.core.main_loop_nodelay()
+            main.main_loop_nodelay()
         if self.thread.error:
-            _message.exception(self.thread.error)
+            message.exception(self.thread.error)
         else:
-            _message.puts("Thread finished: %s" % self.thread.title)
+            message.puts("Thread finished: %s" % self.thread.title)
         Filectrl.threads.remove(self.thread)
         Filer().workspace.all_reload()
-        self.core.view()
 
     def delete(self, path):
         if isinstance(path, list):
@@ -572,7 +568,7 @@ class UnzipThread(threading.Thread):
             try:
                 path = os.path.join(self.dstdir, unifname)
             except UnicodeError:
-                _message.error("UnicodeError: Not support `%s' encoding" % fname)
+                message.error("UnicodeError: Not support `%s' encoding" % fname)
                 continue
 
             myzip_unidirname = util.unix_dirname(unifname)
@@ -581,7 +577,7 @@ class UnzipThread(threading.Thread):
                 try:
                     self.makedirs(myzip, myzip_unidirname, myzip_oridirname)
                 except OSError as e:
-                    _message.exception(e)
+                    message.exception(e)
                     continue
             try:
                 source = myzip.open(fname, pwd=path)
@@ -594,7 +590,7 @@ class UnzipThread(threading.Thread):
                 self.copy_external_attr(myzip, fname)
             except IOError as e:
                 if errno.EISDIR != e[0]:
-                    _message.exception(e)
+                    message.exception(e)
                     continue
         myzip.close()
 
@@ -624,7 +620,7 @@ class ZipThread(threading.Thread):
 
         if not isinstance(self.src, list):
             if not os.path.exists(self.src):
-                return _message.error('No such file or directory (%s)' % self.src)
+                return message.error('No such file or directory (%s)' % self.src)
 
         try:
             myzip = zipfile.ZipFile(self.dst, 'w', compression=zipfile.ZIP_DEFLATED)

@@ -19,12 +19,11 @@
 import os
 import re
 import curses
-import subprocess
-from subprocess import PIPE
+from subprocess import Popen, PIPE
 
+from pyful import Pyful, setsignal, resetsignal
 from pyful import util
-from pyful import Pyful
-from pyful.message import Message
+from pyful import message
 
 def spawn(cmd, title=None, expandmacro=True):
     if expandmacro:
@@ -46,7 +45,7 @@ def view_process():
         elif poll != None:
             (out, err) = p.communicate()
             if err:
-                Message().error(err)
+                message.error(err)
             Process.procs.remove(p)
 
 class Process(object):
@@ -58,8 +57,6 @@ class Process(object):
         self.quick = False
         self.exterminal = False
         self.background = False
-        self.core = Pyful()
-        self.message = Message()
 
     def spawn(self, cmd, title=None):
         cmd = self.parsemacro(cmd)
@@ -81,44 +78,44 @@ class Process(object):
         os.system("clear")
         try:
             exec(cmd)
-            self.message.puts("Eval: %s" % cmd)
+            message.puts("Eval: %s" % cmd)
             if not self.quick:
                 util.wait_restore()
         except Exception as e:
-            self.message.exception(e)
+            message.exception(e)
 
     def system(self, cmd):
         if self.background:
             try:
-                proc = subprocess.Popen(cmd, shell=True, executable=self.shell[0],
-                                        close_fds=True, preexec_fn=os.setsid, stdout=PIPE, stderr=PIPE)
+                proc = Popen(cmd, shell=True, executable=self.shell[0],
+                             close_fds=True, preexec_fn=os.setsid, stdout=PIPE, stderr=PIPE)
                 self.procs.append(proc)
-                self.message.puts("Spawn: %s (%s)" % (cmd.strip(), proc.pid))
+                message.puts("Spawn: %s (%s)" % (cmd.strip(), proc.pid))
             except Exception as e:
-                self.message.exception(e)
+                message.exception(e)
         else:
             curses.endwin()
             os.system("clear")
             try:
-                self.core.resetsignal()
-                proc = subprocess.Popen(cmd, shell=True, executable=self.shell[0],
-                                        close_fds=True, preexec_fn=os.setsid)
+                resetsignal()
+                proc = Popen(cmd, shell=True, executable=self.shell[0],
+                             close_fds=True, preexec_fn=os.setsid)
                 proc.wait()
                 if not self.quick:
                     util.wait_restore()
-                self.message.puts("Spawn: %s (%s)" % (cmd.strip(), proc.pid))
+                message.puts("Spawn: %s (%s)" % (cmd.strip(), proc.pid))
             except Exception as e:
-                self.message.exception(e)
+                message.exception(e)
             finally:
-                self.core.setsignal()
+                setsignal()
 
     def screen(self, cmd, title):
-        subprocess.Popen(["screen", "-t", title, self.shell[0], self.shell[1], "%s; python %s -e" % (cmd, self.core.binpath)])
-        self.message.puts("Spawn: %s (screen)" % cmd.strip())
+        Popen(["screen", "-t", title, self.shell[0], self.shell[1], "%s; python %s -e" % (cmd, Pyful.binpath)])
+        message.puts("Spawn: %s (screen)" % cmd.strip())
 
     def terminal(self, cmd):
-        subprocess.Popen([self.terminal_emulator[0], self.terminal_emulator[1], cmd])
-        self.message.puts("Spawn: %s (%s)" % (cmd.strip(), self.terminal_emulator[0]))
+        Popen([self.terminal_emulator[0], self.terminal_emulator[1], cmd])
+        message.puts("Spawn: %s (%s)" % (cmd.strip(), self.terminal_emulator[0]))
 
     def parsemacro(self, string):
         ret = string

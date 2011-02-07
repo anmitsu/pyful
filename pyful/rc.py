@@ -16,15 +16,15 @@ from pyful import process
 from pyful.keymap import *
 
 # Get PYthon File management UtiLity.
-core = Pyful()
+main = Pyful()
 filer = Filer()
 cmdline = Cmdline()
 menu = Menu()
 
-# Set environments of core.
-core.environs['EDITOR'] = 'vim'
-core.environs['PAGER'] = 'less'
-core.environs['TRASHBOX'] = '~/.pyful/trashbox'
+# Set environments of pyful.
+main.environs['EDITOR'] = 'vim'
+main.environs['PAGER'] = 'less'
+main.environs['TRASHBOX'] = '~/.pyful/trashbox'
 
 # Set proc attributes.
 process.Process.shell = ('/bin/bash', '-c')
@@ -123,19 +123,19 @@ ui.InfoBox.zoom = 0
 # Registration of program initialization.
 #
 # The first argument of `atinit' is the function object
-# called when initializing core.
+# called when initializing pyful.
 # And the other arguments of `atinit' are a arguments of it.
 #
 # For example, add the following command when
 # you load the history of `replace' in cmdline:
-# >>> core.atinit(cmdline.history.loadfile, '~/.pyful/history/replace', 'Replace')
+# >>> main.atinit(cmdline.history.loadfile, '~/.pyful/history/replace', 'Replace')
 #
-core.atinit(filer.loadfile, '~/.pyful/info')
-core.atinit(cmdline.clipboard.loadfile, '~/.pyful/clipboard')
-core.atinit(cmdline.history.loadfile, '~/.pyful/history/shell', 'Shell')
-core.atinit(cmdline.history.loadfile, '~/.pyful/history/eval', 'Eval')
-core.atinit(cmdline.history.loadfile, '~/.pyful/history/replace', 'Replace')
-core.atinit(cmdline.history.loadfile, '~/.pyful/history/mx', 'Mx')
+main.atinit(filer.loadfile, '~/.pyful/info')
+main.atinit(cmdline.clipboard.loadfile, '~/.pyful/clipboard')
+main.atinit(cmdline.history.loadfile, '~/.pyful/history/shell', 'Shell')
+main.atinit(cmdline.history.loadfile, '~/.pyful/history/eval', 'Eval')
+main.atinit(cmdline.history.loadfile, '~/.pyful/history/replace', 'Replace')
+main.atinit(cmdline.history.loadfile, '~/.pyful/history/mx', 'Mx')
 
 # Registration of program termination.
 #
@@ -143,16 +143,16 @@ core.atinit(cmdline.history.loadfile, '~/.pyful/history/mx', 'Mx')
 #
 # For example, add the following command when
 # you preserve the history of `replace' in cmdline:
-# >>> core.atexit(cmdline.history.savefile, '~/.pyful/history/replace', 'Replace')
+# >>> main.atexit(cmdline.history.savefile, '~/.pyful/history/replace', 'Replace')
 #
-core.atexit(filer.savefile, '~/.pyful/info')
-core.atexit(cmdline.clipboard.savefile, '~/.pyful/clipboard')
-core.atexit(cmdline.history.savefile, '~/.pyful/history/shell', 'Shell')
-core.atexit(cmdline.history.savefile, '~/.pyful/history/eval', 'Eval')
-core.atexit(cmdline.history.savefile, '~/.pyful/history/mx', 'Mx')
-core.atexit(cmdline.history.savefile, '~/.pyful/history/replace', 'Replace')
+main.atexit(filer.savefile, '~/.pyful/info')
+main.atexit(cmdline.clipboard.savefile, '~/.pyful/clipboard')
+main.atexit(cmdline.history.savefile, '~/.pyful/history/shell', 'Shell')
+main.atexit(cmdline.history.savefile, '~/.pyful/history/eval', 'Eval')
+main.atexit(cmdline.history.savefile, '~/.pyful/history/mx', 'Mx')
+main.atexit(cmdline.history.savefile, '~/.pyful/history/replace', 'Replace')
 
-# Define the keymap of core.
+# Define the keymap of main.
 #
 # A key of the keymap dictionary is the tuple that consist of
 # (meta, key) with the escape sequence and the keymap constant.
@@ -380,7 +380,7 @@ mymenukeymap = {
     (0, KEY_RETURN): lambda: menu.run(),
     }
 
-# Update the keymap of core.
+# Update the keymap of main.
 Directory.keymap.update(myfilerkeymap)
 Finder.keymap.update(myfinderkeymap)
 cmdline.keymap.update(mycmdlinekeymap)
@@ -564,7 +564,7 @@ myassociation = {
 
 filer.keymap.update(myassociation)
 
-if not core.started:
+if not main.started:
     import os, sys
     if'screen' in os.environ['TERM']:
         # Change GNU SCREEN's title.

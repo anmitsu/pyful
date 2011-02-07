@@ -24,11 +24,66 @@ from pyful import look
 from pyful.keymap import *
 
 def init_ui():
+    StandardScreen()
     InfoBox.resize()
 
 def zoom_infobox(zoom):
     InfoBox.zoom = zoom
     InfoBox.resize()
+
+def getstdscr():
+    return StandardScreen.stdscr
+
+def getcmdscr():
+    return StandardScreen.cmdscr
+
+def gettitlebar():
+    return StandardScreen.titlebar
+
+def resize():
+    stdscr = getstdscr()
+    (y, x) = stdscr.getmaxyx()
+    StandardScreen.cmdscr = stdscr.derwin(2, x, y-2, 0)
+    StandardScreen.titlebar = stdscr.derwin(1, x, 0, 0)
+    InfoBox.resize()
+
+def getch():
+    meta = False
+    while True:
+        key = getstdscr().getch()
+        if meta:
+            if key == 27:
+                return (False, key)
+            return (True, key)
+        if key == 27:
+            meta = True
+        else:
+            return (False, key)
+
+def destroy():
+    getstdscr().keypad(0)
+    curses.echo()
+    curses.nocbreak()
+    curses.endwin()
+
+class StandardScreen(object):
+    stdscr = None
+    cmdscr = None
+    titlebar = None
+
+    def __init__(self):
+        self.__class__.stdscr = curses.initscr()
+        self.stdscr.keypad(1)
+        self.stdscr.notimeout(0)
+        curses.noecho()
+        curses.cbreak()
+        curses.raw()
+        curses.start_color()
+        curses.use_default_colors()
+
+        (y, x) = self.stdscr.getmaxyx()
+        self.__class__.cmdscr = self.stdscr.derwin(2, x, y-2, 0)
+        self.__class__.titlebar = self.stdscr.derwin(1, x, 0, 0)
 
 class InfoBox(object):
     win = None
@@ -58,18 +113,17 @@ class InfoBox(object):
 
     @classmethod
     def resize(cls):
-        from pyful import Pyful
-        core = Pyful()
-        odd = core.stdscr.maxy % 2
-        base = core.stdscr.maxy//2 + odd
+        (y, x) = getstdscr().getmaxyx()
+        odd = y % 2
+        base = y//2 + odd
         height = base + cls.zoom
-        if height > core.stdscr.maxy-2:
-            height = core.stdscr.maxy - 2
+        if height > y-2:
+            height = y - 2
             cls.zoom = height - base
         elif height < 3:
             height = 3
             cls.zoom = height - base - 2
-        cls.win = curses.newwin(height, core.stdscr.maxx, core.stdscr.maxy-height-2, 0)
+        cls.win = curses.newwin(height, x, y-height-2, 0)
 
     @property
     def info(self):

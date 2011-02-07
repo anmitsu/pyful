@@ -37,8 +37,6 @@ class Completion(ui.InfoBox):
         self.maxrow = 1
         self.parser = None
         self.programs = []
-        self.core = Pyful()
-
         self.loadprograms()
         self.loadoptions()
 
@@ -64,7 +62,7 @@ class Completion(ui.InfoBox):
                     exec(opt.read(), locals())
 
     def loadprograms(self):
-        osname = self.core.environs['PLATFORM']
+        osname = Pyful.environs['PLATFORM']
         self.programs[:] = []
         for path in os.environ['PATH'].split(os.pathsep):
             if os.path.exists(path):
@@ -83,7 +81,7 @@ class Completion(ui.InfoBox):
             width = util.termwidth(item)
             if width > length:
                 length = width
-        maxrow = self.core.stdscr.maxx // (length+4)
+        maxrow = ui.getstdscr.getmaxyx()[1] // (length+4)
         if maxrow:
             return maxrow
         else:

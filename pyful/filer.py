@@ -26,18 +26,16 @@ import time
 import pwd
 import grp
 
-from pyful import Pyful, Singleton
+from pyful import Singleton
 from pyful import util
+from pyful import ui
 from pyful import look
-from pyful.message import Message
+from pyful import message
 
 class Filer(Singleton):
     def init_singleton_instance(self):
-        self.titlebar = None
         self.workspaces = []
         self.cursor = 0
-        self.core = Pyful()
-        self.message = Message()
 
     @property
     def keymap(self):
@@ -144,27 +142,29 @@ class Filer(Singleton):
             self.cursor = len(self.workspaces) - 1
 
     def titlebar_view(self):
-        self.titlebar.erase()
-        self.titlebar.move(0, 0)
+        titlebar = ui.gettitlebar()
+        titlebar.erase()
+        titlebar.move(0, 0)
 
         length = sum([util.termwidth(w.title)+2 for w in self.workspaces])
 
-        if self.core.stdscr.maxx-length < 5:
-            return self.message.error('terminal size very small')
+        (y, x) = ui.getstdscr().getmaxyx()
+        if x-length < 5:
+            return message.error('terminal size very small')
 
         for i, ws in enumerate(self.workspaces):
             if self.cursor == i:
-                self.titlebar.addstr(' '+ws.title+' ', look.colors['WKSELECTED'])
+                titlebar.addstr(' '+ws.title+' ', look.colors['WKSELECTED'])
             else:
-                self.titlebar.addstr(' '+ws.title+' ')
-        self.titlebar.addstr(' | ', curses.A_BOLD)
+                titlebar.addstr(' '+ws.title+' ')
+        titlebar.addstr(' | ', curses.A_BOLD)
 
         dirlen = len(self.workspace.dirs)
-        width = (self.core.stdscr.maxx-length-4) // dirlen
-        odd = (self.core.stdscr.maxx-length-4) % dirlen
+        width = (x-length-4) // dirlen
+        odd = (x-length-4) % dirlen
         if width < 5:
-            self.titlebar.noutrefresh()
-            return self.message.error('terminal size very small')
+            titlebar.noutrefresh()
+            return message.error('terminal size very small')
 
         for i, path in enumerate([d.path for d in self.workspace.dirs]):
             num = '[%d] ' % (i+1)
@@ -176,10 +176,10 @@ class Filer(Singleton):
                 w = width-numlen
             string = num + util.mbs_rjust(path, w)
             if i == self.workspace.cursor:
-                self.titlebar.addstr(string, curses.A_REVERSE)
+                titlebar.addstr(string, curses.A_REVERSE)
             else:
-                self.titlebar.addstr(string)
-        self.titlebar.noutrefresh()
+                titlebar.addstr(string)
+        titlebar.noutrefresh()
 
     def toggle_view_ext(self):
         FileStat.view_ext = not FileStat.view_ext
@@ -273,7 +273,6 @@ class Workspace(object):
         self.title = title
         self.dirs = []
         self.cursor = 0
-        self.core = Pyful()
 
     @property
     def dir(self):
@@ -300,8 +299,9 @@ class Workspace(object):
             path = self.default_path
         path = os.path.expanduser(path)
         size = len(self.dirs)
-        height = self.core.stdscr.maxy - 3
-        width = self.core.stdscr.maxx // (size+1)
+        (y, x) = ui.getstdscr().getmaxyx()
+        height = y - 3
+        width = x // (size+1)
         begy = 1
         begx = width * size
 
@@ -347,12 +347,13 @@ class Workspace(object):
             self.layout = 'Tile'
         size = len(self.dirs)
 
+        (y, x) = ui.getstdscr().getmaxyx()
         if size == 1:
-            self.dirs[0].resize(self.core.stdscr.maxy-3, self.core.stdscr.maxx, 1, 0)
+            self.dirs[0].resize(y-3, x, 1, 0)
         else:
-            height = self.core.stdscr.maxy - 3
-            width = self.core.stdscr.maxx // 2
-            wodd = self.core.stdscr.maxx % 2
+            height = y - 3
+            width = x // 2
+            wodd = x % 2
 
             if reverse:
                 self.dirs[0].resize(height, width, 1, width)
@@ -377,8 +378,9 @@ class Workspace(object):
 
     def oneline(self):
         self.layout = 'Oneline'
-        height = self.core.stdscr.maxy - 3
-        width = self.core.stdscr.maxx // len(self.dirs)
+        (y, x) = ui.getstdscr().getmaxyx()
+        height = y - 3
+        width = x // len(self.dirs)
         for i, d in enumerate(self.dirs):
             d.win.erase()
             d.win.noutrefresh()
@@ -387,9 +389,10 @@ class Workspace(object):
 
     def onecolumn(self):
         self.layout = 'Onecolumn'
-        odd = (self.core.stdscr.maxy-3) % len(self.dirs)
-        height = (self.core.stdscr.maxy-3) // len(self.dirs)
-        width = self.core.stdscr.maxx
+        (y, x) = ui.getstdscr().getmaxyx()
+        odd = (y-3) % len(self.dirs)
+        height = (y-3) // len(self.dirs)
+        width = x
         size = len(self.dirs) - 1
         for i, d in enumerate(self.dirs):
             d.win.erase()
@@ -402,8 +405,9 @@ class Workspace(object):
 
     def fullscreen(self):
         self.layout = 'Fullscreen'
-        height = self.core.stdscr.maxy - 3
-        width = self.core.stdscr.maxx
+        (y, x) = ui.getstdscr().getmaxyx()
+        height = y - 3
+        width = x
         for d in self.dirs:
             d.win.erase()
             d.win.noutrefresh()
@@ -501,8 +505,6 @@ class Directory(object):
         self.list = None
         self.list_title = None
         self.finder = Finder(self)
-        self.core = Pyful()
-        self.message = Message()
 
     @property
     def file(self):
@@ -622,7 +624,7 @@ class Directory(object):
                     if os.path.exists(line):
                         self.list.append(re.sub(self.path+'?'+os.sep, '', line))
         except Exception as e:
-            self.message.exception(e)
+            message.exception(e)
         self.reload()
 
     def reset(self):
@@ -671,7 +673,7 @@ class Directory(object):
         try:
             util.chdir(self.path)
         except EnvironmentError as e:
-            self.message.exception(e)
+            message.exception(e)
             self.chdir('/')
         self.diskread()
         self.sort()
@@ -691,8 +693,8 @@ class Directory(object):
                    'user: '+user, 'group: '+group,
                    'size: '+size, 'time: '+time]
 
-        ret = self.message.confirm('Invalid encoding error. What do you do?',
-                                    ['ignore', 'rename', 'delete'], msglist)
+        ret = message.confirm('Invalid encoding error. What do you do?',
+                              ['ignore', 'rename', 'delete'], msglist)
         if ret is None or ret == 'ignore':
             return False
         elif ret == 'rename':
@@ -718,7 +720,7 @@ class Directory(object):
         try:
             util.chdir(path)
         except EnvironmentError as e:
-            return self.message.exception(e)
+            return message.exception(e)
 
         if history:
             self.pathhistory_update(path)
@@ -1084,7 +1086,7 @@ class Directory(object):
         self.win.addstr(util.path_omission(self.path, width), curses.A_BOLD)
 
         if width < 30:
-            return self.message.error('terminal size very small')
+            return message.error('terminal size very small')
 
         line = 0
         for i in range(self.scrolltop, size):
@@ -1132,7 +1134,7 @@ class Directory(object):
                 # self.statwin.addstr(util.mbs_ljust(status + '  |', self.statwin.getmaxyx()[1]-2, keymap.HLINE))
                 self.statwin.addstr(status + '  |')
             except Exception as e:
-                self.message.error('Warning: status window very small')
+                message.error('Warning: status window very small')
             self.statwin.noutrefresh()
             if focus:
                 self.file.view()
@@ -1151,7 +1153,6 @@ class Finder(object):
         self.h_select = 0
         self.active = False
         self._stringcue = []
-        self.message = Message()
 
     def find(self, pattern):
         try:
@@ -1228,7 +1229,7 @@ class Finder(object):
         try:
             self.dir.statwin.addstr(' ' + self.string)
         except Exception as e:
-            self.message.error('Warning: status window very small')
+            message.error('Warning: status window very small')
         self.dir.statwin.noutrefresh()
 
 class FileStat(object):
@@ -1243,7 +1244,6 @@ class FileStat(object):
     time_24_flag = '!'
     time_week_flag = '#'
     time_yore_flag = ' '
-    core = Pyful()
 
     def __init__(self, name, force=False):
         if force:
@@ -1432,7 +1432,8 @@ class FileStat(object):
         return perm
 
     def view(self):
-        self.core.stdscr.cmdwin.erase()
+        cmdscr = ui.getcmdscr()
+        cmdscr.erase()
 
         perm = self.get_permission()
         user = self.get_user_name()
@@ -1443,7 +1444,7 @@ class FileStat(object):
         name = self.name
 
         fstat = '%s %s %s %s %d %s %s' % (perm, nlink, user, group, size, mtime, name)
-        fstat = util.mbs_ljust(fstat, self.core.stdscr.maxx-1)
-        self.core.stdscr.cmdwin.move(1, 0)
-        self.core.stdscr.cmdwin.addstr(fstat)
-        self.core.stdscr.cmdwin.noutrefresh()
+        fstat = util.mbs_ljust(fstat, ui.getstdscr().getmaxyx()[1]-1)
+        cmdscr.move(1, 0)
+        cmdscr.addstr(fstat)
+        cmdscr.noutrefresh()

@@ -95,11 +95,11 @@ def quote(string):
 
 def expandmacro(string, shell=False):
     ret = string
-    from pyful import Pyful
-    core = Pyful()
+    from pyful.filer import Filer
+    filer = Filer()
 
     marks = ''
-    for f in core.filer.dir.get_mark_files():
+    for f in filer.dir.get_mark_files():
         if shell:
             marks += string_to_safe(f) + ' '
         else:
@@ -107,7 +107,7 @@ def expandmacro(string, shell=False):
     ret = re.sub('(?<!\\\\)%m', marks[:-1], ret)
 
     marks = ''
-    for f in core.filer.dir.get_mark_files():
+    for f in filer.dir.get_mark_files():
         if shell:
             marks += abspath(string_to_safe(f)) + ' '
         else:
@@ -115,14 +115,14 @@ def expandmacro(string, shell=False):
     ret = re.sub('(?<!\\\\)%M', marks[:-1], ret)
 
     filename = re.compile('(?<!\\\\)%d(?!2)')
-    path = unix_basename(core.filer.dir.path) + os.sep
+    path = unix_basename(filer.dir.path) + os.sep
     if shell:
         ret = filename.sub(quote(path), ret)
     else:
         ret = filename.sub(path, ret)
 
     filename = re.compile('(?<!\\\\)%d2')
-    path = unix_basename(core.filer.workspace.nextdir.path) + os.sep
+    path = unix_basename(filer.workspace.nextdir.path) + os.sep
     if shell:
         ret = filename.sub(quote(path), ret)
     else:
@@ -130,40 +130,40 @@ def expandmacro(string, shell=False):
 
     filename = re.compile('(?<!\\\\)%D(?!2)')
     if shell:
-        ret = filename.sub(quote(core.filer.dir.path), ret)
+        ret = filename.sub(quote(filer.dir.path), ret)
     else:
-        ret = filename.sub(core.filer.dir.path, ret)
+        ret = filename.sub(filer.dir.path, ret)
 
     filename = re.compile('(?<!\\\\)%D2')
     if shell:
-        ret = filename.sub(quote(core.filer.workspace.nextdir.path), ret)
+        ret = filename.sub(quote(filer.workspace.nextdir.path), ret)
     else:
-        ret = filename.sub(core.filer.workspace.nextdir.path, ret)
+        ret = filename.sub(filer.workspace.nextdir.path, ret)
 
     filename = re.compile('(?<!\\\\)%f')
     if shell:
-        ret = filename.sub(quote(core.filer.file.name), ret)
+        ret = filename.sub(quote(filer.file.name), ret)
     else:
-        ret = filename.sub(core.filer.file.name, ret)
+        ret = filename.sub(filer.file.name, ret)
 
     filename = re.compile('(?<!\\\\)%F')
-    path = abspath(core.filer.file.name)
+    path = abspath(filer.file.name)
     if shell:
         ret = filename.sub(quote(path), ret)
     else:
         ret = filename.sub(path, ret)
 
     filename = re.compile('(?<!\\\\)%x')
-    fname = unix_basename(core.filer.file.name)
-    ext = extname(core.filer.file.name)
+    fname = unix_basename(filer.file.name)
+    ext = extname(filer.file.name)
     if shell:
         ret = filename.sub(quote(fname.replace(ext, "")), ret)
     else:
         ret = filename.sub(fname.replace(ext, ""), ret)
 
     filename = re.compile('(?<!\\\\)%X')
-    fname = unix_basename(core.filer.file.name)
-    ext = extname(core.filer.file.name)
+    fname = unix_basename(filer.file.name)
+    ext = extname(filer.file.name)
     fname = abspath(fname)
     if shell:
         ret = filename.sub(quote(fname.replace(ext, "")), ret)

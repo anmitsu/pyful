@@ -21,23 +21,20 @@ import sys
 import re
 import glob
 
-from pyful import Pyful
+from pyful import Pyful, loadrcfile, refresh
 from pyful import mode
 from pyful import util
 from pyful import ui
 from pyful import filectrl
 from pyful import process
-
+from pyful import message
 from pyful.cmdline import Cmdline
 from pyful.filer import Filer
-from pyful.message import Message
 from pyful.menu import Menu
-_core = Pyful()
+
 _cmdline = Cmdline()
 _filer = Filer()
-_message = Message()
 _menu = Menu()
-
 _image_filter = re.compile('\.(jpe?g|gif|png|bmp|tiff|jp2|j2c|svg|eps)$')
 _music_filter = re.compile('\.(ogg|mp3|flac|ape|tta|tak|mid|wma|wav)$')
 _video_filter = re.compile('\.(avi|mkv|mp4|mpe?g|wmv|asf|rm|ram|ra)$')
@@ -81,7 +78,7 @@ commands = {
     'zoom_out_infobox'   : lambda: ui.zoom_infobox(ui.InfoBox.zoom-5),
     'zoom_normal_infobox': lambda: ui.zoom_infobox(0),
     'google_search'  : lambda: _cmdline.start(mode.WebSearch('Google'), ''),
-    'message_history': lambda: _message.view_histroy(),
+    'message_history': lambda: message.viewhistroy(),
     'kill_thread'    : lambda: filectrl.kill_thread(),
     'drivejump'      : lambda: _drivejump(),
     'fileviewer'     : lambda: _fileviewer(),
@@ -93,8 +90,8 @@ commands = {
     'spawn_terminal' : lambda: _spawn_terminal(),
     'exit'           : lambda: _exit(),
 
-    'reload_rcfile'  : lambda: _core.load_rcfile(),
-    'refresh_window' : lambda: _core.refresh(),
+    'reload_rcfile'  : lambda: loadrcfile(),
+    'refresh_window' : lambda: refresh(),
     'rehash_programs': lambda: _cmdline.completion.loadprograms(),
 
     'enter_mark': lambda: _cmdline.start(mode.Shell(), ' %m', 1),
@@ -201,23 +198,23 @@ commands = {
 
 def _open_at_system():
     try:
-        if _core.environs['PLATFORM'] == 'cygwin':
+        if Pyful.environs['PLATFORM'] == 'cygwin':
             process.spawn("cygstart %f %&")
         else:
             process.spawn("xdg-open %f %&")
     except Exception as e:
-        _message.exception(e)
+        message.exception(e)
 
 def _spawn_editor():
     try:
-        editor = _core.environs['EDITOR']
+        editor = Pyful.environs['EDITOR']
     except KeyError:
         editor = 'vim'
     process.spawn(editor+' %f')
 
 def _spawn_shell():
     try:
-        shell = _core.environs['SHELL']
+        shell = Pyful.environs['SHELL']
     except KeyError:
         shell = '/bin/bash'
     process.spawn(shell, shell)
@@ -226,19 +223,18 @@ def _spawn_terminal():
     try:
         process.spawn(process.Process.terminal_emulator[0]+' %&')
     except Exception as e:
-        _message.exception(e)
+        message.exception(e)
 
 def _exit():
-    ret =  _message.confirm('Exit?', ['Yes', 'No'])
+    ret =  message.confirm('Exit?', ['Yes', 'No'])
     if ret == 'Yes':
-        if _message.timer:
-            _message.timer.cancel()
+        message.timerkill()
         sys.exit(0)
 
 def _switch_workspace():
     titles = [w.title for w in _filer.workspaces]
     pos = _filer.cursor
-    ret = _message.confirm('Switch workspace:', options=titles, position=pos)
+    ret = message.confirm('Switch workspace:', options=titles, position=pos)
     for i, w in enumerate(_filer.workspaces):
         if w.title == ret:
             _filer.focus_workspace(i)
@@ -257,7 +253,7 @@ def _drivejump():
 
 def _fileviewer():
     ext = util.extname(_filer.file.name)
-    pager = _core.environs['PAGER']
+    pager = Pyful.environs['PAGER']
     if ".gz" == ext:
         process.spawn("tar tvfz %f | "+ pager)
     elif ".tgz" == ext:
@@ -276,7 +272,7 @@ def _fileviewer():
         process.spawn(pager+" %f")
 
 def _pack():
-    ret = _message.confirm("Pack type:", ["zip", "tgz", "bz2", "tar", "rar"])
+    ret = message.confirm("Pack type:", ["zip", "tgz", "bz2", "tar", "rar"])
     if "zip" == ret:
         _zip()
     elif ret == "tgz":
@@ -327,7 +323,7 @@ def _unpack2():
         _cmdline.start(mode.Shell(), "unzip %f -d %D")
 
 def _change_workspace_layout():
-    ret =  _message.confirm("Layout:", ["tile", "tilerevese", "oneline", "onecolumn", "fullscreen"])
+    ret =  message.confirm("Layout:", ["tile", "tilerevese", "oneline", "onecolumn", "fullscreen"])
     if "tile" == ret:
         _filer.workspace.tile()
     elif "tilerevese" == ret:
@@ -348,7 +344,7 @@ def _copy():
 def _delete():
     if _filer.dir.ismark():
         mfiles = _filer.dir.get_mark_files()
-        ret = _message.confirm("Delete mark files? ", ["No", "Yes"], mfiles)
+        ret = message.confirm("Delete mark files? ", ["No", "Yes"], mfiles)
         if ret == "No" or ret is None:
             return
         for f in mfiles:
@@ -384,19 +380,19 @@ def _symlink():
         _cmdline.start(mode.Symlink(), os.path.join(_filer.dir.path, _filer.file.name))
 
 def _trashbox():
-    trashbox = os.path.expanduser(_core.environs['TRASHBOX'])
+    trashbox = os.path.expanduser(Pyful.environs['TRASHBOX'])
     if not os.path.exists(trashbox):
-        if "Yes" == _message.confirm("Trashbox doesn't exist. Make trashbox? (%s):" % trashbox, ["No", "Yes"]):
+        if "Yes" == message.confirm("Trashbox doesn't exist. Make trashbox? (%s):" % trashbox, ["No", "Yes"]):
             try:
                 os.makedirs(trashbox)
             except EnvironmentError as e:
-                return _message.error(str(e))
+                return message.error(str(e))
         else:
             return
 
     if _filer.dir.ismark():
         mfiles = _filer.dir.get_mark_files()
-        ret = _message.confirm("Move mark files to trashbox? ", ["No", "Yes"], mfiles)
+        ret = message.confirm("Move mark files to trashbox? ", ["No", "Yes"], mfiles)
         if ret == "No" or ret is None:
             return
 
@@ -409,7 +405,7 @@ def _trashbox():
 
 def _tar(tarmode=None):
     if tarmode is None:
-        tarmode = _message.confirm("Tar mode:", ["gzip", "bzip2", "tar"])
+        tarmode = message.confirm("Tar mode:", ["gzip", "bzip2", "tar"])
         if tarmode is None:
             return
 
@@ -420,7 +416,7 @@ def _tar(tarmode=None):
 
 def _tareach(tarmode=None):
     if tarmode is None:
-        tarmode = _message.confirm("Tar mode:", ["gzip", "bzip2", "tar"])
+        tarmode = message.confirm("Tar mode:", ["gzip", "bzip2", "tar"])
         if tarmode is None:
             return
     _cmdline.start(mode.Tar(tarmode, each=True), '')

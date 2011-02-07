@@ -22,16 +22,15 @@ import time
 
 from pyful import filectrl
 from pyful import process
+from pyful import ui
 from pyful import util
-
+from pyful import message
 from pyful.cmdline import Cmdline
 from pyful.filer import Filer
-from pyful.message import Message
 from pyful.menu import Menu
 
 _cmdline = Cmdline()
 _filer = Filer()
-_message = Message()
 _menu = Menu()
 
 class Shell(object):
@@ -63,7 +62,7 @@ class Mx(object):
         try:
             commands[cmd]()
         except KeyError:
-            _message.error("Undefined command `%s'" % cmd)
+            message.error("Undefined command `%s'" % cmd)
 
 class ChangeWorkspaceTitle(object):
     prompt = 'Change workspace title:'
@@ -158,7 +157,7 @@ class Copy(object):
     def execute(self, path):
         if _filer.dir.ismark():
             if not path.endswith(os.sep) and not os.path.isdir(path):
-                _message.error("Copy error: Destination is not directory")
+                message.error("Copy error: Destination is not directory")
                 return
             filectrl.copy(_filer.dir.get_mark_files(), path)
         elif self.src is None:
@@ -186,7 +185,7 @@ class Delete(object):
 
     def execute(self, path):
         msg = path.replace(_filer.dir.path, "")
-        ret = _message.confirm("Delete? (%s):"%msg, ["No", "Yes"])
+        ret = message.confirm("Delete? (%s):"%msg, ["No", "Yes"])
         if ret == "No" or ret is None:
             return
         filectrl.delete(path)
@@ -257,7 +256,7 @@ class Link(object):
     def execute(self, path):
         if _filer.dir.ismark():
             if not path.endswith(os.sep) and not os.path.isdir(path):
-                _message.error("Error: Destination is not directory")
+                message.error("Error: Destination is not directory")
                 return
             for f in _filer.dir.get_mark_files():
                 dst = os.path.join(path, util.unix_basename(f))
@@ -290,7 +289,7 @@ class Mark(object):
             try:
                 reg = re.compile(pattern)
             except Exception as e:
-                _message.error("Regexp error: " + str(e))
+                message.error("Regexp error: " + str(e))
                 return
             self.__class__.default = reg
             _filer.dir.mark(reg)
@@ -315,7 +314,7 @@ class Mask(object):
             try:
                 reg = re.compile(pattern)
             except:
-                return _message.error("Argument error: Can't complile `%s'" % pattern)
+                return message.error("Argument error: Can't complile `%s'" % pattern)
             self.__class__.default = reg
             _filer.dir.mask(reg)
 
@@ -361,7 +360,7 @@ class Move(object):
     def execute(self, path):
         if _filer.dir.ismark():
             if not path.endswith(os.sep) and not os.path.isdir(path):
-                _message.error("Move error: Destination is not directory")
+                message.error("Move error: Destination is not directory")
                 return
             filectrl.move(_filer.dir.get_mark_files(), path)
         elif self.src is None:
@@ -379,7 +378,7 @@ class Newfile(object):
 
     def execute(self, path):
         if os.path.exists(util.abspath(path)):
-            _message.error("Error: file exists - %s" % path)
+            message.error("Error: file exists - %s" % path)
             return
         filectrl.mknod(path, self.filemode)
         _filer.workspace.all_reload()
@@ -395,7 +394,7 @@ class OpenListfile(object):
         if os.path.exists(path):
             _filer.dir.open_listfile(path)
         else:
-            _message.error('No such list file: ' + path)
+            message.error('No such list file: ' + path)
 
 class Rename(object):
     def __init__(self, path=None):
@@ -417,14 +416,14 @@ class Rename(object):
 
     def execute(self, path):
         if os.path.exists(path):
-            _message.error("Error: File exist - %s" % path)
+            message.error("Error: File exist - %s" % path)
             return
 
         try:
             os.renames(self.path, path)
-            _message.puts("Renamed: %s -> %s" % (self.path, path))
+            message.puts("Renamed: %s -> %s" % (self.path, path))
         except Exception as e:
-            _message.exception(e)
+            message.exception(e)
         _filer.workspace.all_reload()
 
 class Replace(object):
@@ -452,7 +451,7 @@ class Replace(object):
             try:
                 self.pattern = re.compile(util.unistr(pattern))
             except Exception:
-                return _message.error("Argument error: Can't complile `%s'" % pattern)
+                return message.error("Argument error: Can't complile `%s'" % pattern)
             _cmdline.restart("")
         else:
             filectrl.replace(self.pattern, pattern)
@@ -483,7 +482,7 @@ class Symlink(object):
     def execute(self, path):
         if _filer.dir.ismark():
             if not path.endswith(os.sep) and not os.path.isdir(path):
-                _message.error("Symlink error: Destination is not directory")
+                message.error("Symlink error: Destination is not directory")
                 return
             for f in _filer.dir.get_mark_files():
                 dst = os.path.join(path, os.path.basename(f))
@@ -503,10 +502,9 @@ class TrashBox(object):
         return comp.comp_dirs()
 
     def execute(self, path):
-        from pyful import Pyful
-        trashbox = os.path.expanduser(Pyful().environs['TRASHBOX'])
+        trashbox = os.path.expanduser(Pyful.environs['TRASHBOX'])
         msg = path.replace(_filer.dir.path, "")
-        ret = _message.confirm("Move `%s' to trashbox? " % msg, ["No", "Yes"])
+        ret = message.confirm("Move `%s' to trashbox? " % msg, ["No", "Yes"])
         if ret == "No" or ret is None:
             return
 
@@ -559,7 +557,7 @@ class Utime(object):
                 self.timesec = time.localtime(os.stat(self.path).st_mtime)
                 _cmdline.restart("")
             else:
-                return _message.error("%s doesn't exist." % st)
+                return message.error("%s doesn't exist." % st)
 
         elif len(self.sttime) == 0:
             if st == "":
@@ -612,7 +610,7 @@ class Utime(object):
                 atime = mtime = time.mktime(tuple(self.sttime))
                 os.utime(self.path, (atime, mtime))
             except Exception as e:
-                _message.error(str(e))
+                message.error(str(e))
             _filer.workspace.all_reload()
 
 class Tar(object):
@@ -713,7 +711,7 @@ class WebSearch(object):
         try:
             webbrowser.open(search, new=2)
         except Exception as e:
-            _message.exception(e)
+            message.exception(e)
 
 class Zip(object):
     def __init__(self, each=False):
@@ -798,9 +796,8 @@ class ZoomInfoBox(object):
         return [str(x*10) for x in range(-10, 11)]
 
     def execute(self, zoom):
-        from pyful import ui
         try:
             zoom = int(zoom)
             ui.zoom_infobox(zoom)
         except ValueError as e:
-            _message.exception(e)
+            message.exception(e)

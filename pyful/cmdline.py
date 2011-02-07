@@ -26,7 +26,7 @@ from pyful import util
 from pyful import look
 from pyful import process
 from pyful import ui
-from pyful.message import Message
+from pyful import message
 from pyful.keymap import *
 
 class Cmdline(Singleton):
@@ -43,9 +43,6 @@ class Cmdline(Singleton):
         self.clipboard = Clipboard(self)
         self.output = Output(self)
         self.completion = completion.Completion(self)
-
-        self.core = Pyful()
-        self.message = Message()
 
     def execute(self):
         string = self.string
@@ -174,10 +171,11 @@ class Cmdline(Singleton):
         elif self.cursor > util.mbslen(self.string):
             self.cursor = util.mbslen(self.string)
 
-        self.core.stdscr.cmdwin.erase()
-        self.core.stdscr.cmdwin.move(0, 0)
+        cmdscr = ui.getcmdscr()
+        cmdscr.erase()
+        cmdscr.move(0, 0)
         prompt = " %s " % self.mode.prompt
-        self.core.stdscr.cmdwin.addstr(prompt, look.colors['CMDLINE'])
+        cmdscr.addstr(prompt, look.colors['CMDLINE'])
         try:
             if self.mode.__class__.__name__ == "Shell":
                 self.print_color_shell(self.string)
@@ -186,12 +184,13 @@ class Cmdline(Singleton):
             else:
                 self.print_color_default(self.string)
         except Exception as e:
-            self.message.error("curses error: " + str(e))
+            message.error("curses error: " + str(e))
 
         curpos = util.termwidth(prompt+self.string, util.mbslen(prompt)+self.cursor)
-        if curpos < self.core.stdscr.maxx:
-            self.core.stdscr.cmdwin.move(0, curpos)
-        self.core.stdscr.cmdwin.noutrefresh()
+        stdscr = ui.getstdscr()
+        if curpos < stdscr.getmaxyx()[1]:
+            cmdscr.move(0, curpos)
+        cmdscr.noutrefresh()
 
     def input(self, meta, key):
         if self.completion.active:
@@ -204,8 +203,9 @@ class Cmdline(Singleton):
             self.cmdline_input(meta, key)
 
     def finish(self):
-        self.core.stdscr.cmdwin.erase()
-        self.core.stdscr.cmdwin.noutrefresh()
+        cmdscr = ui.getcmdscr()
+        cmdscr.erase()
+        cmdscr.noutrefresh()
         self.string = ""
         self.cursor = 0
         self.active = False
@@ -243,14 +243,16 @@ class Cmdline(Singleton):
         self.start(mode.Mx(), string, pos)
 
     def print_color_default(self, string):
+        cmdscr = ui.getcmdscr()
         reg = re.compile("([\s;.()]|(?<!\\\\)%[mMdDfFxX])")
         for s in reg.split(string):
             attr = 0
             if re.search("^%[mMdDfFxX]$", s):
                 attr = look.colors['CMDLINEMACRO']
-            self.core.stdscr.cmdwin.addstr(s, attr)
+            cmdscr.addstr(s, attr)
 
     def print_color_shell(self, string):
+        cmdscr = ui.getcmdscr()        
         prg = False
         reg = re.compile("([\s;|>]|[^%]&|(?<!\\\\)%[mMdDfFxX])")
         for s in reg.split(string):
@@ -268,9 +270,10 @@ class Cmdline(Singleton):
                     prg = True
                 else:
                     attr = look.colors['CMDLINENOPROGRAM']
-            self.core.stdscr.cmdwin.addstr(s, attr)
+            cmdscr.addstr(s, attr)
 
     def print_color_eval(self, string):
+        cmdscr = ui.getcmdscr()
         reg = re.compile("([\s;.()]|(?<!\\\\)%[mMdDfFxX])")
         for s in reg.split(string):
             attr = 0
@@ -280,7 +283,7 @@ class Cmdline(Singleton):
                 attr = look.colors['CMDLINESEPARATOR']
             elif s in __builtins__.keys():
                 attr = look.colors['CMDLINEPYFUNCTION']
-            self.core.stdscr.cmdwin.addstr(s, attr)
+            cmdscr.addstr(s, attr)
 
     def cmdline_input(self, meta, key):
         if (meta, key) in self.keymap:
@@ -500,7 +503,6 @@ class Output(ui.InfoBox):
     def __init__(self, cmdline):
         ui.InfoBox.__init__(self, "output")
         self.cmdline = cmdline
-        self.message = Message()
 
     def edit(self):
         try:
@@ -509,7 +511,7 @@ class Output(ui.InfoBox):
             lnum = li[1]
             process.spawn("%s +%s %s" % (Pyful.environs['EDITOR'], lnum, fname))
         except Exception as e:
-            self.message.error("edit: %s" % str(e))
+            message.error("edit: %s" % str(e))
 
     def infoarea(self, string=None):
         from pyful import mode
