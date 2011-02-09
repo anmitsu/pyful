@@ -119,11 +119,16 @@ def replace(pattern, repstr):
         src = member[0]
         dst = member[1]
         if os.path.exists(os.path.join(filer.dir.path, dst)):
-            ret = message.confirm("File exist - (%s). Override?" % dst, ["Yes", "No"])
-            if ret == "Yes":
-                pass
-            elif ret == "No" or ret is None:
+            if ret == "No(all)":
                 continue
+            if ret != "Yes(all)":
+                ret = message.confirm("File exist - (%s). Override?" % dst, ["Yes", "No", "Yes(all)", "No(all)", "Cancel"])
+                if ret == "Yes" or ret == "Yes(all)":
+                    pass
+                elif ret == "No" or ret == "No(all)":
+                    continue
+                elif ret is None:
+                    break
         try:
             os.renames(src, dst)
             message.puts("Renamed: %s -> %s" % (src, dst))
