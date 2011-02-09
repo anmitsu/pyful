@@ -272,14 +272,8 @@ class Filectrl(object):
         Filer().workspace.all_reload()
 
     def delete(self, path):
-        if isinstance(path, list):
-            for path in [util.abspath(f) for f in path]:
-                self.thread = DeleteThread(path)
-                self.thread_loop()
-        else:
-            path = util.abspath(path)
-            self.thread = DeleteThread(path)
-            self.thread_loop()
+        self.thread = DeleteThread(path)
+        self.thread_loop()
 
     def copy(self, src, dst):
         if isinstance(src, list):
@@ -682,44 +676,56 @@ class DeleteThread(threading.Thread):
         self.setDaemon(True)
         self.error = 0
         self.active = True
-        self.title = "Delete: %s" % path
-        self.status = "Deleting: %s" % util.unix_basename(path)
-        self.path = path
+        if isinstance(path, list):
+            self.title = "Delete: mark files"
+            self.status = "Deleting: mark files"
+            self.path = [util.abspath(f) for f in path]
+        else:
+            self.title = "Delete: %s" % path
+            self.status = "Deleting: %s" % util.unix_basename(path)
+            self.path = path
 
     def run(self):
         try:
-            if not os.access(self.path, os.R_OK) and not os.path.islink(self.path):
-                raise OSError("No permission: %s" % self.path)
-            if os.path.islink(self.path) or not os.path.isdir(self.path):
-                self.status = "Deleting: " + util.unix_basename(self.path)
-                view_threads()
-                os.remove(self.path)
+            if isinstance(self.path, list):
+                for f in self.path:
+                    self.delete(f)
             else:
-                dirlist = [self.path]
-                for root, dirs, files in os.walk(self.path):
-                    for f in files:
-                        self.status = "Deleting: " + f
-                        view_threads()
-                        os.remove(os.path.join(root, f))
-                        if not self.active:
-                            raise FilectrlCancel("Delete canceled: %s" % f)
-                    for d in dirs:
-                        dirlist.append(os.path.join(root, d))
-                dirlist.sort()
-                dirlist.reverse()
-                for d in dirlist:
-                    if not os.access(self.path, os.R_OK) and not os.path.islink(self.path):
-                        raise OSError("No permission: %s" % d)
-                    try:
-                        os.rmdir(d)
-                    except Exception as e:
-                        if e[0] == errno.ENOTEMPTY:
-                            pass
+                self.delete(self.path)
         except Exception as e:
             self.error = e
 
     def kill(self):
         self.active = False
+
+    def delete(self, path):
+        if not os.access(path, os.R_OK) and not os.path.islink(path):
+            raise OSError("No permission: %s" % path)
+        if os.path.islink(path) or not os.path.isdir(path):
+            self.status = "Deleting: " + util.unix_basename(path)
+            view_threads()
+            os.remove(path)
+        else:
+            dirlist = [path]
+            for root, dirs, files in os.walk(path):
+                for f in files:
+                    self.status = "Deleting: " + f
+                    view_threads()
+                    os.remove(os.path.join(root, f))
+                    if not self.active:
+                        raise FilectrlCancel("Delete canceled: %s" % f)
+                for d in dirs:
+                    dirlist.append(os.path.join(root, d))
+            dirlist.sort()
+            dirlist.reverse()
+            for d in dirlist:
+                if not os.access(path, os.R_OK) and not os.path.islink(path):
+                    raise OSError("No permission: %s" % d)
+                try:
+                    os.rmdir(d)
+                except Exception as e:
+                    if e[0] == errno.ENOTEMPTY:
+                        pass
 
 class CopyThread(threading.Thread):
     def __init__(self, ctrl):
