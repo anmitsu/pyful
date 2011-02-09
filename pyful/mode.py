@@ -416,15 +416,7 @@ class Rename(object):
         return comp.comp_files()
 
     def execute(self, path):
-        if os.path.exists(path):
-            message.error("Error: File exist - %s" % path)
-            return
-
-        try:
-            os.renames(self.path, path)
-            message.puts("Renamed: %s -> %s" % (self.path, path))
-        except Exception as e:
-            message.exception(e)
+        filectrl.rename(self.path, path)
         _filer.workspace.all_reload()
 
 class Replace(object):

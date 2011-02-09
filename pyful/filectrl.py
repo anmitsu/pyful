@@ -97,6 +97,21 @@ def mknod(path, mode=0o644):
 def move(src, dst):
     Filectrl().move(src, dst)
 
+def rename(src, dst):
+    if os.path.samefile(src, dst):
+        return
+    if os.path.exists(dst):
+        ret = message.confirm("File exist - (%s). Override?" % dst, ["Yes", "No", "Cancel"])
+        if ret == "Yes":
+            pass
+        else:
+            return
+    try:
+        os.renames(src, dst)
+        message.puts("Renamed: %s -> %s" % (src, dst))
+    except Exception as e:
+        message.exception(e)
+
 def replace(pattern, repstr):
     filer = Filer()
     files = filer.dir.get_mark_files()
@@ -127,7 +142,7 @@ def replace(pattern, repstr):
                     pass
                 elif ret == "No" or ret == "No(all)":
                     continue
-                elif ret is None:
+                elif ret is None or ret == "Cancel":
                     break
         try:
             os.renames(src, dst)
