@@ -1159,8 +1159,8 @@ class Finder(object):
                 if self.migemo:
                     pattern = self.migemo.query(pattern)
                 reg = re.compile(pattern)
-        except Exception as e:
-            return message.exception(e)
+        except Exception:
+            return
 
         self.results = [f.name for f in self.cache if f.name != os.pardir and reg.search(f.name)]
 
