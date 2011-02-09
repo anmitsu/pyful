@@ -362,9 +362,7 @@ class History(ui.InfoBox):
 
     def delete(self):
         li = self.index(self.cmdline.mode.__class__.__name__)
-        try:
-            li[self.cursor]
-        except IndexError:
+        if not 0 <= self.cursor < len(li):
             return
         if not li or self.info is None:
             return
