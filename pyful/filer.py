@@ -82,17 +82,13 @@ class Filer(Singleton):
         self.workspaces[x].clear()
         ws = self.workspaces[x]
         self.workspaces.remove(ws)
-        try:
-            self.workspaces[self.cursor]
-        except IndexError:
+        if not 0 <= self.cursor < len(self.workspaces):
             self.cursor = len(self.workspaces) - 1
         self.focus_workspace(self.cursor)
         return ws
 
     def focus_workspace(self, x):
-        try:
-            self.workspaces[x]
-        except IndexError:
+        if not 0 <= x < len(self.workspaces):
             return
         self.workspace.clear()
         self.cursor = x
@@ -427,9 +423,7 @@ class Workspace(object):
         return self.cursor
 
     def setcursor(self, x):
-        try:
-            self.dirs[x]
-        except IndexError:
+        if not 0 <= x < len(self.dirs):
             return
         self.cursor = x
         try:
@@ -1130,11 +1124,12 @@ class Directory(object):
                 status += ' Mask:%s' % self.maskreg.pattern
             if self.list_title is not None:
                 status += ' ' + self.list_title
-            try:
-                # self.statwin.addstr(util.mbs_ljust(status + '  |', self.statwin.getmaxyx()[1]-2, keymap.HLINE))
-                self.statwin.addstr(status + '  |')
-            except Exception as e:
-                message.error('Warning: status window very small')
+
+            status += " |"
+            (sy, sx) = self.statwin.getmaxyx()
+            if util.termwidth(status) > sx-2:
+                status = util.mbs_ljust(status, sx-2)
+            self.statwin.addstr(status)
             self.statwin.noutrefresh()
             if focus:
                 self.file.view()
@@ -1165,7 +1160,7 @@ class Finder(object):
                     pattern = self.migemo.query(pattern)
                 reg = re.compile(pattern)
         except Exception as e:
-            return
+            return message.exception(e)
 
         self.results = [f.name for f in self.cache if f.name != os.pardir and reg.search(f.name)]
 
@@ -1228,7 +1223,7 @@ class Finder(object):
         self.dir.statwin.addstr(' Finder: ', look.colors['FINDER'])
         try:
             self.dir.statwin.addstr(' ' + self.string)
-        except Exception as e:
+        except Exception:
             message.error('Warning: status window very small')
         self.dir.statwin.noutrefresh()
 
