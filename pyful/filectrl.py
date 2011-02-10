@@ -98,7 +98,7 @@ def move(src, dst):
     Filectrl().move(src, dst)
 
 def rename(src, dst):
-    if os.path.samefile(src, dst):
+    if os.path.exists(dst) and os.path.samefile(src, dst):
         return
     if os.path.exists(dst):
         ret = message.confirm("File exist - (%s). Override?" % dst, ["Yes", "No", "Cancel"])
