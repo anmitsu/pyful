@@ -698,7 +698,7 @@ class DeleteThread(threading.Thread):
         else:
             self.title = "Delete: %s" % path
             self.status = "Deleting: %s" % util.unix_basename(path)
-            self.path = path
+            self.path = util.abspath(path)
 
     def run(self):
         try:
