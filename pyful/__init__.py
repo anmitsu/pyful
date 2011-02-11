@@ -31,12 +31,19 @@ from pyful import ui
 
 def loadrcfile(path=None):
     if path is None:
+        defpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'rc.py')
         path = os.path.expanduser(Pyful.environs['RCFILE'])
         if not os.path.exists(path):
-            path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'rc.py')
-    with open(path, 'r') as rc:
-        exec(rc.read(), locals())
-    Pyful.environs['RCFILE'] = path
+            path = defpath
+    try:
+        with open(path, 'r') as rc:
+            exec(rc.read(), locals())
+        Pyful.environs['RCFILE'] = path
+    except Exception as e:
+        with open(defpath, 'r') as rc:
+            exec(rc.read(), locals())
+        Pyful.environs['RCFILE'] = defpath
+        return e
 
 def createconfig():
     confdir = os.path.expanduser('~/.pyful')

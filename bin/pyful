@@ -78,7 +78,7 @@ if __name__ == '__main__':
 
     main = Pyful()
 
-    loadrcfile(__options__.config)
+    error = loadrcfile(__options__.config)
     main.start_curses()
     main.init_function()
 
@@ -86,7 +86,11 @@ if __name__ == '__main__':
     stdscr.refresh()
     main.started = True
     message.puts("Python %s" % sys.version)
-    message.puts("Loaded %s" % Pyful.environs['RCFILE'])
+    if error:
+        message.exception(error)
+        message.puts("Loaded %s" % Pyful.environs['RCFILE'])
+    else:
+        message.puts("Loaded %s" % Pyful.environs['RCFILE'])
     message.puts("Welcome to pyful v%s" % __version__)
     main.view()
 
