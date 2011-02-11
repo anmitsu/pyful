@@ -88,9 +88,7 @@ if __name__ == '__main__':
     message.puts("Python %s" % sys.version)
     if error:
         message.exception(error)
-        message.puts("Loaded %s" % Pyful.environs['RCFILE'])
-    else:
-        message.puts("Loaded %s" % Pyful.environs['RCFILE'])
+    message.puts("Loaded %s" % Pyful.environs['RCFILE'])
     message.puts("Welcome to pyful v%s" % __version__)
     main.view()
 
