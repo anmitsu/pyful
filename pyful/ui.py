@@ -104,20 +104,24 @@ class CmdlineScreen(Component):
         Component.__init__(self, "Cmdscr")
         (y, x) = getcomponent("Stdscr").win.getmaxyx()
         self.win = curses.newwin(2, x, y-2, 0)
+        self.win.bkgdset(" ", look.colors['Window'])
 
     def resize(self):
         (y, x) = getcomponent("Stdscr").win.getmaxyx()
         self.win = curses.newwin(2, x, y-2, 0)
+        self.win.bkgdset(" ", look.colors['Window'])
 
 class Titlebar(Component):
     def __init__(self):
         Component.__init__(self, "Titlebar")
         (y, x) = getcomponent("Stdscr").win.getmaxyx()
         self.win = curses.newwin(1, x, 0, 0)
+        self.win.bkgdset(" ", look.colors['Window'])
 
     def resize(self):
         (y, x) = getcomponent("Stdscr").win.getmaxyx()
         self.win = curses.newwin(1, x, 0, 0)
+        self.win.bkgdset(" ", look.colors['Window'])
 
 class InfoBox(Component):
     win = None
@@ -274,7 +278,7 @@ class InfoBox(Component):
                     reg = re.compile("(%s)" % re.escape(self._highlight))
                     for iitem in reg.split(item):
                         if iitem == self._highlight:
-                            self.win.addstr(iitem, look.colors['CANDIDATE_HILIGHT'])
+                            self.win.addstr(iitem, look.colors['CandidateHilight'])
                         else:
                             self.win.addstr(iitem)
                 else:

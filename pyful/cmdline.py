@@ -175,7 +175,7 @@ class Cmdline(ui.Component):
         cmdscr.erase()
         cmdscr.move(0, 0)
         prompt = " %s " % self.mode.prompt
-        cmdscr.addstr(prompt, look.colors['CMDLINE'])
+        cmdscr.addstr(prompt, look.colors['CmdlinePrompt'])
         try:
             if self.mode.__class__.__name__ == "Shell":
                 self.print_color_shell(self.string)
@@ -248,7 +248,7 @@ class Cmdline(ui.Component):
         for s in reg.split(string):
             attr = 0
             if re.search("^%[mMdDfFxX]$", s):
-                attr = look.colors['CMDLINEMACRO']
+                attr = look.colors['CmdlineMacro']
             cmdscr.addstr(s, attr)
 
     def print_color_shell(self, string):
@@ -258,18 +258,18 @@ class Cmdline(ui.Component):
         for s in reg.split(string):
             attr = 0
             if re.search("^%[&TqmMdDfFxX]$", s):
-                attr = look.colors['CMDLINEMACRO']
+                attr = look.colors['CmdlineMacro']
             elif re.search("^[;|>&]$", s):
-                attr = look.colors['CMDLINESEPARATOR']
+                attr = look.colors['CmdlineSeparator']
                 prg = False
             elif s.startswith("-") and prg:
-                attr = look.colors['CMDLINEOPTION']
+                attr = look.colors['CmdlineOptions']
             elif not s == "\s" and not prg:
                 if s in self.completion.programs:
-                    attr = look.colors['CMDLINEPROGRAM']
+                    attr = look.colors['CmdlineProgram']
                     prg = True
                 else:
-                    attr = look.colors['CMDLINENOPROGRAM']
+                    attr = look.colors['CmdlineNoProgram']
             cmdscr.addstr(s, attr)
 
     def print_color_eval(self, string):
@@ -278,11 +278,11 @@ class Cmdline(ui.Component):
         for s in reg.split(string):
             attr = 0
             if re.search("^%[&TqmMdDfFxX]$", s):
-                attr = look.colors['CMDLINEMACRO']
+                attr = look.colors['CmdlineMacro']
             elif re.search("^[;]$", s):
-                attr = look.colors['CMDLINESEPARATOR']
+                attr = look.colors['CmdlineSeparator']
             elif s in __builtins__.keys():
-                attr = look.colors['CMDLINEPYFUNCTION']
+                attr = look.colors['CmdlinePythonFunction']
             cmdscr.addstr(s, attr)
 
     def cmdline_input(self, meta, key):

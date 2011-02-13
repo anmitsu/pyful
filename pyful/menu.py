@@ -18,6 +18,7 @@
 
 import curses
 
+from pyful import look
 from pyful import message
 from pyful import ui
 from pyful import util
@@ -52,6 +53,7 @@ class Menu(ui.Component):
         self.title = name
         self.active = self._items[name]
         self.win = curses.newwin(len(self.active)+2, 50, 1, 0)
+        self.win.bkgdset(" ", look.colors['Window'])
 
     def hide(self):
         self.win.erase()

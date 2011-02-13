@@ -65,7 +65,7 @@ class Message(ui.Component):
 
     def puts(self, string, timex=3):
         self.active = True
-        msg = (re.sub(r"[\n\r\t]", "", util.unistr(string)), look.colors['MSGPUT'])
+        msg = (re.sub(r"[\n\r\t]", "", util.unistr(string)), look.colors['PutsMessage'])
         self.msg.insert(0, msg)
         if self.history < len(self.msg):
             self.msg.pop()
@@ -75,7 +75,7 @@ class Message(ui.Component):
 
     def error(self, string, timex=3):
         self.active = True
-        msg = (re.sub(r"[\n\r\t]", "", util.unistr(string)), look.colors['MSGERR'])
+        msg = (re.sub(r"[\n\r\t]", "", util.unistr(string)), look.colors['ErrorMessage'])
         self.msg.insert(0, msg)
         if self.history < len(self.msg):
             self.msg.pop()
@@ -111,10 +111,12 @@ class MessageBox(object):
     def __init__(self):
         (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
         self.win = curses.newwin(self.height+2, x, y-self.height-4, 0)
+        self.win.bkgdset(" ", look.colors['Window'])
 
     def resize(self):
         (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
         self.win = curses.newwin(self.height+2, x, y-self.height-4, 0)
+        self.win.bkgdset(" ", look.colors['Window'])
 
     def view(self, msglist):
         if not msglist:
@@ -179,7 +181,7 @@ class Confirm(object):
         cmdscr.move(0, 1)
 
         size = len(self.options)
-        cmdscr.addstr(self.msg+" ", look.colors['MSGCONFIRM'])
+        cmdscr.addstr(self.msg+" ", look.colors['ConfirmMessage'])
         if self.cursor < 0:
             self.cursor = 0
         elif self.cursor > size - 1:

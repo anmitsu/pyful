@@ -150,7 +150,7 @@ class Filer(ui.Component):
 
         for i, ws in enumerate(self.workspaces):
             if self.cursor == i:
-                titlebar.addstr(' '+ws.title+' ', look.colors['WKSELECTED'])
+                titlebar.addstr(' '+ws.title+' ', look.colors['WorkspaceSelected'])
             else:
                 titlebar.addstr(' '+ws.title+' ')
         titlebar.addstr(' | ', curses.A_BOLD)
@@ -485,7 +485,9 @@ class Directory(object):
 
     def __init__(self, path, height, width, begy, begx):
         self.win = curses.newwin(height, width, begy, begx)
+        self.win.bkgdset(" ", look.colors['Window'])
         self.statwin = curses.newwin(1, self.win.getmaxyx()[0], self.win.getmaxyx()[1], self.win.getbegyx()[1])
+        self.statwin.bkgdset(" ", look.colors['Window'])
         self.path = util.abspath(path)
         self.pathhistory = [self.path]
         self.pathhistory_cursor = 0
@@ -1052,6 +1054,8 @@ class Directory(object):
         self.win = curses.newwin(height, width, begy, begx)
         begy, begx = self.win.getbegyx()
         self.statwin = curses.newwin(1, width, begy+height-1, begx)
+        self.win.bkgdset(look.colors['Window'])
+        self.statwin.bkgdset(look.colors['Window'])
 
     def view(self, focus):
         size = len(self.files)
@@ -1093,9 +1097,9 @@ class Directory(object):
 
             if f.marked:
                 if self.cursor == i and focus:
-                    attr = look.colors['MARK'] | curses.A_REVERSE
+                    attr = look.colors['MarkFile'] | curses.A_REVERSE
                 else:
-                    attr = look.colors['MARK']
+                    attr = look.colors['MarkFile']
                 self.win.move(line, 1)
                 self.win.addstr('*' + fname + fstat, attr)
             else:
@@ -1219,7 +1223,7 @@ class Finder(object):
 
     def view(self):
         self.dir.statwin.move(0, 1)
-        self.dir.statwin.addstr(' Finder: ', look.colors['FINDER'])
+        self.dir.statwin.addstr(' Finder: ', look.colors['Finder'])
         try:
             self.dir.statwin.addstr(' ' + self.string)
         except Exception:
@@ -1351,13 +1355,13 @@ class FileStat(object):
     def get_attr(self):
         if self.islink():
             if self.isdir():
-                return look.colors['LINKDIR']
+                return look.colors['LinkDir']
             else:
-                return look.colors['LINK']
+                return look.colors['LinkFile']
         elif self.isdir():
-            return look.colors['DIRECTORY']
+            return look.colors['Directory']
         elif self.isexec():
-            return look.colors['EXECUTABLE']
+            return look.colors['ExecutableFile']
         else:
             return 0
 
