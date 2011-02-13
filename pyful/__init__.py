@@ -26,6 +26,7 @@ import os
 import signal
 import sys
 
+from pyful import look
 from pyful import ui
 
 def loadrcfile(path=None, started=True):
@@ -67,6 +68,7 @@ class Pyful(object):
         'PAGER': 'less',
         'TRASHBOX': '~/.pyful/trashbox',
         'RCFILE': '~/.pyful/rc.py',
+        'LOOKS': look.default,
         'PLATFORM': sys.platform,
         }
     binpath = None

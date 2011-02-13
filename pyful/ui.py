@@ -59,12 +59,12 @@ def refresh():
 
 def start_curses():
     StandardScreen()
+    look.init_colors()
     CmdlineScreen()
     Titlebar()
     InfoBox.resize()
     getcomponent("Filer").default_init()
     getcomponent("Message").init_messagebox()
-    look.init_colors()
 
 class ComponentDuplication(Exception):
     pass
@@ -104,24 +104,24 @@ class CmdlineScreen(Component):
         Component.__init__(self, "Cmdscr")
         (y, x) = getcomponent("Stdscr").win.getmaxyx()
         self.win = curses.newwin(2, x, y-2, 0)
-        self.win.bkgdset(" ", look.colors['Window'])
+        self.win.bkgd(look.colors['CmdlineWindow'])
 
     def resize(self):
         (y, x) = getcomponent("Stdscr").win.getmaxyx()
         self.win = curses.newwin(2, x, y-2, 0)
-        self.win.bkgdset(" ", look.colors['Window'])
+        self.win.bkgd(look.colors['CmdlineWindow'])
 
 class Titlebar(Component):
     def __init__(self):
         Component.__init__(self, "Titlebar")
         (y, x) = getcomponent("Stdscr").win.getmaxyx()
         self.win = curses.newwin(1, x, 0, 0)
-        self.win.bkgdset(" ", look.colors['Window'])
+        self.win.bkgd(look.colors['Titlebar'])
 
     def resize(self):
         (y, x) = getcomponent("Stdscr").win.getmaxyx()
         self.win = curses.newwin(1, x, 0, 0)
-        self.win.bkgdset(" ", look.colors['Window'])
+        self.win.bkgd(look.colors['Titlebar'])
 
 class InfoBox(Component):
     win = None
@@ -162,6 +162,7 @@ class InfoBox(Component):
             height = 3
             cls.zoom = height - base - 2
         cls.win = curses.newwin(height, x, y-height-2, 0)
+        cls.win.bkgd(look.colors['InfoBoxWindow'])
 
     @property
     def info(self):

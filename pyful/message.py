@@ -111,12 +111,12 @@ class MessageBox(object):
     def __init__(self):
         (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
         self.win = curses.newwin(self.height+2, x, y-self.height-4, 0)
-        self.win.bkgdset(" ", look.colors['Window'])
+        self.win.bkgd(look.colors['MessageWindow'])
 
     def resize(self):
         (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
         self.win = curses.newwin(self.height+2, x, y-self.height-4, 0)
-        self.win.bkgdset(" ", look.colors['Window'])
+        self.win.bkgd(look.colors['MessageWindow'])
 
     def view(self, msglist):
         if not msglist:

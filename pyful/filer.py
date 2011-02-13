@@ -150,7 +150,7 @@ class Filer(ui.Component):
 
         for i, ws in enumerate(self.workspaces):
             if self.cursor == i:
-                titlebar.addstr(' '+ws.title+' ', look.colors['WorkspaceSelected'])
+                titlebar.addstr(' '+ws.title+' ', look.colors['WorkspaceFocus'])
             else:
                 titlebar.addstr(' '+ws.title+' ')
         titlebar.addstr(' | ', curses.A_BOLD)
@@ -172,7 +172,7 @@ class Filer(ui.Component):
                 w = width-numlen
             string = num + util.mbs_rjust(path, w)
             if i == self.workspace.cursor:
-                titlebar.addstr(string, curses.A_REVERSE)
+                titlebar.addstr(string, look.colors['TitlebarFocus'])
             else:
                 titlebar.addstr(string)
         titlebar.noutrefresh()
@@ -485,9 +485,9 @@ class Directory(object):
 
     def __init__(self, path, height, width, begy, begx):
         self.win = curses.newwin(height, width, begy, begx)
-        self.win.bkgdset(" ", look.colors['Window'])
+        self.win.bkgd(look.colors['Window'])
         self.statwin = curses.newwin(1, self.win.getmaxyx()[0], self.win.getmaxyx()[1], self.win.getbegyx()[1])
-        self.statwin.bkgdset(" ", look.colors['Window'])
+        self.statwin.bkgd(look.colors['Window'])
         self.path = util.abspath(path)
         self.pathhistory = [self.path]
         self.pathhistory_cursor = 0
@@ -1054,8 +1054,8 @@ class Directory(object):
         self.win = curses.newwin(height, width, begy, begx)
         begy, begx = self.win.getbegyx()
         self.statwin = curses.newwin(1, width, begy+height-1, begx)
-        self.win.bkgdset(look.colors['Window'])
-        self.statwin.bkgdset(look.colors['Window'])
+        self.win.bkgd(look.colors['Window'])
+        self.statwin.bkgd(look.colors['Window'])
 
     def view(self, focus):
         size = len(self.files)

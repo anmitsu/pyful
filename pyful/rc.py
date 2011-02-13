@@ -5,6 +5,7 @@
 #
 
 from pyful import Pyful, atinit, atexit
+from pyful import look
 from pyful import message
 from pyful import mode
 from pyful import process
@@ -22,6 +23,8 @@ menu = ui.getcomponent("Menu")
 Pyful.environs['EDITOR'] = 'vim'
 Pyful.environs['PAGER'] = 'less'
 Pyful.environs['TRASHBOX'] = '~/.pyful/trashbox'
+Pyful.environs['LOOKS'] = look.default
+# Pyful.environs['LOOKS'] = look.midnight
 
 # Set proc attributes.
 process.Process.shell = ('/bin/bash', '-c')
