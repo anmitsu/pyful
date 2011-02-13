@@ -22,6 +22,7 @@ import time
 
 from pyful import Pyful
 from pyful import filectrl
+from pyful import look
 from pyful import message
 from pyful import process
 from pyful import ui
@@ -57,6 +58,20 @@ class Mx(object):
             commands[cmd]()
         except KeyError:
             message.error("Undefined command `%s'" % cmd)
+
+class ChangeLooks(object):
+    prompt = "Change looks:"
+
+    def complete(self, comp):
+        return list(look.looks.keys())
+
+    def execute(self, name):
+        if name in look.looks:
+            Pyful.environs['LOOKS'] = look.looks[name]
+            look.init_colors()
+            ui.refresh()
+        else:
+            message.error("`%s' looks doesn't exist" % name)
 
 class ChangeWorkspaceTitle(object):
     prompt = 'Change workspace title:'

@@ -70,6 +70,7 @@ commands = {
 
     'open_at_system' : lambda: _open_at_system(),
     'open_listfile'  : lambda: _cmdline.start(mode.OpenListfile(), ''),
+    'change_looks'  : lambda: _cmdline.start(mode.ChangeLooks(), ''),
     'zoom_infobox'       : lambda: _cmdline.start(mode.ZoomInfoBox(), ''),
     'zoom_in_infobox'    : lambda: ui.zoom_infobox(ui.InfoBox.zoom+5),
     'zoom_out_infobox'   : lambda: ui.zoom_infobox(ui.InfoBox.zoom-5),
