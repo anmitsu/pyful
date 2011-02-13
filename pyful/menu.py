@@ -18,12 +18,12 @@
 
 import curses
 
-from pyful import Singleton
-from pyful import util
 from pyful import message
+from pyful import ui
+from pyful import util
 from pyful.keymap import *
 
-class Menu(Singleton):
+class Menu(ui.Component):
     keymap = {}
     _items = {}
 
@@ -33,10 +33,10 @@ class Menu(Singleton):
         self.__class__._items.update(itm)
     items = property(getitems, setitems)
 
-    def init_singleton_instance(self):
+    def __init__(self):
+        ui.Component.__init__(self, "Menu")
         self.win = None
         self.cursor = 0
-        self.active = None
         self.title = None
 
     def mvcursor(self, x):

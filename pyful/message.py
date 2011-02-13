@@ -20,7 +20,6 @@ import curses
 import re
 from threading import Timer
 
-from pyful import Singleton
 from pyful import look
 from pyful import ui
 from pyful import util
@@ -45,19 +44,17 @@ def timerkill():
 def viewhistroy():
     Message.instance.view_histroy()
 
-class Message(Singleton):
+class Message(ui.Component):
     history = 100
     instance = None
 
-    def init_singleton_instance(self):
+    def __init__(self):
+        ui.Component.__init__(self, "Message")
         self.msg = []
-        self.active = False
         self.timer = None
         self.__class__.instance = self
 
     def init_messagebox(self):
-        from pyful.cmdline import Cmdline
-        self.cmdline = Cmdline()
         self.messagebox = MessageBox()
 
     def start_timer(self, timex):
@@ -105,18 +102,18 @@ class Message(Singleton):
         self.active = False
 
     def view(self):
-        if not self.cmdline.active:
+        if not ui.getcomponent("Cmdline").is_active:
             self.messagebox.view(self.msg)
 
 class MessageBox(object):
     height = 2
 
     def __init__(self):
-        (y, x) = ui.getstdscr().getmaxyx()
+        (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
         self.win = curses.newwin(self.height+2, x, y-self.height-4, 0)
 
     def resize(self):
-        (y, x) = ui.getstdscr().getmaxyx()
+        (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
         self.win = curses.newwin(self.height+2, x, y-self.height-4, 0)
 
     def view(self, msglist):
@@ -178,7 +175,7 @@ class Confirm(object):
         if self.box:
             self.box.view()
 
-        cmdscr = ui.getcmdscr()
+        cmdscr = ui.getcomponent("Cmdscr").win
         cmdscr.erase()
         cmdscr.move(0, 1)
 
@@ -210,3 +207,4 @@ class Confirm(object):
             self.box.input(meta, key)
         if (meta, key) in self.keymap:
             self.keymap[(meta, key)]()
+

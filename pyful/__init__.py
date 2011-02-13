@@ -21,15 +21,14 @@ This application is CUI filer of the keyboard operation for Linux."""
 
 __version__ = "0.2.2"
 
-import os
-import sys
 import curses
+import os
 import signal
-import shutil
+import sys
 
 from pyful import ui
 
-def loadrcfile(path=None):
+def loadrcfile(path=None, started=True):
     if path is None:
         defpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'rc.py')
         path = os.path.expanduser(Pyful.environs['RCFILE'])
@@ -40,55 +39,29 @@ def loadrcfile(path=None):
             exec(rc.read(), locals())
         Pyful.environs['RCFILE'] = path
     except Exception as e:
-        with open(defpath, 'r') as rc:
-            exec(rc.read(), locals())
-        Pyful.environs['RCFILE'] = defpath
+        if started:
+            with open(defpath, 'r') as rc:
+                exec(rc.read(), locals())
+            Pyful.environs['RCFILE'] = defpath
         return e
-
-def createconfig():
-    confdir = os.path.expanduser('~/.pyful')
-    if not os.path.exists(confdir):
-        os.makedirs(confdir, 0o700)
-
-    rcfile = os.path.join(confdir, 'rc.py')
-    if not os.path.exists(rcfile):
-        default = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'rc.py')
-        shutil.copy(default, rcfile)
-
-def refresh():
-    curses.endwin()
-    ui.getstdscr().refresh()
-    ui.resize()
-    from pyful.filer import Filer
-    Filer().workspace.resize()
-    from pyful.message import Message
-    Message.instance.messagebox.resize()
 
 def setsignal():
     def _signal(signalnum, stackframe):
-        refresh()
+        ui.refresh()
     signal.signal(signal.SIGWINCH, _signal)
 
 def resetsignal():
     signal.signal(signal.SIGWINCH, signal.SIG_DFL)
 
-class Singleton(object):
-    def __new__(cls, *args, **kwargs):
-        if not hasattr(cls, '_singleton_instances'):
-            cls._singleton_instances = {}
-            instance = super(Singleton, cls).__new__(cls, *args, **kwargs)
-            cls._singleton_instances[hash(cls)] = instance
-            instance.init_singleton_instance(*args, **kwargs)
-        return cls._singleton_instances[hash(cls)]
+def atinit(func, *args, **kwargs):
+    Pyful.initfuncs.append(lambda: func(*args, **kwargs))
 
-    def init_singleton_instance(self):
-        raise Exception("Singleton class must override this method.")
+def atexit(func, *args, **kwargs):
+    Pyful.exitfuncs.append(lambda: func(*args, **kwargs))
 
-class Pyful(Singleton):
+class Pyful(object):
     """PYthon File management UtiLity"""
 
-    started = None
-    binpath = None
     environs = {
         'EDITOR': 'vim',
         'PAGER': 'less',
@@ -96,63 +69,45 @@ class Pyful(Singleton):
         'RCFILE': '~/.pyful/rc.py',
         'PLATFORM': sys.platform,
         }
-    __initfuncs = []
-    __exitfuncs = []
+    binpath = None
+    initfuncs = []
+    exitfuncs = []
 
-    def init_singleton_instance(self):
-        from pyful.message import Message
-        self.message = Message()
-
+    def __init__(self):
         from pyful.cmdline import Cmdline
-        self.cmdline = Cmdline()
-
         from pyful.filer import Filer
-        self.filer = Filer()
-
+        from pyful.message import Message
         from pyful.menu import Menu
+
+        self.cmdline = Cmdline()
+        self.filer = Filer()
+        self.message = Message()
         self.menu = Menu()
 
         from pyful.process import view_process
         self.view_process = view_process
 
-    def start_curses(self):
-        if not self.started:
-            ui.init_ui()
-
-            self.filer.default_init()
-
-            self.message.init_messagebox()
-
-            from pyful import look
-            look.init_colors()
-
-    def atinit(self, func, *args, **kwargs):
-        self.__initfuncs.append(lambda: func(*args, **kwargs))
-
     def init_function(self):
-        for func in self.__initfuncs: func()
-
-    def atexit(self, func, *args, **kwargs):
-        self.__exitfuncs.append(lambda: func(*args, **kwargs))
+        for func in self.initfuncs: func()
 
     def exit_function(self):
-        for func in self.__exitfuncs: func()
+        for func in self.exitfuncs: func()
 
     def view(self):
         self.filer.view()
-        if self.menu.active:
+        if self.menu.is_active:
             self.menu.view()
-        if self.cmdline.active:
+        if self.cmdline.is_active:
             self.cmdline.view()
-        elif self.message.active:
+        elif self.message.is_active:
             self.message.view()
         self.view_process()
         curses.doupdate()
 
     def input(self, meta, key):
-        if self.cmdline.active:
+        if self.cmdline.is_active:
             self.cmdline.input(meta, key)
-        elif self.menu.active:
+        elif self.menu.is_active:
             self.menu.input(meta, key)
         else:
             self.filer.input(meta, key)
@@ -163,16 +118,3 @@ class Pyful(Singleton):
             (meta, key) = ui.getch()
             if key != -1:
                 self.input(meta, key)
-
-    def main_loop_nodelay(self):
-        stdscr = ui.getstdscr()
-        stdscr.timeout(10)
-        self.view()
-        (meta, key) = ui.getch()
-        if key != -1:
-            self.input(meta, key)
-        stdscr.timeout(-1)
-
-    def check_rcfile_version(self, version):
-        pass
-

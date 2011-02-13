@@ -20,23 +20,23 @@ import os
 import re
 import subprocess
 
-from pyful import Pyful, Singleton
+from pyful import Pyful
 from pyful import completion
-from pyful import util
 from pyful import look
+from pyful import message
 from pyful import process
 from pyful import ui
-from pyful import message
+from pyful import util
 from pyful.keymap import *
 
-class Cmdline(Singleton):
+class Cmdline(ui.Component):
     keymap = {}
     wordbreakchars = re.compile("[._/\s\t\n\"\\`'@$><=:|&{(]")
 
-    def init_singleton_instance(self):
+    def __init__(self):
+        ui.Component.__init__(self, "Cmdline")
         self.string = ""
         self.cursor = 0
-        self.active = False
         self._stringcue = []
         self.mode = None
         self.history = History(self)
@@ -171,7 +171,7 @@ class Cmdline(Singleton):
         elif self.cursor > util.mbslen(self.string):
             self.cursor = util.mbslen(self.string)
 
-        cmdscr = ui.getcmdscr()
+        cmdscr = ui.getcomponent("Cmdscr").win
         cmdscr.erase()
         cmdscr.move(0, 0)
         prompt = " %s " % self.mode.prompt
@@ -187,7 +187,7 @@ class Cmdline(Singleton):
             message.error("curses error: " + str(e))
 
         curpos = util.termwidth(prompt+self.string, util.mbslen(prompt)+self.cursor)
-        stdscr = ui.getstdscr()
+        stdscr = ui.getcomponent("Stdscr").win
         if curpos < stdscr.getmaxyx()[1]:
             cmdscr.move(0, curpos)
         cmdscr.noutrefresh()
@@ -203,7 +203,7 @@ class Cmdline(Singleton):
             self.cmdline_input(meta, key)
 
     def finish(self):
-        cmdscr = ui.getcmdscr()
+        cmdscr = ui.getcomponent("Cmdscr").win
         cmdscr.erase()
         cmdscr.noutrefresh()
         self.string = ""
@@ -243,7 +243,7 @@ class Cmdline(Singleton):
         self.start(mode.Mx(), string, pos)
 
     def print_color_default(self, string):
-        cmdscr = ui.getcmdscr()
+        cmdscr = ui.getcomponent("Cmdscr").win
         reg = re.compile("([\s;.()]|(?<!\\\\)%[mMdDfFxX])")
         for s in reg.split(string):
             attr = 0
@@ -252,7 +252,7 @@ class Cmdline(Singleton):
             cmdscr.addstr(s, attr)
 
     def print_color_shell(self, string):
-        cmdscr = ui.getcmdscr()        
+        cmdscr = ui.getcomponent("Cmdscr").win        
         prg = False
         reg = re.compile("([\s;|>]|[^%]&|(?<!\\\\)%[mMdDfFxX])")
         for s in reg.split(string):
@@ -273,7 +273,7 @@ class Cmdline(Singleton):
             cmdscr.addstr(s, attr)
 
     def print_color_eval(self, string):
-        cmdscr = ui.getcmdscr()
+        cmdscr = ui.getcomponent("Cmdscr").win
         reg = re.compile("([\s;.()]|(?<!\\\\)%[mMdDfFxX])")
         for s in reg.split(string):
             attr = 0
@@ -320,7 +320,7 @@ class History(ui.InfoBox):
     _index = {}
 
     def __init__(self, cmdline):
-        ui.InfoBox.__init__(self, "history")
+        ui.InfoBox.__init__(self, "History")
         self.cmdline = cmdline
         self.source = None
 
@@ -420,7 +420,7 @@ class Clipboard(ui.InfoBox):
     clip = []
 
     def __init__(self, cmdline):
-        ui.InfoBox.__init__(self, "clipboard")
+        ui.InfoBox.__init__(self, "Clipboard")
         self.cmdline = cmdline
 
     def loadfile(self, path):
@@ -499,7 +499,7 @@ class Clipboard(ui.InfoBox):
 
 class Output(ui.InfoBox):
     def __init__(self, cmdline):
-        ui.InfoBox.__init__(self, "output")
+        ui.InfoBox.__init__(self, "Output")
         self.cmdline = cmdline
 
     def edit(self):

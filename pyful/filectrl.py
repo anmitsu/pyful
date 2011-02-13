@@ -27,8 +27,9 @@ import errno
 
 from pyful import Pyful
 from pyful import message
+from pyful import process
+from pyful import ui
 from pyful import util
-from pyful.filer import Filer
 
 def chmod(path, mode):
     try:
@@ -113,7 +114,7 @@ def rename(src, dst):
         message.exception(e)
 
 def replace(pattern, repstr):
-    filer = Filer()
+    filer = ui.getcomponent("Filer")
     files = filer.dir.get_mark_files()
     renamed = [pattern.sub(r""+repstr, f) for f in files]
 
@@ -275,16 +276,48 @@ class Filectrl(object):
         Filectrl.threads.append(self.thread)
         self.threadevent.set()
         self.thread.start()
-        main = Pyful()
+        cmdline = ui.getcomponent("Cmdline")
+        filer = ui.getcomponent("Filer")
+        menu = ui.getcomponent("Menu")
+        message = ui.getcomponent("Message")
+
+        def input(meta, key):
+            if cmdline.is_active:
+                cmdline.input(meta, key)
+            elif menu.is_active:
+                menu.input(meta, key)
+            else:
+                filer.input(meta, key)
+
+        def view():
+            filer.view()
+            if menu.is_active:
+                menu.view()
+            if cmdline.is_active:
+                cmdline.view()
+            elif message.is_active:
+                message.view()
+            process.view_process()
+            curses.doupdate()
+
+        def sub_loop():
+            stdscr = ui.getcomponent("Stdscr").win
+            stdscr.timeout(10)
+            view()
+            (meta, key) = ui.getch()
+            if key != -1:
+                input(meta, key)
+            stdscr.timeout(-1)
+
         while self.thread.isAlive():
             self.threadevent.wait()
-            main.main_loop_nodelay()
+            sub_loop()
         if self.thread.error:
             message.exception(self.thread.error)
         else:
             message.puts("Thread finished: %s" % self.thread.title)
         Filectrl.threads.remove(self.thread)
-        Filer().workspace.all_reload()
+        ui.getcomponent("Filer").workspace.all_reload()
 
     def delete(self, path):
         self.thread = DeleteThread(path)

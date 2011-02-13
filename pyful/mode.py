@@ -22,17 +22,10 @@ import time
 
 from pyful import Pyful
 from pyful import filectrl
+from pyful import message
 from pyful import process
 from pyful import ui
 from pyful import util
-from pyful import message
-from pyful.cmdline import Cmdline
-from pyful.filer import Filer
-from pyful.menu import Menu
-
-_cmdline = Cmdline()
-_filer = Filer()
-_menu = Menu()
 
 class Shell(object):
     prompt = '$'
@@ -72,7 +65,7 @@ class ChangeWorkspaceTitle(object):
         return comp.comp_files()
 
     def execute(self, title):
-        _filer.workspace.chtitle(title)
+        ui.getcomponent("Filer").workspace.chtitle(title)
 
 class Chdir(object):
     prompt = 'Chdir to:'
@@ -81,27 +74,29 @@ class Chdir(object):
         return comp.comp_dirs()
 
     def execute(self, path):
-        _filer.dir.chdir(path)
+        ui.getcomponent("Filer").dir.chdir(path)
 
 class Chmod(object):
     @property
     def prompt(self):
-        if _filer.dir.ismark():
+        filer = ui.getcomponent("Filer")
+        if filer.dir.ismark():
             return "Chmod mark files:"
         else:
-            mode = "%o" % _filer.file.stat.st_mode
-            return "Chmod (%s - %s):" % (_filer.file.name, mode)
+            mode = "%o" % filer.file.stat.st_mode
+            return "Chmod (%s - %s):" % (filer.file.name, mode)
 
     def complete(self, comp):
         pass
 
     def execute(self, mode):
-        if _filer.dir.ismark():
-            for f in _filer.dir.get_mark_files():
+        filer = ui.getcomponent("Filer")
+        if filer.dir.ismark():
+            for f in filer.dir.get_mark_files():
                 filectrl.chmod(f, mode)
         else:
-            filectrl.chmod(_filer.file.name, mode)
-        _filer.workspace.all_reload()
+            filectrl.chmod(filer.file.name, mode)
+        filer.workspace.all_reload()
 
 class Chown(object):
     def __init__(self):
@@ -129,13 +124,13 @@ class Chown(object):
                 self.user = -1
             else:
                 self.user = string
-            _cmdline.restart("")
+            ui.getcomponent("Cmdline").restart("")
         else:
             if string == "":
                 self.group = -1
             else:
                 self.group = string
-            filectrl.chown(_filer.file.name, self.user, self.group)
+            filectrl.chown(ui.getcomponent("Filer").file.name, self.user, self.group)
 
 class Copy(object):
     def __init__(self):
@@ -143,7 +138,7 @@ class Copy(object):
 
     @property
     def prompt(self):
-        if _filer.dir.ismark():
+        if ui.getcomponent("Filer").dir.ismark():
             return "Copy mark files to:"
         elif self.src:
             return "Copy from %s to:" % self.src
@@ -156,14 +151,15 @@ class Copy(object):
         return comp.comp_files()
 
     def execute(self, path):
-        if _filer.dir.ismark():
+        filer = ui.getcomponent("Filer")
+        if filer.dir.ismark():
             if not path.endswith(os.sep) and not os.path.isdir(path):
                 message.error("Copy error: Destination is not directory")
                 return
-            filectrl.copy(_filer.dir.get_mark_files(), path)
+            filectrl.copy(filer.dir.get_mark_files(), path)
         elif self.src is None:
             self.src = path
-            _cmdline.restart(_filer.workspace.nextdir.path)
+            ui.getcomponent("Cmdline").restart(filer.workspace.nextdir.path)
         else:
             filectrl.copy(self.src, path)
 
@@ -174,7 +170,7 @@ class CreateWorkspace(object):
         return comp.comp_files()
 
     def execute(self, title):
-        _filer.create_workspace(title)
+        ui.getcomponent("Filer").create_workspace(title)
 
 class Delete(object):
     @property
@@ -185,12 +181,13 @@ class Delete(object):
         return comp.comp_files()
 
     def execute(self, path):
-        msg = path.replace(_filer.dir.path, "")
+        filer = ui.getcomponent("Filer")
+        msg = path.replace(filer.dir.path, "")
         ret = message.confirm("Delete? (%s):"%msg, ["No", "Yes"])
         if ret == "No" or ret is None:
             return
         filectrl.delete(path)
-        _filer.workspace.all_reload()
+        filer.workspace.all_reload()
 
 class Glob(object):
     default = ""
@@ -206,13 +203,14 @@ class Glob(object):
         return comp.comp_files()
 
     def execute(self, pattern):
+        filer = ui.getcomponent("Filer")
         if not self.default == "" and pattern == "":
-            _filer.dir.glob(self.default)
+            filer.dir.glob(self.default)
         else:
             if pattern == "":
                 return
             Glob.default = pattern
-            _filer.dir.glob(pattern)
+            filer.dir.glob(pattern)
 
 class GlobDir(object):
     default = ""
@@ -228,13 +226,14 @@ class GlobDir(object):
         return comp.comp_files()
 
     def execute(self, pattern):
+        filer = ui.getcomponent("Filer")
         if not self.default == "" and pattern == "":
-            _filer.dir.globdir(self.default)
+            filer.dir.globdir(self.default)
         else:
             if pattern == "":
                 return
             GlobDir.default = pattern
-            _filer.dir.globdir(pattern)
+            filer.dir.globdir(pattern)
 
 class Link(object):
     def __init__(self):
@@ -242,7 +241,7 @@ class Link(object):
 
     @property
     def prompt(self):
-        if _filer.dir.ismark():
+        if ui.getcomponent("Filer").dir.ismark():
             return "Link mark files to:"
         elif self.src:
             return "Link from `%s' to:" % self.src
@@ -255,20 +254,21 @@ class Link(object):
         return comp.comp_files()
 
     def execute(self, path):
-        if _filer.dir.ismark():
+        filer = ui.getcomponent("Filer")
+        if filer.dir.ismark():
             if not path.endswith(os.sep) and not os.path.isdir(path):
                 message.error("Error: Destination is not directory")
                 return
-            for f in _filer.dir.get_mark_files():
+            for f in filer.dir.get_mark_files():
                 dst = os.path.join(path, util.unix_basename(f))
                 filectrl.link(f, dst)
-            _filer.workspace.all_reload()
+            filer.workspace.all_reload()
         elif self.src is None:
             self.src = path
-            _cmdline.restart(_filer.workspace.nextdir.path)
+            ui.getcomponent("Cmdline").restart(filer.workspace.nextdir.path)
         else:
             filectrl.link(self.src, path)
-            _filer.workspace.all_reload()
+            filer.workspace.all_reload()
 
 class Mark(object):
     default = None
@@ -284,8 +284,9 @@ class Mark(object):
         return comp.comp_files()
 
     def execute(self, pattern):
+        filer = ui.getcomponent("Filer")
         if self.default and pattern == "":
-            _filer.dir.mark(self.default)
+            filer.dir.mark(self.default)
         else:
             try:
                 reg = re.compile(pattern)
@@ -293,7 +294,7 @@ class Mark(object):
                 message.error("Regexp error: " + str(e))
                 return
             self.__class__.default = reg
-            _filer.dir.mark(reg)
+            filer.dir.mark(reg)
 
 class Mask(object):
     default = None
@@ -309,24 +310,25 @@ class Mask(object):
         return comp.comp_files()
 
     def execute(self, pattern):
+        filer = ui.getcomponent("Filer")
         if self.default and pattern == "":
-            _filer.dir.mask(self.default)
+            filer.dir.mask(self.default)
         else:
             try:
                 reg = re.compile(pattern)
             except:
                 return message.error("Argument error: Can't complile `%s'" % pattern)
             self.__class__.default = reg
-            _filer.dir.mask(reg)
+            filer.dir.mask(reg)
 
 class Menu(object):
     prompt = 'Menu name:'
 
     def complete(self, comp):
-        return list(_menu.items.keys())
+        return list(ui.getcomponent("Menu").items.keys())
 
     def execute(self, name):
-        _menu.show(name)
+        ui.getcomponent("Menu").show(name)
 
 class Mkdir(object):
     dirmode = 0o755
@@ -336,9 +338,10 @@ class Mkdir(object):
         return comp.comp_dirs()
 
     def execute(self, path):
+        filer = ui.getcomponent("Filer")
         filectrl.mkdir(path, self.dirmode)
-        _filer.workspace.all_reload()
-        _filer.dir.setcursor(_filer.dir.get_index(util.unix_basename(path)))
+        filer.workspace.all_reload()
+        filer.dir.setcursor(filer.dir.get_index(util.unix_basename(path)))
 
 class Move(object):
     def __init__(self):
@@ -346,7 +349,7 @@ class Move(object):
 
     @property
     def prompt(self):
-        if _filer.dir.ismark():
+        if ui.getcomponent("Filer").dir.ismark():
             return "Move mark files to:"
         elif self.src:
             return "Move from %s to:" % self.src
@@ -359,14 +362,15 @@ class Move(object):
         return comp.comp_files()
 
     def execute(self, path):
-        if _filer.dir.ismark():
+        filer = ui.getcomponent("Filer")
+        if filer.dir.ismark():
             if not path.endswith(os.sep) and not os.path.isdir(path):
                 message.error("Move error: Destination is not directory")
                 return
-            filectrl.move(_filer.dir.get_mark_files(), path)
+            filectrl.move(filer.dir.get_mark_files(), path)
         elif self.src is None:
             self.src = path
-            _cmdline.restart(_filer.workspace.nextdir.path)
+            ui.getcomponent("Cmdline").restart(filer.workspace.nextdir.path)
         else:
             filectrl.move(self.src, path)
 
@@ -378,12 +382,13 @@ class Newfile(object):
         return comp.comp_files()
 
     def execute(self, path):
+        filer = ui.getcomponent("Filer")
         if os.path.exists(util.abspath(path)):
             message.error("Error: file exists - %s" % path)
             return
         filectrl.mknod(path, self.filemode)
-        _filer.workspace.all_reload()
-        _filer.dir.setcursor(_filer.dir.get_index(path))
+        filer.workspace.all_reload()
+        filer.dir.setcursor(filer.dir.get_index(path))
 
 class OpenListfile(object):
     prompt = 'Open list file:'
@@ -392,15 +397,17 @@ class OpenListfile(object):
         return comp.comp_files()
 
     def execute(self, path):
+        filer = ui.getcomponent("Filer")
         if os.path.exists(path):
-            _filer.dir.open_listfile(path)
+            filer.dir.open_listfile(path)
         else:
             message.error('No such list file: ' + path)
 
 class Rename(object):
     def __init__(self, path=None):
+        filer = ui.getcomponent("Filer")
         if path is None:
-            self.path = _filer.file.name
+            self.path = filer.file.name
         else:
             self.path = path
 
@@ -417,7 +424,7 @@ class Rename(object):
 
     def execute(self, path):
         filectrl.rename(self.path, path)
-        _filer.workspace.all_reload()
+        ui.getcomponent("Filer").workspace.all_reload()
 
 class Replace(object):
     default = []
@@ -436,23 +443,24 @@ class Replace(object):
         return comp.comp_files()
 
     def execute(self, pattern):
+        filer = ui.getcomponent("Filer")
         if not pattern and not self.pattern and self.default:
             filectrl.replace(self.default[0], self.default[1])
-            _filer.dir.mark_clear()
-            _filer.workspace.all_reload()
+            filer.dir.mark_clear()
+            filer.workspace.all_reload()
         elif self.pattern is None:
             try:
                 self.pattern = re.compile(util.unistr(pattern))
             except Exception:
                 return message.error("Argument error: Can't complile `%s'" % pattern)
-            _cmdline.restart("")
+            ui.getcomponent("Cmdline").restart("")
         else:
             filectrl.replace(self.pattern, pattern)
             Replace.default[:] = []
             Replace.default.append(self.pattern)
             Replace.default.append(pattern)
-            _filer.dir.mark_clear()
-            _filer.workspace.all_reload()
+            filer.dir.mark_clear()
+            filer.workspace.all_reload()
 
 class Symlink(object):
     def __init__(self):
@@ -460,7 +468,8 @@ class Symlink(object):
 
     @property
     def prompt(self):
-        if _filer.dir.ismark():
+        filer = ui.getcomponent("Filer")
+        if filer.dir.ismark():
             return "Symlink mark files to:"
         elif self.src:
             return "Symlink from `%s' to:" % self.src
@@ -473,20 +482,21 @@ class Symlink(object):
         return comp.comp_files()
 
     def execute(self, path):
-        if _filer.dir.ismark():
+        filer = ui.getcomponent("Filer")
+        if filer.dir.ismark():
             if not path.endswith(os.sep) and not os.path.isdir(path):
                 message.error("Symlink error: Destination is not directory")
                 return
-            for f in _filer.dir.get_mark_files():
+            for f in filer.dir.get_mark_files():
                 dst = os.path.join(path, os.path.basename(f))
                 filectrl.symlink(f, dst)
-            _filer.workspace.all_reload()
+            filer.workspace.all_reload()
         elif self.src is None:
             self.src = path
-            _cmdline.restart(_filer.workspace.nextdir.path)
+            ui.getcomponent("Cmdline").restart(filer.workspace.nextdir.path)
         else:
             filectrl.symlink(self.src, path)
-            _filer.workspace.all_reload()
+            filer.workspace.all_reload()
 
 class TrashBox(object):
     prompt = "Trashbox:"
@@ -495,14 +505,15 @@ class TrashBox(object):
         return comp.comp_dirs()
 
     def execute(self, path):
+        filer = ui.getcomponent("Filer")
         trashbox = os.path.expanduser(Pyful.environs['TRASHBOX'])
-        msg = path.replace(_filer.dir.path, "")
+        msg = path.replace(filer.dir.path, "")
         ret = message.confirm("Move `%s' to trashbox? " % msg, ["No", "Yes"])
         if ret == "No" or ret is None:
             return
 
         filectrl.move(path, trashbox)
-        _filer.workspace.all_reload()
+        filer.workspace.all_reload()
 
 class Utime(object):
     def __init__(self):
@@ -544,11 +555,12 @@ class Utime(object):
             return [str(i) for i in range(0, 62)]
 
     def execute(self, st):
+        cmdline = ui.getcomponent("Cmdline")
         if not self.path:
             if os.path.exists(st):
                 self.path = st
                 self.timesec = time.localtime(os.stat(self.path).st_mtime)
-                _cmdline.restart("")
+                cmdline.restart("")
             else:
                 return message.error("%s doesn't exist." % st)
 
@@ -557,7 +569,7 @@ class Utime(object):
                 self.sttime.append(self.timesec[0])
             else:
                 self.sttime.append(int(st))
-            _cmdline.restart("")
+            cmdline.restart("")
         elif len(self.sttime) == 1:
             if st == "":
                 self.sttime.append(self.timesec[1])
@@ -565,7 +577,7 @@ class Utime(object):
                 self.sttime.append(int(st))
             else:
                 self.sttime.append(self.timesec[1])
-            _cmdline.restart("")
+            cmdline.restart("")
         elif len(self.sttime) == 2:
             if st == "":
                 self.sttime.append(self.timesec[2])
@@ -573,7 +585,7 @@ class Utime(object):
                 self.sttime.append(int(st))
             else:
                 self.sttime.append(self.timesec[2])
-            _cmdline.restart("")
+            cmdline.restart("")
         elif len(self.sttime) == 3:
             if st == "":
                 self.sttime.append(self.timesec[3])
@@ -581,7 +593,7 @@ class Utime(object):
                 self.sttime.append(int(st))
             else:
                 self.sttime.append(self.timesec[3])
-            _cmdline.restart("")
+            cmdline.restart("")
         elif len(self.sttime) == 4:
             if st == "":
                 self.sttime.append(self.timesec[4])
@@ -589,7 +601,7 @@ class Utime(object):
                 self.sttime.append(int(st))
             else:
                 self.sttime.append(self.timesec[4])
-            _cmdline.restart("")
+            cmdline.restart("")
         elif len(self.sttime) == 5:
             if st == "":
                 self.sttime.append(self.timesec[5])
@@ -604,7 +616,7 @@ class Utime(object):
                 os.utime(self.path, (atime, mtime))
             except Exception as e:
                 message.error(str(e))
-            _filer.workspace.all_reload()
+            ui.getcomponent("Filer").workspace.all_reload()
 
 class Tar(object):
     def __init__(self, tarmode, each=False):
@@ -615,7 +627,8 @@ class Tar(object):
 
     @property
     def prompt(self):
-        if _filer.dir.ismark() or self.each:
+        filer = ui.getcomponent("Filer")
+        if filer.dir.ismark() or self.each:
             if self.wrap is None:
                 return 'Mark files wrap is:'
             else:
@@ -632,29 +645,31 @@ class Tar(object):
         return comp.comp_files()
 
     def execute(self, path):
-        if _filer.dir.ismark() or self.each:
+        cmdline = ui.getcomponent("Cmdline")
+        filer = ui.getcomponent("Filer")
+        if filer.dir.ismark() or self.each:
             if self.wrap is None:
                 self.wrap = path
                 if self.each:
-                    _cmdline.restart(_filer.workspace.nextdir.path)
+                    cmdline.restart(filer.workspace.nextdir.path)
                 else:
                     ext = filectrl.TarThread.tarexts[self.tarmode]
-                    tarpath = os.path.join(_filer.workspace.nextdir.path, self.wrap + ext)
-                    _cmdline.restart(tarpath, -len(ext))
+                    tarpath = os.path.join(filer.workspace.nextdir.path, self.wrap + ext)
+                    cmdline.restart(tarpath, -len(ext))
             else:
                 if self.each:
-                    filectrl.tareach(_filer.dir.get_mark_files(), path, self.tarmode, self.wrap)
+                    filectrl.tareach(filer.dir.get_mark_files(), path, self.tarmode, self.wrap)
                 else:
-                    filectrl.tar(_filer.dir.get_mark_files(), path, self.tarmode, self.wrap)
-                _filer.workspace.all_reload()
+                    filectrl.tar(filer.dir.get_mark_files(), path, self.tarmode, self.wrap)
+                filer.workspace.all_reload()
         elif self.src is None:
             self.src = path
             ext = filectrl.TarThread.tarexts[self.tarmode]
-            tarpath = os.path.join(_filer.workspace.nextdir.path, self.src + ext)
-            _cmdline.restart(tarpath, -len(ext))
+            tarpath = os.path.join(filer.workspace.nextdir.path, self.src + ext)
+            cmdline.restart(tarpath, -len(ext))
         else:
             filectrl.tar(self.src, path, self.tarmode)
-            _filer.workspace.all_reload()
+            filer.workspace.all_reload()
 
 class UnTar(object):
     def __init__(self):
@@ -662,7 +677,8 @@ class UnTar(object):
 
     @property
     def prompt(self):
-        if _filer.dir.ismark():
+        filer = ui.getcomponent("Filer")
+        if filer.dir.ismark():
             return 'Mark files untar to:'
         elif self.src is None:
             return 'Untar from:'
@@ -673,15 +689,16 @@ class UnTar(object):
         return comp.comp_files()
 
     def execute(self, path):
-        if _filer.dir.ismark():
-            filectrl.untar(_filer.dir.get_mark_files(), path)
-            _filer.workspace.all_reload()
+        filer = ui.getcomponent("Filer")
+        if filer.dir.ismark():
+            filectrl.untar(filer.dir.get_mark_files(), path)
+            filer.workspace.all_reload()
         elif self.src is None:
             self.src = path
-            _cmdline.restart(_filer.workspace.nextdir.path)
+            ui.getcomponent("Cmdline").restart(filer.workspace.nextdir.path)
         else:
             filectrl.untar(self.src, path)
-            _filer.workspace.all_reload()
+            filer.workspace.all_reload()
 
 class WebSearch(object):
     def __init__(self, engine='Google'):
@@ -714,7 +731,8 @@ class Zip(object):
 
     @property
     def prompt(self):
-        if _filer.dir.ismark() or self.each:
+        filer = ui.getcomponent("Filer")
+        if filer.dir.ismark() or self.each:
             if self.wrap is None:
                 return 'Mark files wrap is:'
             else:
@@ -731,29 +749,31 @@ class Zip(object):
         return comp.comp_files()
 
     def execute(self, path):
-        if _filer.dir.ismark() or self.each:
+        cmdline = ui.getcomponent("Cmdline")
+        filer = ui.getcomponent("Filer")
+        if filer.dir.ismark() or self.each:
             if self.wrap is None:
                 self.wrap = path
                 if self.each:
-                    _cmdline.restart(_filer.workspace.nextdir.path)
+                    cmdline.restart(filer.workspace.nextdir.path)
                 else:
                     ext = '.zip'
-                    zippath = os.path.join(_filer.workspace.nextdir.path, self.wrap + ext)
-                    _cmdline.restart(zippath, -len(ext))
+                    zippath = os.path.join(filer.workspace.nextdir.path, self.wrap + ext)
+                    cmdline.restart(zippath, -len(ext))
             else:
                 if self.each:
-                    filectrl.zipeach(_filer.dir.get_mark_files(), path, self.wrap)
+                    filectrl.zipeach(filer.dir.get_mark_files(), path, self.wrap)
                 else:
-                    filectrl.zip(_filer.dir.get_mark_files(), path, self.wrap)
-                _filer.workspace.all_reload()
+                    filectrl.zip(filer.dir.get_mark_files(), path, self.wrap)
+                filer.workspace.all_reload()
         elif self.src is None:
             self.src = path
             ext = '.zip'
-            zippath = os.path.join(_filer.workspace.nextdir.path, self.src + ext)
-            _cmdline.restart(zippath, -len(ext))
+            zippath = os.path.join(filer.workspace.nextdir.path, self.src + ext)
+            cmdline.restart(zippath, -len(ext))
         else:
             filectrl.zip(self.src, path)
-            _filer.workspace.all_reload()
+            filer.workspace.all_reload()
 
 class UnZip(object):
     def __init__(self):
@@ -761,7 +781,8 @@ class UnZip(object):
 
     @property
     def prompt(self):
-        if _filer.dir.ismark():
+        filer = ui.getcomponent("Filer")
+        if filer.dir.ismark():
             return 'Mark files unzip to:'
         elif self.src is None:
             return 'Unzip from:'
@@ -772,15 +793,16 @@ class UnZip(object):
         return comp.comp_files()
 
     def execute(self, path):
-        if _filer.dir.ismark():
-            filectrl.unzip(_filer.dir.get_mark_files(), path)
-            _filer.workspace.all_reload()
+        filer = ui.getcomponent("Filer")
+        if filer.dir.ismark():
+            filectrl.unzip(filer.dir.get_mark_files(), path)
+            filer.workspace.all_reload()
         elif self.src is None:
             self.src = path
-            _cmdline.restart(_filer.workspace.nextdir.path)
+            ui.getcomponent("Cmdline").restart(filer.workspace.nextdir.path)
         else:
             filectrl.unzip(self.src, path)
-            _filer.workspace.all_reload()
+            filer.workspace.all_reload()
 
 class ZoomInfoBox(object):
     prompt = 'Zoom infobox:'

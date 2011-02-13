@@ -16,25 +16,22 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import os
-import sys
-import re
 import glob
+import os
+import re
+import sys
 
-from pyful import Pyful, loadrcfile, refresh
-from pyful import mode
-from pyful import util
-from pyful import ui
+from pyful import Pyful, loadrcfile
 from pyful import filectrl
-from pyful import process
 from pyful import message
-from pyful.cmdline import Cmdline
-from pyful.filer import Filer
-from pyful.menu import Menu
+from pyful import mode
+from pyful import process
+from pyful import ui
+from pyful import util
 
-_cmdline = Cmdline()
-_filer = Filer()
-_menu = Menu()
+_cmdline = ui.getcomponent("Cmdline")
+_filer = ui.getcomponent("Filer")
+_menu = ui.getcomponent("Menu")
 _image_filter = re.compile('\.(jpe?g|gif|png|bmp|tiff|jp2|j2c|svg|eps)$')
 _music_filter = re.compile('\.(ogg|mp3|flac|ape|tta|tak|mid|wma|wav)$')
 _video_filter = re.compile('\.(avi|mkv|mp4|mpe?g|wmv|asf|rm|ram|ra)$')
@@ -90,8 +87,8 @@ commands = {
     'spawn_terminal' : lambda: _spawn_terminal(),
     'exit'           : lambda: _exit(),
 
-    'reload_rcfile'  : lambda: loadrcfile(),
-    'refresh_window' : lambda: refresh(),
+    'reload_rcfile'  : lambda: _reload_rcfile(),
+    'refresh_window' : lambda: ui.refresh(),
     'rehash_programs': lambda: _cmdline.completion.loadprograms(),
 
     'enter_mark': lambda: _cmdline.start(mode.Shell(), ' %m', 1),
@@ -230,6 +227,13 @@ def _exit():
     if ret == 'Yes':
         message.timerkill()
         sys.exit(0)
+
+def _reload_rcfile():
+    error = loadrcfile(started=False)
+    if error:
+        message.exception(error)
+    else:
+        message.puts("Reloaded: %s" % Pyful.environs['RCFILE'])
 
 def _switch_workspace():
     titles = [w.title for w in _filer.workspaces]

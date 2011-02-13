@@ -16,24 +16,24 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import os
-import stat
-import re
-import glob
-import fnmatch
 import curses
-import time
-import pwd
+import fnmatch
+import glob
 import grp
+import os
+import pwd
+import re
+import stat
+import time
 
-from pyful import Singleton
-from pyful import util
-from pyful import ui
 from pyful import look
 from pyful import message
+from pyful import ui
+from pyful import util
 
-class Filer(Singleton):
-    def init_singleton_instance(self):
+class Filer(ui.Component):
+    def __init__(self):
+        ui.Component.__init__(self, "Filer")
         self.workspaces = []
         self.cursor = 0
 
@@ -138,13 +138,13 @@ class Filer(Singleton):
             self.cursor = len(self.workspaces) - 1
 
     def titlebar_view(self):
-        titlebar = ui.gettitlebar()
+        titlebar = ui.getcomponent("Titlebar").win
         titlebar.erase()
         titlebar.move(0, 0)
 
         length = sum([util.termwidth(w.title)+2 for w in self.workspaces])
 
-        (y, x) = ui.getstdscr().getmaxyx()
+        (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
         if x-length < 5:
             return message.error('terminal size very small')
 
@@ -295,7 +295,7 @@ class Workspace(object):
             path = self.default_path
         path = os.path.expanduser(path)
         size = len(self.dirs)
-        (y, x) = ui.getstdscr().getmaxyx()
+        (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
         height = y - 3
         width = x // (size+1)
         begy = 1
@@ -343,7 +343,7 @@ class Workspace(object):
             self.layout = 'Tile'
         size = len(self.dirs)
 
-        (y, x) = ui.getstdscr().getmaxyx()
+        (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
         if size == 1:
             self.dirs[0].resize(y-3, x, 1, 0)
         else:
@@ -374,7 +374,7 @@ class Workspace(object):
 
     def oneline(self):
         self.layout = 'Oneline'
-        (y, x) = ui.getstdscr().getmaxyx()
+        (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
         height = y - 3
         width = x // len(self.dirs)
         for i, d in enumerate(self.dirs):
@@ -385,7 +385,7 @@ class Workspace(object):
 
     def onecolumn(self):
         self.layout = 'Onecolumn'
-        (y, x) = ui.getstdscr().getmaxyx()
+        (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
         odd = (y-3) % len(self.dirs)
         height = (y-3) // len(self.dirs)
         width = x
@@ -401,7 +401,7 @@ class Workspace(object):
 
     def fullscreen(self):
         self.layout = 'Fullscreen'
-        (y, x) = ui.getstdscr().getmaxyx()
+        (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
         height = y - 3
         width = x
         for d in self.dirs:
@@ -693,8 +693,7 @@ class Directory(object):
             return False
         elif ret == 'rename':
             from pyful import mode
-            from pyful.cmdline import Cmdline
-            Cmdline().start(mode.Rename(fname), '')
+            ui.getcomponent("Cmdline").start(mode.Rename(fname), '')
         elif ret == 'delete':
             from pyful import filectrl
             filectrl.delete(fname)
@@ -1427,7 +1426,7 @@ class FileStat(object):
         return perm
 
     def view(self):
-        cmdscr = ui.getcmdscr()
+        cmdscr = ui.getcomponent("Cmdscr").win
         cmdscr.erase()
 
         perm = self.get_permission()
@@ -1439,7 +1438,7 @@ class FileStat(object):
         name = self.name
 
         fstat = '%s %s %s %s %d %s %s' % (perm, nlink, user, group, size, mtime, name)
-        fstat = util.mbs_ljust(fstat, ui.getstdscr().getmaxyx()[1]-1)
+        fstat = util.mbs_ljust(fstat, ui.getcomponent("Stdscr").win.getmaxyx()[1]-1)
         cmdscr.move(1, 0)
         cmdscr.addstr(fstat)
         cmdscr.noutrefresh()

@@ -63,12 +63,13 @@ __options__ = option_parse()
 
 import locale
 import imp
+import shutil
 
 locale.setlocale(locale.LC_ALL, "")
 imp.reload(sys)
 sys.setdefaultencoding("utf-8")
 
-from pyful import Pyful, loadrcfile, setsignal, createconfig
+from pyful import Pyful, loadrcfile, setsignal
 from pyful import message
 from pyful import ui
 
@@ -76,28 +77,27 @@ if __name__ == '__main__':
     setsignal()
     Pyful.binpath = os.path.abspath(__file__)
 
-    main = Pyful()
-
+    pyful = Pyful()
     error = loadrcfile(__options__.config)
-    main.start_curses()
-    main.init_function()
 
-    stdscr = ui.getstdscr()
-    stdscr.refresh()
-    main.started = True
+    ui.start_curses()
+    pyful.init_function()
+
+    ui.getcomponent("Stdscr").win.refresh()
     message.puts("Python %s" % sys.version)
     if error:
         message.exception(error)
     message.puts("Loaded %s" % Pyful.environs['RCFILE'])
     message.puts("Welcome to pyful v%s" % __version__)
-    main.view()
+    pyful.view()
 
     try:
-        main.main_loop()
+        pyful.main_loop()
     except SystemExit:
-        createconfig()
-        if main.started:
-            main.exit_function()
+        confdir = os.path.expanduser('~/.pyful')
+        if not os.path.exists(confdir):
+            os.makedirs(confdir, 0o700)
+
+        pyful.exit_function()
     finally:
-        if stdscr:
-            ui.destroy()
+        ui.getcomponent("Stdscr").destroy()

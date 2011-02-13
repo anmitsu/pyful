@@ -16,14 +16,15 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import curses
 import os
 import re
-import curses
 from subprocess import Popen, PIPE
 
 from pyful import Pyful, setsignal, resetsignal
-from pyful import util
 from pyful import message
+from pyful import ui
+from pyful import util
 
 def spawn(cmd, title=None, expandmacro=True):
     if expandmacro:

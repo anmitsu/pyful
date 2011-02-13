@@ -16,15 +16,15 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import os
-import re
 import glob
-import pwd
 import grp
+import os
+import pwd
+import re
 
 from pyful import Pyful
-from pyful import util
 from pyful import ui
+from pyful import util
 
 optionsdict = {}
 
@@ -32,7 +32,7 @@ class Completion(ui.InfoBox):
     program_options = {}
 
     def __init__(self, cmdline):
-        ui.InfoBox.__init__(self, "completion")
+        ui.InfoBox.__init__(self, "Completion")
         self.cmdline = cmdline
         self.maxrow = 1
         self.parser = None
@@ -81,7 +81,7 @@ class Completion(ui.InfoBox):
             width = util.termwidth(item)
             if width > length:
                 length = width
-        maxrow = ui.getstdscr().getmaxyx()[1] // (length+4)
+        maxrow = ui.getcomponent("Stdscr").win.getmaxyx()[1] // (length+4)
         if maxrow:
             return maxrow
         else:

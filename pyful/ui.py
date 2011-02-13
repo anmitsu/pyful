@@ -19,38 +19,19 @@
 import curses
 import re
 
-from pyful import util
 from pyful import look
+from pyful import util
 from pyful.keymap import *
 
-def init_ui():
-    StandardScreen()
-    InfoBox.resize()
+_components = {}
 
-def zoom_infobox(zoom):
-    InfoBox.zoom = zoom
-    InfoBox.resize()
-
-def getstdscr():
-    return StandardScreen.stdscr
-
-def getcmdscr():
-    return StandardScreen.cmdscr
-
-def gettitlebar():
-    return StandardScreen.titlebar
-
-def resize():
-    stdscr = getstdscr()
-    (y, x) = stdscr.getmaxyx()
-    StandardScreen.cmdscr = stdscr.derwin(2, x, y-2, 0)
-    StandardScreen.titlebar = stdscr.derwin(1, x, 0, 0)
-    InfoBox.resize()
+def getcomponent(name):
+    return _components[name]
 
 def getch():
     meta = False
     while True:
-        key = getstdscr().getch()
+        key = getcomponent("Stdscr").win.getch()
         if meta:
             if key == 27:
                 return (False, key)
@@ -60,43 +41,96 @@ def getch():
         else:
             return (False, key)
 
-def destroy():
-    getstdscr().keypad(0)
-    curses.echo()
-    curses.nocbreak()
+def zoom_infobox(zoom):
+    InfoBox.zoom = zoom
+    InfoBox.resize()
+
+def resize():
+    getcomponent("Cmdscr").resize()
+    getcomponent("Titlebar").resize()
+    getcomponent("Filer").workspace.resize()
+    getcomponent("Message").messagebox.resize()
+    InfoBox.resize()
+
+def refresh():
     curses.endwin()
+    getcomponent("Stdscr").win.refresh()
+    resize()
 
-class StandardScreen(object):
-    stdscr = None
-    cmdscr = None
-    titlebar = None
+def start_curses():
+    StandardScreen()
+    CmdlineScreen()
+    Titlebar()
+    InfoBox.resize()
+    getcomponent("Filer").default_init()
+    getcomponent("Message").init_messagebox()
+    look.init_colors()
 
+class ComponentDuplication(Exception):
+    pass
+
+class Component(object):
+    def __init__(self, name):
+        self.active = False
+        if not name in _components:
+            _components[name] = self
+        else:
+            raise ComponentDuplication("`%s' overlap for components" % name)
+
+    @property
+    def is_active(self):
+        return self.active
+
+class StandardScreen(Component):
     def __init__(self):
-        self.__class__.stdscr = curses.initscr()
-        self.stdscr.keypad(1)
-        self.stdscr.notimeout(0)
+        Component.__init__(self, "Stdscr")
+        self.win = curses.initscr()
+        self.win.keypad(1)
+        self.win.notimeout(0)
         curses.noecho()
         curses.cbreak()
         curses.raw()
         curses.start_color()
         curses.use_default_colors()
 
-        (y, x) = self.stdscr.getmaxyx()
-        self.__class__.cmdscr = self.stdscr.derwin(2, x, y-2, 0)
-        self.__class__.titlebar = self.stdscr.derwin(1, x, 0, 0)
+    def destroy(self):
+        self.win.keypad(0)
+        curses.echo()
+        curses.nocbreak()
+        curses.endwin()
 
-class InfoBox(object):
+class CmdlineScreen(Component):
+    def __init__(self):
+        Component.__init__(self, "Cmdscr")
+        (y, x) = getcomponent("Stdscr").win.getmaxyx()
+        self.win = curses.newwin(2, x, y-2, 0)
+
+    def resize(self):
+        (y, x) = getcomponent("Stdscr").win.getmaxyx()
+        self.win = curses.newwin(2, x, y-2, 0)
+
+class Titlebar(Component):
+    def __init__(self):
+        Component.__init__(self, "Titlebar")
+        (y, x) = getcomponent("Stdscr").win.getmaxyx()
+        self.win = curses.newwin(1, x, 0, 0)
+
+    def resize(self):
+        (y, x) = getcomponent("Stdscr").win.getmaxyx()
+        self.win = curses.newwin(1, x, 0, 0)
+
+class InfoBox(Component):
     win = None
     zoom = 0
 
     def __init__(self, title):
+        Component.__init__(self, title)
         self._title = title
         self._info = None
 
         self._highlight = None
         self._cursor = 0
         self._scrolltop = 0
-        self._active = False
         self.keymap = {
             (0, KEY_CTRL_N): lambda: self.mvcursor(1),
             (0, KEY_DOWN  ): lambda: self.mvcursor(1),
@@ -113,7 +147,7 @@ class InfoBox(object):
 
     @classmethod
     def resize(cls):
-        (y, x) = getstdscr().getmaxyx()
+        (y, x) = getcomponent("Stdscr").win.getmaxyx()
         odd = y % 2
         base = y//2 + odd
         height = base + cls.zoom
@@ -133,22 +167,18 @@ class InfoBox(object):
     def cursor(self):
         return self._cursor
 
-    @property
-    def active(self):
-        return self._active
-
     def show(self, info, pos=0, highlight=None):
         self.win.erase()
+        self.active = True
         self._cursor = pos
         self._scrolltop = 0
-        self._active = True
         self._highlight = highlight
         self._info = info
 
     def hide(self):
+        self.active = False
         self._cursor = 0
         self._scrolltop = 0
-        self._active = False
         self._highlight = None
         self._info = None
 
@@ -252,7 +282,7 @@ class InfoBox(object):
             row += 1
         self.win.noutrefresh()
 
-class ContextBox(object):
+class ContextBox(Component):
     def __init__(self):
         self.win = None
         self._cursor = 0

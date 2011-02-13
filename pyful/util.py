@@ -95,8 +95,8 @@ def quote(string):
 
 def expandmacro(string, shell=False):
     ret = string
-    from pyful.filer import Filer
-    filer = Filer()
+    from pyful import ui
+    filer = ui.getcomponent("Filer")
 
     marks = ''
     for f in filer.dir.get_mark_files():
