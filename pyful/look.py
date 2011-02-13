@@ -50,5 +50,5 @@ def init_colors(looks=None):
     if looks is None:
         looks = default
     for i, (name, v) in enumerate(looks.items()):
-        curses.init_pair(i, v[0], v[1])
-        colors.update({name: curses.color_pair(i) | v[2]})
+        curses.init_pair(i+1, v[0], v[1])
+        colors.update({name: curses.color_pair(i+1) | v[2]})
