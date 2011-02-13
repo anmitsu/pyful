@@ -134,15 +134,14 @@ class MessageBox(object):
 
 class Confirm(object):
     keymap = {}
+    box = ui.InfoBox("Confirm")
 
     def __init__(self, msg, options, msglist=None):
         self.msg = msg
         self.options = options
         self.cursor = 0
         self.result = None
-        self.box = None
         if isinstance(msglist, list):
-            self.box = ui.InfoBox(self.msg)
             self.box.show(msglist, -1)
         self.active = True
         Confirm.keymap = {
