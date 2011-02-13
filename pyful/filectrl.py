@@ -188,6 +188,41 @@ def view_threads():
         message.puts("[%s] %s" % (str(i+1), t.status), 0)
     curses.doupdate()
 
+class Subloop(object):
+    def __init__(self):
+        self.cmdline = ui.getcomponent("Cmdline")
+        self.filer = ui.getcomponent("Filer")
+        self.menu = ui.getcomponent("Menu")
+        self.message = ui.getcomponent("Message")
+        self.stdscr = ui.getcomponent("Stdscr").win
+
+    def input(self, meta, key):
+        if self.cmdline.is_active:
+            self.cmdline.input(meta, key)
+        elif self.menu.is_active:
+            self.menu.input(meta, key)
+        else:
+            self.filer.input(meta, key)
+
+    def view(self):
+        self.filer.view()
+        if self.menu.is_active:
+            self.menu.view()
+        if self.cmdline.is_active:
+            self.cmdline.view()
+        elif self.message.is_active:
+            self.message.view()
+        process.view_process()
+        curses.doupdate()
+
+    def sub_loop(self):
+        self.stdscr.timeout(10)
+        self.view()
+        (meta, key) = ui.getch()
+        if key != -1:
+            self.input(meta, key)
+        self.stdscr.timeout(-1)
+
 class FilectrlCancel(Exception):
     pass
 
@@ -276,42 +311,10 @@ class Filectrl(object):
         Filectrl.threads.append(self.thread)
         self.threadevent.set()
         self.thread.start()
-        cmdline = ui.getcomponent("Cmdline")
-        filer = ui.getcomponent("Filer")
-        menu = ui.getcomponent("Menu")
-        message = ui.getcomponent("Message")
-
-        def input(meta, key):
-            if cmdline.is_active:
-                cmdline.input(meta, key)
-            elif menu.is_active:
-                menu.input(meta, key)
-            else:
-                filer.input(meta, key)
-
-        def view():
-            filer.view()
-            if menu.is_active:
-                menu.view()
-            if cmdline.is_active:
-                cmdline.view()
-            elif message.is_active:
-                message.view()
-            process.view_process()
-            curses.doupdate()
-
-        def sub_loop():
-            stdscr = ui.getcomponent("Stdscr").win
-            stdscr.timeout(10)
-            view()
-            (meta, key) = ui.getch()
-            if key != -1:
-                input(meta, key)
-            stdscr.timeout(-1)
-
+        subloop = Subloop()
         while self.thread.isAlive():
             self.threadevent.wait()
-            sub_loop()
+            subloop.sub_loop()
         if self.thread.error:
             message.exception(self.thread.error)
         else:
