@@ -68,7 +68,7 @@ class Pyful(object):
         'PAGER': 'less',
         'TRASHBOX': '~/.pyful/trashbox',
         'RCFILE': '~/.pyful/rc.py',
-        'LOOKS': look.default,
+        'LOOKS': look.looks['default'],
         'PLATFORM': sys.platform,
         }
     binpath = None

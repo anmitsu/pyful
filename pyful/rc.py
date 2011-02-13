@@ -23,8 +23,8 @@ menu = ui.getcomponent("Menu")
 Pyful.environs['EDITOR'] = 'vim'
 Pyful.environs['PAGER'] = 'less'
 Pyful.environs['TRASHBOX'] = '~/.pyful/trashbox'
-Pyful.environs['LOOKS'] = look.default
-# Pyful.environs['LOOKS'] = look.midnight
+Pyful.environs['LOOKS'] = look.looks['default']
+# Pyful.environs['LOOKS'] = look.looks['midnight']
 
 # Set proc attributes.
 process.Process.shell = ('/bin/bash', '-c')
