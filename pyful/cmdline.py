@@ -19,6 +19,7 @@
 import os
 import re
 import subprocess
+import unicodedata
 
 from pyful import Pyful
 from pyful import completion
@@ -175,21 +176,55 @@ class Cmdline(ui.Component):
         cmdscr.erase()
         cmdscr.move(0, 0)
         prompt = " %s " % self.mode.prompt
+        promptlen = util.termwidth(prompt)
+
+        (maxy, maxx) = cmdscr.getmaxyx()
+        self.string = util.unistr(self.string)
+        realcurpos = util.termwidth(self.string[:self.cursor])
+        if maxx <= util.termwidth(prompt+self.string):
+            if maxx <= realcurpos+promptlen:
+                width = promptlen
+                start = 0
+                pages = []
+                for i, c in enumerate(util.unistr(self.string)):
+                    if unicodedata.east_asian_width(c) in "WF":
+                        add = 2
+                    else:
+                        add = 1
+                    width += add
+                    if maxx <= width:
+                        pages.append(self.string[start:i])
+                        start = i
+                        width = add
+                pages.append(self.string[start:])
+
+                string = ""
+                for i, s in enumerate(pages):
+                    curpos = realcurpos-util.termwidth(string)
+                    string += s
+                    if self.cursor <= util.mbslen(string):
+                        cmd = pages[i]
+                        break
+                prompt = ""
+            else:
+                cmd = util.mbs_ljust(self.string, maxx-promptlen+1, pad="")
+                curpos = realcurpos+promptlen
+        else:
+            cmd = self.string
+            curpos = realcurpos+promptlen
+
         cmdscr.addstr(prompt, look.colors['CmdlinePrompt'])
         try:
             if self.mode.__class__.__name__ == "Shell":
-                self.print_color_shell(self.string)
+                self.print_color_shell(cmd)
             elif self.mode.__class__.__name__ == "Eval":
-                self.print_color_eval(self.string)
+                self.print_color_eval(cmd)
             else:
-                self.print_color_default(self.string)
+                self.print_color_default(cmd)
         except Exception as e:
             message.error("curses error: " + str(e))
 
-        curpos = util.termwidth(prompt+self.string, util.mbslen(prompt)+self.cursor)
-        stdscr = ui.getcomponent("Stdscr").win
-        if curpos < stdscr.getmaxyx()[1]:
-            cmdscr.move(0, curpos)
+        cmdscr.move(0, curpos)
         cmdscr.noutrefresh()
 
     def input(self, meta, key):
