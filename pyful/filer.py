@@ -1080,7 +1080,7 @@ class Directory(object):
 
         self.win.box()
         self.win.move(0, 2)
-        self.win.addstr(util.path_omission(self.path, width), curses.A_BOLD)
+        self.win.addstr(util.path_omission(self.path, width), look.colors['DirectoryPath'])
 
         if width < 30:
             return message.error('terminal size very small')
