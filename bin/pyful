@@ -69,7 +69,7 @@ locale.setlocale(locale.LC_ALL, "")
 imp.reload(sys)
 sys.setdefaultencoding("utf-8")
 
-from pyful import Pyful, loadrcfile, setsignal
+from pyful import Pyful, loadrcfile, createconf, setsignal
 from pyful import message
 from pyful import ui
 
@@ -94,10 +94,7 @@ if __name__ == '__main__':
     try:
         pyful.main_loop()
     except SystemExit:
-        confdir = os.path.expanduser('~/.pyful')
-        if not os.path.exists(confdir):
-            os.makedirs(confdir, 0o700)
-
+        createconf()
         pyful.exit_function()
     finally:
         ui.getcomponent("Stdscr").destroy()

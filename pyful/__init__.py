@@ -24,6 +24,7 @@ __version__ = "0.2.2"
 import curses
 import os
 import signal
+import shutil
 import sys
 
 from pyful import look
@@ -45,6 +46,16 @@ def loadrcfile(path=None, started=True):
                 exec(rc.read(), locals())
             Pyful.environs['RCFILE'] = defpath
         return e
+
+def createconf():
+    confdir = os.path.expanduser('~/.pyful')
+    if not os.path.exists(confdir):
+        os.makedirs(confdir, 0o700)
+
+    rcfile = os.path.join(confdir, 'rc.py')
+    if not os.path.exists(rcfile):
+        default = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'rc.py')
+        shutil.copy(default, rcfile)
 
 def setsignal():
     def _signal(signalnum, stackframe):
