@@ -430,7 +430,7 @@ class Rename(object):
     def prompt(self):
         try:
             util.unistr(self.path)
-            return "Rename (%s):" % self.path
+            return "Rename: %s ->" % self.path
         except UnicodeError:
             return "Rename invalid encoding to:"
 
