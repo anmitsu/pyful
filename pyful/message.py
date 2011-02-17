@@ -102,8 +102,9 @@ class Message(ui.Component):
         self.active = False
 
     def view(self):
-        if not ui.getcomponent("Cmdline").is_active:
-            self.messagebox.view(self.msg)
+        if ui.getcomponent("Cmdline").is_active or ui.getcomponent("Filer").finder.active:
+            return
+        self.messagebox.view(self.msg)
 
 class MessageBox(object):
     height = 2
