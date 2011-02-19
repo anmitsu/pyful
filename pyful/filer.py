@@ -165,6 +165,7 @@ class Filer(ui.Component):
         for i, path in enumerate([d.path for d in self.workspace.dirs]):
             num = '[%d] ' % (i+1)
             numlen = len(num)
+            path = path.replace(os.environ['HOME'], "~", 1)
             path = util.path_omission(path, width-numlen-1)
             if i == 0:
                 w = width-numlen+odd
@@ -1080,7 +1081,7 @@ class Directory(object):
 
         self.win.box()
         self.win.move(0, 2)
-        self.win.addstr(util.path_omission(self.path, width), look.colors['DirectoryPath'])
+        self.win.addstr(util.path_omission(self.path.replace(os.environ['HOME'], "~", 1), width), look.colors['DirectoryPath'])
 
         if width < 30:
             return message.error('terminal size very small')
