@@ -143,6 +143,10 @@ for k in looks['default'].keys():
 
 def init_colors():
     from pyful import Pyful
-    for i, (name, v) in enumerate(Pyful.environs['LOOKS'].items()):
-        curses.init_pair(i+1, v[0], v[1])
-        colors.update({name: curses.color_pair(i+1) | v[2]})
+    if curses.has_colors():
+        for i, (name, v) in enumerate(Pyful.environs['LOOKS'].items()):
+            curses.init_pair(i+1, v[0], v[1])
+            colors.update({name: curses.color_pair(i+1) | v[2]})
+    else:
+        for (name, v) in Pyful.environs['LOOKS'].items():
+            colors.update({name: v[2]})

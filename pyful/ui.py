@@ -90,8 +90,9 @@ class StandardScreen(Component):
         curses.noecho()
         curses.cbreak()
         curses.raw()
-        curses.start_color()
-        curses.use_default_colors()
+        if curses.has_colors():
+            curses.start_color()
+            curses.use_default_colors()
 
     def destroy(self):
         self.win.keypad(0)
