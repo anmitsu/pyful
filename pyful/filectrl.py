@@ -790,13 +790,16 @@ class CopyThread(threading.Thread):
             for j in self.ctrl.jobs:
                 if not self.active:
                     break
-                if isinstance(j, FileJob):
+                if j:
                     j.copy(self)
         except FilectrlCancel as e:
             self.error = e
 
     def kill(self):
+        self.status = "Waiting..."
+        view_threads()
         self.active = False
+        self.join()
 
 class MoveThread(threading.Thread):
     def __init__(self, ctrl):
@@ -813,7 +816,7 @@ class MoveThread(threading.Thread):
             for j in self.ctrl.jobs:
                 if not self.active:
                     break
-                if isinstance(j, FileJob):
+                if j:
                     j.move(self)
         except FilectrlCancel as e:
             self.error = e
@@ -828,7 +831,10 @@ class MoveThread(threading.Thread):
                     pass
 
     def kill(self):
+        self.status = "Waiting..."
+        view_threads()
         self.active = False
+        self.join()
 
 class FileJob(object):
     def __init__(self, src, dst):
@@ -840,15 +846,6 @@ class FileJob(object):
             return
         linkto = os.readlink(src)
         os.symlink(linkto, dst)
-
-    def copyfileobj(self, src, dst, length=16*1024):
-        with open(src, 'rb') as fsrc:
-            with open(dst, 'wb') as fdst:
-                while self.thread.active:
-                    buf = fsrc.read(length)
-                    if not buf:
-                        break
-                    fdst.write(buf)
 
     def makedirs(self, src, dst, mode=0o755):
         head, tail = os.path.split(dst)
@@ -873,7 +870,6 @@ class FileJob(object):
             self.makedirs(src, dst)
 
     def copy(self, thread):
-        self.thread = thread
         try:
             self.copydirs(self.src, self.dst)
 
@@ -887,13 +883,12 @@ class FileJob(object):
             if os.path.islink(self.src):
                 self.copysymlink(self.src, self.dst)
             else:
-                self.copyfileobj(self.src, self.dst)
+                shutil.copyfile(self.src, self.dst)
                 shutil.copystat(self.src, self.dst)
         except Exception as e:
-            self.thread.error = e
+            thread.error = e
 
     def move(self, thread):
-        self.thread = thread
         try:
             self.copydirs(self.src, self.dst)
 
@@ -912,7 +907,7 @@ class FileJob(object):
                     try:
                         os.remove(self.src)
                     except EnvironmentError as e:
-                        self.thread.error = e
+                        thread.error = e
             else:
-                self.thread.error = e
+                thread.error = e
 
