@@ -215,7 +215,7 @@ class Subloop(object):
         process.view_process()
         curses.doupdate()
 
-    def sub_loop(self):
+    def run(self):
         self.stdscr.timeout(10)
         self.view()
         (meta, key) = ui.getch()
@@ -313,7 +313,7 @@ class Filectrl(object):
         subloop = Subloop()
         while thread.isAlive():
             self.threadevent.wait()
-            subloop.sub_loop()
+            subloop.run()
         if thread.error:
             message.exception(thread.error)
         else:
