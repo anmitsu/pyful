@@ -228,12 +228,12 @@ class FilectrlCancel(Exception):
 
 class Filectrl(object):
     threads = []
+    event = threading.Event()
 
     def __init__(self):
         self.confirm = "importunate"
         self.jobs = None
         self.dirlist = []
-        self.threadevent = threading.Event()
 
     def filejob_generator(self, src, dst):
         def _checkfile(src, dst):
@@ -276,7 +276,7 @@ class Filectrl(object):
             return "yes"
 
         if "importunate" == self.confirm:
-            self.threadevent.clear()
+            self.event.clear()
             sstat = os.stat(src)
             dstat = os.stat(dst)
             ssize = str(sstat.st_size)
@@ -286,7 +286,7 @@ class Filectrl(object):
             msglist = ["source", "path: " + src, "size: " + ssize, "time: " + stime, "",
                        "destination", "path: " + dst, "size: " + dsize, "time: " + dtime]
             ret = message.confirm("Override?", ["Yes", "No", "Yes(all)", "No(all)", "Cancel"], msglist)
-            self.threadevent.set()
+            self.event.set()
             if ret == "Yes":
                 return "yes"
             elif ret == "No":
@@ -308,11 +308,11 @@ class Filectrl(object):
 
     def thread_loop(self, thread):
         Filectrl.threads.append(thread)
-        self.threadevent.set()
+        self.event.set()
         thread.start()
         subloop = Subloop()
         while thread.isAlive():
-            self.threadevent.wait()
+            self.event.wait()
             subloop.run()
         if thread.error:
             message.exception(thread.error)
