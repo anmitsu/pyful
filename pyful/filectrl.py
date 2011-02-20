@@ -18,6 +18,7 @@
 
 import os
 import shutil
+import stat
 import curses
 import time
 import threading
@@ -697,17 +698,19 @@ class CopyThread(threading.Thread):
             dst = util.abspath(dst) + os.sep
         else:
             dst = util.abspath(dst)
-        self.jobs = FileJobGenerator().generate(src, dst)
+        self.fjg = FileJobGenerator()
+        self.jobs = self.fjg.generate(src, dst)
 
     def run(self):
         try:
-            for j in self.jobs:
+            for job in self.jobs:
                 if not self.active:
                     break
-                if j:
-                    j.copy(self)
+                if job:
+                    job.copy(self)
         except FilectrlCancel as e:
             self.error = e
+        self.fjg.copydirs()
 
     def kill(self):
         self.status = "Waiting..."
@@ -736,13 +739,15 @@ class MoveThread(threading.Thread):
 
     def run(self):
         try:
-            for j in self.jobs:
+            for job in self.jobs:
                 if not self.active:
                     break
-                if j:
-                    j.move(self)
+                if job:
+                    job.move(self)
         except FilectrlCancel as e:
             self.error = e
+
+        self.fjg.copydirs()
 
         self.fjg.dirlist.sort()
         self.fjg.dirlist.reverse()
@@ -763,6 +768,7 @@ class FileJobGenerator(object):
     def __init__(self):
         self.confirm = "importunate"
         self.dirlist = []
+        self.dircopylist = []
 
     def generate(self, src, dst):
         def _checkfile(src, dst):
@@ -774,6 +780,8 @@ class FileJobGenerator(object):
 
         def _checkdir(src, dst):
             self.dirlist.append(src)
+            if not os.path.isdir(dst):
+                self.dircopylist.append((os.stat(src), dst))
 
             for f in os.listdir(src):
                 ssub = os.path.join(src, f)
@@ -835,6 +843,29 @@ class FileJobGenerator(object):
         elif "no_all" == self.confirm:
             return "no"
 
+    def copydirs(self):
+        self.dircopylist.sort()
+        self.dircopylist.reverse()
+        for d in self.dircopylist:
+            try:
+                os.makedirs(d[1])
+            except OSError as e:
+                if e.errno != errno.EEXIST:
+                    raise
+            st = d[0]
+            mode = stat.S_IMODE(st.st_mode)
+            if hasattr(os, 'utime'):
+                os.utime(d[1], (st.st_atime, st.st_mtime))
+            if hasattr(os, 'chmod'):
+                os.chmod(d[1], mode)
+            if hasattr(os, 'chflags') and hasattr(st, 'st_flags'):
+                try:
+                    os.chflags(d[1], st.st_flags)
+                except OSError as why:
+                    if (not hasattr(errno, 'EOPNOTSUPP') or
+                        why.errno != errno.EOPNOTSUPP):
+                        raise
+
 class FileJob(object):
     def __init__(self, src, dst):
         self.src = src
@@ -846,31 +877,10 @@ class FileJob(object):
         linkto = os.readlink(src)
         os.symlink(linkto, dst)
 
-    def makedirs(self, src, dst, mode=0o755):
-        head, tail = os.path.split(dst)
-        if not tail:
-            head, tail = os.path.split(head)
-        if head and tail and not os.path.exists(head):
-            try:
-                self.makedirs(util.unix_dirname(src), head, mode)
-            except OSError as e:
-                if e.errno != errno.EEXIST:
-                    raise
-            if tail == os.curdir:
-                return
-        os.mkdir(dst, mode)
-        if util.unix_basename(src) == util.unix_basename(dst):
-            shutil.copystat(src, dst)
-
-    def copydirs(self, src, dst):
-        src = util.unix_dirname(self.src)
-        dst = util.unix_dirname(self.dst)
-        if not os.path.isdir(dst):
-            self.makedirs(src, dst)
-
     def copy(self, thread):
         try:
-            self.copydirs(self.src, self.dst)
+            if not os.path.isdir(util.unix_dirname(self.dst)):
+                os.makedirs(util.unix_dirname(self.dst))
 
             if os.path.isfile(self.dst):
                 if not os.access(self.dst, os.W_OK):
@@ -889,7 +899,8 @@ class FileJob(object):
 
     def move(self, thread):
         try:
-            self.copydirs(self.src, self.dst)
+            if not os.path.isdir(util.unix_dirname(self.dst)):
+                os.makedirs(util.unix_dirname(self.dst))
 
             if os.path.isfile(self.dst):
                 if not os.access(self.dst, os.W_OK):
