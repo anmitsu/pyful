@@ -231,7 +231,6 @@ class Filectrl(object):
 
     def __init__(self):
         self.confirm = "importunate"
-        self.thread = None
         self.jobs = None
         self.dirlist = []
         self.threadevent = threading.Event()
@@ -307,24 +306,24 @@ class Filectrl(object):
         elif "no_all" == self.confirm:
             return "no"
 
-    def thread_loop(self):
-        Filectrl.threads.append(self.thread)
+    def thread_loop(self, thread):
+        Filectrl.threads.append(thread)
         self.threadevent.set()
-        self.thread.start()
+        thread.start()
         subloop = Subloop()
-        while self.thread.isAlive():
+        while thread.isAlive():
             self.threadevent.wait()
             subloop.sub_loop()
-        if self.thread.error:
-            message.exception(self.thread.error)
+        if thread.error:
+            message.exception(thread.error)
         else:
-            message.puts("Thread finished: %s" % self.thread.title)
-        Filectrl.threads.remove(self.thread)
+            message.puts("Thread finished: %s" % thread.title)
+        Filectrl.threads.remove(thread)
         ui.getcomponent("Filer").workspace.all_reload()
 
     def delete(self, path):
-        self.thread = DeleteThread(path)
-        self.thread_loop()
+        thread = DeleteThread(path)
+        self.thread_loop(thread)
 
     def copy(self, src, dst):
         if isinstance(src, list):
@@ -336,8 +335,8 @@ class Filectrl(object):
         else:
             dst = util.abspath(dst)
         self.jobs = self.filejob_generator(src, dst)
-        self.thread = CopyThread(self)
-        self.thread_loop()
+        thread = CopyThread(self)
+        self.thread_loop(thread)
 
     def move(self, src, dst):
         if isinstance(src, list):
@@ -349,12 +348,12 @@ class Filectrl(object):
         else:
             dst = util.abspath(dst)
         self.jobs = self.filejob_generator(src, dst)
-        self.thread = MoveThread(self)
-        self.thread_loop()
+        thread = MoveThread(self)
+        self.thread_loop(thread)
 
     def tar(self, src, dst, tarmode='gzip', wrap=''):
-        self.thread = TarThread(src, dst, tarmode, wrap)
-        self.thread_loop()
+        thread = TarThread(src, dst, tarmode, wrap)
+        self.thread_loop(thread)
 
     def tareach(self, src, dst, tarmode='gzip', wrap=''):
         threadlist = []
@@ -362,20 +361,19 @@ class Filectrl(object):
             path = os.path.join(dst, util.unix_basename(f))
             threadlist.append(TarThread(f, path, tarmode, wrap))
         for t in threadlist:
-            self.thread = t
-            self.thread_loop()
+            self.thread_loop(t)
 
     def untar(self, src, dstdir='.'):
-        self.thread = UntarThread(src, dstdir)
-        self.thread_loop()
+        thread = UntarThread(src, dstdir)
+        self.thread_loop(thread)
 
     def unzip(self, src, dstdir=''):
-        self.thread = UnzipThread(src, dstdir)
-        self.thread_loop()
+        thread = UnzipThread(src, dstdir)
+        self.thread_loop(thread)
 
     def zip(self, src, dst, wrap):
-        self.thread = ZipThread(src, dst, wrap)
-        self.thread_loop()
+        thread = ZipThread(src, dst, wrap)
+        self.thread_loop(thread)
 
     def zipeach(self, src, dst, wrap):
         threadlist = []
@@ -383,8 +381,7 @@ class Filectrl(object):
             path = os.path.join(dst, util.unix_basename(f))
             threadlist.append(ZipThread(f, path, wrap))
         for t in threadlist:
-            self.thread = t
-            self.thread_loop()
+            self.thread_loop(t)
 
 class TarThread(threading.Thread):
     tarmodes = {'tar': '', 'gzip': 'gz', 'bzip2': 'bz2'}
