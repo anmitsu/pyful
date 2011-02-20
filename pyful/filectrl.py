@@ -230,82 +230,6 @@ class Filectrl(object):
     threads = []
     event = threading.Event()
 
-    def __init__(self):
-        self.confirm = "importunate"
-        self.jobs = None
-        self.dirlist = []
-
-    def filejob_generator(self, src, dst):
-        def _checkfile(src, dst):
-            ret = self.check_override(src, dst)
-            if ret == "cancel":
-                raise FilectrlCancel("Filejob canceled: %s -> %s" % (src, dst))
-            if ret == "yes":
-                return FileJob(src, dst)
-
-        def _checkdir(src, dst):
-            self.dirlist.append(src)
-
-            for f in os.listdir(src):
-                ssub = os.path.join(src, f)
-                dsub = os.path.join(dst, f)
-                if os.path.isdir(ssub) and not os.path.islink(ssub):
-                    for checked in _checkdir(ssub, dsub):
-                        yield checked
-                else:
-                    yield _checkfile(ssub, dsub)
-
-        if isinstance(src, list):
-            for f in src:
-                for checked in self.filejob_generator(f, dst):
-                    yield checked
-        else:
-            if dst.endswith(os.sep) or os.path.isdir(dst):
-                dst = os.path.join(dst, util.unix_basename(src))
-
-            if os.path.isdir(src) and not os.path.islink(src):
-                for checked in _checkdir(src, dst):
-                    yield checked
-            else:
-                yield _checkfile(src, dst)
-
-    def check_override(self, src, dst):
-        if not os.path.lexists(dst):
-            return "yes"
-        if not util.unix_basename(src) == util.unix_basename(dst):
-            return "yes"
-
-        if "importunate" == self.confirm:
-            self.event.clear()
-            sstat = os.stat(src)
-            dstat = os.stat(dst)
-            ssize = str(sstat.st_size)
-            dsize = str(dstat.st_size)
-            stime = time.strftime("%y-%m-%d %H:%M:%S", time.localtime(sstat.st_mtime))
-            dtime = time.strftime("%y-%m-%d %H:%M:%S", time.localtime(dstat.st_mtime))
-            msglist = ["source", "path: " + src, "size: " + ssize, "time: " + stime, "",
-                       "destination", "path: " + dst, "size: " + dsize, "time: " + dtime]
-            ret = message.confirm("Override?", ["Yes", "No", "Yes(all)", "No(all)", "Cancel"], msglist)
-            self.event.set()
-            if ret == "Yes":
-                return "yes"
-            elif ret == "No":
-                return "no"
-            elif ret == "Cancel":
-                return "cancel"
-            elif ret == "Yes(all)":
-                self.confirm = "yes_all"
-                return "yes"
-            elif ret == "No(all)":
-                self.confirm = "no_all"
-                return "no"
-            else:
-                return "cancel"
-        elif "yes_all" == self.confirm:
-            return "yes"
-        elif "no_all" == self.confirm:
-            return "no"
-
     def thread_loop(self, thread):
         Filectrl.threads.append(thread)
         self.event.set()
@@ -326,29 +250,11 @@ class Filectrl(object):
         self.thread_loop(thread)
 
     def copy(self, src, dst):
-        if isinstance(src, list):
-            src = [util.abspath(f) for f in src]
-        else:
-            src = util.abspath(src)
-        if dst.endswith(os.sep):
-            dst = util.abspath(dst) + os.sep
-        else:
-            dst = util.abspath(dst)
-        self.jobs = self.filejob_generator(src, dst)
-        thread = CopyThread(self)
+        thread = CopyThread(src, dst)
         self.thread_loop(thread)
 
     def move(self, src, dst):
-        if isinstance(src, list):
-            src = [util.abspath(f) for f in src]
-        else:
-            src = util.abspath(src)
-        if dst.endswith(os.sep):
-            dst = util.abspath(dst) + os.sep
-        else:
-            dst = util.abspath(dst)
-        self.jobs = self.filejob_generator(src, dst)
-        thread = MoveThread(self)
+        thread = MoveThread(src, dst)
         self.thread_loop(thread)
 
     def tar(self, src, dst, tarmode='gzip', wrap=''):
@@ -776,18 +682,26 @@ class DeleteThread(threading.Thread):
                         pass
 
 class CopyThread(threading.Thread):
-    def __init__(self, ctrl):
+    def __init__(self, src, dst):
         threading.Thread.__init__(self)
         self.setDaemon(True)
         self.error = 0
-        self.ctrl = ctrl
         self.status = "Copy starting..."
         self.title = "Copy thread: %s" % self.name
         self.active = True
+        if isinstance(src, list):
+            src = [util.abspath(f) for f in src]
+        else:
+            src = util.abspath(src)
+        if dst.endswith(os.sep):
+            dst = util.abspath(dst) + os.sep
+        else:
+            dst = util.abspath(dst)
+        self.jobs = FileJobGenerator().generate(src, dst)
 
     def run(self):
         try:
-            for j in self.ctrl.jobs:
+            for j in self.jobs:
                 if not self.active:
                     break
                 if j:
@@ -802,18 +716,27 @@ class CopyThread(threading.Thread):
         self.join()
 
 class MoveThread(threading.Thread):
-    def __init__(self, ctrl):
+    def __init__(self, src, dst):
         threading.Thread.__init__(self)
         self.setDaemon(True)
         self.error = 0
-        self.ctrl = ctrl
         self.status = "Move starting..."
         self.title = "Move thread: %s" % self.name
         self.active = True
+        if isinstance(src, list):
+            src = [util.abspath(f) for f in src]
+        else:
+            src = util.abspath(src)
+        if dst.endswith(os.sep):
+            dst = util.abspath(dst) + os.sep
+        else:
+            dst = util.abspath(dst)
+        self.fjg = FileJobGenerator()
+        self.jobs = self.fjg.generate(src, dst)
 
     def run(self):
         try:
-            for j in self.ctrl.jobs:
+            for j in self.jobs:
                 if not self.active:
                     break
                 if j:
@@ -821,9 +744,9 @@ class MoveThread(threading.Thread):
         except FilectrlCancel as e:
             self.error = e
 
-        self.ctrl.dirlist.sort()
-        self.ctrl.dirlist.reverse()
-        for d in self.ctrl.dirlist:
+        self.fjg.dirlist.sort()
+        self.fjg.dirlist.reverse()
+        for d in self.fjg.dirlist:
             try:
                 os.rmdir(d)
             except EnvironmentError as e:
@@ -835,6 +758,82 @@ class MoveThread(threading.Thread):
         view_threads()
         self.active = False
         self.join()
+
+class FileJobGenerator(object):
+    def __init__(self):
+        self.confirm = "importunate"
+        self.dirlist = []
+
+    def generate(self, src, dst):
+        def _checkfile(src, dst):
+            ret = self.check_override(src, dst)
+            if ret == "cancel":
+                raise FilectrlCancel("Filejob canceled: %s -> %s" % (src, dst))
+            if ret == "yes":
+                return FileJob(src, dst)
+
+        def _checkdir(src, dst):
+            self.dirlist.append(src)
+
+            for f in os.listdir(src):
+                ssub = os.path.join(src, f)
+                dsub = os.path.join(dst, f)
+                if os.path.isdir(ssub) and not os.path.islink(ssub):
+                    for checked in _checkdir(ssub, dsub):
+                        yield checked
+                else:
+                    yield _checkfile(ssub, dsub)
+
+        if isinstance(src, list):
+            for f in src:
+                for checked in self.generate(f, dst):
+                    yield checked
+        else:
+            if dst.endswith(os.sep) or os.path.isdir(dst):
+                dst = os.path.join(dst, util.unix_basename(src))
+
+            if os.path.isdir(src) and not os.path.islink(src):
+                for checked in _checkdir(src, dst):
+                    yield checked
+            else:
+                yield _checkfile(src, dst)
+
+    def check_override(self, src, dst):
+        if not os.path.lexists(dst):
+            return "yes"
+        if not util.unix_basename(src) == util.unix_basename(dst):
+            return "yes"
+
+        if "importunate" == self.confirm:
+            Filectrl.event.clear()
+            sstat = os.stat(src)
+            dstat = os.stat(dst)
+            ssize = str(sstat.st_size)
+            dsize = str(dstat.st_size)
+            stime = time.strftime("%y-%m-%d %H:%M:%S", time.localtime(sstat.st_mtime))
+            dtime = time.strftime("%y-%m-%d %H:%M:%S", time.localtime(dstat.st_mtime))
+            msglist = ["source", "path: " + src, "size: " + ssize, "time: " + stime, "",
+                       "destination", "path: " + dst, "size: " + dsize, "time: " + dtime]
+            ret = message.confirm("Override?", ["Yes", "No", "Yes(all)", "No(all)", "Cancel"], msglist)
+            Filectrl.event.set()
+            if ret == "Yes":
+                return "yes"
+            elif ret == "No":
+                return "no"
+            elif ret == "Cancel":
+                return "cancel"
+            elif ret == "Yes(all)":
+                self.confirm = "yes_all"
+                return "yes"
+            elif ret == "No(all)":
+                self.confirm = "no_all"
+                return "no"
+            else:
+                return "cancel"
+        elif "yes_all" == self.confirm:
+            return "yes"
+        elif "no_all" == self.confirm:
+            return "no"
 
 class FileJob(object):
     def __init__(self, src, dst):
