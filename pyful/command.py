@@ -196,7 +196,7 @@ commands = {
 
 def _open_at_system():
     try:
-        if Pyful.environs['PLATFORM'] == 'cygwin':
+        if sys.platform == 'cygwin':
             process.spawn("cygstart %f %&")
         else:
             process.spawn("xdg-open %f %&")

@@ -25,7 +25,6 @@ import curses
 import os
 import signal
 import shutil
-import sys
 
 from pyful import look
 from pyful import ui
@@ -80,7 +79,6 @@ class Pyful(object):
         'TRASHBOX': '~/.pyful/trashbox',
         'RCFILE': '~/.pyful/rc.py',
         'LOOKS': look.looks['default'],
-        'PLATFORM': sys.platform,
         }
     binpath = None
     initfuncs = []

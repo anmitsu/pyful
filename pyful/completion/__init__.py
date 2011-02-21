@@ -21,8 +21,8 @@ import grp
 import os
 import pwd
 import re
+import sys
 
-from pyful import Pyful
 from pyful import ui
 from pyful import util
 
@@ -62,7 +62,7 @@ class Completion(ui.InfoBox):
                     exec(opt.read(), locals())
 
     def loadprograms(self):
-        osname = Pyful.environs['PLATFORM']
+        osname = sys.platform
         self.programs[:] = []
         for path in os.environ['PATH'].split(os.pathsep):
             if os.path.exists(path):
