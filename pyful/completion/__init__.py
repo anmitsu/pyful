@@ -29,8 +29,6 @@ from pyful import util
 optionsdict = {}
 
 class Completion(ui.InfoBox):
-    program_options = {}
-
     def __init__(self, cmdline):
         ui.InfoBox.__init__(self, "Completion")
         self.cmdline = cmdline
