@@ -843,7 +843,7 @@ class ZoomInfoBox(object):
     prompt = 'Zoom infobox:'
 
     def complete(self, comp):
-        return [str(x*10) for x in range(-10, 11)]
+        return [str(x*10) for x in range(-10, 11) if str(x*10).startswith(comp.parser.nowstr)]
 
     def execute(self, zoom):
         try:
