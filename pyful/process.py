@@ -111,7 +111,10 @@ class Process(object):
                 setsignal()
 
     def screen(self, cmd, title):
-        Popen(["screen", "-t", title, self.shell[0], self.shell[1], "%s; python %s -e" % (cmd, Pyful.binpath)])
+        if self.quick:
+            Popen(["screen", "-t", title, self.shell[0], self.shell[1], cmd])
+        else:
+            Popen(["screen", "-t", title, self.shell[0], self.shell[1], "%s; python %s -e" % (cmd, Pyful.binpath)])
         message.puts("Spawn: %s (screen)" % cmd.strip())
 
     def terminal(self, cmd):
