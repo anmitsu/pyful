@@ -138,8 +138,8 @@ looks = {
         },
     }
 
-for k in looks['default'].keys():
-    colors.update({k: 0})
+for (name, v) in looks['default'].items():
+    colors.update({name: v[2]})
 
 def init_colors():
     from pyful import Pyful
