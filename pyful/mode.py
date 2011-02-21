@@ -102,16 +102,35 @@ class Chmod(object):
             return "Chmod (%s - %s):" % (filer.file.name, mode)
 
     def complete(self, comp):
-        pass
+        symbols = ['+r', '-r', '+w', '-w', '+x', '-x']
+        return sorted([symb for symb in symbols if symb.startswith(comp.parser.nowstr)])
 
     def execute(self, mode):
         filer = ui.getcomponent("Filer")
         if filer.dir.ismark():
             for f in filer.dir.get_mark_files():
+                mode = self._getmode(os.stat(f), mode)
                 filectrl.chmod(f, mode)
         else:
+            mode = self._getmode(filer.file.stat, mode)
             filectrl.chmod(filer.file.name, mode)
         filer.workspace.all_reload()
+
+    def _getmode(self, st, mode):
+        if mode == '+r':
+            return "%o" % (st.st_mode | 0o400)
+        elif mode == '-r':
+            return "%o" % (st.st_mode & 0o377)
+        elif mode == '+w':
+            return "%o" % (st.st_mode | 0o200)
+        elif mode == '-w':
+            return "%o" % (st.st_mode & 0o577)
+        elif mode == '+x':
+            return "%o" % (st.st_mode | 0o111)
+        elif mode == '-x':
+            return "%o" % (st.st_mode & 0o666)
+        else:
+            return mode
 
 class Chown(object):
     def __init__(self):
