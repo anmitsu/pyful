@@ -232,7 +232,7 @@ class Filectrl(object):
     event = threading.Event()
 
     def thread_loop(self, thread):
-        Filectrl.threads.append(thread)
+        self.threads.append(thread)
         self.event.set()
         thread.start()
         subloop = Subloop()
@@ -243,7 +243,7 @@ class Filectrl(object):
             message.exception(thread.error)
         else:
             message.puts("Thread finished: %s" % thread.title)
-        Filectrl.threads.remove(thread)
+        self.threads.remove(thread)
         ui.getcomponent("Filer").workspace.all_reload()
 
     def delete(self, path):
