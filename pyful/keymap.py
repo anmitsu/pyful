@@ -18,9 +18,6 @@
 
 import curses
 
-META = True
-NONE = False
-
 KEY_CTRL_A = 1
 KEY_CTRL_B = 2
 KEY_CTRL_C = 3
