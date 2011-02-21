@@ -63,7 +63,7 @@ class ChangeLooks(object):
     prompt = "Change looks:"
 
     def complete(self, comp):
-        return list(look.looks.keys())
+        return sorted([l for l in look.looks.keys() if l.startswith(comp.parser.nowstr)])
 
     def execute(self, name):
         if name in look.looks:
@@ -340,7 +340,8 @@ class Menu(object):
     prompt = 'Menu name:'
 
     def complete(self, comp):
-        return list(ui.getcomponent("Menu").items.keys())
+        return sorted([item for item in ui.getcomponent("Menu").items.keys()
+                       if item.startswith(comp.parser.nowstr)])
 
     def execute(self, name):
         ui.getcomponent("Menu").show(name)
