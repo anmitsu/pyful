@@ -429,7 +429,7 @@ class Rename(object):
     @property
     def prompt(self):
         try:
-            util.unistr(self.path)
+            util.U(self.path)
             return "Rename: %s ->" % self.path
         except UnicodeError:
             return "Rename invalid encoding to:"
@@ -465,7 +465,7 @@ class Replace(object):
             filer.workspace.all_reload()
         elif self.pattern is None:
             try:
-                self.pattern = re.compile(util.unistr(pattern))
+                self.pattern = re.compile(util.U(pattern))
             except Exception:
                 return message.error("Argument error: Can't complile `%s'" % pattern)
             ui.getcomponent("Cmdline").restart("")

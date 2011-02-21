@@ -92,7 +92,7 @@ class Completion(ui.InfoBox):
             string = self.cursor_item()
 
         try:
-            util.unistr(string)
+            util.U(string)
         except UnicodeError:
             return self.finish()
 
@@ -249,7 +249,7 @@ class Parser(object):
         ps = ""
         ns = ""
         fs = ""
-        string = util.unistr(string)
+        string = util.U(string)
         for c in string[:pos]:
             ns += c
             if re.search("[\s;|,=\"']", c):

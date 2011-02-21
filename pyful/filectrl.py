@@ -314,7 +314,7 @@ class TarThread(JobThread):
         self.status = "Reading..."
         if isinstance(src, list):
             self.src = [util.abspath(f) for f in src]
-            self.src_dirname = util.unistr(os.getcwd()) + os.sep
+            self.src_dirname = util.U(os.getcwd()) + os.sep
             self.title = "Tar: mark files"
         else:
             self.src = util.abspath(src)
@@ -563,7 +563,7 @@ class ZipThread(JobThread):
         self.status = 'Reading...'
         if isinstance(src, list):
             self.src = [util.abspath(f) for f in src]
-            self.src_dirname = util.unistr(os.getcwd()) + os.sep
+            self.src_dirname = util.U(os.getcwd()) + os.sep
             self.title = "Zip: mark files"
         else:
             self.src = util.abspath(src)

@@ -22,7 +22,7 @@ import unicodedata
 
 try:
     unicode
-    def unistr(string):
+    def U(string):
         return string.decode('utf-8')
 
     def force_decode(string):
@@ -34,7 +34,7 @@ try:
             except UnicodeError:
                 return string.decode('ascii')
 except:
-    def unistr(string):
+    def U(string):
         string.encode('utf-8')
         return string
     def force_decode(string):
@@ -184,22 +184,22 @@ def wait_restore():
 
 
 def mbslen(string):
-    return len(unistr(string))
+    return len(U(string))
 
 def insertstr(string, ins, length):
-    string = unistr(string)
+    string = U(string)
     f = string[:length]
     b = string[length:]
     return f + ins + b
 
 def rmstr(string, length):
-    string = unistr(string)
+    string = U(string)
     f = string[:length]
     b = string[length+1:]
     return f + b
 
 def slicestr(string, start, end):
-    string = unistr(string)
+    string = U(string)
     f = string[:start]
     b = string[end:]
     return f + b
@@ -226,7 +226,7 @@ def unix_dirname(path):
 
 def path_omission(path, width):
     if termwidth(path) > width:
-        for name in unistr(path).split(os.sep)[:-1]:
+        for name in U(path).split(os.sep)[:-1]:
             if name:
                 path = path.replace(name, name[0], 1)
             if termwidth(path) <= width:
@@ -234,7 +234,7 @@ def path_omission(path, width):
     return path
 
 def termwidth(string, length=None):
-    string = unistr(string)
+    string = U(string)
     if length is None:
         length = len(string)
     string = string[:length]
@@ -245,7 +245,7 @@ def termwidth(string, length=None):
     return width
 
 def mbs_ljust(string, length, pad=" "):
-    string = unistr(string)
+    string = U(string)
 
     width = 0
     cut = False
@@ -267,7 +267,7 @@ def mbs_ljust(string, length, pad=" "):
     return string
 
 def mbs_rjust(string, length, pad=" "):
-    string = unistr(string)
+    string = U(string)
     width = 0
     cut = False
     for i, c in enumerate(reversed(string)):

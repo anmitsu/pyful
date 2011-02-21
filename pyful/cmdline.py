@@ -81,7 +81,7 @@ class Cmdline(ui.Component):
 
     def forward_word(self):
         i = self.cursor + 1
-        s = util.unistr(self.string)
+        s = util.U(self.string)
         while i < util.mbslen(self.string):
             c = s[i]
             if self.wordbreakchars.search(c):
@@ -94,7 +94,7 @@ class Cmdline(ui.Component):
             return
 
         i = self.cursor - 1
-        s = util.unistr(self.string)
+        s = util.U(self.string)
         while 0 < i:
             c = s[i-1]
             if self.wordbreakchars.search(c):
@@ -123,7 +123,7 @@ class Cmdline(ui.Component):
             if self.wordbreakchars.search(c):
                 break
             i += 1
-        delword = util.unistr(self.string)[self.cursor:i]
+        delword = util.U(self.string)[self.cursor:i]
         self.clipboard.yank(delword)
         self.string = util.slicestr(self.string, self.cursor, i)
         self.history.restart()
@@ -132,20 +132,20 @@ class Cmdline(ui.Component):
         if not self.cursor:
             return
         i = self.cursor - 1
-        s = util.unistr(self.string)
+        s = util.U(self.string)
         while 0 < i:
             c = s[i-1]
             if self.wordbreakchars.search(c):
                 break
             i -= 1
-        delword = util.unistr(self.string)[:self.cursor]
+        delword = util.U(self.string)[:self.cursor]
         self.clipboard.yank(delword)
         self.string = util.slicestr(self.string, i, self.cursor)
         self.cursor = i
         self.history.restart()
 
     def kill_line(self):
-        self.string = util.unistr(self.string)
+        self.string = util.U(self.string)
         killword = self.string[self.cursor:]
         self.clipboard.yank(killword)
         self.string = self.string[:self.cursor]
@@ -179,14 +179,14 @@ class Cmdline(ui.Component):
         promptlen = util.termwidth(prompt)
 
         (maxy, maxx) = cmdscr.getmaxyx()
-        self.string = util.unistr(self.string)
+        self.string = util.U(self.string)
         realcurpos = util.termwidth(self.string[:self.cursor])
         if maxx <= util.termwidth(prompt+self.string):
             if maxx <= realcurpos+promptlen:
                 width = promptlen
                 start = 0
                 pages = []
-                for i, c in enumerate(util.unistr(self.string)):
+                for i, c in enumerate(util.U(self.string)):
                     if unicodedata.east_asian_width(c) in "WF":
                         add = 2
                     else:
@@ -331,11 +331,11 @@ class Cmdline(ui.Component):
             if c < " ":
                 return
             try:
-                s = util.unistr(c)
+                s = util.U(c)
             except UnicodeError:
                 self._stringcue.append(c)
                 try:
-                    s = util.unistr("".join(self._stringcue))
+                    s = util.U("".join(self._stringcue))
                     self._stringcue[:] = []
                 except UnicodeError:
                     return
@@ -494,7 +494,7 @@ class Clipboard(ui.InfoBox):
     def yank(self, string):
         if not string:
             return
-        string = util.unistr(string)
+        string = util.U(string)
 
         if string in self.clip:
             self.__class__.clip.remove(string)

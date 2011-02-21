@@ -605,7 +605,7 @@ class Directory(object):
                 if os.path.isdir(entrypath):
                     for ep in _globdir(entrypath, patternname):
                         yield ep
-                if fnmatch.fnmatch(util.unistr(e), patternname):
+                if fnmatch.fnmatch(util.U(e), patternname):
                     yield os.path.normpath(entrypath)
 
         self.list = list(_globdir(os.curdir, pattern))
@@ -1173,11 +1173,11 @@ class Finder(object):
 
     def insert(self, c):
         try:
-            s = util.unistr(c)
+            s = util.U(c)
         except UnicodeError:
             self._stringcue.append(c)
             try:
-                s = util.unistr("".join(self._stringcue))
+                s = util.U("".join(self._stringcue))
                 self._stringcue[:] = []
             except UnicodeError:
                 return
@@ -1186,7 +1186,7 @@ class Finder(object):
         self.find(self.string)
 
     def delete_backward_char(self):
-        self.string = util.unistr(self.string)[:-1]
+        self.string = util.U(self.string)[:-1]
         self.find(self.string)
 
     def select_result(self):
@@ -1247,11 +1247,11 @@ class FileStat(object):
     def __init__(self, name, force=False):
         if force:
             try:
-                self.name = util.unistr(name)
+                self.name = util.U(name)
             except UnicodeError:
                 self.name = name
         else:
-            self.name = util.unistr(name)
+            self.name = util.U(name)
         self.marked = False
 
         self.lstat = os.lstat(name)

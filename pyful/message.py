@@ -65,7 +65,7 @@ class Message(ui.Component):
 
     def puts(self, string, timex=3):
         self.active = True
-        msg = (re.sub(r"[\n\r\t]", "", util.unistr(string)), look.colors['PutsMessage'])
+        msg = (re.sub(r"[\n\r\t]", "", util.U(string)), look.colors['PutsMessage'])
         self.msg.insert(0, msg)
         if self.history < len(self.msg):
             self.msg.pop()
@@ -75,7 +75,7 @@ class Message(ui.Component):
 
     def error(self, string, timex=3):
         self.active = True
-        msg = (re.sub(r"[\n\r\t]", "", util.unistr(string)), look.colors['ErrorMessage'])
+        msg = (re.sub(r"[\n\r\t]", "", util.U(string)), look.colors['ErrorMessage'])
         self.msg.insert(0, msg)
         if self.history < len(self.msg):
             self.msg.pop()
