@@ -290,15 +290,27 @@ class Filectrl(object):
         for t in threadlist:
             self.thread_loop(t)
 
-class TarThread(threading.Thread):
-    tarmodes = {'tar': '', 'gzip': 'gz', 'bzip2': 'bz2'}
-    tarexts = {'tar': '.tar', 'gzip': '.tgz', 'bzip2': '.bz2'}
-
-    def __init__(self, src, dst, tarmode='gzip', wrap=''):
+class JobThread(threading.Thread):
+    def __init__(self):
         threading.Thread.__init__(self)
         self.setDaemon(True)
         self.error = 0
         self.active = True
+        self.title = self.__class__.__name__
+        self.status = ""
+
+    def run(self):
+        pass
+
+    def kill(self):
+        pass
+
+class TarThread(JobThread):
+    tarmodes = {'tar': '', 'gzip': 'gz', 'bzip2': 'bz2'}
+    tarexts = {'tar': '.tar', 'gzip': '.tgz', 'bzip2': '.bz2'}
+
+    def __init__(self, src, dst, tarmode='gzip', wrap=''):
+        JobThread.__init__(self)
         self.status = "Reading..."
         if isinstance(src, list):
             self.src = [util.abspath(f) for f in src]
@@ -372,15 +384,12 @@ class TarThread(threading.Thread):
         if not self.active:
             raise FilectrlCancel("Tar canceled: %s" % arcname)
 
-class UntarThread(threading.Thread):
+class UntarThread(JobThread):
     tarmodes = {'.tar': '', '.tgz': 'gz', '.gz': 'gz', '.bz2': 'bz2',}
 
     def __init__(self, src, dstdir='.'):
-        threading.Thread.__init__(self)
-        self.setDaemon(True)
-        self.error = 0
-        self.active = True
-        self.status = 'Reading...'
+        JobThread.__init__(self)
+        self.status = "Reading..."
         if isinstance(src, list):
             self.src = [util.abspath(f) for f in src]
             self.title = "Untar: mark files"
@@ -434,13 +443,10 @@ class UntarThread(threading.Thread):
         self.active = False
         self.join()
 
-class UnzipThread(threading.Thread):
+class UnzipThread(JobThread):
     def __init__(self, src, dstdir=''):
-        threading.Thread.__init__(self)
-        self.setDaemon(True)
-        self.error = 0
+        JobThread.__init__(self)
         self.status = 'Reading...'
-        self.active = True
         if isinstance(src, list):
             self.src = [util.abspath(f) for f in src]
             self.title = "Unzip: mark files"
@@ -551,13 +557,10 @@ class UnzipThread(threading.Thread):
                     continue
         myzip.close()
 
-class ZipThread(threading.Thread):
+class ZipThread(JobThread):
     def __init__(self, src, dst, wrap=''):
-        threading.Thread.__init__(self)
-        self.setDaemon(True)
-        self.error = 0
+        JobThread.__init__(self)
         self.status = 'Reading...'
-        self.active = True
         if isinstance(src, list):
             self.src = [util.abspath(f) for f in src]
             self.src_dirname = util.unistr(os.getcwd()) + os.sep
@@ -625,12 +628,9 @@ class ZipThread(threading.Thread):
         else:
             self._write(myzip, source)
 
-class DeleteThread(threading.Thread):
+class DeleteThread(JobThread):
     def __init__(self, path):
-        threading.Thread.__init__(self)
-        self.setDaemon(True)
-        self.error = 0
-        self.active = True
+        JobThread.__init__(self)
         if isinstance(path, list):
             self.title = "Delete: mark files"
             self.status = "Deleting: mark files"
@@ -682,14 +682,11 @@ class DeleteThread(threading.Thread):
                     if e[0] == errno.ENOTEMPTY:
                         pass
 
-class CopyThread(threading.Thread):
+class CopyThread(JobThread):
     def __init__(self, src, dst):
-        threading.Thread.__init__(self)
-        self.setDaemon(True)
-        self.error = 0
+        JobThread.__init__(self)
         self.status = "Copy starting..."
         self.title = "Copy thread: %s" % self.name
-        self.active = True
         if isinstance(src, list):
             src = [util.abspath(f) for f in src]
         else:
@@ -718,14 +715,11 @@ class CopyThread(threading.Thread):
         self.active = False
         self.join()
 
-class MoveThread(threading.Thread):
+class MoveThread(JobThread):
     def __init__(self, src, dst):
-        threading.Thread.__init__(self)
-        self.setDaemon(True)
-        self.error = 0
+        JobThread.__init__(self)
         self.status = "Move starting..."
         self.title = "Move thread: %s" % self.name
-        self.active = True
         if isinstance(src, list):
             src = [util.abspath(f) for f in src]
         else:
