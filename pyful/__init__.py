@@ -89,11 +89,13 @@ class Pyful(object):
         from pyful.filer import Filer
         from pyful.message import Message
         from pyful.menu import Menu
+        from pyful.help import Help
 
         self.cmdline = Cmdline()
         self.filer = Filer()
         self.message = Message()
         self.menu = Menu()
+        self.help = Help()
 
         from pyful.process import view_process
         self.view_process = view_process
@@ -110,6 +112,8 @@ class Pyful(object):
             self.menu.view()
         if self.cmdline.is_active:
             self.cmdline.view()
+        elif self.help.is_active:
+            self.help.view()
         elif self.message.is_active:
             self.message.view()
         self.view_process()
@@ -120,6 +124,8 @@ class Pyful(object):
             self.cmdline.input(meta, key)
         elif self.menu.is_active:
             self.menu.input(meta, key)
+        elif self.help.is_active:
+            self.help.input(meta, key)
         else:
             self.filer.input(meta, key)
 
