@@ -53,14 +53,17 @@ defcmd('refresh_window',
        lambda: ui.refresh())
 
 defcmd('rehash_programs',
-       """Rehash of programs from PATH. PATH your environment is as follows:
-       %s""" % os.linesep.join(['* '+path for path in os.environ['PATH'].split(os.pathsep)]),
+       """Rehash of programs from PATH.
+       PATH your environment is as follows:
+       %s
+       """ % os.linesep.join(['* '+path for path in os.environ['PATH'].split(os.pathsep)]),
        lambda: _cmdline.completion.loadprograms())
 
 defcmd('open_at_system',
        """Open the file under cursor at the file association of system.
        * Linux distributions -> 'xdg-open'
-       * Cygwin -> 'cygstart'""",
+       * Cygwin -> 'cygstart'
+       """,
        lambda: _open_at_system())
 
 defcmd('spawn_editor',
@@ -92,7 +95,15 @@ defcmd('help_all',
        lambda: ui.getcomponent("Help").show_all_command())
 
 defcmd('change_looks',
-       """Changing look and feel of pyful.""",
+       """Changing look and feel of pyful.
+       There is the following kinds of looks:
+       * default
+       * midnight
+       * dark
+       * light\n
+       Present looks is preserved in Pyful.environs['LOOKS'].
+       The setting concerning looks consults the pyful.look module.
+       """,
        lambda: _cmdline.start(mode.ChangeLooks(), ''))
 
 defcmd('google_search',
@@ -165,7 +176,8 @@ defcmd('enter_link',
 
 defcmd('enter_listfile',
        """Behavior of list file.
-       list file is a file to which the absolute path is written and extension is '.list'. """,
+       list file is a file to which the absolute path is written and extension is '.list'.
+       """,
        lambda: _filer.dir.open_listfile(_filer.file.name))
 
 defcmd('switch_workspace',
@@ -185,7 +197,14 @@ defcmd('change_workspace_title',
        lambda: _cmdline.start(mode.ChangeWorkspaceTitle(), ""))
 
 defcmd('change_workspace_layout',
-       """Change current workspace's layout.""",
+       """Change current workspace's layout.
+       Layouts are following kinds:
+       * Tile
+       * Tile of reverse
+       * Oneline
+       * Onecolumn
+       * Fullscreen
+       """,
        lambda: _change_workspace_layout())
 
 defcmd('view_next_workspace',
@@ -465,23 +484,32 @@ defcmd('mark_clear',
        lambda: _filer.dir.mark_clear())
 
 defcmd('mark_source',
-       """Mark source files in current directory.""",
+       """Mark source files in current directory.
+       Regexp of filter: %s""" % _source_filter.pattern,
        lambda: _filer.dir.mark(_source_filter))
 
 defcmd('mark_archive',
-       """Mark archive files in current directory.""",
+       """Mark archive files in current directory.
+       Regexp of filter: %s
+       """ % _archive_filter.pattern,
        lambda: _filer.dir.mark(_archive_filter))
 
 defcmd('mark_image',
-       """Mark image files in current directory.""",
+       """Mark image files in current directory.
+       Regexp of filter: %s
+       """ % _image_filter.pattern,
        lambda: _filer.dir.mark(_image_filter))
 
 defcmd('mark_music',
-       """Mark music files in current directory.""",
+       """Mark music files in current directory.
+       Regexp of filter: %s
+       """ % _music_filter.pattern,
        lambda: _filer.dir.mark(_music_filter))
 
 defcmd('mark_video',
-       """Mark video files in current directory.""",
+       """Mark video files in current directory.
+       Regexp of filter: %s
+       """ % _video_filter.pattern,
        lambda: _filer.dir.mark(_video_filter))
 
 defcmd('mask_clear',
@@ -489,23 +517,33 @@ defcmd('mask_clear',
        lambda: _filer.dir.mask(None))
 
 defcmd('mask_source',
-       """Filter source files.""",
+       """Filter source files.
+       Regexp of filter: %s
+       """ % _source_filter.pattern,
        lambda: _filer.dir.mask(_source_filter))
 
 defcmd('mask_archive',
-       """Filter archive files.""",
+       """Filter archive files.
+       Regexp of filter: %s
+       """ % _archive_filter.pattern,
        lambda: _filer.dir.mask(_archive_filter))
 
 defcmd('mask_image',
-       """Filter image files.""",
+       """Filter image files.
+       Regexp of filter: %s
+       """ % _image_filter.pattern,
        lambda: _filer.dir.mask(_image_filter))
 
 defcmd('mask_music',
-       """Filter music files.""",
+       """Filter music files.
+       Regexp of filter: %s
+       """ % _music_filter.pattern,
        lambda: _filer.dir.mask(_music_filter))
 
 defcmd('mask_video',
-       """Filter video files.""",
+       """Filter video files.
+       Regexp of filter: %s
+       """ % _video_filter.pattern,
        lambda: _filer.dir.mask(_video_filter))
 
 defcmd('copy',
