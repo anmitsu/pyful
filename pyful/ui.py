@@ -148,6 +148,9 @@ class InfoBox(Component):
             (0, KEY_CTRL_G): lambda: self.hide(),
             (0, KEY_CTRL_C): lambda: self.hide(),
             (0, KEY_ESCAPE): lambda: self.hide(),
+            (1, KEY_PLUS     ): lambda: zoom_infobox(InfoBox.zoom+5),
+            (1, KEY_MINUS    ): lambda: zoom_infobox(InfoBox.zoom-5),
+            (1, KEY_EQUAL    ): lambda: zoom_infobox(0),
             }
 
     @classmethod
@@ -271,10 +274,17 @@ class InfoBox(Component):
             if line >= height:
                 break
 
-            item = util.mbs_ljust(self._info[i], width//maxrow - 3)
+            if isinstance(self._info[i], list):
+                item = self._info[i][0]
+                attr = self._info[i][1]
+            else:
+                item = self._info[i]
+                attr = 0
+            item = util.mbs_ljust(item, width//maxrow-1)
+
             self.win.move(line+1, row * (width//maxrow) + 2)
             if self._cursor == i:
-                self.win.addstr(item, curses.A_REVERSE)
+                self.win.addstr(item, curses.A_REVERSE | attr)
             else:
                 if self._highlight:
                     reg = re.compile("(%s)" % re.escape(self._highlight))
@@ -282,9 +292,9 @@ class InfoBox(Component):
                         if iitem == self._highlight:
                             self.win.addstr(iitem, look.colors['CandidateHilight'])
                         else:
-                            self.win.addstr(iitem)
+                            self.win.addstr(iitem, attr)
                 else:
-                    self.win.addstr(item)
+                    self.win.addstr(item, attr)
             row += 1
         self.win.noutrefresh()
 
