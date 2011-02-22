@@ -37,7 +37,6 @@ def defcmd(name, doc, cmd):
 
 _cmdline = ui.getcomponent("Cmdline")
 _filer = ui.getcomponent("Filer")
-_menu = ui.getcomponent("Menu")
 _image_filter = re.compile('\.(jpe?g|gif|png|bmp|tiff|jp2|j2c|svg|eps)$')
 _music_filter = re.compile('\.(ogg|mp3|flac|ape|tta|tak|mid|wma|wav)$')
 _video_filter = re.compile('\.(avi|mkv|mp4|mpe?g|wmv|asf|rm|ram|ra)$')
@@ -713,15 +712,16 @@ def _switch_workspace():
             break
 
 def _drivejump():
-    _menu.items['Drives'] = {}
+    menu = ui.getcomponent("Menu")
+    menu.items['Drives'] = {}
     li = []
     for i, f in enumerate(glob.glob('/media/*')+glob.glob('/mnt/*')):
         def _wrap(path):
             return lambda: _filer.dir.chdir(path)
         num = str(i+1)
         li.append(('(%s) %s' % (num, f), ord(num), _wrap(f)))
-    _menu.items['Drives'] = li
-    _menu.show('Drives')
+    menu.items['Drives'] = li
+    menu.show('Drives')
 
 def _fileviewer():
     ext = util.extname(_filer.file.name)
