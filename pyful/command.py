@@ -624,14 +624,17 @@ def _spawn_editor():
         editor = Pyful.environs['EDITOR']
     except KeyError:
         editor = 'vim'
-    process.spawn(editor+' %f')
+    try:
+        process.spawn(editor+' %f')
+    except Exception as e:
+        message.exception(e)
 
 def _spawn_shell():
+    shell = process.Process.shell[0]
     try:
-        shell = Pyful.environs['SHELL']
-    except KeyError:
-        shell = '/bin/bash'
-    process.spawn(shell, shell)
+        process.spawn(shell, shell)
+    except Exception as e:
+        message.exception(e)
 
 def _spawn_terminal():
     try:
