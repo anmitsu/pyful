@@ -53,11 +53,14 @@ defcmd('refresh_window',
        lambda: ui.refresh())
 
 defcmd('rehash_programs',
-       """Rehash of programs from PATH.""",
+       """Rehash of programs from PATH. PATH your environment is as follows:
+       %s""" % os.linesep.join(['* '+path for path in os.environ['PATH'].split(os.pathsep)]),
        lambda: _cmdline.completion.loadprograms())
 
 defcmd('open_at_system',
-       """Open the file under cursor at the file association of system.""",
+       """Open the file under cursor at the file association of system.
+       * Linux distributions -> 'xdg-open'
+       * Cygwin -> 'cygstart'""",
        lambda: _open_at_system())
 
 defcmd('spawn_editor',
@@ -153,9 +156,8 @@ defcmd('enter_link',
        lambda: _filer.dir.enter_link())
 
 defcmd('enter_listfile',
-       """Behavior of list file. list file is a file to which
-       the absolute path is written and extension is '.list'.
-       """,
+       """Behavior of list file.
+       list file is a file to which the absolute path is written and extension is '.list'. """,
        lambda: _filer.dir.open_listfile(_filer.file.name))
 
 defcmd('switch_workspace',
