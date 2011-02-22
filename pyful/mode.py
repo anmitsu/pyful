@@ -269,6 +269,15 @@ class GlobDir(object):
             GlobDir.default = pattern
             filer.dir.globdir(pattern)
 
+class Help(object):
+    prompt = 'Help:'
+
+    def complete(self, comp):
+        return comp.comp_pyful_commands()
+
+    def execute(self, cmd):
+        ui.getcomponent("Help").show_command(cmd)
+
 class Link(object):
     def __init__(self):
         self.src = None
