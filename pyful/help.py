@@ -18,6 +18,7 @@
 
 import curses
 import os
+import re
 
 from pyful import message
 from pyful import ui
@@ -33,8 +34,13 @@ class Help(ui.InfoBox):
         info.append(["Documentation:", curses.A_BOLD])
         for line in doc.split(os.linesep):
             line = line.strip()
+
             if line.startswith('*'):
-                line = self.indent + line
+                count = re.match(r"^\*+", line).end()
+                if count > 1:
+                    line = re.sub(r"^\*+", '-', line, 1)
+                line = count*self.indent + line
+
             info.append(self.indent+line)
         return info
 
