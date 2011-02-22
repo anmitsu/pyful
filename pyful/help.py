@@ -29,7 +29,7 @@ class Help(ui.InfoBox):
         ui.InfoBox.__init__(self, "Help")
         self.indent = ' ' * 4
 
-    def parse_documentation(self, doc):
+    def parse_docstring(self, doc):
         info = []
         info.append(["Documentation:", curses.A_BOLD])
         for line in doc.split(os.linesep):
@@ -59,7 +59,7 @@ class Help(ui.InfoBox):
         info.append(["Name:", curses.A_BOLD])
         info.append(self.indent+name)
         info.append('')
-        info += self.parse_documentation(doc)
+        info += self.parse_docstring(doc)
         self.show(info, -1)
 
     def show_all_command(self):
@@ -73,6 +73,6 @@ class Help(ui.InfoBox):
             info.append(["Name:", curses.A_BOLD])
             info.append(self.indent+name)
             info.append('')
-            info += self.parse_documentation(doc)
+            info += self.parse_docstring(doc)
             info.append('-'*100)
         self.show(info, -1)
