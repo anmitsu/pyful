@@ -290,7 +290,7 @@ class InfoBox(Component):
                     reg = re.compile("(%s)" % re.escape(self._highlight))
                     for iitem in reg.split(item):
                         if iitem == self._highlight:
-                            self.win.addstr(iitem, look.colors['CandidateHilight'])
+                            self.win.addstr(iitem, look.colors['CandidateHighlight'])
                         else:
                             self.win.addstr(iitem, attr)
                 else:

@@ -47,7 +47,7 @@ looks = {
         "CmdlineProgram": (curses.COLOR_GREEN, -1, curses.A_BOLD),
         "CmdlineNoProgram": (curses.COLOR_RED, -1, 0),
         "CmdlinePrompt": (curses.COLOR_CYAN, -1, curses.A_BOLD),
-        "CandidateHilight": (-1, -1, curses.A_BOLD)
+        "CandidateHighlight": (-1, -1, curses.A_BOLD)
         },
 
     "midnight": {
@@ -76,7 +76,7 @@ looks = {
         "CmdlineProgram": (curses.COLOR_GREEN, -1, curses.A_BOLD),
         "CmdlineNoProgram": (curses.COLOR_RED, -1, 0),
         "CmdlinePrompt": (curses.COLOR_WHITE, -1, curses.A_BOLD),
-        "CandidateHilight": (curses.COLOR_WHITE, curses.COLOR_BLUE, curses.A_BOLD)
+        "CandidateHighlight": (curses.COLOR_WHITE, curses.COLOR_BLUE, curses.A_BOLD)
         },
 
     "dark": {
@@ -105,7 +105,7 @@ looks = {
         "CmdlineProgram": (curses.COLOR_GREEN, curses.COLOR_BLACK, curses.A_BOLD),
         "CmdlineNoProgram": (curses.COLOR_RED, curses.COLOR_BLACK, 0),
         "CmdlinePrompt": (curses.COLOR_WHITE, curses.COLOR_BLACK, curses.A_BOLD),
-        "CandidateHilight": (curses.COLOR_WHITE, curses.COLOR_BLACK, curses.A_BOLD)
+        "CandidateHighlight": (curses.COLOR_WHITE, curses.COLOR_BLACK, curses.A_BOLD)
         },
 
     "light": {
@@ -134,7 +134,7 @@ looks = {
         "CmdlineProgram": (curses.COLOR_BLACK, curses.COLOR_GREEN, 0),
         "CmdlineNoProgram": (curses.COLOR_RED, curses.COLOR_WHITE, 0),
         "CmdlinePrompt": (curses.COLOR_BLACK, curses.COLOR_WHITE, 0),
-        "CandidateHilight": (curses.COLOR_BLUE, curses.COLOR_WHITE, curses.A_BOLD)
+        "CandidateHighlight": (curses.COLOR_BLUE, curses.COLOR_WHITE, curses.A_BOLD)
         },
     }
 
