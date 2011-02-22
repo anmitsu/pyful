@@ -83,6 +83,14 @@ defcmd('finder_start',
        """Start finder of focused directory.""",
        lambda: _filer.finder.start())
 
+defcmd('help',
+       """Invoke command line of help mode.""",
+       lambda: _cmdline.start(mode.Help(), ''))
+
+defcmd('help_all',
+       """Show all command's help.""",
+       lambda: ui.getcomponent("Help").show_all_command())
+
 defcmd('change_looks',
        """Changing look and feel of pyful.""",
        lambda: _cmdline.start(mode.ChangeLooks(), ''))
