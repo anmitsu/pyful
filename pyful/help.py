@@ -23,6 +23,7 @@ import re
 from pyful import message
 from pyful import ui
 from pyful import util
+from pyful import keymap
 
 class Help(ui.InfoBox):
     def __init__(self):
@@ -40,9 +41,22 @@ class Help(ui.InfoBox):
                 if count > 1:
                     line = re.sub(r"^\*+", '-', line, 1)
                 line = count*self.indent + line
-
             info.append(self.indent+line)
         return info
+
+    def find_keybind(self, cmd):
+        from pyful.filer import Directory
+
+        key = []
+        for k, v in Directory.keymap.items():
+            if v == cmd:
+                keybind = keymap.keyhelp[k[1]]
+                if k[0]:
+                    keybind = 'Meta + %s' % keybind
+                if len(k) == 3:
+                    keybind += ' (%s)' % k[2]
+                key.append(self.indent+keybind)
+        return key
 
     def show_command(self, name):
         from pyful.command import commands
@@ -59,6 +73,13 @@ class Help(ui.InfoBox):
         info.append(["Name:", curses.A_BOLD])
         info.append(self.indent+name)
         info.append('')
+
+        key = self.find_keybind(commands[name])
+        if key:
+            info.append(["Keybinds:", curses.A_BOLD])
+            info += key
+            info.append('')
+
         info += self.parse_docstring(doc)
         self.show(info, -1)
 
@@ -73,6 +94,13 @@ class Help(ui.InfoBox):
             info.append(["Name:", curses.A_BOLD])
             info.append(self.indent+name)
             info.append('')
+
+            key = self.find_keybind(commands[name])
+            if key:
+                info.append(["Keybinds:", curses.A_BOLD])
+                info += key
+                info.append('')
+
             info += self.parse_docstring(doc)
             info.append('-'*100)
         self.show(info, -1)
