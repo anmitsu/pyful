@@ -207,9 +207,15 @@ def slicestr(string, start, end):
 
 def abspath(path, basedir=None):
     if basedir:
-        return os.path.normpath(os.path.join(os.path.abspath(basedir), path))
+        return os.path.normpath(os.path.join(os.path.abspath(basedir), expanduser(path)))
     else:
-        return os.path.abspath(path)
+        return os.path.abspath(expanduser(path))
+
+def expanduser(path):
+    if os.path.exists("~"):
+        return path
+    else:
+        return os.path.expanduser(path)
 
 def chdir(path):
     os.chdir(os.path.expanduser(path))
