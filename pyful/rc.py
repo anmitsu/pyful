@@ -237,6 +237,8 @@ myfilerkeymap = {
     (1, KEY_COLON    ): commands['eval'],
     (1, KEY_x        ): commands['mx'],
     (0, KEY_K        ): commands['kill_thread'],
+    (0, KEY_QMARK    ): commands['help'],
+    (1, KEY_QMARK    ): commands['help_all'],
     (0, KEY_c        ): commands['copy'],
     (0, KEY_DC       ): commands['delete'],
     (0, KEY_D        ): commands['delete'],
@@ -326,9 +328,6 @@ myclipboardkeymap = {
     (0, KEY_CTRL_C): lambda: cmdline.clipboard.finish(),
     (0, KEY_ESCAPE): lambda: cmdline.clipboard.finish(),
     (0, KEY_RETURN): lambda: cmdline.clipboard.insert(),
-    (1, KEY_PLUS     ): commands['zoom_in_infobox'],
-    (1, KEY_MINUS    ): commands['zoom_out_infobox'],
-    (1, KEY_EQUAL    ): commands['zoom_normal_infobox'],
     }
 
 mycompletionkeymap = {
@@ -345,9 +344,6 @@ mycompletionkeymap = {
     (0, KEY_CTRL_C): lambda: cmdline.completion.finish(),
     (0, KEY_ESCAPE): lambda: cmdline.completion.finish(),
     (0, KEY_RETURN): lambda: cmdline.completion.insert(),
-    (1, KEY_PLUS     ): commands['zoom_in_infobox'],
-    (1, KEY_MINUS    ): commands['zoom_out_infobox'],
-    (1, KEY_EQUAL    ): commands['zoom_normal_infobox'],
     }
 
 myoutputkeymap = {
@@ -363,9 +359,6 @@ myoutputkeymap = {
     (0, KEY_CTRL_C): lambda: cmdline.output.finish(),
     (0, KEY_ESCAPE): lambda: cmdline.output.finish(),
     (0, KEY_RETURN): lambda: cmdline.output.edit(),
-    (1, KEY_PLUS     ): commands['zoom_in_infobox'],
-    (1, KEY_MINUS    ): commands['zoom_out_infobox'],
-    (1, KEY_EQUAL    ): commands['zoom_normal_infobox'],
     }
 
 mymenukeymap = {
