@@ -712,7 +712,7 @@ class Directory(object):
 
         parent_path = util.unix_dirname(self.path)
         parent_fname = util.unix_basename(self.path)
-        path = util.abspath(os.path.expanduser(path), self.path)
+        path = util.abspath(util.expanduser(path), self.path)
         try:
             util.chdir(path)
         except EnvironmentError as e:
