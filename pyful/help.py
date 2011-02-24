@@ -23,7 +23,6 @@ import re
 from pyful import message
 from pyful import ui
 from pyful import util
-from pyful import keymap
 
 class Help(ui.InfoBox):
     def __init__(self):
@@ -50,7 +49,14 @@ class Help(ui.InfoBox):
         key = []
         for k, v in Directory.keymap.items():
             if v == cmd:
-                keybind = keymap.keyhelp[k[1]]
+                keybind = curses.keyname(k[1])
+                if keybind.isupper() and len(keybind) == 1:
+                    keybind = 'Shift + %s' % keybind.lower()
+                elif keybind.startswith('^'):
+                    keybind = 'Control + %s' % keybind.lower().replace('^', '')
+                elif keybind == ' ':
+                    keybind = 'KEY_SPACE'
+
                 if k[0]:
                     keybind = 'Meta + %s' % keybind
                 if len(k) == 3:
