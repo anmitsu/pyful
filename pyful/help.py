@@ -32,6 +32,7 @@ class Help(ui.InfoBox):
     def parse_docstring(self, doc):
         info = []
         info.append(["Documentation:", curses.A_BOLD])
+        level = 1
         for line in doc.split(os.linesep):
             line = line.strip()
 
@@ -39,8 +40,22 @@ class Help(ui.InfoBox):
                 count = re.match(r"^\*+", line).end()
                 if count > 1:
                     line = re.sub(r"^\*+", '-', line, 1)
-                line = count*self.indent + line
-            info.append(self.indent+line)
+                line = (count+level)*self.indent + line
+                info.append(line)
+            elif line.startswith('='):
+                count = re.match(r"^=+", line).end()
+                line = re.sub(r"^=+", '', line, 1).strip()
+                line = (count-1)*self.indent + line
+                info.append('')
+                info.append([line, curses.A_BOLD])
+                level = count
+            elif line.startswith('$'):
+                info.append('')
+                line = line.replace('$', '', 1).strip()
+                info.append((level+1)*self.indent+line)
+                info.append('')
+            else:
+                info.append(level*self.indent+line)
         return info
 
     def find_keybind(self, cmd):
