@@ -484,7 +484,8 @@ defcmd('mark_clear',
 
 defcmd('mark_source',
        """Mark source files in current directory.
-       Regexp of filter: %s""" % _source_filter.pattern,
+       Regexp of filter: %s
+       """ % _source_filter.pattern,
        lambda: _filer.dir.mark(_source_filter))
 
 defcmd('mark_archive',
@@ -546,7 +547,15 @@ defcmd('mask_video',
        lambda: _filer.dir.mask(_video_filter))
 
 defcmd('copy',
-       """Invoke command line of copy mode.""",
+       """Invoke command line of copy mode.
+       = Example:
+       File copy from ~/example/file.txt to ~/text/file.txt.
+       # Invoke copy mode by `copy' command.
+       # Specify file of copy source:
+       $ Copy from: ~/example/file.txt
+       # Specify its destination:
+       $ Copy from ~/example/file.txt to: ~/text/file.txt
+       """,
        lambda: _copy())
 
 defcmd('delete',
@@ -554,7 +563,17 @@ defcmd('delete',
        lambda: _delete())
 
 defcmd('move',
-       """Invoke command line of move mode.""",
+       """Invoke command line of move mode.
+       = Example:
+       File move from ~/example/file.txt to ~/text/file.txt.
+       # Invoke copy mode by `move' command.
+       # Specify file of move source:
+       $ Move from: ~/example/file.txt
+       # Specify its destination:
+       $ Move from ~/example/file.txt to: ~/text/file.txt
+       If EXDEV exception (device in move source and move destination is different)
+       occur, after it copy from source to destination, Pyful delete source file.
+       """,
        lambda: _move())
 
 defcmd('link',
@@ -634,7 +653,16 @@ defcmd('mkdir',
        lambda: _cmdline.start(mode.Mkdir(), ''))
 
 defcmd('replace',
-       """Invoke command line of replace mode.""",
+       """Invoke command line of replace mode.
+       The replace mode renames mark files with regexp.
+       = Example:
+       The extension of mark files is renamed from '.py' to '.txt'.
+       # Invoke replace mode by `replace' command.
+       # The match pattern specify with regexp:
+       $ Replace pattern: \.py$
+       # Specify the replacing string:
+       $ Replace regexp \.py$ with: .txt
+       """,
        lambda: _cmdline.start(mode.Replace(), ''))
 
 defcmd('newfile',
