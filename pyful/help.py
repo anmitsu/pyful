@@ -33,6 +33,7 @@ class Help(ui.InfoBox):
         info = []
         info.append(["Documentation:", curses.A_BOLD])
         level = 1
+        number = 1
         for line in doc.split(os.linesep):
             line = line.strip()
 
@@ -49,6 +50,11 @@ class Help(ui.InfoBox):
                 info.append('')
                 info.append([line, curses.A_BOLD])
                 level = count
+            elif line.startswith('#'):
+                line = line.replace('#', '', 1).strip()
+                line = '%s. %s' % (number, line)
+                info.append(level*self.indent+line)
+                number += 1
             elif line.startswith('$'):
                 info.append('')
                 line = line.replace('$', '', 1).strip()
