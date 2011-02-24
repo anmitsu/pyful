@@ -143,6 +143,8 @@ class InfoBox(Component):
             (0, KEY_CTRL_D): lambda: self.pagedown(),
             (0, KEY_CTRL_P): lambda: self.mvcursor(-1),
             (0, KEY_UP    ): lambda: self.mvcursor(-1),
+            (1, KEY_n     ): lambda: self.mvscroll(1),
+            (1, KEY_p     ): lambda: self.mvscroll(-1),
             (1, KEY_v     ): lambda: self.pageup(),
             (0, KEY_CTRL_U): lambda: self.pageup(),
             (0, KEY_CTRL_G): lambda: self.hide(),
@@ -190,6 +192,10 @@ class InfoBox(Component):
         self._scrolltop = 0
         self._highlight = None
         self._info = None
+
+    def mvscroll(self, x):
+        self._scrolltop += x
+        self._cursor = self._scrolltop
 
     def mvcursor(self, x):
         if not self._info:
@@ -249,11 +255,11 @@ class InfoBox(Component):
         elif self._cursor < -1:
             self._cursor = size - 1
 
-        if (self._cursor < self._scrolltop or self._cursor > self._scrolltop + ((height-1)*maxrow)) and not self._cursor == -1:
+        if (self._cursor < self._scrolltop or self._cursor > self._scrolltop + ((height-1)*maxrow)):
             self._scrolltop = (self._cursor//(height*maxrow)) * (height*maxrow)
             if self._scrolltop < 0:
                 self._scrolltop = 0
-            self.win.erase()
+        self.win.erase()
 
         self.win.box()
         self.win.move(0, 2)
