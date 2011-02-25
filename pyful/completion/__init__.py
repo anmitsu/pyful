@@ -206,8 +206,7 @@ class Completion(ui.InfoBox):
             self.hide()
         else:
             self.cmdline.history.hide()
-            info = [ui.InfoBoxContext(c, highlight=self.parser.nowstr,
-                                      highlightattr=look.colors['CandidateHighlight']) for c in candidate]
+            info = [ui.InfoBoxContext(c, highlight=self.parser.nowstr) for c in candidate]
             self.show(info)
             self.maxrow = self.get_maxrow()
 

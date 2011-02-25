@@ -291,7 +291,7 @@ class InfoBox(Component):
         self.win.noutrefresh()
 
 class InfoBoxContext(object):
-    def __init__(self, string, highlight=None, attr=0, highlightattr=0):
+    def __init__(self, string, highlight=None, attr=0, highlightattr=look.colors['CandidateHighlight']):
         self.string = string
         self.highlight = highlight
         self.attr = attr

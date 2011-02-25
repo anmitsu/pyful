@@ -422,8 +422,7 @@ class History(ui.InfoBox):
         info = []
         for item in self.index(self.cmdline.mode.__class__.__name__):
             if self.cmdline.string in item:
-                info.insert(0, ui.InfoBoxContext(item, highlight=self.cmdline.string,
-                                                 highlightattr=look.colors['CandidateHighlight']))
+                info.insert(0, ui.InfoBoxContext(item, highlight=self.cmdline.string))
         if info:
             self.show(info, pos=-1)
         else:
