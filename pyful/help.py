@@ -41,8 +41,8 @@ class Help(ui.InfoBox):
                 count = re.match(r"^\*+", line).end()
                 if count > 1:
                     line = re.sub(r"^\*+", '-', line, 1)
-                line = (count+level)*self.indent + line
-                info.append(ui.InfoBoxContext(line))
+                line = (count-1+level)*self.indent + line
+                info.append(ui.InfoBoxContext(line, histr="[*-]", hiattr=curses.A_BOLD, rematch=True))
             elif line.startswith('='):
                 count = re.match(r"^=+", line).end()
                 line = re.sub(r"^=+", '', line, 1).strip()
@@ -54,7 +54,7 @@ class Help(ui.InfoBox):
                 line = line.replace('#', '', 1).strip()
                 line = '%s. %s' % (number, line)
                 info.append(ui.InfoBoxContext(level*self.indent+line,
-                                              highlight=str(number), highlightattr=curses.A_BOLD))
+                                              histr=str(number), hiattr=curses.A_BOLD))
                 number += 1
             elif line.startswith('$'):
                 info.append(ui.InfoBoxContext(''))
