@@ -53,7 +53,8 @@ class Help(ui.InfoBox):
             elif line.startswith('#'):
                 line = line.replace('#', '', 1).strip()
                 line = '%s. %s' % (number, line)
-                info.append(ui.InfoBoxContext(level*self.indent+line))
+                info.append(ui.InfoBoxContext(level*self.indent+line,
+                                              highlight=str(number), highlightattr=curses.A_BOLD))
                 number += 1
             elif line.startswith('$'):
                 info.append(ui.InfoBoxContext(''))
