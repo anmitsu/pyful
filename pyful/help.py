@@ -31,7 +31,7 @@ class Help(ui.InfoBox):
 
     def parse_docstring(self, doc):
         info = []
-        info.append(["Documentation:", curses.A_BOLD])
+        info.append(ui.InfoBoxContext("Documentation:", attr=curses.A_BOLD))
         level = 1
         number = 1
         for line in doc.split(os.linesep):
@@ -42,26 +42,26 @@ class Help(ui.InfoBox):
                 if count > 1:
                     line = re.sub(r"^\*+", '-', line, 1)
                 line = (count+level)*self.indent + line
-                info.append(line)
+                info.append(ui.InfoBoxContext(line))
             elif line.startswith('='):
                 count = re.match(r"^=+", line).end()
                 line = re.sub(r"^=+", '', line, 1).strip()
                 line = (count-1)*self.indent + line
-                info.append('')
-                info.append([line, curses.A_BOLD])
+                info.append(ui.InfoBoxContext(''))
+                info.append(ui.InfoBoxContext(line, attr=curses.A_BOLD))
                 level = count
             elif line.startswith('#'):
                 line = line.replace('#', '', 1).strip()
                 line = '%s. %s' % (number, line)
-                info.append(level*self.indent+line)
+                info.append(ui.InfoBoxContext(level*self.indent+line))
                 number += 1
             elif line.startswith('$'):
-                info.append('')
+                info.append(ui.InfoBoxContext(''))
                 line = line.replace('$', '', 1).strip()
-                info.append((level+1)*self.indent+line)
-                info.append('')
+                info.append(ui.InfoBoxContext((level+1)*self.indent+line))
+                info.append(ui.InfoBoxContext(''))
             else:
-                info.append(level*self.indent+line)
+                info.append(ui.InfoBoxContext(level*self.indent+line))
         return info
 
     def find_keybind(self, cmd):
@@ -82,7 +82,7 @@ class Help(ui.InfoBox):
                     keybind = 'Meta + %s' % keybind
                 if len(k) == 3:
                     keybind += ' (%s)' % k[2]
-                key.append(self.indent+keybind)
+                key.append(ui.InfoBoxContext(self.indent+keybind))
         return key
 
     def show_command(self, name):
@@ -97,15 +97,15 @@ class Help(ui.InfoBox):
             return message.error("`%s' hasn't documentation" % name)
 
         info = []
-        info.append(["Name:", curses.A_BOLD])
-        info.append(self.indent+name)
-        info.append('')
+        info.append(ui.InfoBoxContext("Name:", attr=curses.A_BOLD))
+        info.append(ui.InfoBoxContext(self.indent+name))
+        info.append(ui.InfoBoxContext(''))
 
         key = self.find_keybind(commands[name])
         if key:
-            info.append(["Keybinds:", curses.A_BOLD])
+            info.append(ui.InfoBoxContext("Keybinds:", attr=curses.A_BOLD))
             info += key
-            info.append('')
+            info.append(ui.InfoBoxContext(''))
 
         info += self.parse_docstring(doc)
         self.show(info, -1)
@@ -118,16 +118,16 @@ class Help(ui.InfoBox):
             doc = cmd.__doc__
             if not doc:
                 continue
-            info.append(["Name:", curses.A_BOLD])
-            info.append(self.indent+name)
-            info.append('')
+            info.append(ui.InfoBoxContext("Name:", attr=curses.A_BOLD))
+            info.append(ui.InfoBoxContext(self.indent+name))
+            info.append(ui.InfoBoxContext(''))
 
             key = self.find_keybind(commands[name])
             if key:
-                info.append(["Keybinds:", curses.A_BOLD])
+                info.append(ui.InfoBoxContext("Keybinds:", attr=curses.A_BOLD))
                 info += key
-                info.append('')
+                info.append(ui.InfoBoxContext(''))
 
             info += self.parse_docstring(doc)
-            info.append('-'*100)
+            info.append(ui.InfoBoxContext('-'*100))
         self.show(info, -1)

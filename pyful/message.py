@@ -145,7 +145,7 @@ class Confirm(object):
         self.cursor = 0
         self.result = None
         if isinstance(msglist, list):
-            self.box.show(msglist, -1)
+            self.box.show([ui.InfoBoxContext(msg) for msg in msglist], -1)
         self.active = True
         Confirm.keymap = {
             (0, KEY_CTRL_F): lambda: self.mvcursor(1),

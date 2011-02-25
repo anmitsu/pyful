@@ -133,7 +133,6 @@ class InfoBox(Component):
         self._title = title
         self._info = None
 
-        self._highlight = None
         self._cursor = 0
         self._scrolltop = 0
         self.keymap = {
@@ -178,19 +177,17 @@ class InfoBox(Component):
     def cursor(self):
         return self._cursor
 
-    def show(self, info, pos=0, highlight=None):
+    def show(self, info, pos=0):
         self.win.erase()
         self.active = True
         self._cursor = pos
         self._scrolltop = 0
-        self._highlight = highlight
         self._info = info
 
     def hide(self):
         self.active = False
         self._cursor = 0
         self._scrolltop = 0
-        self._highlight = None
         self._info = None
 
     def mvscroll(self, x):
@@ -280,29 +277,36 @@ class InfoBox(Component):
             if line >= height:
                 break
 
-            if isinstance(self._info[i], list):
-                item = self._info[i][0]
-                attr = self._info[i][1]
-            else:
-                item = self._info[i]
-                attr = 0
-            item = util.mbs_ljust(item, width//maxrow-1)
-
             self.win.move(line+1, row * (width//maxrow) + 2)
+
+            info = self._info[i]
             if self._cursor == i:
-                self.win.addstr(item, curses.A_REVERSE | attr)
+                info.attr += curses.A_REVERSE
+                info.addstr(self.win, width//maxrow-1)
+                info.attr -= curses.A_REVERSE
             else:
-                if self._highlight:
-                    reg = re.compile("(%s)" % re.escape(self._highlight))
-                    for iitem in reg.split(item):
-                        if iitem == self._highlight:
-                            self.win.addstr(iitem, look.colors['CandidateHighlight'])
-                        else:
-                            self.win.addstr(iitem, attr)
-                else:
-                    self.win.addstr(item, attr)
+                info.addstr(self.win, width//maxrow-1)
+
             row += 1
         self.win.noutrefresh()
+
+class InfoBoxContext(object):
+    def __init__(self, string, highlight=None, attr=0):
+        self.string = string
+        self.highlight = highlight
+        self.attr = attr
+
+    def addstr(self, win, width):
+        string = util.mbs_ljust(self.string, width)
+        if self.highlight:
+            r = re.compile(r"(%s)" % re.escape(self.highlight))
+            for s in r.split(string):
+                if s == self.highlight:
+                    win.addstr(s, self.attr | look.colors['CandidateHighlight'])
+                else:
+                    win.addstr(s, self.attr)
+        else:
+            win.addstr(string, self.attr)
 
 class ContextBox(Component):
     def __init__(self):

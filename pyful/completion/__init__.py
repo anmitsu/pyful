@@ -76,7 +76,7 @@ class Completion(ui.InfoBox):
     def get_maxrow(self):
         length = 1
         for item in self.info:
-            width = util.termwidth(item)
+            width = util.termwidth(item.string)
             if width > length:
                 length = width
         maxrow = ui.getcomponent("Stdscr").win.getmaxyx()[1] // (length+4)
@@ -87,7 +87,7 @@ class Completion(ui.InfoBox):
 
     def insert(self, string=None):
         if string is None:
-            string = self.cursor_item()
+            string = self.cursor_item().string
 
         try:
             util.U(string)
@@ -205,7 +205,8 @@ class Completion(ui.InfoBox):
             self.hide()
         else:
             self.cmdline.history.hide()
-            self.show(candidate, highlight=self.cmdline.string)
+            info = [ui.InfoBoxContext(c, self.parser.nowstr) for c in candidate]
+            self.show(info)
             self.maxrow = self.get_maxrow()
 
     def finish(self):

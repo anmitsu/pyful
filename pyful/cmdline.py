@@ -402,8 +402,8 @@ class History(ui.InfoBox):
         if not li or self.info is None:
             return
 
-        if self.cursor_item() in li:
-            li.remove(self.cursor_item())
+        if self.cursor_item().string in li:
+            li.remove(self.cursor_item().string)
         x = self.cursor
         if self.source:
             self.cmdline.string = self.source
@@ -422,9 +422,9 @@ class History(ui.InfoBox):
         info = []
         for item in self.index(self.cmdline.mode.__class__.__name__):
             if self.cmdline.string in item:
-                info.insert(0, item)
+                info.insert(0, ui.InfoBoxContext(item, self.cmdline.string))
         if info:
-            self.show(info, pos=-1, highlight=self.cmdline.string)
+            self.show(info, pos=-1)
         else:
             self.hide()
 
@@ -439,7 +439,7 @@ class History(ui.InfoBox):
             self.cmdline.cursor = util.mbslen(self.cmdline.string)
             self.source = None
         else:
-            item = self.cursor_item()
+            item = self.cursor_item().string
             if item:
                 self.cmdline.string = item
                 self.cmdline.cursor = util.mbslen(self.cmdline.string)
@@ -477,7 +477,7 @@ class Clipboard(ui.InfoBox):
             return
 
     def insert(self):
-        item = self.cursor_item()
+        item = self.cursor_item().string
         self.cmdline.string = util.insertstr(self.cmdline.string, item, self.cmdline.cursor)
         self.cmdline.cursor += util.mbslen(item)
         self.hide()
@@ -486,7 +486,7 @@ class Clipboard(ui.InfoBox):
     def delete(self):
         if not self.clip:
             return
-        self.__class__.clip.remove(self.cursor_item())
+        self.__class__.clip.remove(self.cursor_item().string)
         c = self.cursor
         self.restart()
         self.setcursor(c)
@@ -519,7 +519,7 @@ class Clipboard(ui.InfoBox):
     def start(self):
         info = []
         for item in self.clip:
-            info.insert(0, item)
+            info.insert(0, ui.InfoBoxContext(item))
         if info:
             self.cmdline.history.hide()
             self.show(info)
@@ -539,7 +539,7 @@ class Output(ui.InfoBox):
 
     def edit(self):
         try:
-            li = self.cursor_item().split(":")
+            li = self.cursor_item().string.split(":")
             fname = li[0]
             lnum = li[1]
             process.spawn("%s +%s %s" % (Pyful.environs['EDITOR'], lnum, fname))
@@ -559,7 +559,7 @@ class Output(ui.InfoBox):
         if info:
             self.cmdline.history.hide()
             reg = re.compile("[\r\t]")
-            self.show([reg.sub("", item) for item in info.split(os.linesep) if item != ''])
+            self.show([ui.InfoBoxContext(reg.sub("", item)) for item in info.split(os.linesep) if item != ''])
 
     def terminal(self):
         pass
