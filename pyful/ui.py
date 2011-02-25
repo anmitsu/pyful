@@ -291,10 +291,11 @@ class InfoBox(Component):
         self.win.noutrefresh()
 
 class InfoBoxContext(object):
-    def __init__(self, string, highlight=None, attr=0):
+    def __init__(self, string, highlight=None, attr=0, highlightattr=0):
         self.string = string
         self.highlight = highlight
         self.attr = attr
+        self.highlightattr = highlightattr
 
     def addstr(self, win, width):
         string = util.mbs_ljust(self.string, width)
@@ -302,7 +303,7 @@ class InfoBoxContext(object):
             r = re.compile(r"(%s)" % re.escape(self.highlight))
             for s in r.split(string):
                 if s == self.highlight:
-                    win.addstr(s, self.attr | look.colors['CandidateHighlight'])
+                    win.addstr(s, self.attr | self.highlightattr)
                 else:
                     win.addstr(s, self.attr)
         else:
