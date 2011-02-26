@@ -48,41 +48,41 @@ class Help(ui.InfoBox):
                 count = re.match(r"^\*+", line).end()
                 if count > 1:
                     line = re.sub(r"^\*+", '-', line, 1)
-                line = (count-1+level)*self.indent + line
+                indent = (count-1+level)*self.indent
                 attr = 0
             elif line.startswith('='):
                 count = re.match(r"^=+", line).end()
                 line = re.sub(r"^=+", '', line, 1).strip()
-                line = (count-1)*self.indent + line
+                indent = (count-1)*self.indent
                 attr = curses.A_BOLD
                 info.append(ui.InfoBoxContext(''))
                 level = count
             elif line.startswith('#'):
                 line = line.replace('#', '', 1).strip()
                 line = '%s. %s' % (number, line)
-                line = level*self.indent+line
+                indent = level*self.indent
                 attr = 0
                 number += 1
             elif line.startswith('$'):
                 info.append(ui.InfoBoxContext(''))
                 line = line.replace('$', '', 1).strip()
-                line = (level+1)*self.indent+line
+                indent = (level+1)*self.indent
                 attr = 0
                 linebreak = True
             else:
-                line = level*self.indent+line
+                indent = level*self.indent
                 attr = 0
 
             if self.re_underline.search(line):
-                info.append(AttributeContext(line, attr=attr, attrtype='underline'))
+                info.append(AttributeContext(line, indent, attr=attr, attrtype='underline'))
             elif self.re_bold.search(line):
-                info.append(AttributeContext(line, attr=attr, attrtype='bold'))
+                info.append(AttributeContext(line, indent, attr=attr, attrtype='bold'))
             elif self.re_reverse.search(line):
-                info.append(AttributeContext(line, attr=attr, attrtype='reverse'))
+                info.append(AttributeContext(line, indent, attr=attr, attrtype='reverse'))
             elif self.re_prompt.search(line):
-                info.append(AttributeContext(line, attr=attr, attrtype='prompt'))
+                info.append(AttributeContext(line, indent, attr=attr, attrtype='prompt'))
             else:
-                info.append(ui.InfoBoxContext(line, attr=attr))
+                info.append(ui.InfoBoxContext(indent+line, attr=attr))
 
             if linebreak:
                 info.append(ui.InfoBoxContext(''))
@@ -157,8 +157,9 @@ class Help(ui.InfoBox):
         self.show(info, -1)
 
 class AttributeContext(ui.InfoBoxContext):
-    def __init__(self, string, attr=0, attrtype='bold'):
+    def __init__(self, string, indent, attr=0, attrtype='bold'):
         ui.InfoBoxContext.__init__(self, string, attr=attr)
+        self.indent = indent
         if attrtype == 'bold':
             self.hiattr = curses.A_BOLD
             self.rematch = Help.re_bold
@@ -177,8 +178,9 @@ class AttributeContext(ui.InfoBoxContext):
             self.symbol = '$'
 
     def addstr(self, win, width):
-        string = util.mbs_ljust(self.string, width)
+        string = util.mbs_ljust(self.string, width-len(self.indent))
         symbol = self.symbol
+        win.addstr(self.indent, self.attr)
         for s in self.rematch.split(string):
             if s.startswith(symbol) and s.endswith(symbol):
                 s = s.replace('\%s' % symbol, symbol)
