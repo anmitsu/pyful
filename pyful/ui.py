@@ -308,19 +308,3 @@ class InfoBoxContext(object):
                     win.addstr(s, self.attr)
         else:
             win.addstr(string, self.attr)
-
-class ContextBox(Component):
-    def __init__(self):
-        self.win = None
-        self._cursor = 0
-        self._scrolltop = 0
-        self._active = 0
-        self._contents = None
-        self.keymap = {}
-
-    def input (self, meta, key):
-        if (meta, key) in self.keymap:
-            self.keymap[(meta, key)]()
-
-    def view(self):
-        pass
