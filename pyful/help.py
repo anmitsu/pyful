@@ -26,10 +26,10 @@ from pyful import ui
 from pyful import util
 
 class Help(ui.InfoBox):
-    re_underline = re.compile(r"((?:[^+\\]|\\.)*)\s(\+(?:[^+\\]|\\.)*\+)\s")
-    re_bold = re.compile(r"((?:[^*\\]|\\.)*)\s(\*(?:[^*\\]|\\.)*\*)\s")
-    re_reverse = re.compile(r"((?:[^@\\]|\\.)*)\s(@(?:[^@\\]|\\.)*@)\s")
-    re_prompt = re.compile(r"((?:[^$\\]|\\.)*)\s(\$(?:[^$\\]|\\.)*\$)\s")
+    re_underline = re.compile(r"((?:[^+\\]|\\.)*)(?:\s|^)(\+(?:[^+\\]|\\.)*\+)(?:\s|$)")
+    re_bold = re.compile(r"((?:[^*\\]|\\.)*)(?:\s|^)(\*(?:[^*\\]|\\.)*\*)(?:\s|$)")
+    re_reverse = re.compile(r"((?:[^@\\]|\\.)*)(?:\s|^)(@(?:[^@\\]|\\.)*@)(?:\s|$)")
+    re_prompt = re.compile(r"((?:[^$\\]|\\.)*)(?:\s|^)(\$(?:[^$\\]|\\.)*\$)(?:\s|$)")
 
     def __init__(self):
         ui.InfoBox.__init__(self, "Help")
