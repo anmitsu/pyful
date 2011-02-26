@@ -49,7 +49,7 @@ def resize():
     getcomponent("Cmdscr").resize()
     getcomponent("Titlebar").resize()
     getcomponent("Filer").workspace.resize()
-    getcomponent("Message").messagebox.resize()
+    getcomponent("MessageBox").resize()
     InfoBox.resize()
 
 def refresh():
@@ -63,8 +63,8 @@ def start_curses():
     CmdlineScreen()
     Titlebar()
     InfoBox.resize()
+    getcomponent("MessageBox").resize()
     getcomponent("Filer").default_init()
-    getcomponent("Message").init_messagebox()
 
 class ComponentDuplication(Exception):
     pass

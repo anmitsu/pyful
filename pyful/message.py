@@ -52,10 +52,8 @@ class Message(ui.Component):
         ui.Component.__init__(self, "Message")
         self.msg = []
         self.timer = None
-        self.__class__.instance = self
-
-    def init_messagebox(self):
         self.messagebox = MessageBox()
+        self.__class__.instance = self
 
     def start_timer(self, timex):
         if self.timer:
@@ -65,8 +63,8 @@ class Message(ui.Component):
 
     def puts(self, string, timex=3):
         self.active = True
-        msg = (re.sub(r"[\n\r\t]", "", util.U(string)), look.colors['PutsMessage'])
-        self.msg.insert(0, msg)
+        msg = re.sub(r"[\n\r\t]", "", util.U(string))
+        self.msg.insert(0, ui.InfoBoxContext(msg, attr=look.colors['PutsMessage']))
         if self.history < len(self.msg):
             self.msg.pop()
         self.view()
@@ -75,8 +73,8 @@ class Message(ui.Component):
 
     def error(self, string, timex=3):
         self.active = True
-        msg = (re.sub(r"[\n\r\t]", "", util.U(string)), look.colors['ErrorMessage'])
-        self.msg.insert(0, msg)
+        msg = re.sub(r"[\n\r\t]", "", util.U(string))
+        self.msg.insert(0, ui.InfoBoxContext(msg, attr=look.colors['ErrorMessage']))
         if self.history < len(self.msg):
             self.msg.pop()
         self.view()
@@ -96,7 +94,7 @@ class Message(ui.Component):
         return cnf.result
 
     def view_histroy(self):
-        self.confirm("Message history", ["Close"], [m[0] for m in self.msg], -1)
+        self.confirm("Message history", ["Close"], [m.string for m in self.msg], -1)
 
     def hide(self):
         self.active = False
@@ -104,36 +102,20 @@ class Message(ui.Component):
     def view(self):
         if ui.getcomponent("Cmdline").is_active or ui.getcomponent("Filer").finder.active:
             return
-        self.messagebox.view(self.msg)
+        self.messagebox.show(self.msg, -1)
+        self.messagebox.view()
 
-class MessageBox(object):
+class MessageBox(ui.InfoBox):
     height = 2
 
     def __init__(self):
-        (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
-        self.win = curses.newwin(self.height+2, x, y-self.height-4, 0)
-        self.win.bkgd(look.colors['MessageWindow'])
+        ui.InfoBox.__init__(self, "MessageBox")
+        self.win = None
 
     def resize(self):
         (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
         self.win = curses.newwin(self.height+2, x, y-self.height-4, 0)
         self.win.bkgd(look.colors['MessageWindow'])
-
-    def view(self, msglist):
-        if not msglist:
-            return
-        self.win.box()
-        size = len(msglist)
-        (y,x) = self.win.getmaxyx()
-        self.win.move(0, 2)
-        self.win.addstr("Messages(%s)" % size, curses.A_BOLD|curses.A_UNDERLINE)
-        (y,x) = self.win.getmaxyx()
-        for i in range(0, size):
-            if self.height <= i: break
-            self.win.move(i+1, 2)
-            msg = msglist[i]
-            self.win.addstr(util.mbs_ljust(msg[0], x-4), msg[1])
-        self.win.noutrefresh()
 
 class Confirm(object):
     keymap = {}
