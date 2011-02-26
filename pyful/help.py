@@ -28,6 +28,7 @@ from pyful import util
 class Help(ui.InfoBox):
     re_underline = re.compile(r"((?:[^+\\]|\\.)*)\s(\+(?:[^+\\]|\\.)*\+)\s")
     re_bold = re.compile(r"((?:[^*\\]|\\.)*)\s(\*(?:[^*\\]|\\.)*\*)\s")
+    re_reverse = re.compile(r"((?:[^@\\]|\\.)*)\s(@(?:[^@\\]|\\.)*@)\s")
     re_prompt = re.compile(r"((?:[^$\\]|\\.)*)\s(\$(?:[^$\\]|\\.)*\$)\s")
 
     def __init__(self):
@@ -76,6 +77,8 @@ class Help(ui.InfoBox):
                 info.append(AttributeContext(line, attr=attr, attrtype='underline'))
             elif self.re_bold.search(line):
                 info.append(AttributeContext(line, attr=attr, attrtype='bold'))
+            elif self.re_reverse.search(line):
+                info.append(AttributeContext(line, attr=attr, attrtype='reverse'))
             elif self.re_prompt.search(line):
                 info.append(AttributeContext(line, attr=attr, attrtype='prompt'))
             else:
@@ -164,6 +167,10 @@ class AttributeContext(ui.InfoBoxContext):
             self.hiattr = curses.A_UNDERLINE
             self.rematch = Help.re_underline
             self.symbol = '+'
+        elif attrtype == 'reverse':
+            self.hiattr = curses.A_REVERSE
+            self.rematch = Help.re_reverse
+            self.symbol = '@'
         elif attrtype == 'prompt':
             self.hiattr = look.colors['CmdlinePrompt']
             self.rematch = Help.re_prompt
