@@ -26,34 +26,32 @@ from pyful import util
 from pyful.keymap import *
 
 def puts(string, timex=3):
-    Message.instance.puts(string, timex)
+    ui.getcomponent("Message").puts(string, timex)
 
 def error(string, timex=3):
-    Message.instance.error(string, timex)
+    ui.getcomponent("Message").error(string, timex)
 
 def exception(except_cls):
-    Message.instance.exception(except_cls)
+    ui.getcomponent("Message").exception(except_cls)
 
 def confirm(msg, options, msglist=None, position=0):
-    return Message.instance.confirm(msg, options, msglist, position)
+    return ui.getcomponent("Message").confirm(msg, options, msglist, position)
 
 def timerkill():
-    t = Message.instance.timer
+    t = ui.getcomponent("Message").timer
     if t: t.cancel()
 
 def viewhistroy():
-    Message.instance.view_histroy()
+    ui.getcomponent("Message").view_histroy()
 
 class Message(ui.Component):
     history = 100
-    instance = None
 
     def __init__(self):
         ui.Component.__init__(self, "Message")
         self.msg = []
         self.timer = None
         self.messagebox = MessageBox()
-        self.__class__.instance = self
 
     def start_timer(self, timex):
         if self.timer:
