@@ -20,11 +20,16 @@ import curses
 import os
 import re
 
+from pyful import look
 from pyful import message
 from pyful import ui
 from pyful import util
 
 class Help(ui.InfoBox):
+    re_underline = re.compile(r"((?:[^+\\]|\\.)*)\s(\+(?:[^+\\]|\\.)*\+)\s")
+    re_bold = re.compile(r"((?:[^*\\]|\\.)*)\s(\*(?:[^*\\]|\\.)*\*)\s")
+    re_prompt = re.compile(r"((?:[^$\\]|\\.)*)\s(\$(?:[^$\\]|\\.)*\$)\s")
+
     def __init__(self):
         ui.InfoBox.__init__(self, "Help")
         self.indent = ' ' * 4
@@ -36,33 +41,48 @@ class Help(ui.InfoBox):
         number = 1
         for line in doc.split(os.linesep):
             line = line.strip()
+            linebreak = False
 
             if line.startswith('*'):
                 count = re.match(r"^\*+", line).end()
                 if count > 1:
                     line = re.sub(r"^\*+", '-', line, 1)
                 line = (count-1+level)*self.indent + line
-                info.append(ui.InfoBoxContext(line, histr="[*-]", hiattr=curses.A_BOLD, rematch=True))
+                attr = 0
             elif line.startswith('='):
                 count = re.match(r"^=+", line).end()
                 line = re.sub(r"^=+", '', line, 1).strip()
                 line = (count-1)*self.indent + line
+                attr = curses.A_BOLD
                 info.append(ui.InfoBoxContext(''))
-                info.append(ui.InfoBoxContext(line, attr=curses.A_BOLD))
                 level = count
             elif line.startswith('#'):
                 line = line.replace('#', '', 1).strip()
                 line = '%s. %s' % (number, line)
-                info.append(ui.InfoBoxContext(level*self.indent+line,
-                                              histr=str(number), hiattr=curses.A_BOLD))
+                line = level*self.indent+line
+                attr = 0
                 number += 1
             elif line.startswith('$'):
                 info.append(ui.InfoBoxContext(''))
                 line = line.replace('$', '', 1).strip()
-                info.append(ui.InfoBoxContext((level+1)*self.indent+line))
-                info.append(ui.InfoBoxContext(''))
+                line = (level+1)*self.indent+line
+                attr = 0
+                linebreak = True
             else:
-                info.append(ui.InfoBoxContext(level*self.indent+line))
+                line = level*self.indent+line
+                attr = 0
+
+            if self.re_underline.search(line):
+                info.append(AttributeContext(line, attr=attr, attrtype='underline'))
+            elif self.re_bold.search(line):
+                info.append(AttributeContext(line, attr=attr, attrtype='bold'))
+            elif self.re_prompt.search(line):
+                info.append(AttributeContext(line, attr=attr, attrtype='prompt'))
+            else:
+                info.append(ui.InfoBoxContext(line, attr=attr))
+
+            if linebreak:
+                info.append(ui.InfoBoxContext(''))
         return info
 
     def find_keybind(self, cmd):
@@ -132,3 +152,29 @@ class Help(ui.InfoBox):
             info += self.parse_docstring(doc)
             info.append(ui.InfoBoxContext('-'*100))
         self.show(info, -1)
+
+class AttributeContext(ui.InfoBoxContext):
+    def __init__(self, string, attr=0, attrtype='bold'):
+        ui.InfoBoxContext.__init__(self, string, attr=attr)
+        if attrtype == 'bold':
+            self.hiattr = curses.A_BOLD
+            self.rematch = Help.re_bold
+            self.symbol = '*'
+        elif attrtype == 'underline':
+            self.hiattr = curses.A_UNDERLINE
+            self.rematch = Help.re_underline
+            self.symbol = '+'
+        elif attrtype == 'prompt':
+            self.hiattr = look.colors['CmdlinePrompt']
+            self.rematch = Help.re_prompt
+            self.symbol = '$'
+
+    def addstr(self, win, width):
+        string = util.mbs_ljust(self.string, width)
+        symbol = self.symbol
+        for s in self.rematch.split(string):
+            if s.startswith(symbol) and s.endswith(symbol):
+                s = s.replace('\%s' % symbol, symbol)
+                win.addstr(s.strip(symbol), self.attr | self.hiattr)
+            else:
+                win.addstr(s, self.attr)
