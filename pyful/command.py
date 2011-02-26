@@ -550,11 +550,11 @@ defcmd('copy',
        """Invoke command line of copy mode.
        = Example:
        File copy from ~/example/file.txt to ~/text/file.txt.
-       # Invoke copy mode by `copy' command.
+       # Invoke copy mode by  +copy+  command.
        # Specify file of copy source:
-       $ Copy from: ~/example/file.txt
+       $  $Copy from:$  ~/example/file.txt
        # Specify its destination:
-       $ Copy from ~/example/file.txt to: ~/text/file.txt
+       $  $Copy from ~/example/file.txt to:$  ~/text/file.txt
        """,
        lambda: _copy())
 
@@ -566,11 +566,11 @@ defcmd('move',
        """Invoke command line of move mode.
        = Example:
        File move from ~/example/file.txt to ~/text/file.txt.
-       # Invoke copy mode by `move' command.
+       # Invoke copy mode by  +move+  command.
        # Specify file of move source:
-       $ Move from: ~/example/file.txt
+       $  $Move from:$  ~/example/file.txt
        # Specify its destination:
-       $ Move from ~/example/file.txt to: ~/text/file.txt
+       $  $Move from ~/example/file.txt to:$  ~/text/file.txt
        If EXDEV exception (device in move source and move destination is different)
        occur, after it copy from source to destination, Pyful delete source file.
        """,
@@ -657,11 +657,11 @@ defcmd('replace',
        The replace mode renames mark files with regexp.
        = Example:
        The extension of mark files is renamed from '.py' to '.txt'.
-       # Invoke replace mode by `replace' command.
+       # Invoke replace mode by  +replace+  command.
        # The match pattern specify with regexp:
-       $ Replace pattern: \.py$
+       $  $Replace pattern:$  \.py$
        # Specify the replacing string:
-       $ Replace regexp \.py$ with: .txt
+       $  $Replace regexp \.py\$ with:$  .txt
        """,
        lambda: _cmdline.start(mode.Replace(), ''))
 
