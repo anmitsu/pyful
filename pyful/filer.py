@@ -494,7 +494,7 @@ class Directory(object):
         self.pathhistory_cursor = 0
         self.pathhistory_max = 20
         self.files = [FileStat(os.pardir)]
-        self.mark_files = []
+        self.mark_files = {}
         self.mark_size = '0'
         self.cursor = 0
         self.scrolltop = 0
@@ -636,10 +636,10 @@ class Directory(object):
             self.reload()
 
     def diskread(self):
-        marks = [f.name for f in self.mark_files]
+        marks = self.mark_files.copy()
         self.win.erase()
         self.files[:] = [FileStat(os.pardir)]
-        self.mark_files[:] = []
+        self.mark_files.clear()
 
         if self.finder.active:
             filelist = self.finder.results
@@ -659,8 +659,7 @@ class Directory(object):
                 fs = FileStat(f)
                 if fs.name in marks:
                     fs.marked = True
-                    marks.remove(fs.name)
-                    self.mark_files.append(fs)
+                    self.mark_files[fs.name] = fs
                 self.files.append(fs)
             except UnicodeError:
                 self.invalid_encoding_error(f)
@@ -707,7 +706,7 @@ class Directory(object):
         if self.finder.active:
             self.finder.finish()
 
-        self.mark_files[:] = []
+        self.mark_files.clear()
         self.mark_size = '0'
 
         parent_path = util.unix_dirname(self.path)
@@ -741,7 +740,7 @@ class Directory(object):
         if f.name == os.pardir:
             return
         f.marked = True
-        self.mark_files.append(f)
+        self.mark_files[f.name] = f
         self.mark_size = self.get_mark_size()
 
     def markoff(self):
@@ -750,7 +749,7 @@ class Directory(object):
             return
         f.marked = False
         try:
-            self.mark_files.remove(f)
+            self.mark_files.pop(f)
         except:
             pass
         self.mark_size = self.get_mark_size()
@@ -762,23 +761,23 @@ class Directory(object):
         if f.marked:
             f.marked = False
             try:
-                self.mark_files.remove(f)
+                self.mark_files.pop(f)
             except:
                 pass
         else:
             f.marked = True
-            self.mark_files.append(f)
+            self.mark_files[f.name] = f
         self.mark_size = self.get_mark_size()
         self.mvcursor(+1)
 
     def mark_toggle_all(self):
-        self.mark_files[:] = []
+        self.mark_files.clear()
         for f in self.files:
             if f.name == os.pardir:
                 continue
             f.marked = not f.marked
             if f.marked:
-                self.mark_files.append(f)
+                self.mark_files[f.name] = f
         self.mark_size = self.get_mark_size()
 
     def mark(self, pattern):
@@ -787,67 +786,66 @@ class Directory(object):
                 continue
             if pattern.search(f.name):
                 f.marked = True
-                self.mark_files.append(f)
-        self.mark_files = util.uniq(self.mark_files)
+                self.mark_files[f.name] = f
         self.mark_size = self.get_mark_size()
 
     def mark_below_cursor(self, filetype='all'):
         self.mark_all(filetype, self.cursor)
 
     def mark_all(self, filetype='all', start=0):
-        self.mark_files[:] = []
+        self.mark_files.clear()
         for f in self.files[start:]:
             if f.name == os.pardir:
                 continue
             if filetype == 'all':
                 f.marked = True
-                self.mark_files.append(f)
+                self.mark_files[f.name] = f
             elif filetype == 'file':
                 if not f.isdir():
                     f.marked = True
-                    self.mark_files.append(f)
+                    self.mark_files[f.name] = f
                 else:
                     f.marked = False
             elif filetype == 'directory':
                 if f.isdir():
                     f.marked = True
-                    self.mark_files.append(f)
+                    self.mark_files[f.name] = f
                 else:
                     f.marked = False
             elif filetype == 'symlink':
                 if f.islink():
                     f.marked = True
-                    self.mark_files.append(f)
+                    self.mark_files[f.name] = f
                 else:
                     f.marked = False
             elif filetype == 'executable':
                 if f.isexec() and not f.isdir():
                     f.marked = True
-                    self.mark_files.append(f)
+                    self.mark_files[f.name] = f
                 else:
                     f.marked = False
             elif filetype == 'socket':
                 if f.issocket():
                     f.marked = True
-                    self.mark_files.append(f)
+                    self.mark_files[f.name] = f
                 else:
                     f.marked = False
             elif filetype == 'fifo':
                 if f.isfifo():
                     f.marked = True
-                    self.mark_files.append(f)
+                    self.mark_files[f.name] = f
                 else:
                     f.marked = False
             elif filetype == 'chr':
                 if f.ischr():
                     f.marked = True
-                    self.mark_files.append(f)
+                    self.mark_files[f.name] = f
                 else:
                     f.marked = False
             elif filetype == 'block':
                 if f.isblock():
                     f.marked = True
-                    self.mark_files.append(f)
+                    self.mark_files[f.name] = f
                 else:
                     f.marked = False
         self.mark_size = self.get_mark_size()
@@ -855,14 +853,14 @@ class Directory(object):
     def mark_clear(self):
         for f in self.files:
             f.marked = False
-        self.mark_files[:] = []
+        self.mark_files.clear()
         self.mark_size = '0'
 
     def get_mark_size(self):
         if not self.mark_files:
             return '0'
         ret = 0
-        for f in self.mark_files:
+        for f in self.mark_files.values():
             if f.isdir():
                 continue
             ret += f.stat.st_size
@@ -872,7 +870,7 @@ class Directory(object):
         if len(self.mark_files) == 0:
             return [self.file.name]
         else:
-            return [f.name for f in self.mark_files]
+            return [f.name for f in self.mark_files.values()]
 
     def ismark(self):
         return len(self.mark_files) != 0
