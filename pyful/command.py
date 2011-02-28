@@ -53,7 +53,7 @@ defcmd('rehash_programs',
        """Rehash of programs from PATH.
        PATH your environment is as follows:
        %s
-       """ % os.linesep.join(['* '+path for path in os.environ['PATH'].split(os.pathsep)]),
+       """ % (lambda: os.linesep.join(['* '+path for path in os.environ['PATH'].split(os.pathsep)]))(),
        lambda: ui.getcomponent('Cmdline').completion.loadprograms())
 
 defcmd('open_at_system',
