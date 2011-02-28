@@ -35,8 +35,6 @@ def defcmd(name, doc, cmd):
     cmd.__doc__ = doc
     commands.update({name: cmd})
 
-_cmdline = ui.getcomponent("Cmdline")
-_filer = ui.getcomponent("Filer")
 _image_filter = re.compile('\.(jpe?g|gif|png|bmp|tiff|jp2|j2c|svg|eps)$')
 _music_filter = re.compile('\.(ogg|mp3|flac|ape|tta|tak|mid|wma|wav)$')
 _video_filter = re.compile('\.(avi|mkv|mp4|mpe?g|wmv|asf|rm|ram|ra)$')
@@ -56,7 +54,7 @@ defcmd('rehash_programs',
        PATH your environment is as follows:
        %s
        """ % os.linesep.join(['* '+path for path in os.environ['PATH'].split(os.pathsep)]),
-       lambda: _cmdline.completion.loadprograms())
+       lambda: ui.getcomponent('Cmdline').completion.loadprograms())
 
 defcmd('open_at_system',
        """Open the file under cursor at the file association of system.
@@ -83,11 +81,11 @@ defcmd('exit',
 
 defcmd('finder_start',
        """Start finder of focused directory.""",
-       lambda: _filer.finder.start())
+       lambda: ui.getcomponent('Filer').finder.start())
 
 defcmd('help',
        """Invoke command line of help mode.""",
-       lambda: _cmdline.start(mode.Help(), ''))
+       lambda: ui.getcomponent('Cmdline').start(mode.Help(), ''))
 
 defcmd('help_all',
        """Show all command's help.""",
@@ -103,19 +101,19 @@ defcmd('change_looks',
        Present looks is preserved in Pyful.environs['LOOKS'].
        The setting concerning looks consults the pyful.look module.
        """,
-       lambda: _cmdline.start(mode.ChangeLooks(), ''))
+       lambda: ui.getcomponent('Cmdline').start(mode.ChangeLooks(), ''))
 
 defcmd('google_search',
        """Search word in google on the regulated web browser.""",
-       lambda: _cmdline.start(mode.WebSearch('Google'), ''))
+       lambda: ui.getcomponent('Cmdline').start(mode.WebSearch('Google'), ''))
 
 defcmd('open_listfile',
        """Invoke command line of open list file mode.""",
-       lambda: _cmdline.start(mode.OpenListfile(), ''))
+       lambda: ui.getcomponent('Cmdline').start(mode.OpenListfile(), ''))
 
 defcmd('zoom_infobox',
        """Invoke command line of zoom infobox mode.""",
-       lambda: _cmdline.start(mode.ZoomInfoBox(), ''))
+       lambda: ui.getcomponent('Cmdline').start(mode.ZoomInfoBox(), ''))
 
 defcmd('zoom_in_infobox',
        """Zoom in of infobox.""",
@@ -159,25 +157,25 @@ defcmd('unpack2',
 
 defcmd('enter_mark',
        """Behavior of mark files.""",
-       lambda: _cmdline.start(mode.Shell(), ' %m', 1))
+       lambda: ui.getcomponent('Cmdline').start(mode.Shell(), ' %m', 1))
 
 defcmd('enter_exec',
        """Behavior of executable file.""",
-       lambda: _cmdline.start(mode.Shell(), ' ./%f', 1))
+       lambda: ui.getcomponent('Cmdline').start(mode.Shell(), ' ./%f', 1))
 
 defcmd('enter_dir',
        """Behavior of directory.""",
-       lambda: _filer.dir.enter_dir())
+       lambda: ui.getcomponent('Filer').dir.enter_dir())
 
 defcmd('enter_link',
        """Behavior of symlink.""",
-       lambda: _filer.dir.enter_link())
+       lambda: ui.getcomponent('Filer').dir.enter_link())
 
 defcmd('enter_listfile',
        """Behavior of list file.
        list file is a file to which the absolute path is written and extension is '.list'.
        """,
-       lambda: _filer.dir.open_listfile(_filer.file.name))
+       lambda: ui.getcomponent('Filer').dir.open_listfile(ui.getcomponent('Filer').file.name))
 
 defcmd('switch_workspace',
        """Switching workspaces.""",
@@ -185,15 +183,15 @@ defcmd('switch_workspace',
 
 defcmd('create_workspace',
        """Create new workspace.""",
-       lambda: _cmdline.start(mode.CreateWorkspace(), ''))
+       lambda: ui.getcomponent('Cmdline').start(mode.CreateWorkspace(), ''))
 
 defcmd('close_workspace',
        """Close current workspace.""",
-       lambda: _filer.close_workspace())
+       lambda: ui.getcomponent('Filer').close_workspace())
 
 defcmd('change_workspace_title',
        """Change current workspace's title.""",
-       lambda: _cmdline.start(mode.ChangeWorkspaceTitle(), ""))
+       lambda: ui.getcomponent('Cmdline').start(mode.ChangeWorkspaceTitle(), ""))
 
 defcmd('change_workspace_layout',
        """Change current workspace's layout.
@@ -208,348 +206,348 @@ defcmd('change_workspace_layout',
 
 defcmd('view_next_workspace',
        """Switching to next workspace.""",
-       lambda: _filer.next_workspace())
+       lambda: ui.getcomponent('Filer').next_workspace())
 
 defcmd('view_prev_workspace',
        """Switching to previous workspace.""",
-       lambda: _filer.prev_workspace())
+       lambda: ui.getcomponent('Filer').prev_workspace())
 
 defcmd('swap_workspace_inc',
        """Swap current workspace to next workspace.""",
-       lambda: _filer.swap_workspace_inc())
+       lambda: ui.getcomponent('Filer').swap_workspace_inc())
 
 defcmd('swap_workspace_dec',
        """Swap current workspace to previous workspace.""",
-       lambda: _filer.swap_workspace_dec())
+       lambda: ui.getcomponent('Filer').swap_workspace_dec())
 
 defcmd('layout_tile',
        """Change workspace layout to Tile""",
-       lambda: _filer.workspace.tile())
+       lambda: ui.getcomponent('Filer').workspace.tile())
 
 defcmd('layout_tile_rev',
        """Change workspace layout to Tile of reverse.""",
-       lambda: _filer.workspace.tile(reverse=True))
+       lambda: ui.getcomponent('Filer').workspace.tile(reverse=True))
 
 defcmd('layout_oneline',
        """Change workspace layout to Oneline.""",
-       lambda: _filer.workspace.oneline())
+       lambda: ui.getcomponent('Filer').workspace.oneline())
 
 defcmd('layout_onecolumn',
        """Change workspace layout to Onecolumn.""",
-       lambda: _filer.workspace.onecolumn())
+       lambda: ui.getcomponent('Filer').workspace.onecolumn())
 
 defcmd('layout_fullscreen',
        """Change workspace layout to Fullscreen.""",
-       lambda: _filer.workspace.fullscreen())
+       lambda: ui.getcomponent('Filer').workspace.fullscreen())
 
 defcmd('chdir_parent',
        """Change current directory to parent directory.""",
-       lambda: _filer.dir.chdir(os.pardir))
+       lambda: ui.getcomponent('Filer').dir.chdir(os.pardir))
 
 defcmd('chdir_root',
        """Change current directory to root directory.""",
-       lambda: _filer.dir.chdir('/'))
+       lambda: ui.getcomponent('Filer').dir.chdir('/'))
 
 defcmd('chdir_home',
        """Change current directory to home directory.""",
-       lambda: _filer.dir.chdir(os.environ['HOME']))
+       lambda: ui.getcomponent('Filer').dir.chdir(os.environ['HOME']))
 
 defcmd('chdir_neighbor',
        """Change current directory to neighbor directory.""",
-       lambda: _filer.dir.chdir(_filer.workspace.nextdir.path))
+       lambda: ui.getcomponent('Filer').dir.chdir(ui.getcomponent('Filer').workspace.nextdir.path))
 
 defcmd('chdir_backward',
        """Change current directory to backward of directory history.""",
-       lambda: _filer.dir.pathhistory_backward())
+       lambda: ui.getcomponent('Filer').dir.pathhistory_backward())
 
 defcmd('chdir_forward',
        """Change current directory to forward of directory history.""",
-       lambda: _filer.dir.pathhistory_forward())
+       lambda: ui.getcomponent('Filer').dir.pathhistory_forward())
 
 defcmd('sort_name',
        """Sort name by ascending order.""",
-       lambda: _filer.dir.sort_name())
+       lambda: ui.getcomponent('Filer').dir.sort_name())
 
 defcmd('sort_name_rev',
        """Sort name by descending order.""",
-       lambda: _filer.dir.sort_name_rev())
+       lambda: ui.getcomponent('Filer').dir.sort_name_rev())
 
 defcmd('sort_ext',
        """Sort file extension by ascending order.""",
-       lambda: _filer.dir.sort_ext())
+       lambda: ui.getcomponent('Filer').dir.sort_ext())
 
 defcmd('sort_ext_rev',
        """Sort file extension by descending order.""",
-       lambda: _filer.dir.sort_ext_rev())
+       lambda: ui.getcomponent('Filer').dir.sort_ext_rev())
 
 defcmd('sort_size',
        """Sort file size by ascending order.""",
-       lambda: _filer.dir.sort_size())
+       lambda: ui.getcomponent('Filer').dir.sort_size())
 
 defcmd('sort_size_rev',
        """Sort file size by descending order.""",
-       lambda: _filer.dir.sort_size_rev())
+       lambda: ui.getcomponent('Filer').dir.sort_size_rev())
 
 defcmd('sort_time',
        """Sort time by ascending order.""",
-       lambda: _filer.dir.sort_time())
+       lambda: ui.getcomponent('Filer').dir.sort_time())
 
 defcmd('sort_time_rev',
        """Sort time by descending order.""",
-       lambda: _filer.dir.sort_time_rev())
+       lambda: ui.getcomponent('Filer').dir.sort_time_rev())
 
 defcmd('sort_nlink',
        """Sort link by ascending order.""",
-       lambda: _filer.dir.sort_nlink())
+       lambda: ui.getcomponent('Filer').dir.sort_nlink())
 
 defcmd('sort_nlink_rev',
        """Sort link by descending order.""",
-       lambda: _filer.dir.sort_nlink_rev())
+       lambda: ui.getcomponent('Filer').dir.sort_nlink_rev())
 
 defcmd('sort_permission',
        """Sort permission by ascending order.""",
-       lambda: _filer.dir.sort_permission())
+       lambda: ui.getcomponent('Filer').dir.sort_permission())
 
 defcmd('sort_permission_rev',
        """Sort permission by ascending order.""",
-       lambda: _filer.dir.sort_permission_rev())
+       lambda: ui.getcomponent('Filer').dir.sort_permission_rev())
 
 defcmd('toggle_view_ext',
        """Toggle the file extension display.""",
-       lambda: _filer.toggle_view_ext())
+       lambda: ui.getcomponent('Filer').toggle_view_ext())
 
 defcmd('toggle_view_permission',
        """Toggle the file permission display.""",
-       lambda: _filer.toggle_view_permission())
+       lambda: ui.getcomponent('Filer').toggle_view_permission())
 
 defcmd('toggle_view_nlink',
        """Toggle the nuber of link display.""",
-       lambda: _filer.toggle_view_nlink())
+       lambda: ui.getcomponent('Filer').toggle_view_nlink())
 
 defcmd('toggle_view_user',
        """Toggle the user name of file display.""",
-       lambda: _filer.toggle_view_user())
+       lambda: ui.getcomponent('Filer').toggle_view_user())
 
 defcmd('toggle_view_group',
        """Toggle the group name of file display.""",
-       lambda: _filer.toggle_view_group())
+       lambda: ui.getcomponent('Filer').toggle_view_group())
 
 defcmd('toggle_view_size',
        """Toggle the file size display.""",
-       lambda: _filer.toggle_view_size())
+       lambda: ui.getcomponent('Filer').toggle_view_size())
 
 defcmd('toggle_view_mtime',
        """Toggle the change time of file display.""",
-       lambda: _filer.toggle_view_mtime())
+       lambda: ui.getcomponent('Filer').toggle_view_mtime())
 
 defcmd('create_dir',
        """Create directory in current workspace.""",
-       lambda: _filer.workspace.create_dir())
+       lambda: ui.getcomponent('Filer').workspace.create_dir())
 
 defcmd('close_dir',
        """Close focus directory in current workspace.""",
-       lambda: _filer.workspace.close_dir())
+       lambda: ui.getcomponent('Filer').workspace.close_dir())
 
 defcmd('all_reload',
        """Reload files of current workspace directorise.""",
-       lambda: _filer.workspace.all_reload())
+       lambda: ui.getcomponent('Filer').workspace.all_reload())
 
 defcmd('swap_dir_inc',
        """Swap current directory to next directory.""",
-       lambda: _filer.workspace.swap_dir_inc())
+       lambda: ui.getcomponent('Filer').workspace.swap_dir_inc())
 
 defcmd('swap_dir_dec',
        """Swap current directory to previous directory.""",
-       lambda: _filer.workspace.swap_dir_dec())
+       lambda: ui.getcomponent('Filer').workspace.swap_dir_dec())
 
 defcmd('focus_next_dir',
        """Focus of cursor to next directory.""",
-       lambda: _filer.workspace.mvcursor(+1))
+       lambda: ui.getcomponent('Filer').workspace.mvcursor(+1))
 
 defcmd('focus_prev_dir',
        """Focus of curosr to previous directory.""",
-       lambda: _filer.workspace.mvcursor(-1))
+       lambda: ui.getcomponent('Filer').workspace.mvcursor(-1))
 
 defcmd('filer_cursor_down',
        """Cursor down in focused directory.""",
-       lambda: _filer.dir.mvcursor(+1))
+       lambda: ui.getcomponent('Filer').dir.mvcursor(+1))
 
 defcmd('filer_cursor_up',
        """Cursor up in focused directory.""",
-       lambda: _filer.dir.mvcursor(-1))
+       lambda: ui.getcomponent('Filer').dir.mvcursor(-1))
 
 defcmd('filer_pagedown',
        """Page down in focused directory.""",
-       lambda: _filer.dir.pagedown())
+       lambda: ui.getcomponent('Filer').dir.pagedown())
 
 defcmd('filer_pageup',
        """Page up in focused directory.""",
-       lambda: _filer.dir.pageup())
+       lambda: ui.getcomponent('Filer').dir.pageup())
 
 defcmd('filer_settop',
        """Set cursor to page top in focused directory.""",
-       lambda: _filer.dir.settop())
+       lambda: ui.getcomponent('Filer').dir.settop())
 
 defcmd('filer_setbottom',
        """Set cursor to page bottom in focused directory.""",
-       lambda: _filer.dir.setbottom())
+       lambda: ui.getcomponent('Filer').dir.setbottom())
 
 defcmd('filer_reset',
        """Reset the glob, mask and mark of focused directory.""",
-       lambda: _filer.dir.reset())
+       lambda: ui.getcomponent('Filer').dir.reset())
 
 defcmd('mark_all',
        """Mark all objects in current directory.""",
-       lambda: _filer.dir.mark_all('all'))
+       lambda: ui.getcomponent('Filer').dir.mark_all('all'))
 
 defcmd('mark_file',
        """Mark all files in current directory.""",
-       lambda: _filer.dir.mark_all('file'))
+       lambda: ui.getcomponent('Filer').dir.mark_all('file'))
 
 defcmd('mark_dir',
        """Mark all directories in current directory.""",
-       lambda: _filer.dir.mark_all('directory'))
+       lambda: ui.getcomponent('Filer').dir.mark_all('directory'))
 
 defcmd('mark_symlink',
        """Mark all symlinks in current directory.""",
-       lambda: _filer.dir.mark_all('symlink'))
+       lambda: ui.getcomponent('Filer').dir.mark_all('symlink'))
 
 defcmd('mark_exec',
        """Mark all executable files in current directory.""",
-       lambda: _filer.dir.mark_all('executable'))
+       lambda: ui.getcomponent('Filer').dir.mark_all('executable'))
 
 defcmd('mark_socket',
        """Mark all sockets in current directory.""",
-       lambda: _filer.dir.mark_all('socket'))
+       lambda: ui.getcomponent('Filer').dir.mark_all('socket'))
 
 defcmd('mark_fifo',
        """Mark all fifo in current directory.""",
-       lambda: _filer.dir.mark_all('fifo'))
+       lambda: ui.getcomponent('Filer').dir.mark_all('fifo'))
 
 defcmd('mark_chr',
        """Mark all chr files in current directory.""",
-       lambda: _filer.dir.mark_all('chr'))
+       lambda: ui.getcomponent('Filer').dir.mark_all('chr'))
 
 defcmd('mark_block',
        """Mark all block files in current directory.""",
-       lambda: _filer.dir.mark_all('block'))
+       lambda: ui.getcomponent('Filer').dir.mark_all('block'))
 
 defcmd('mark_all_bcursor',
        """Mark all objects from cursor in current directory.""",
-       lambda: _filer.dir.mark_below_cursor('all'))
+       lambda: ui.getcomponent('Filer').dir.mark_below_cursor('all'))
 
 defcmd('mark_file_bcursor',
        """Mark all files from cursor in current directory.""",
-       lambda: _filer.dir.mark_below_cursor('file'))
+       lambda: ui.getcomponent('Filer').dir.mark_below_cursor('file'))
 
 defcmd('mark_dir_bcursor',
        """Mark all directries from cursor in current directory.""",
-       lambda: _filer.dir.mark_below_cursor('directory'))
+       lambda: ui.getcomponent('Filer').dir.mark_below_cursor('directory'))
 
 defcmd('mark_symlink_bcursor',
        """Mark all symlinks from cursor in current directory.""",
-       lambda: _filer.dir.mark_below_cursor('symlink'))
+       lambda: ui.getcomponent('Filer').dir.mark_below_cursor('symlink'))
 
 defcmd('mark_exec_bcursor',
        """Mark all executable files from cursor in current directory.""",
-       lambda: _filer.dir.mark_below_cursor('executable'))
+       lambda: ui.getcomponent('Filer').dir.mark_below_cursor('executable'))
 
 defcmd('mark_socket_bcursor',
        """Mark all sockets from cursor in current directory.""",
-       lambda: _filer.dir.mark_below_cursor('socket'))
+       lambda: ui.getcomponent('Filer').dir.mark_below_cursor('socket'))
 
 defcmd('mark_fifo_bcursor',
        """Mark all fifo from cursor in current directory.""",
-       lambda: _filer.dir.mark_below_cursor('fifo'))
+       lambda: ui.getcomponent('Filer').dir.mark_below_cursor('fifo'))
 
 defcmd('mark_chr_bcursor',
        """Mark all chr files from cursor in current directory.""",
-       lambda: _filer.dir.mark_below_cursor('chr'))
+       lambda: ui.getcomponent('Filer').dir.mark_below_cursor('chr'))
 
 defcmd('mark_block_bcursor',
        """Mark all block files from cursor in current directory.""",
-       lambda: _filer.dir.mark_below_cursor('block'))
+       lambda: ui.getcomponent('Filer').dir.mark_below_cursor('block'))
 
 defcmd('mark_toggle',
        """Toggle mark of file under the cursor.""",
-       lambda: _filer.dir.mark_toggle())
+       lambda: ui.getcomponent('Filer').dir.mark_toggle())
 
 defcmd('mark_toggle_all',
        """Toggle mark of all files in current directory.""",
-       lambda: _filer.dir.mark_toggle_all())
+       lambda: ui.getcomponent('Filer').dir.mark_toggle_all())
 
 defcmd('mark_clear',
        """Clear mark of all files in current directory.""",
-       lambda: _filer.dir.mark_clear())
+       lambda: ui.getcomponent('Filer').dir.mark_clear())
 
 defcmd('mark_source',
        """Mark source files in current directory.
        Regexp of filter: %s
        """ % _source_filter.pattern,
-       lambda: _filer.dir.mark(_source_filter))
+       lambda: ui.getcomponent('Filer').dir.mark(_source_filter))
 
 defcmd('mark_archive',
        """Mark archive files in current directory.
        Regexp of filter: %s
        """ % _archive_filter.pattern,
-       lambda: _filer.dir.mark(_archive_filter))
+       lambda: ui.getcomponent('Filer').dir.mark(_archive_filter))
 
 defcmd('mark_image',
        """Mark image files in current directory.
        Regexp of filter: %s
        """ % _image_filter.pattern,
-       lambda: _filer.dir.mark(_image_filter))
+       lambda: ui.getcomponent('Filer').dir.mark(_image_filter))
 
 defcmd('mark_music',
        """Mark music files in current directory.
        Regexp of filter: %s
        """ % _music_filter.pattern,
-       lambda: _filer.dir.mark(_music_filter))
+       lambda: ui.getcomponent('Filer').dir.mark(_music_filter))
 
 defcmd('mark_video',
        """Mark video files in current directory.
        Regexp of filter: %s
        """ % _video_filter.pattern,
-       lambda: _filer.dir.mark(_video_filter))
+       lambda: ui.getcomponent('Filer').dir.mark(_video_filter))
 
 defcmd('mask_clear',
        """Claer of filter.""",
-       lambda: _filer.dir.mask(None))
+       lambda: ui.getcomponent('Filer').dir.mask(None))
 
 defcmd('mask_source',
        """Filter source files.
        Regexp of filter: %s
        """ % _source_filter.pattern,
-       lambda: _filer.dir.mask(_source_filter))
+       lambda: ui.getcomponent('Filer').dir.mask(_source_filter))
 
 defcmd('mask_archive',
        """Filter archive files.
        Regexp of filter: %s
        """ % _archive_filter.pattern,
-       lambda: _filer.dir.mask(_archive_filter))
+       lambda: ui.getcomponent('Filer').dir.mask(_archive_filter))
 
 defcmd('mask_image',
        """Filter image files.
        Regexp of filter: %s
        """ % _image_filter.pattern,
-       lambda: _filer.dir.mask(_image_filter))
+       lambda: ui.getcomponent('Filer').dir.mask(_image_filter))
 
 defcmd('mask_music',
        """Filter music files.
        Regexp of filter: %s
        """ % _music_filter.pattern,
-       lambda: _filer.dir.mask(_music_filter))
+       lambda: ui.getcomponent('Filer').dir.mask(_music_filter))
 
 defcmd('mask_video',
        """Filter video files.
        Regexp of filter: %s
        """ % _video_filter.pattern,
-       lambda: _filer.dir.mask(_video_filter))
+       lambda: ui.getcomponent('Filer').dir.mask(_video_filter))
 
 defcmd('copy',
        """Invoke command line of copy mode.
        = Example:
-       File copy from ~/example/file.txt to ~/text/file.txt.
+       File copy from ~/example/file.txt to ~/text/file.txt
        # Invoke copy mode by  +copy+  command.
        # Specify file of copy source:
        $  $Copy from:$  ~/example/file.txt
@@ -565,7 +563,7 @@ defcmd('delete',
 defcmd('move',
        """Invoke command line of move mode.
        = Example:
-       File move from ~/example/file.txt to ~/text/file.txt.
+       File move from ~/example/file.txt to ~/text/file.txt
        # Invoke copy mode by  +move+  command.
        # Specify file of move source:
        $  $Move from:$  ~/example/file.txt
@@ -618,72 +616,72 @@ defcmd('unzip',
 
 defcmd('chdir',
        """Invoke command line of chdir mode.""",
-       lambda: _cmdline.start(mode.Chdir(), _filer.dir.path))
+       lambda: ui.getcomponent('Cmdline').start(mode.Chdir(), ui.getcomponent('Filer').dir.path))
 
 defcmd('chmod',
        """Invoke command line of chmod mode.""",
-       lambda: _cmdline.start(mode.Chmod(), ''))
+       lambda: ui.getcomponent('Cmdline').start(mode.Chmod(), ''))
 
 defcmd('chown',
        """Invoke command line of chown mode.""",
-       lambda: _cmdline.start(mode.Chown(), ''))
+       lambda: ui.getcomponent('Cmdline').start(mode.Chown(), ''))
 
 defcmd('glob',
        """Invoke command line of glob mode.""",
-       lambda: _cmdline.start(mode.Glob(), ''))
+       lambda: ui.getcomponent('Cmdline').start(mode.Glob(), ''))
 
 defcmd('globdir',
        """Invoke command line of globdir mode.""",
-       lambda: _cmdline.start(mode.GlobDir(), ''))
+       lambda: ui.getcomponent('Cmdline').start(mode.GlobDir(), ''))
 
 defcmd('mark',
        """Invoke command line of mark mode.""",
-       lambda: _cmdline.start(mode.Mark(), ''))
+       lambda: ui.getcomponent('Cmdline').start(mode.Mark(), ''))
 
 defcmd('mask',
        """Invoke command line of mask mode.""",
-       lambda: _cmdline.start(mode.Mask(), ''))
+       lambda: ui.getcomponent('Cmdline').start(mode.Mask(), ''))
 
 defcmd('menu',
        """Invoke command line of menu mode.""",
-       lambda: _cmdline.start(mode.Menu(), ''))
+       lambda: ui.getcomponent('Cmdline').start(mode.Menu(), ''))
 
 defcmd('mkdir',
        """Invoke command line of mkdir mode.""",
-       lambda: _cmdline.start(mode.Mkdir(), ''))
+       lambda: ui.getcomponent('Cmdline').start(mode.Mkdir(), ''))
 
 defcmd('replace',
        """Invoke command line of replace mode.
        The replace mode renames mark files with regexp.
        = Example:
-       The extension of mark files is renamed from '.py' to '.txt'.
+       The extension of mark files is renamed from '.py' to '.txt'
        # Invoke replace mode by  +replace+  command.
        # The match pattern specify with regexp:
        $  $Replace pattern:$  \.py$
        # Specify the replacing string:
        $  $Replace regexp \.py\$ with:$  .txt
        """,
-       lambda: _cmdline.start(mode.Replace(), ''))
+       lambda: ui.getcomponent('Cmdline').start(mode.Replace(), ''))
 
 defcmd('newfile',
        """Invoke command line of new file mode.""",
-       lambda: _cmdline.start(mode.Newfile(), ''))
+       lambda: ui.getcomponent('Cmdline').start(mode.Newfile(), ''))
 
 defcmd('utime',
        """Invoke command line of utime mode.""",
-       lambda: _cmdline.start(mode.Utime(), _filer.file.name))
+       lambda: ui.getcomponent('Cmdline').start(mode.Utime(), ui.getcomponent('Filer').file.name))
 
 defcmd('shell',
        """Invoke command line of shell mode.""",
-       lambda: _cmdline.start(mode.Shell(), ''))
+       lambda: ui.getcomponent('Cmdline').start(mode.Shell(), ''))
 
 defcmd('eval',
        """Invoke command line of eval mode.""",
-       lambda: _cmdline.start(mode.Eval(), ''))
+       lambda: ui.getcomponent('Cmdline').start(mode.Eval(), ''))
 
 defcmd('mx',
        """Invoke command line of mx mode.""",
-       lambda: _cmdline.start(mode.Mx(), ''))
+       lambda: ui.getcomponent('Cmdline').start(mode.Mx(), ''))
 
 def _open_at_system():
     try:
@@ -731,12 +729,13 @@ def _reload_rcfile():
         message.puts("Reloaded: %s" % Pyful.environs['RCFILE'])
 
 def _switch_workspace():
-    titles = [w.title for w in _filer.workspaces]
-    pos = _filer.cursor
+    filer = ui.getcomponent('Filer')
+    titles = [w.title for w in filer.workspaces]
+    pos = filer.cursor
     ret = message.confirm('Switch workspace:', options=titles, position=pos)
-    for i, w in enumerate(_filer.workspaces):
+    for i, w in enumerate(filer.workspaces):
         if w.title == ret:
-            _filer.focus_workspace(i)
+            filer.focus_workspace(i)
             break
 
 def _drivejump():
@@ -745,14 +744,14 @@ def _drivejump():
     li = []
     for i, f in enumerate(glob.glob('/media/*')+glob.glob('/mnt/*')):
         def _wrap(path):
-            return lambda: _filer.dir.chdir(path)
+            return lambda: ui.getcomponent('Filer').dir.chdir(path)
         num = str(i+1)
         li.append(('(%s) %s' % (num, f), ord(num), _wrap(f)))
     menu.items['Drives'] = li
     menu.show('Drives')
 
 def _fileviewer():
-    ext = util.extname(_filer.file.name)
+    ext = util.extname(ui.getcomponent('Filer').file.name)
     pager = Pyful.environs['PAGER']
     if ".gz" == ext:
         process.spawn("tar tvfz %f | "+ pager)
@@ -782,100 +781,117 @@ def _pack():
     elif ret == "tar":
         _tar('tar')
     elif ret == "rar":
-        _cmdline.start(mode.Shell(), "rar u %D2.rar %m", -7)
+        ui.getcomponent('Cmdline').start(mode.Shell(), "rar u %D2.rar %m", -7)
 
 def _unpack():
-    ext = util.extname(_filer.file.name)
+    ext = util.extname(ui.getcomponent('Filer').file.name)
+    cmdline = ui.getcomponent('Cmdline')
     if ext == ".gz":
-        _cmdline.start(mode.Shell(), "tar xvfz %f -C %D2")
+        cmdline.start(mode.Shell(), "tar xvfz %f -C %D2")
     elif ext == ".tgz":
-        _cmdline.start(mode.Shell(), "tar xvfz %f -C %D2")
+        cmdline.start(mode.Shell(), "tar xvfz %f -C %D2")
     elif ext == ".bz2":
-        _cmdline.start(mode.Shell(), "tar xvfj %f -C %D2")
+        cmdline.start(mode.Shell(), "tar xvfj %f -C %D2")
     elif ext == ".tar":
-        _cmdline.start(mode.Shell(), "tar xvf %f -C %D2")
+        cmdline.start(mode.Shell(), "tar xvf %f -C %D2")
     elif ext == ".rar":
-        _cmdline.start(mode.Shell(), "rar x %f -C %D2")
+        cmdline.start(mode.Shell(), "rar x %f -C %D2")
     elif ext == ".zip":
-        _cmdline.start(mode.Shell(), "unzip %f -d %D2")
+        cmdline.start(mode.Shell(), "unzip %f -d %D2")
     elif ext == ".xpi":
-        _cmdline.start(mode.Shell(), "unzip %f -d %D2")
+        cmdline.start(mode.Shell(), "unzip %f -d %D2")
     elif ext == ".jar":
-        _cmdline.start(mode.Shell(), "unzip %f -d %D2")
+        cmdline.start(mode.Shell(), "unzip %f -d %D2")
 
 def _unpack2():
-    ext = util.extname(_filer.file.name)
+    ext = util.extname(ui.getcomponent('Filer').file.name)
+    cmdline = ui.getcomponent('Cmdline')
     if ext == ".gz" :
-        _cmdline.start(mode.Shell(), "tar xvfz %f -C %D")
+        cmdline.start(mode.Shell(), "tar xvfz %f -C %D")
     elif ext == ".tgz":
-        _cmdline.start(mode.Shell(), "tar xvfz %f -C %D")
+        cmdline.start(mode.Shell(), "tar xvfz %f -C %D")
     elif ext == ".bz2":
-        _cmdline.start(mode.Shell(), "tar xvfj %f -C %D")
+        cmdline.start(mode.Shell(), "tar xvfj %f -C %D")
     elif ext == ".tar":
-        _cmdline.start(mode.Shell(), "tar xvf %f -C %D")
+        cmdline.start(mode.Shell(), "tar xvf %f -C %D")
     elif ext == ".rar":
-        _cmdline.start(mode.Shell(), "rar x %f -C %D")
+        cmdline.start(mode.Shell(), "rar x %f -C %D")
     elif ext == ".zip":
-        _cmdline.start(mode.Shell(), "unzip %f -d %D")
+        cmdline.start(mode.Shell(), "unzip %f -d %D")
     elif ext == ".xpi":
-        _cmdline.start(mode.Shell(), "unzip %f -d %D")
+        cmdline.start(mode.Shell(), "unzip %f -d %D")
     elif ext == ".jar":
-        _cmdline.start(mode.Shell(), "unzip %f -d %D")
+        cmdline.start(mode.Shell(), "unzip %f -d %D")
 
 def _change_workspace_layout():
     ret =  message.confirm("Layout:", ["tile", "tilerevese", "oneline", "onecolumn", "fullscreen"])
+    filer = ui.getcomponent('Filer')
     if "tile" == ret:
-        _filer.workspace.tile()
+        filer.workspace.tile()
     elif "tilerevese" == ret:
-        _filer.workspace.tile(reverse=True)
+        filer.workspace.tile(reverse=True)
     elif "oneline" == ret:
-        _filer.workspace.oneline()
+        filer.workspace.oneline()
     elif "onecolumn" == ret:
-        _filer.workspace.onecolumn()
+        filer.workspace.onecolumn()
     elif "fullscreen" == ret:
-        _filer.workspace.fullscreen()
+        filer.workspace.fullscreen()
 
 def _copy():
-    if _filer.dir.ismark():
-        _cmdline.start(mode.Copy(), _filer.workspace.nextdir.path)
+    filer = ui.getcomponent('Filer')
+    cmdline = ui.getcomponent('Cmdline')
+    if filer.dir.ismark():
+        cmdline.start(mode.Copy(), filer.workspace.nextdir.path)
     else:
-        _cmdline.start(mode.Copy(), _filer.file.name)
+        cmdline.start(mode.Copy(), filer.file.name)
 
 def _delete():
-    if _filer.dir.ismark():
-        files = _filer.dir.get_mark_files()
+    filer = ui.getcomponent('Filer')
+    cmdline = ui.getcomponent('Cmdline')
+    if filer.dir.ismark():
+        files = filer.dir.get_mark_files()
         ret = message.confirm("Delete mark files? ", ["No", "Yes"], files)
         if ret == "No" or ret is None:
             return
         filectrl.delete(files)
     else:
-        _cmdline.start(mode.Delete(), _filer.file.name)
+        cmdline.start(mode.Delete(), ui.getcomponent('Filer').file.name)
 
 def _move():
-    if _filer.dir.ismark():
-        _cmdline.start(mode.Move(), _filer.workspace.nextdir.path)
+    filer = ui.getcomponent('Filer')
+    cmdline = ui.getcomponent('Cmdline')
+    if filer.dir.ismark():
+        cmdline.start(mode.Move(), filer.workspace.nextdir.path)
     else:
-        _cmdline.start(mode.Move(), _filer.file.name)
+        cmdline.start(mode.Move(), filer.file.name)
 
 def _link():
-    if _filer.dir.ismark():
-        _cmdline.start(mode.Link(), _filer.workspace.nextdir.path)
+    filer = ui.getcomponent('Filer')
+    cmdline = ui.getcomponent('Cmdline')
+    if filer.dir.ismark():
+        cmdline.start(mode.Link(), filer.workspace.nextdir.path)
     else:
-        _cmdline.start(mode.Link(), _filer.file.name)
+        cmdline.start(mode.Link(), filer.file.name)
 
 def _rename():
-    if _filer.dir.ismark():
-        _cmdline.start(mode.Replace(), "")
+    filer = ui.getcomponent('Filer')
+    cmdline = ui.getcomponent('Cmdline')
+    if filer.dir.ismark():
+        cmdline.start(mode.Replace(), "")
     else:
-        _cmdline.start(mode.Rename(), _filer.file.name, -len(util.extname(_filer.file.name)))
+        cmdline.start(mode.Rename(), filer.file.name, -len(util.extname(filer.file.name)))
 
 def _symlink():
-    if _filer.dir.ismark():
-        _cmdline.start(mode.Symlink(), _filer.workspace.nextdir.path)
+    filer = ui.getcomponent('Filer')
+    cmdline = ui.getcomponent('Cmdline')
+    if filer.dir.ismark():
+        cmdline.start(mode.Symlink(), filer.workspace.nextdir.path)
     else:
-        _cmdline.start(mode.Symlink(), os.path.join(_filer.dir.path, _filer.file.name))
+        cmdline.start(mode.Symlink(), os.path.join(filer.dir.path, filer.file.name))
 
 def _trashbox():
+    filer = ui.getcomponent('Filer')
+    cmdline = ui.getcomponent('Cmdline')
     trashbox = os.path.expanduser(Pyful.environs['TRASHBOX'])
     if not os.path.exists(trashbox):
         if "Yes" == message.confirm("Trashbox doesn't exist. Make trashbox? (%s):" % trashbox, ["No", "Yes"]):
@@ -886,18 +902,18 @@ def _trashbox():
         else:
             return
 
-    if _filer.dir.ismark():
-        mfiles = _filer.dir.get_mark_files()
+    if filer.dir.ismark():
+        mfiles = filer.dir.get_mark_files()
         ret = message.confirm("Move mark files to trashbox? ", ["No", "Yes"], mfiles)
         if ret == "No" or ret is None:
             return
 
         for f in mfiles:
             filectrl.move(f, trashbox)
-        _filer.dir.mark_clear()
-        _filer.workspace.all_reload()
+        filer.dir.mark_clear()
+        filer.workspace.all_reload()
     else:
-        _cmdline.start(mode.TrashBox(), _filer.file.name)
+        cmdline.start(mode.TrashBox(), filer.file.name)
 
 def _tar(tarmode=None):
     if tarmode is None:
@@ -905,35 +921,43 @@ def _tar(tarmode=None):
         if tarmode is None:
             return
 
-    if _filer.dir.ismark():
-        _cmdline.start(mode.Tar(tarmode), '')
+    filer = ui.getcomponent('Filer')
+    cmdline = ui.getcomponent('Cmdline')
+    if filer.dir.ismark():
+        cmdline.start(mode.Tar(tarmode), '')
     else:
-        _cmdline.start(mode.Tar(tarmode), _filer.file.name)
+        cmdline.start(mode.Tar(tarmode), filer.file.name)
 
 def _tareach(tarmode=None):
     if tarmode is None:
         tarmode = message.confirm("Tar mode:", ["gzip", "bzip2", "tar"])
         if tarmode is None:
             return
-    _cmdline.start(mode.Tar(tarmode, each=True), '')
+    ui.getcomponent('Cmdline').start(mode.Tar(tarmode, each=True), '')
 
 def _untar():
-    if _filer.dir.ismark():
-        _cmdline.start(mode.UnTar(), _filer.workspace.nextdir.path)
+    filer = ui.getcomponent('Filer')
+    cmdline = ui.getcomponent('Cmdline')
+    if filer.dir.ismark():
+        cmdline.start(mode.UnTar(), filer.workspace.nextdir.path)
     else:
-        _cmdline.start(mode.UnTar(), _filer.file.name)
+        cmdline.start(mode.UnTar(), filer.file.name)
 
 def _zip():
-    if _filer.dir.ismark():
-        _cmdline.start(mode.Zip(), '')
+    filer = ui.getcomponent('Filer')
+    cmdline = ui.getcomponent('Cmdline')
+    if filer.dir.ismark():
+        cmdline.start(mode.Zip(), '')
     else:
-        _cmdline.start(mode.Zip(), _filer.file.name)
+        cmdline.start(mode.Zip(), filer.file.name)
 
 def _zipeach():
-    _cmdline.start(mode.Zip(each=True), '')
+    ui.getcomponent('Cmdline').start(mode.Zip(each=True), '')
 
 def _unzip():
-    if _filer.dir.ismark():
-        _cmdline.start(mode.UnZip(), _filer.workspace.nextdir.path)
+    filer = ui.getcomponent('Filer')
+    cmdline = ui.getcomponent('Cmdline')
+    if filer.dir.ismark():
+        cmdline.start(mode.UnZip(), filer.workspace.nextdir.path)
     else:
-        _cmdline.start(mode.UnZip(), _filer.file.name)
+        cmdline.start(mode.UnZip(), filer.file.name)
