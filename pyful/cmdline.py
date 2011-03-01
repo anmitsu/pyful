@@ -564,7 +564,7 @@ class Output(ui.InfoBox):
                 if item:
                     try:
                         info.append(ui.InfoBoxContext(r.sub("", util.U(item))))
-                    except UnicodeError as e:
+                    except UnicodeError:
                         info.append(ui.InfoBoxContext("????? - Invalid encoding", attr=look.colors['ErrorMessage']))
             self.show(info)
 
