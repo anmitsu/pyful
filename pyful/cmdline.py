@@ -555,11 +555,18 @@ class Output(ui.InfoBox):
         cmd = util.expandmacro(string)
         (out, err) = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).communicate()
 
-        info = (out + err)
-        if info:
+        outputs = str(out + err)
+        if outputs:
             self.cmdline.history.hide()
-            reg = re.compile("[\r\t]")
-            self.show([ui.InfoBoxContext(reg.sub("", item)) for item in info.split(os.linesep) if item != ''])
+            info = []
+            r = re.compile("[\r\t]")
+            for item in outputs.split(os.linesep):
+                if item:
+                    try:
+                        info.append(ui.InfoBoxContext(r.sub("", util.U(item))))
+                    except UnicodeError as e:
+                        info.append(ui.InfoBoxContext("????? - Invalid encoding", attr=look.colors['ErrorMessage']))
+            self.show(info)
 
     def terminal(self):
         pass
