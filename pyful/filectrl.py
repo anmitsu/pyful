@@ -269,6 +269,7 @@ class Filectrl(object):
             threadlist.append(TarThread(f, path, tarmode, wrap))
         for t in threadlist:
             self.thread_loop(t)
+        message.puts("Finished 'tareach'")
 
     def untar(self, src, dstdir='.'):
         thread = UntarThread(src, dstdir)
@@ -289,6 +290,7 @@ class Filectrl(object):
             threadlist.append(ZipThread(f, path, wrap))
         for t in threadlist:
             self.thread_loop(t)
+        message.puts("Finished 'zipeach'")
 
 class JobThread(threading.Thread):
     def __init__(self):
