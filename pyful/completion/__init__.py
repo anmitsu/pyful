@@ -99,7 +99,7 @@ class Completion(ui.InfoBox):
         if isinstance(self.cmdline.mode, Shell):
             psquote = False
             pdquote = False
-            for c in self.parser.paststr:
+            for c in self.parser.part[0]:
                 if c == "'":
                     if not pdquote:
                         psquote = not psquote
@@ -108,7 +108,7 @@ class Completion(ui.InfoBox):
                         pdquote = not pdquote
             fsquote = False
             fdquote = False
-            for c in self.parser.futurestr:
+            for c in self.parser.part[2]:
                 if c == "'":
                     if not fdquote and not pdquote:
                         fsquote = not fsquote
@@ -121,8 +121,8 @@ class Completion(ui.InfoBox):
             else:
                 string = util.string_to_safe(string)
 
-        self.cmdline.string = self.parser.paststr + string + self.parser.futurestr
-        self.cmdline.cursor = util.mbslen(self.parser.paststr+string)
+        self.cmdline.string = self.parser.part[0] + string + self.parser.part[2]
+        self.cmdline.cursor = util.mbslen(self.parser.part[0]+string)
         self.finish()
 
     def dirname(self, path):
@@ -138,8 +138,8 @@ class Completion(ui.InfoBox):
                 return dirname
 
     def comp_files(self):
-        self.parser.paststr += self.dirname(self.parser.nowstr)
-        path = os.path.expanduser(self.parser.nowstr)
+        self.parser.part[0] += self.dirname(self.parser.part[1])
+        path = os.path.expanduser(self.parser.part[1])
 
         files = []
         for f in glob.glob(path+"*"):
@@ -151,8 +151,8 @@ class Completion(ui.InfoBox):
         return sorted(files)
 
     def comp_dirs(self):
-        self.parser.paststr += self.dirname(self.parser.nowstr)
-        path = os.path.expanduser(self.parser.nowstr)
+        self.parser.part[0] += self.dirname(self.parser.part[1])
+        path = os.path.expanduser(self.parser.part[1])
 
         dirs = []
         for f in glob.glob(path+"*"):
@@ -163,24 +163,24 @@ class Completion(ui.InfoBox):
 
     def comp_username(self):
         return sorted([usrname for usrname in [p[0] for p in pwd.getpwall()]
-                       if usrname.startswith(self.parser.nowstr)])
+                       if usrname.startswith(self.parser.part[1])])
 
     def comp_groupname(self):
         return sorted([grpname for grpname in [g[0] for g in grp.getgrall()]
-                       if grpname.startswith(self.parser.nowstr)])
+                       if grpname.startswith(self.parser.part[1])])
 
     def comp_programs(self):
         return sorted([item for item in self.programs
-                       if item.startswith(self.parser.nowstr)])
+                       if item.startswith(self.parser.part[1])])
 
     def comp_pyful_commands(self):
         from pyful.command import commands
         return sorted([cmd for cmd in list(commands.keys())
-                       if cmd.startswith(self.parser.nowstr)])
+                       if cmd.startswith(self.parser.part[1])])
 
     def comp_python_builtin_functions(self):
         return sorted([func for func in list(__builtins__.keys())
-                       if func.startswith(self.parser.nowstr)])
+                       if func.startswith(self.parser.part[1])])
 
     def comp_program_options(self):
         if self.parser.prgname in optionsdict:
@@ -200,13 +200,13 @@ class Completion(ui.InfoBox):
             return
 
         if len(candidate) == 1:
-            if candidate[0] == self.parser.nowstr:
+            if candidate[0] == self.parser.part[1]:
                 return
             self.insert(candidate[0])
             self.hide()
         else:
             self.cmdline.history.hide()
-            info = [ui.InfoBoxContext(c, histr=self.parser.nowstr) for c in candidate]
+            info = [ui.InfoBoxContext(c, histr=self.parser.part[1]) for c in candidate]
             self.show(info)
             self.maxrow = self.get_maxrow()
 
@@ -215,18 +215,15 @@ class Completion(ui.InfoBox):
         self.cmdline.history.start()
 
 class Parser(object):
-    paststr = None
-    nowstr = None
-    futurestr = None
     current_cmdline = None
     options = None
     prgname = None
 
     def __init__(self, string, pos):
-        (self.paststr, self.nowstr, self.futurestr) = self.parse(string, pos)
+        self.part = self.parse(string, pos)
 
-        past_sepetes = re.split("[;|]", self.paststr)
-        futures_seperates = re.split("[;|]", self.futurestr)
+        past_sepetes = re.split("[;|]", self.part[0])
+        futures_seperates = re.split("[;|]", self.part[2])
         if len(futures_seperates) > 1:
             self.current_cmdline = past_sepetes[-1] + futures_seperates[0]
         else:
@@ -256,7 +253,7 @@ class Parser(object):
                 ps += ns
                 ns = ""
         fs = string[pos:]
-        return (ps, ns, fs)
+        return [ps, ns, fs]
 
 class CompletionFunction(object):
     def __init__(self, comp, arguments):
@@ -268,12 +265,12 @@ class CompletionFunction(object):
 
     def options(self):
         ret = [opt for opt in self.arguments.keys()
-               if opt.startswith(self.comp.parser.nowstr)
+               if opt.startswith(self.comp.parser.part[1])
                and not opt in self.comp.parser.options]
         return sorted(ret)
 
     def complete(self):
-        if self.comp.parser.nowstr.startswith("-"):
+        if self.comp.parser.part[1].startswith("-"):
             return self.options()
 
         value = self.arguments.get(self.comp.parser.current_option, self.default)

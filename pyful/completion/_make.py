@@ -96,7 +96,7 @@ class Make(CompletionFunction):
             for line in f:
                 tmp = line.split(":")
                 if len(tmp) == 2 and "$" not in tmp[0] and "\t" not in tmp[0] and not tmp[0].startswith("#"):
-                    if tmp[0].startswith(self.comp.parser.nowstr):
+                    if tmp[0].startswith(self.comp.parser.part[1]):
                         command.append(tmp[0])
         return sorted(command)
 

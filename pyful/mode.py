@@ -63,7 +63,7 @@ class ChangeLooks(object):
     prompt = "Change looks:"
 
     def complete(self, comp):
-        return sorted([l for l in look.looks.keys() if l.startswith(comp.parser.nowstr)])
+        return sorted([l for l in look.looks.keys() if l.startswith(comp.parser.part[1])])
 
     def execute(self, name):
         if name in look.looks:
@@ -103,7 +103,7 @@ class Chmod(object):
 
     def complete(self, comp):
         symbols = ['+r', '-r', '+w', '-w', '+x', '-x']
-        return sorted([symb for symb in symbols if symb.startswith(comp.parser.nowstr)])
+        return sorted([symb for symb in symbols if symb.startswith(comp.parser.part[1])])
 
     def execute(self, mode):
         filer = ui.getcomponent("Filer")
@@ -369,7 +369,7 @@ class Menu(object):
 
     def complete(self, comp):
         return sorted([item for item in ui.getcomponent("Menu").items.keys()
-                       if item.startswith(comp.parser.nowstr)])
+                       if item.startswith(comp.parser.part[1])])
 
     def execute(self, name):
         ui.getcomponent("Menu").show(name)
@@ -852,7 +852,7 @@ class ZoomInfoBox(object):
     prompt = 'Zoom infobox:'
 
     def complete(self, comp):
-        return [str(x*10) for x in range(-10, 11) if str(x*10).startswith(comp.parser.nowstr)]
+        return [str(x*10) for x in range(-10, 11) if str(x*10).startswith(comp.parser.part[1])]
 
     def execute(self, zoom):
         try:

@@ -20,19 +20,19 @@ import subprocess
 from pyful.completion import CompletionFunction
 from pyful.completion import optionsdict
 
-def comp_pkgnames(nowstr):
+def comp_pkgnames(s):
     (out, err) = subprocess.Popen(["apt-cache", "pkgnames"], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
     li = out.split(os.linesep)
-    ret = [item for item in li if item.startswith(nowstr)]
+    ret = [item for item in li if item.startswith(s)]
     return ret
 
-def comp_dpkglist(nowstr):
+def comp_dpkglist(s):
     (out, err) = subprocess.Popen(["dpkg", "-l"], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
     pkgs = []
     for i, line in enumerate(out.split(os.linesep)):
         if i > 4:
             li = line.split()
-            if len(li) > 2 and li[1].startswith(nowstr):
+            if len(li) > 2 and li[1].startswith(s):
                 pkgs.append(li[1])
     return pkgs
 
@@ -40,16 +40,16 @@ class AptGet(CompletionFunction):
     def __init__(self, comp):
         arguments = {
             'autoclean'      : [],
-            'autoremove'     : lambda: comp_dpkglist(self.comp.parser.nowstr),
-            'build-dep'      : lambda: comp_pkgnames(self.comp.parser.nowstr),
+            'autoremove'     : lambda: comp_dpkglist(self.comp.parser.part[1]),
+            'build-dep'      : lambda: comp_pkgnames(self.comp.parser.part[1]),
             'check'          : [],
             'clean'          : [],
             'dist-upgrade'   : [],
             'dselect-upgrade': [],
-            'install'        : lambda: comp_pkgnames(self.comp.parser.nowstr),
-            'purge'          : lambda: comp_dpkglist(self.comp.parser.nowstr),
-            'remove'         : lambda: comp_dpkglist(self.comp.parser.nowstr),
-            'source'         : lambda: comp_pkgnames(self.comp.parser.nowstr),
+            'install'        : lambda: comp_pkgnames(self.comp.parser.part[1]),
+            'purge'          : lambda: comp_dpkglist(self.comp.parser.part[1]),
+            'remove'         : lambda: comp_dpkglist(self.comp.parser.part[1]),
+            'source'         : lambda: comp_pkgnames(self.comp.parser.part[1]),
             'update'         : [],
             'upgrade'        : [],
             'help'           : [],
@@ -60,23 +60,23 @@ class AptCache(CompletionFunction):
     def __init__(self, comp):
         arguments = {
             'add'      : [],
-            'depends'  : lambda: comp_pkgnames(self.comp.parser.nowstr),
-            'dotty'    : lambda: comp_pkgnames(self.comp.parser.nowstr),
+            'depends'  : lambda: comp_pkgnames(self.comp.parser.part[1]),
+            'dotty'    : lambda: comp_pkgnames(self.comp.parser.part[1]),
             'dump'     : [],
             'dumpavail': [],
             'gencaches': [],
             'help'     : [],
-            'madison'  : lambda: comp_pkgnames(self.comp.parser.nowstr),
+            'madison'  : lambda: comp_pkgnames(self.comp.parser.part[1]),
             'pkgnames' : [],
-            'policy'   : lambda: comp_pkgnames(self.comp.parser.nowstr),
-            'rdepends' : lambda: comp_pkgnames(self.comp.parser.nowstr),
+            'policy'   : lambda: comp_pkgnames(self.comp.parser.part[1]),
+            'rdepends' : lambda: comp_pkgnames(self.comp.parser.part[1]),
             'search'   : [],
-            'show'     : lambda: comp_pkgnames(self.comp.parser.nowstr),
-            'showpkg'  : lambda: comp_pkgnames(self.comp.parser.nowstr),
-            'showsrc'  : lambda: comp_pkgnames(self.comp.parser.nowstr),
+            'show'     : lambda: comp_pkgnames(self.comp.parser.part[1]),
+            'showpkg'  : lambda: comp_pkgnames(self.comp.parser.part[1]),
+            'showsrc'  : lambda: comp_pkgnames(self.comp.parser.part[1]),
             'stats'    : [],
             'unmet'    : [],
-            'xvcg'     : lambda: comp_pkgnames(self.comp.parser.nowstr),
+            'xvcg'     : lambda: comp_pkgnames(self.comp.parser.part[1]),
             }
         CompletionFunction.__init__(self, comp, arguments)
 

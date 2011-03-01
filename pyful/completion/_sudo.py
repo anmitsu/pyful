@@ -55,7 +55,7 @@ class Sudo(CompletionFunction):
         if candidate:
             return candidate
 
-        if self.comp.parser.nowstr.startswith("-"):
+        if self.comp.parser.part[1].startswith("-"):
             return self.options()
 
         value = self.arguments.get(self.comp.parser.current_option, self.default)
