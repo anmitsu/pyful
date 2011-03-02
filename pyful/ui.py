@@ -267,7 +267,7 @@ class InfoBox(Component):
         max_page = (size-1)//(height*maxrow)+1
         self.win.addstr("%s(%d) [%d/%d]" %
                         (self._title, size, current_page, max_page),
-                        curses.A_BOLD | curses.A_UNDERLINE)
+                        look.colors['InfoBoxTitle'])
 
         line = 0
         for i in range(self._scrolltop, size):
