@@ -191,8 +191,12 @@ class InfoBox(Component):
         self._info = None
 
     def mvscroll(self, x):
+        (h, w) = self.win.getmaxyx()
         self._scrolltop += x
-        self._cursor = self._scrolltop
+        if self._scrolltop > self._cursor:
+            self._cursor = self._scrolltop
+        elif self._scrolltop+h-3 < self._cursor:
+            self._cursor = self._scrolltop+h-3
 
     def mvcursor(self, x):
         if not self._info:
