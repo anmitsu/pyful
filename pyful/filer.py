@@ -1155,8 +1155,8 @@ class Directory(object):
                 p = 'Bot'
             else:
                 p = str(int(p)) + '%'
-            status = ' |  [%d/%d] %sbytes (%s) %s' % (len(self.mark_files), size-1,
-                                                         self.mark_size, p, self.sort_kind)
+            status = ' |  [%d/%d] %sbytes %3s(%s) %s' % (len(self.mark_files), size-1, self.mark_size,
+                                                         p, self.cursor, self.sort_kind)
             if self.maskreg is not None:
                 status += ' Mask:%s' % self.maskreg.pattern
             if self.list_title is not None:
