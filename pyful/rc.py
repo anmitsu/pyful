@@ -52,7 +52,6 @@ Workspace.default_path = '~/'
 
 # Set the workspace layout.
 #
-# The workspace layout indicate as follows:
 #     'Tile'
 #     'Tile reverse'
 #     'Oneline'
@@ -63,21 +62,28 @@ Workspace.layout = 'Tile'
 
 # Set default kind of sorting in directory.
 #
-# The kind of sorting indicate as follows:
-#     Name[^] -> Name sort of ascending order;
-#     Name[$] -> Name sort of descending order;
-#     Size[^] -> File size sort of ascending order;
-#     Size[$] -> File size sort of descending order;
-#     Time[^] -> Time sort of ascending order;
-#     Time[$] -> Time sort of descending order;
-#     Permission[^] -> Permission sort of ascending order;
-#     Permission[$] -> Permission sort of descending order;
-#     Link[^] -> Link sort of ascending order;
-#     Link[$] -> Link sort of descending order;
-#     Ext[^] -> File extension sort of ascending order;
-#     Ext[$] -> File extension sort of descending order.
+#     'Name[^]' -> Name sort of ascending order;
+#     'Name[$]' -> Name sort of descending order;
+#     'Size[^]' -> File size sort of ascending order;
+#     'Size[$]' -> File size sort of descending order;
+#     'Time[^]' -> Time sort of ascending order;
+#     'Time[$]' -> Time sort of descending order;
+#     'Permission[^]' -> Permission sort of ascending order;
+#     'Permission[$]' -> Permission sort of descending order;
+#     'Link[^]' -> Link sort of ascending order;
+#     'Link[$]' -> Link sort of descending order;
+#     'Ext[^]' -> File extension sort of ascending order;
+#     'Ext[$]' -> File extension sort of descending order.
 #
 Directory.sort_kind = 'Name[^]'
+
+# Set scroll type in directory.
+#
+#     'HalfScroll'
+#     'PageScroll'
+#     'ContinuousScroll'
+#
+Directory.scroll_type = 'HalfScroll'
 
 # Distinguish upper case and lower case at a finder?
 Finder.smartcase = True
