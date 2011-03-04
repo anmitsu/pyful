@@ -1148,13 +1148,13 @@ class Directory(object):
                 self.file.view()
             self.finder.view()
         else:
-            p = int(float(self.scrolltop)/float(size-height)*100)
+            p = float(self.scrolltop)/float(size-height)*100
             if p == 0:
                 p = 'Top'
             elif p >= 100:
                 p = 'Bot'
             else:
-                p = str(p) + '%'
+                p = str(int(p)) + '%'
             status = ' |  [%d/%d] %sbytes (%s) %s' % (len(self.mark_files), size-1,
                                                          self.mark_size, p, self.sort_kind)
             if self.maskreg is not None:
