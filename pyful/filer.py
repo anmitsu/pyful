@@ -1092,15 +1092,15 @@ class Directory(object):
 
         if not height: return
 
-        if self.cursor >= self.scrolltop+height or self.cursor < self.scrolltop:
-            self.scroll()
-
         if self.cursor < 0:
             self.cursor = 0
         elif self.cursor >= size:
             self.cursor = size - 1
 
-        if self.scrolltop < 0:
+        if self.cursor >= self.scrolltop+height or self.cursor < self.scrolltop:
+            self.scroll()
+
+        if self.scrolltop < 0 or size < height:
             self.scrolltop = 0
         elif self.scrolltop >= size:
             self.scrolltop = (size//height) * height
