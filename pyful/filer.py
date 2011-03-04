@@ -649,7 +649,6 @@ class Directory(object):
 
     def diskread(self):
         marks = self.mark_files.copy()
-        self.win.erase()
         self.files[:] = [FileStat(os.pardir)]
         self.mark_files.clear()
 
@@ -1079,10 +1078,8 @@ class Directory(object):
 
     def view(self, focus):
         size = len(self.files)
-        height, width = self.win.getmaxyx()
-        sheight, swidth = self.statwin.getmaxyx()
-        height = height - sheight - 1
-        width -= 3
+        height = self.win.getmaxyx()[0] - self.statwin.getmaxyx()[0] - 1
+        width = self.win.getmaxyx()[1] - 3
 
         if not height: return
 
