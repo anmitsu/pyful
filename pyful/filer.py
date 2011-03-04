@@ -482,6 +482,7 @@ class Workspace(object):
 
 class Directory(object):
     sort_kind = 'Name[^]'
+    scroll_type = 'HalfScroll'
     keymap = {}
 
     def __init__(self, path, height, width, begy, begx):
@@ -550,10 +551,21 @@ class Directory(object):
         self.cursor = x
 
     def pagedown(self):
-        self.cursor += self.win.getmaxyx()[0] - self.statwin.getmaxyx()[0] - 1
+        height = self.win.getmaxyx()[0] - self.statwin.getmaxyx()[0] - 1
+        size = len(self.files)
+        if self.scrolltop+height >= size:
+            return
+        [f.cache_clear() for f in self.files[self.scrolltop:self.scrolltop+height]]
+        self.scrolltop += height
+        self.cursor += height
 
     def pageup(self):
-        self.cursor -= self.win.getmaxyx()[0] - self.statwin.getmaxyx()[0] - 1
+        if self.scrolltop == 0:
+            return
+        height = self.win.getmaxyx()[0] - self.statwin.getmaxyx()[0] - 1
+        [f.cache_clear() for f in self.files[self.scrolltop:self.scrolltop+height]]
+        self.scrolltop -= height
+        self.cursor -= height
 
     def enter_dir(self):
         self.chdir(self.file.name)
@@ -1056,6 +1068,21 @@ class Directory(object):
         self.win.bkgd(look.colors['Window'])
         self.statwin.bkgd(look.colors['Window'])
 
+    def scroll(self):
+        height = self.win.getmaxyx()[0] - self.statwin.getmaxyx()[0] - 1
+        [f.cache_clear() for f in self.files[self.scrolltop:self.scrolltop+height]]
+        if self.scroll_type == 'HalfScroll':
+            self.scrolltop = self.cursor - (height//2)
+        elif self.scroll_type == 'PageScroll':
+            self.scrolltop = (self.cursor//height) * height
+        elif self.scroll_type == 'ContinuousScroll':
+            if self.cursor >= self.scrolltop+height:
+                self.scrolltop = self.cursor - height + 1
+            elif self.cursor < self.scrolltop:
+                self.scrolltop = self.cursor
+        else:
+            self.scrolltop = self.cursor - (height//2)
+
     def view(self, focus):
         size = len(self.files)
         height, width = self.win.getmaxyx()
@@ -1065,18 +1092,20 @@ class Directory(object):
 
         if not height: return
 
+        if self.cursor >= self.scrolltop+height or self.cursor < self.scrolltop:
+            self.scroll()
+
         if self.cursor < 0:
             self.cursor = 0
         elif self.cursor >= size:
             self.cursor = size - 1
 
-        if self.cursor >= self.scrolltop+height or self.cursor < self.scrolltop:
-            for f in self.files[self.scrolltop:self.scrolltop+height]:
-                f.cache_clear()
-            self.scrolltop = (self.cursor//height) * height
-            if size - self.scrolltop < height:
-                self.win.erase()
+        if self.scrolltop < 0:
+            self.scrolltop = 0
+        elif self.scrolltop >= size:
+            self.scrolltop = (size//height) * height
 
+        self.win.erase()
         self.win.box()
         self.win.move(0, 2)
         self.win.addstr(util.path_omission(self.path.replace(os.environ['HOME'], "~", 1), width), look.colors['DirectoryPath'])
