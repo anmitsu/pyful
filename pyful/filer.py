@@ -760,10 +760,7 @@ class Directory(object):
         if f.name == os.pardir:
             return
         f.marked = False
-        try:
-            self.mark_files.pop(f)
-        except:
-            pass
+        self.mark_files.pop(f.name)
         self.mark_size = self.get_mark_size()
 
     def mark_toggle(self):
@@ -772,10 +769,7 @@ class Directory(object):
             return self.mvcursor(+1)
         if f.marked:
             f.marked = False
-            try:
-                self.mark_files.pop(f)
-            except:
-                pass
+            self.mark_files.pop(f.name)
         else:
             f.marked = True
             self.mark_files[f.name] = f
