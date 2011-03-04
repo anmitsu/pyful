@@ -94,6 +94,9 @@ class Help(ui.InfoBox):
         key = []
         for k, v in Directory.keymap.items():
             if v == cmd:
+                if k[1] == 0:
+                    key.append(ui.InfoBoxContext(self.indent+'Control + KEY_SPACE'))
+                    continue
                 keybind = curses.keyname(k[1])
                 if keybind.isupper() and len(keybind) == 1:
                     keybind = 'Shift + %s' % keybind.lower()
