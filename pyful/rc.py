@@ -122,6 +122,12 @@ FileStat.view_size = True
 # Display the change time of file?
 FileStat.view_mtime = True
 
+# Set box character.
+# Smooth box:
+ui.setbox()
+# Classical box:
+# ui.setbox('|', '|', '-', '-', '+', '+', '+', '+')
+
 # Set zoom attribute of infobox.
 # Infobox is an area displaying information of cmdline and message.
 ui.InfoBox.zoom = 0
