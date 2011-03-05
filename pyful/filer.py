@@ -1139,7 +1139,10 @@ class Directory(object):
                 self.file.view()
             self.finder.view()
         else:
-            p = float(self.scrolltop)/float(size-height)*100
+            try:
+                p = float(self.scrolltop)/float(size-height)*100
+            except ZeroDivisionError:
+                p = float(self.scrolltop)/float(size)*100
             if p == 0:
                 p = 'Top'
             elif p >= 100:
