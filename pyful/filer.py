@@ -25,6 +25,7 @@ import pwd
 import re
 import stat
 import time
+from string import Template
 
 from pyful import look
 from pyful import message
@@ -483,6 +484,7 @@ class Workspace(object):
 class Directory(object):
     sort_kind = 'Name[^]'
     scroll_type = 'HalfScroll'
+    statusbar_format = " [$MARK/$FILE] ${MARKSIZE}bytes $SCROLL($CURSOR) $SORT "
     keymap = {}
 
     def __init__(self, path, height, width, begy, begx):
@@ -1149,14 +1151,17 @@ class Directory(object):
                 p = 'Bot'
             else:
                 p = str(int(p)) + '%'
-            status = ' |  [%d/%d] %sbytes %3s(%s) %s' % (len(self.mark_files), size-1, self.mark_size,
-                                                         p, self.cursor, self.sort_kind)
+
+            status = Template(self.statusbar_format).safe_substitute(
+                MARK=len(self.mark_files), FILE=size-1,
+                MARKSIZE=self.mark_size, SCROLL=p,
+                CURSOR=self.cursor, SORT=self.sort_kind)
+
             if self.maskreg is not None:
                 status += ' Mask:%s' % self.maskreg.pattern
             if self.list_title is not None:
                 status += ' ' + self.list_title
 
-            status += " |"
             (sy, sx) = self.statwin.getmaxyx()
             if util.termwidth(status) > sx-2:
                 status = util.mbs_ljust(status, sx-2)
