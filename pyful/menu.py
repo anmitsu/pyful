@@ -88,7 +88,7 @@ class Menu(ui.Component):
         elif not size == 0 and self.cursor >= size:
             self.cursor = 0
 
-        self.win.box()
+        ui.box(self.win)
         self.win.move(0, 2)
         self.win.addstr(self.title, curses.A_BOLD)
 

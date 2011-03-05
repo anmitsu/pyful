@@ -24,6 +24,7 @@ from pyful import util
 from pyful.keymap import *
 
 _components = {}
+_boxtable = []
 
 def getcomponent(name):
     return _components[name]
@@ -44,6 +45,13 @@ def getch():
 def zoom_infobox(zoom):
     InfoBox.zoom = zoom
     InfoBox.resize()
+
+def setbox(*boxtable):
+    global _boxtable
+    _boxtable = boxtable
+
+def box(win):
+    win.border(*_boxtable)
 
 def resize():
     getcomponent("Cmdscr").resize()
@@ -262,7 +270,7 @@ class InfoBox(Component):
                 self._scrolltop = 0
         self.win.erase()
 
-        self.win.box()
+        box(self.win)
         self.win.move(0, 2)
         if self._cursor <= -1:
             current_page = 1

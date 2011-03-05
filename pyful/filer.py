@@ -1097,7 +1097,7 @@ class Directory(object):
             self.scrolltop = (size//height) * height
 
         self.win.erase()
-        self.win.box()
+        ui.box(self.win)
         self.win.move(0, 2)
         self.win.addstr(util.path_omission(self.path.replace(os.environ['HOME'], "~", 1), width), look.colors['DirectoryPath'])
 
@@ -1131,7 +1131,7 @@ class Directory(object):
 
         self.statwin.erase()
         if not self.finder.active:
-            self.statwin.box()
+            ui.box(self.statwin)
         self.statwin.move(0, 1)
 
         if self.finder.active:
