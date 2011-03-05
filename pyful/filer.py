@@ -346,10 +346,10 @@ class Workspace(object):
         size = len(self.dirs)
 
         (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
+        height = y - (ui.getcomponent("Cmdscr").win.getmaxyx()[0] + ui.getcomponent("Titlebar").win.getmaxyx()[0])
         if size == 1:
-            self.dirs[0].resize(y-3, x, 1, 0)
+            self.dirs[0].resize(height, x, 1, 0)
         else:
-            height = y - 3
             width = x // 2
             wodd = x % 2
 
@@ -377,38 +377,34 @@ class Workspace(object):
     def oneline(self):
         self.layout = 'Oneline'
         (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
-        height = y - 3
-        width = x // len(self.dirs)
-        for i, d in enumerate(self.dirs):
-            d.win.erase()
-            d.win.noutrefresh()
+        height = y - (ui.getcomponent("Cmdscr").win.getmaxyx()[0] + ui.getcomponent("Titlebar").win.getmaxyx()[0])
+        k = len(self.dirs)
+        width = x // k
+        odd = x % k
+        for i, d in enumerate(self.dirs[:-1]):
             d.resize(height, width, 1, width*i)
+        self.dirs[-1].resize(height, width+odd, 1, width*(k-1))
         self.all_reload()
 
     def onecolumn(self):
         self.layout = 'Onecolumn'
         (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
-        odd = (y-3) % len(self.dirs)
-        height = (y-3) // len(self.dirs)
+        y -= ui.getcomponent("Cmdscr").win.getmaxyx()[0] + ui.getcomponent("Titlebar").win.getmaxyx()[0]
+        k = len(self.dirs)
+        odd = y % k
+        height = y // k
         width = x
-        size = len(self.dirs) - 1
-        for i, d in enumerate(self.dirs):
-            d.win.erase()
-            d.win.noutrefresh()
-            if i == size:
-                d.resize(height+odd, width, height*i+1, 0)
-            else:
-                d.resize(height, width, height*i+1, 0)
+        for i, d in enumerate(self.dirs[:-1]):
+            d.resize(height, width, height*i+1, 0)
+        self.dirs[-1].resize(height+odd, width, height*(k-1)+1, 0)
         self.all_reload()
 
     def fullscreen(self):
         self.layout = 'Fullscreen'
         (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
-        height = y - 3
+        height = y - (ui.getcomponent("Cmdscr").win.getmaxyx()[0] + ui.getcomponent("Titlebar").win.getmaxyx()[0])
         width = x
         for d in self.dirs:
-            d.win.erase()
-            d.win.noutrefresh()
             d.resize(height, width, 1, 0)
         self.all_reload()
 
@@ -1057,6 +1053,8 @@ class Directory(object):
         self.sort_kind = 'Ext[$]'
 
     def resize(self, height, width, begy, begx):
+        self.win.erase()
+        self.statwin.erase()
         self.win = curses.newwin(height, width, begy, begx)
         begy, begx = self.win.getbegyx()
         self.statwin = curses.newwin(1, width, begy+height-1, begx)
