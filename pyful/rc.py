@@ -85,6 +85,9 @@ Directory.sort_kind = 'Name[^]'
 #
 Directory.scroll_type = 'HalfScroll'
 
+# Set statusbar format in directory.
+Directory.statusbar_format = " [$MARK/$FILE] ${MARKSIZE}bytes $SCROLL($CURSOR) $SORT "
+
 # Distinguish upper case and lower case at a finder?
 Finder.smartcase = True
 
