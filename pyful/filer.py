@@ -1113,8 +1113,7 @@ class Directory(object):
                 break
 
             f = self.files[i]
-            fstat = f.get_file_stat()
-            fname = f.ljust_name(f.get_file_name(self.path), width-len(fstat))
+            fstr = f.get_view_file_string(self.path, width)
 
             if f.marked:
                 if self.cursor == i and focus:
@@ -1122,13 +1121,13 @@ class Directory(object):
                 else:
                     attr = look.colors['MarkFile']
                 self.win.move(line, 1)
-                self.win.addstr('*' + fname + fstat, attr)
+                self.win.addstr('*' + fstr, attr)
             else:
                 attr = f.get_attr()
                 if self.cursor == i and focus:
                     attr += curses.A_REVERSE
                 self.win.move(line, 1)
-                self.win.addstr(' ' + fname + fstat, attr)
+                self.win.addstr(' ' + fstr, attr)
         self.win.noutrefresh()
 
         self.statwin.erase()
@@ -1295,9 +1294,7 @@ class FileStat(object):
         else:
             self.stat = self.lstat
 
-        self.just_name = None
-        self.view_name = None
-        self.view_stat = None
+        self.view_file_string = None
 
     def isdir(self):
         return stat.S_ISDIR(self.stat.st_mode)
@@ -1321,19 +1318,17 @@ class FileStat(object):
         return stat.S_IEXEC & self.stat.st_mode
 
     def cache_clear(self):
-        self.just_name = None
-        self.view_name = None
-        self.view_stat = None
+        self.view_file_string = None
 
-    def ljust_name(self, name, length):
-        if self.just_name is None:
-            self.just_name = util.mbs_ljust(name, length)
-        return self.just_name
+    def get_view_file_string(self, path, width):
+        if self.view_file_string is None:
+            fname = self.get_file_name(path)
+            fstat = self.get_file_stat()
+            fname = util.mbs_ljust(fname, width-util.termwidth(fstat))
+            self.view_file_string = fname + fstat
+        return self.view_file_string
 
     def get_file_name(self, path):
-        if self.view_name:
-            return self.view_name
-
         if self.view_ext and not self.isdir() and not self.islink():
             fname = self.name.replace(util.extname(self.name), '')
         else:
@@ -1355,14 +1350,9 @@ class FileStat(object):
             fname += '='
         elif self.isexec():
             fname += '*'
-
-        self.view_name = fname
-        return self.view_name
+        return fname
 
     def get_file_stat(self):
-        if self.view_stat:
-            return self.view_stat
-
         fstat = ''
         if self.view_ext and not self.isdir() and not self.islink():
             fstat += ' %s' % util.extname(self.name)
@@ -1381,9 +1371,7 @@ class FileStat(object):
             fstat += ' %s' % self.get_permission()
         if self.view_mtime:
             fstat += ' %s' % self.get_mtime()
-
-        self.view_stat = fstat
-        return self.view_stat
+        return fstat
 
     def get_attr(self):
         if self.islink():
