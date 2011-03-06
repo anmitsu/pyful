@@ -184,11 +184,6 @@ def kill_thread():
         if th.title == ret:
             th.kill()
 
-def view_threads():
-    for i, t in enumerate(Filectrl.threads):
-        message.puts("[%s] %s" % (str(i+1), t.status), 0)
-    curses.doupdate()
-
 class Subloop(object):
     def __init__(self):
         self.cmdline = ui.getcomponent("Cmdline")
@@ -196,6 +191,16 @@ class Subloop(object):
         self.menu = ui.getcomponent("Menu")
         self.message = ui.getcomponent("Message")
         self.stdscr = ui.getcomponent("Stdscr").win
+
+    def subthreads_view(self):
+        cmdscr = ui.getcomponent("Cmdscr").win
+        y, x = cmdscr.getmaxyx()
+        string = ""
+        for i, t in enumerate(Filectrl.threads):
+            string += "[%d] %s " % (i+1, t.title)
+        cmdscr.move(0, 1)
+        cmdscr.addstr(util.mbs_ljust(string, x-2), curses.A_BOLD)
+        cmdscr.noutrefresh()
 
     def input(self, meta, key):
         if self.cmdline.is_active:
@@ -212,7 +217,10 @@ class Subloop(object):
         if self.cmdline.is_active:
             self.cmdline.view()
         elif self.message.is_active:
+            self.subthreads_view()
             self.message.view()
+        else:
+            self.subthreads_view()
         process.view_process()
         curses.doupdate()
 
@@ -299,7 +307,6 @@ class JobThread(threading.Thread):
         self.error = 0
         self.active = True
         self.title = self.__class__.__name__
-        self.status = ""
 
     def run(self):
         pass
@@ -307,13 +314,17 @@ class JobThread(threading.Thread):
     def kill(self):
         pass
 
+    def view_thread(self, status):
+        message.puts(status, 0)
+        curses.doupdate()
+
 class TarThread(JobThread):
     tarmodes = {'tar': '', 'gzip': 'gz', 'bzip2': 'bz2'}
     tarexts = {'tar': '.tar', 'gzip': '.tgz', 'bzip2': '.bz2'}
 
     def __init__(self, src, dst, tarmode='gzip', wrap=''):
         JobThread.__init__(self)
-        self.status = "Reading..."
+        self.view_thread("Reading...")
         if isinstance(src, list):
             self.src = [util.abspath(f) for f in src]
             self.src_dirname = util.U(os.getcwd()) + os.sep
@@ -364,8 +375,7 @@ class TarThread(JobThread):
         os.chmod(self.dst, 0o644)
 
     def kill(self):
-        self.status = "Waiting..."
-        view_threads()
+        self.view_thread("Waiting...")
         self.active = False
         self.join()
 
@@ -381,8 +391,7 @@ class TarThread(JobThread):
 
     def add_file(self, tar, source):
         arcname = source.replace(os.path.commonprefix([source, self.src_dirname]), '')
-        self.status = "Adding: " + arcname
-        view_threads()
+        self.view_thread("Adding: " + arcname)
         try:
             tar.add(source, os.path.join(self.wrap, arcname), recursive=False)
         except Exception as e:
@@ -395,7 +404,7 @@ class UntarThread(JobThread):
 
     def __init__(self, src, dstdir='.'):
         JobThread.__init__(self)
-        self.status = "Reading..."
+        self.view_thread("Reading...")
         if isinstance(src, list):
             self.src = [util.abspath(f) for f in src]
             self.title = "Untar: mark files"
@@ -419,8 +428,7 @@ class UntarThread(JobThread):
             self.error = e
 
     def kill(self):
-        self.status = "Waiting..."
-        view_threads()
+        self.view_thread("Waiting...")
         self.active = False
         self.join()
 
@@ -435,8 +443,7 @@ class UntarThread(JobThread):
             for info in tar.getmembers():
                 if not self.active:
                     raise FilectrlCancel("Untar canceled: %s" % info.name)
-                self.status = "Untar: " + info.name
-                view_threads()
+                self.view_thread("Untar: " + info.name)
                 tar.extract(info, self.dstdir)
                 if info.isdir():
                     self.dirlist.append(info)
@@ -450,7 +457,7 @@ class UntarThread(JobThread):
 class UnzipThread(JobThread):
     def __init__(self, src, dstdir=''):
         JobThread.__init__(self)
-        self.status = 'Reading...'
+        self.view_thread('Reading...')
         if isinstance(src, list):
             self.src = [util.abspath(f) for f in src]
             self.title = "Unzip: mark files"
@@ -474,8 +481,7 @@ class UnzipThread(JobThread):
             self.error = e
 
     def kill(self):
-        self.status = "Waiting..."
-        view_threads()
+        self.view_thread("Waiting...")
         self.active = False
         self.join()
 
@@ -515,8 +521,7 @@ class UnzipThread(JobThread):
                 os.makedirs(dirpath)
             source = myzip.open(fname)
             target = open(path, 'wb')
-            self.status = 'Inflating: ' + ufname
-            view_threads()
+            self.view_thread('Inflating: ' + ufname)
             shutil.copyfileobj(source, target)
             source.close()
             target.close()
@@ -541,7 +546,7 @@ class UnzipThread(JobThread):
 class ZipThread(JobThread):
     def __init__(self, src, dst, wrap=''):
         JobThread.__init__(self)
-        self.status = 'Reading...'
+        self.view_thread('Reading...')
         if isinstance(src, list):
             self.src = [util.abspath(f) for f in src]
             self.src_dirname = util.U(os.getcwd()) + os.sep
@@ -583,8 +588,7 @@ class ZipThread(JobThread):
             os.utime(self.dst, (lst.st_mtime, lst.st_mtime))
 
     def kill(self):
-        self.status = "Waiting..."
-        view_threads()
+        self.view_thread("Waiting...")
         self.active = False
         self.join()
 
@@ -600,8 +604,7 @@ class ZipThread(JobThread):
 
     def write_file(self, myzip, source):
         arcname = source.replace(os.path.commonprefix([source, self.src_dirname]), '')
-        self.status = "Adding: " + arcname
-        view_threads()
+        self.view_thread("Adding: " + arcname)
         try:
             myzip.write(source, os.path.join(self.wrap, arcname))
         except Exception as e:
@@ -614,11 +617,11 @@ class DeleteThread(JobThread):
         JobThread.__init__(self)
         if isinstance(path, list):
             self.title = "Delete: mark files"
-            self.status = "Deleting: mark files"
+            self.view_thread("Deleting: mark files")
             self.path = [util.abspath(f) for f in path]
         else:
             self.title = "Delete: %s" % path
-            self.status = "Deleting: %s" % util.unix_basename(path)
+            self.view_thread("Deleting: %s" % util.unix_basename(path))
             self.path = util.abspath(path)
 
     def run(self):
@@ -638,15 +641,13 @@ class DeleteThread(JobThread):
         if not os.access(path, os.R_OK) and not os.path.islink(path):
             raise OSError("No permission: %s" % path)
         if os.path.islink(path) or not os.path.isdir(path):
-            self.status = "Deleting: " + util.unix_basename(path)
-            view_threads()
+            self.view_thread("Deleting: " + util.unix_basename(path))
             os.remove(path)
         else:
             dirlist = [path]
             for root, dirs, files in os.walk(path):
                 for f in files:
-                    self.status = "Deleting: " + f
-                    view_threads()
+                    self.view_thread("Deleting: " + f)
                     os.remove(os.path.join(root, f))
                     if not self.active:
                         raise FilectrlCancel("Delete canceled: %s" % f)
@@ -664,7 +665,7 @@ class DeleteThread(JobThread):
 class CopyThread(JobThread):
     def __init__(self, src, dst):
         JobThread.__init__(self)
-        self.status = "Copy starting..."
+        self.view_thread("Copy starting...")
         self.title = "Copy thread: %s" % self.name
         if isinstance(src, list):
             src = [util.abspath(f) for f in src]
@@ -689,15 +690,14 @@ class CopyThread(JobThread):
         self.fjg.copydirs()
 
     def kill(self):
-        self.status = "Waiting..."
-        view_threads()
+        self.view_thread("Waiting...")
         self.active = False
         self.join()
 
 class MoveThread(JobThread):
     def __init__(self, src, dst):
         JobThread.__init__(self)
-        self.status = "Move starting..."
+        self.view_thread("Move starting...")
         self.title = "Move thread: %s" % self.name
         if isinstance(src, list):
             src = [util.abspath(f) for f in src]
@@ -732,8 +732,7 @@ class MoveThread(JobThread):
                     pass
 
     def kill(self):
-        self.status = "Waiting..."
-        view_threads()
+        self.view_thread("Waiting...")
         self.active = False
         self.join()
 
@@ -848,8 +847,7 @@ class FileJob(object):
                 if not os.access(self.dst, os.W_OK):
                     os.remove(self.dst)
 
-            thread.status = "Coping: " + util.unix_basename(self.src)
-            view_threads()
+            thread.view_thread("Coping: " + util.unix_basename(self.src))
 
             if os.path.islink(self.src):
                 self.copysymlink(self.src, self.dst)
@@ -868,8 +866,7 @@ class FileJob(object):
                 if not os.access(self.dst, os.W_OK):
                     os.remove(self.dst)
 
-            thread.status = "Moving: " + util.unix_basename(self.src)
-            view_threads()
+            thread.view_thread("Moving: " + util.unix_basename(self.src))
 
             os.rename(self.src, self.dst)
         except EnvironmentError as e:
