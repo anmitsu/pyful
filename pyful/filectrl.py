@@ -666,10 +666,11 @@ class CopyThread(JobThread):
     def __init__(self, src, dst):
         JobThread.__init__(self)
         self.view_thread("Copy starting...")
-        self.title = "Copy thread: %s" % self.name
         if isinstance(src, list):
+            self.title = "Copy: mark files -> %s" % dst
             src = [util.abspath(f) for f in src]
         else:
+            self.title = "Copy: %s -> %s" % (src, dst)
             src = util.abspath(src)
         if dst.endswith(os.sep):
             dst = util.abspath(dst) + os.sep
@@ -698,10 +699,11 @@ class MoveThread(JobThread):
     def __init__(self, src, dst):
         JobThread.__init__(self)
         self.view_thread("Move starting...")
-        self.title = "Move thread: %s" % self.name
         if isinstance(src, list):
+            self.title = "Move: mark files -> %s" % dst
             src = [util.abspath(f) for f in src]
         else:
+            self.title = "Move: %s -> %s" % (src, dst)
             src = util.abspath(src)
         if dst.endswith(os.sep):
             dst = util.abspath(dst) + os.sep
