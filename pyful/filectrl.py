@@ -399,34 +399,34 @@ class UntarThread(JobThread):
             self.src = util.abspath(src)
             self.title = "Untar: %s" % self.src
         self.dstdir = util.abspath(dstdir)
-        self.directories = []
+        self.dirlist = []
 
     def run(self):
+        if not os.access(self.dstdir, os.W_OK):
+            self.error = OSError("No permission: %s" % self.dstdir)
+            return
         try:
             if isinstance(self.src, list):
                 for f in self.src:
-                    self._extract(f)
+                    self.extract(f)
             else:
-                self._extract(self.src)
+                self.extract(self.src)
         except FilectrlCancel as e:
             self.error = e
 
-        self.directories.sort(key=lambda a: a.name)
-        self.directories.reverse()
-        for info in self.directories:
-            dirpath = os.path.join(self.dstdir, info.name)
-            os.utime(dirpath, (info.mtime, info.mtime))
-
+    def kill(self):
+        self.status = "Waiting..."
+        view_threads()
         self.active = False
+        self.join()
 
-    def _extract(self, source):
+    def extract(self, source):
         import tarfile
         mode = self.tarmodes.get(util.extname(source), 'gz')
         try:
             tar = tarfile.open(source, 'r:'+mode)
         except Exception as e:
-            self.error = e
-            return 
+            return message.exception(e)
         try:
             for info in tar.getmembers():
                 if not self.active:
@@ -435,15 +435,13 @@ class UntarThread(JobThread):
                 view_threads()
                 tar.extract(info, self.dstdir)
                 if info.isdir():
-                    self.directories.append(info)
+                    self.dirlist.append(info)
         finally:
+            for dinfo in reversed(sorted(self.dirlist, key=lambda a: a.name)):
+                dirpath = os.path.join(self.dstdir, dinfo.name) 
+                os.utime(dirpath, (dinfo.mtime, dinfo.mtime))
+            self.dirlist[:] = []
             tar.close()
-
-    def kill(self):
-        self.status = "Waiting..."
-        view_threads()
-        self.active = False
-        self.join()
 
 class UnzipThread(JobThread):
     def __init__(self, src, dstdir=''):
@@ -486,7 +484,7 @@ class UnzipThread(JobThread):
         try:
             for info in myzip.infolist():
                 if not self.active:
-                    raise FilectrlCancel("unzip canceled: %s" % info.filename)
+                    raise FilectrlCancel("Unzip canceled: %s" % info.filename)
                 try:
                     self.extract_file(myzip, info)
                 except Exception as e:
