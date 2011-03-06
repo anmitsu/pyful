@@ -153,7 +153,9 @@ def replace(pattern, repstr):
             message.exception(e)
             break
 
-def unzip(src, dstdir=''):
+def unzip(src, dstdir):
+    if not dstdir:
+        dstdir  = './'
     Filectrl().unzip(src, dstdir)
 
 def zip(src, dst, wrap=''):
@@ -172,7 +174,9 @@ def tareach(src, dst, tarmode='gzip', wrap=''):
         return message.error("source must present `list'")
     Filectrl().tareach(src, dst, tarmode, wrap)
 
-def untar(src, dstdir='.'):
+def untar(src, dstdir):
+    if not dstdir:
+        dstdir  = './'
     Filectrl().untar(src, dstdir)
 
 def kill_thread():
@@ -283,7 +287,7 @@ class Filectrl(object):
         thread = UntarThread(src, dstdir)
         self.thread_loop(thread)
 
-    def unzip(self, src, dstdir=''):
+    def unzip(self, src, dstdir):
         thread = UnzipThread(src, dstdir)
         self.thread_loop(thread)
 
@@ -325,18 +329,18 @@ class TarThread(JobThread):
     def __init__(self, src, dst, tarmode='gzip', wrap=''):
         JobThread.__init__(self)
         self.view_thread("Reading...")
-        if isinstance(src, list):
-            self.src = [util.abspath(f) for f in src]
-            self.src_dirname = util.U(os.getcwd()) + os.sep
-            self.title = "Tar: mark files"
-        else:
-            self.src = util.abspath(src)
-            self.src_dirname = util.unix_dirname(self.src) + os.sep
-            self.title = "Tar: %s" % self.src
         self.dst = util.abspath(dst)
         ext = self.tarexts[tarmode]
         if not self.dst.endswith(ext):
             self.dst += ext
+        if isinstance(src, list):
+            self.title = "Tar: mark files -> %s" % self.dst
+            self.src = [util.abspath(f) for f in src]
+            self.src_dirname = util.U(os.getcwd()) + os.sep
+        else:
+            self.title = "Tar: %s -> %s" % (util.unix_basename(src), self.dst)
+            self.src = util.abspath(src)
+            self.src_dirname = util.unix_dirname(self.src) + os.sep
         self.tarmode = tarmode
         self.wrap = wrap
 
@@ -405,13 +409,13 @@ class UntarThread(JobThread):
     def __init__(self, src, dstdir='.'):
         JobThread.__init__(self)
         self.view_thread("Reading...")
-        if isinstance(src, list):
-            self.src = [util.abspath(f) for f in src]
-            self.title = "Untar: mark files"
-        else:
-            self.src = util.abspath(src)
-            self.title = "Untar: %s" % self.src
         self.dstdir = util.abspath(dstdir)
+        if isinstance(src, list):
+            self.title = "Untar: mark files -> %s" % self.dstdir
+            self.src = [util.abspath(f) for f in src]
+        else:
+            self.title = "Untar: %s -> %s" % (util.unix_basename(src), self.dstdir)
+            self.src = util.abspath(src)
         self.dirlist = []
 
     def run(self):
@@ -455,16 +459,16 @@ class UntarThread(JobThread):
             tar.close()
 
 class UnzipThread(JobThread):
-    def __init__(self, src, dstdir=''):
+    def __init__(self, src, dstdir):
         JobThread.__init__(self)
         self.view_thread('Reading...')
-        if isinstance(src, list):
-            self.src = [util.abspath(f) for f in src]
-            self.title = "Unzip: mark files"
-        else:
-            self.src = util.abspath(src)
-            self.title = "Unzip: %s" % self.src
         self.dstdir = util.abspath(dstdir)
+        if isinstance(src, list):
+            self.title = "Unzip: mark files -> %s" % self.dstdir
+            self.src = [util.abspath(f) for f in src]
+        else:
+            self.title = "Unzip: %s -> %s" % (util.unix_basename(src), self.dstdir)
+            self.src = util.abspath(src)
         self.dirlist = []
 
     def run(self):
@@ -547,17 +551,17 @@ class ZipThread(JobThread):
     def __init__(self, src, dst, wrap=''):
         JobThread.__init__(self)
         self.view_thread('Reading...')
-        if isinstance(src, list):
-            self.src = [util.abspath(f) for f in src]
-            self.src_dirname = util.U(os.getcwd()) + os.sep
-            self.title = "Zip: mark files"
-        else:
-            self.src = util.abspath(src)
-            self.src_dirname = util.unix_dirname(self.src) + os.sep
-            self.title = "Zip: %s" % self.src
         self.dst = util.abspath(dst)
         if not self.dst.endswith('.zip'):
             self.dst += '.zip'
+        if isinstance(src, list):
+            self.title = "Zip: mark files -> %s" % self.dst
+            self.src = [util.abspath(f) for f in src]
+            self.src_dirname = util.U(os.getcwd()) + os.sep
+        else:
+            self.title = "Zip: %s -> %s" % (util.unix_basename(src), self.dst)
+            self.src = util.abspath(src)
+            self.src_dirname = util.unix_dirname(self.src) + os.sep
         self.wrap = wrap
 
     def run(self):
