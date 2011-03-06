@@ -329,16 +329,16 @@ class TarThread(JobThread):
     def __init__(self, src, dst, tarmode='gzip', wrap=''):
         JobThread.__init__(self)
         self.view_thread("Reading...")
-        self.dst = util.abspath(dst)
         ext = self.tarexts[tarmode]
-        if not self.dst.endswith(ext):
-            self.dst += ext
+        if not dst.endswith(ext):
+            dst += ext
+        self.dst = util.abspath(dst)
         if isinstance(src, list):
-            self.title = "Tar: mark files -> %s" % self.dst
+            self.title = "Tar: mark files -> %s" % dst
             self.src = [util.abspath(f) for f in src]
             self.src_dirname = util.U(os.getcwd()) + os.sep
         else:
-            self.title = "Tar: %s -> %s" % (util.unix_basename(src), self.dst)
+            self.title = "Tar: %s -> %s" % (src, dst)
             self.src = util.abspath(src)
             self.src_dirname = util.unix_dirname(self.src) + os.sep
         self.tarmode = tarmode
@@ -409,13 +409,13 @@ class UntarThread(JobThread):
     def __init__(self, src, dstdir='.'):
         JobThread.__init__(self)
         self.view_thread("Reading...")
-        self.dstdir = util.abspath(dstdir)
         if isinstance(src, list):
-            self.title = "Untar: mark files -> %s" % self.dstdir
+            self.title = "Untar: mark files -> %s" % dstdir
             self.src = [util.abspath(f) for f in src]
         else:
-            self.title = "Untar: %s -> %s" % (util.unix_basename(src), self.dstdir)
+            self.title = "Untar: %s -> %s" % (src, dstdir)
             self.src = util.abspath(src)
+        self.dstdir = util.abspath(dstdir)
         self.dirlist = []
 
     def run(self):
@@ -462,13 +462,13 @@ class UnzipThread(JobThread):
     def __init__(self, src, dstdir):
         JobThread.__init__(self)
         self.view_thread('Reading...')
-        self.dstdir = util.abspath(dstdir)
         if isinstance(src, list):
-            self.title = "Unzip: mark files -> %s" % self.dstdir
+            self.title = "Unzip: mark files -> %s" % dstdir
             self.src = [util.abspath(f) for f in src]
         else:
-            self.title = "Unzip: %s -> %s" % (util.unix_basename(src), self.dstdir)
+            self.title = "Unzip: %s -> %s" % (src, dstdir)
             self.src = util.abspath(src)
+        self.dstdir = util.abspath(dstdir)
         self.dirlist = []
 
     def run(self):
@@ -551,15 +551,15 @@ class ZipThread(JobThread):
     def __init__(self, src, dst, wrap=''):
         JobThread.__init__(self)
         self.view_thread('Reading...')
+        if not dst.endswith('.zip'):
+            dst += '.zip'
         self.dst = util.abspath(dst)
-        if not self.dst.endswith('.zip'):
-            self.dst += '.zip'
         if isinstance(src, list):
-            self.title = "Zip: mark files -> %s" % self.dst
+            self.title = "Zip: mark files -> %s" % dst
             self.src = [util.abspath(f) for f in src]
             self.src_dirname = util.U(os.getcwd()) + os.sep
         else:
-            self.title = "Zip: %s -> %s" % (util.unix_basename(src), self.dst)
+            self.title = "Zip: %s -> %s" % (src, dst)
             self.src = util.abspath(src)
             self.src_dirname = util.unix_dirname(self.src) + os.sep
         self.wrap = wrap
@@ -625,7 +625,7 @@ class DeleteThread(JobThread):
             self.path = [util.abspath(f) for f in path]
         else:
             self.title = "Delete: %s" % path
-            self.view_thread("Deleting: %s" % util.unix_basename(path))
+            self.view_thread("Deleting: %s" % path)
             self.path = util.abspath(path)
 
     def run(self):
