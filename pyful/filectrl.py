@@ -323,13 +323,16 @@ class TarThread(JobThread):
             self.src_dirname = util.unix_dirname(self.src) + os.sep
             self.title = "Tar: %s" % self.src
         self.dst = util.abspath(dst)
+        ext = self.tarexts[tarmode]
+        if not self.dst.endswith(ext):
+            self.dst += ext
         self.tarmode = tarmode
         self.wrap = wrap
 
     def run(self):
-        ext = self.tarexts[self.tarmode]
-        if not self.dst.endswith(ext):
-            self.dst += ext
+        if not isinstance(self.src, list):
+            if not os.path.exists(self.src):
+                return message.error("No such file or directory - %s" % self.src)
         try:
             unicode
             self.dst = self.dst.encode()
@@ -345,7 +348,10 @@ class TarThread(JobThread):
         try:
             if isinstance(self.src, list):
                 for f in self.src:
-                    self.add(tar, f)
+                    if not os.path.exists(f):
+                        message.error("No such file or directory - %s" % f)
+                    else:
+                        self.add(tar, f)
             else:
                 self.add(tar, self.src)
         except FilectrlCancel as e:
@@ -545,39 +551,36 @@ class ZipThread(JobThread):
             self.src_dirname = util.unix_dirname(self.src) + os.sep
             self.title = "Zip: %s" % self.src
         self.dst = util.abspath(dst)
+        if not self.dst.endswith('.zip'):
+            self.dst += '.zip'
         self.wrap = wrap
 
     def run(self):
-        import zipfile
-
-        if not self.dst.endswith('.zip'):
-            self.dst += '.zip'
-
         if not isinstance(self.src, list):
             if not os.path.exists(self.src):
-                return message.error('No such file or directory (%s)' % self.src)
-
+                return message.error("No such file or directory - %s" % self.src)
         try:
+            import zipfile
             myzip = zipfile.ZipFile(self.dst, 'w', compression=zipfile.ZIP_DEFLATED)
         except Exception as e:
-            self.error = e
-            return 
-
+            return message.exception(e)
         try:
             if isinstance(self.src, list):
-                for path in self.src:
-                    self.write(myzip, path)
+                for f in self.src:
+                    if not os.path.exists(f):
+                        message.error("No such file or directory - %s" % f)
+                    else:
+                        self.write(myzip, f)
             else:
                 self.write(myzip, self.src)
         except FilectrlCancel as e:
             self.error = e
-        myzip.close()
+        finally:
+            myzip.close()
 
         if not isinstance(self.src, list):
             lst = os.lstat(self.src)
             os.utime(self.dst, (lst.st_mtime, lst.st_mtime))
-
-        self.active = False
 
     def kill(self):
         self.status = "Waiting..."
@@ -585,23 +588,26 @@ class ZipThread(JobThread):
         self.active = False
         self.join()
 
-    def _write(self, myzip, source):
-        arcname = source.replace(os.path.commonprefix([source, self.src_dirname]), '')
-        self.status = "Adding: " + arcname
-        view_threads()
-        myzip.write(source, os.path.join(self.wrap, arcname))
-        if not self.active:
-            raise FilectrlCancel("Zip canceled: %s" % arcname)
-
     def write(self, myzip, source):
         if os.path.isdir(source):
-            self._write(myzip, source)
+            self.write_file(myzip, source)
             for root, dnames, fnames in os.walk(source):
                 for name in fnames+dnames:
                     path = os.path.normpath(os.path.join(root, name))
-                    self._write(myzip, path)
+                    self.write_file(myzip, path)
         else:
-            self._write(myzip, source)
+            self.write_file(myzip, source)
+
+    def write_file(self, myzip, source):
+        arcname = source.replace(os.path.commonprefix([source, self.src_dirname]), '')
+        self.status = "Adding: " + arcname
+        view_threads()
+        try:
+            myzip.write(source, os.path.join(self.wrap, arcname))
+        except Exception as e:
+            message.exception(e)
+        if not self.active:
+            raise FilectrlCancel("Zip canceled: %s" % arcname)
 
 class DeleteThread(JobThread):
     def __init__(self, path):
