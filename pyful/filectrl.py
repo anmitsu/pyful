@@ -652,9 +652,7 @@ class DeleteThread(JobThread):
                         raise FilectrlCancel("Delete canceled: %s" % f)
                 for d in dirs:
                     dirlist.append(os.path.join(root, d))
-            dirlist.sort()
-            dirlist.reverse()
-            for d in dirlist:
+            for d in reversed(sorted(dirlist)):
                 if not os.access(path, os.R_OK) and not os.path.islink(path):
                     raise OSError("No permission: %s" % d)
                 try:
@@ -819,27 +817,16 @@ class FileJobGenerator(object):
             return "no"
 
     def copydirs(self):
-        self.dircopylist.sort()
-        self.dircopylist.reverse()
-        for d in self.dircopylist:
+        for d in reversed(sorted(self.dircopylist)):
             try:
                 os.makedirs(d[1])
             except OSError as e:
                 if e.errno != errno.EEXIST:
                     raise
-            st = d[0]
-            mode = stat.S_IMODE(st.st_mode)
-            if hasattr(os, 'utime'):
-                os.utime(d[1], (st.st_atime, st.st_mtime))
-            if hasattr(os, 'chmod'):
-                os.chmod(d[1], mode)
-            if hasattr(os, 'chflags') and hasattr(st, 'st_flags'):
-                try:
-                    os.chflags(d[1], st.st_flags)
-                except OSError as why:
-                    if (not hasattr(errno, 'EOPNOTSUPP') or
-                        why.errno != errno.EOPNOTSUPP):
-                        raise
+            sst = d[0]
+            dst = d[1]
+            os.utime(dst, (sst.st_atime, sst.st_mtime))
+            os.chmod(dst, stat.S_IMODE(sst.st_mode))
 
 class FileJob(object):
     def __init__(self, src, dst):
