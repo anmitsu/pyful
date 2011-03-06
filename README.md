@@ -1,14 +1,15 @@
-Pyful - python file management utility
+pyful - python file management utility
 ======================================
 
-Pyful is the filer on console of the keyboard operation main with the
-interface of curses for Linux. This application operates at the terminal
-emulator such as xterm.
+pyful is CUI filer of the keyboard operation for Linux.
+This application operates at the terminal emulator such as xterm.
+
+For more information, see <https://github.com/anmitsu/pyful/wiki>
 
 Features
 --------
 
-* Flexible and powerful custamizing by Python;
+* Flexible and powerful customizing by Python;
 * File view of multi screen;
 * Interactive command line;
 * Command line completion function like zsh;
@@ -17,7 +18,7 @@ Features
 Installation
 ------------
 
-Pyful is installed in **/usr/local** by executing the following
+pyful is installed in **/usr/local** by executing the following
 command as a super user:
 
      $ python setup.py install
@@ -35,20 +36,19 @@ the application is started by only executing the following command:
 Dependencies
 ------------
 
-The operation of Pyful is confirmed by Python2.6 and Python3.1 on
+The operation of pyful is confirmed by Python2.6 and Python3.1 on
 Ubuntu 10.04.
 
 To display multi byte character including Japanese,
 **libncursesw** library might become necessary.
 
-In addition, Pyful operates in the assumption that encoding is **utf-8**.
+In addition, pyful operates in the assumption that encoding is **utf-8**.
 Therefore, normal operation cannot be expected in the environment that
 uses encoding that is not **utf-8**.
 
 Configuration
 -------------
 
-Pyful configuration has edit of **~/.pyful/rc.py**.
-Please copy rc.py because it doesn't exist in default
-and configure this file.
+pyful configuration has edit of **~/.pyful/rc.py** .
 
+For edit of rc.py, see <https://github.com/anmitsu/pyful/wiki/Configuration>
