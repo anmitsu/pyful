@@ -327,12 +327,9 @@ class TarThread(JobThread):
         self.wrap = wrap
 
     def run(self):
-        import tarfile
-        mode = self.tarmodes[self.tarmode]
         ext = self.tarexts[self.tarmode]
         if not self.dst.endswith(ext):
             self.dst += ext
-
         try:
             unicode
             self.dst = self.dst.encode()
@@ -340,27 +337,25 @@ class TarThread(JobThread):
             pass
 
         try:
+            import tarfile
+            mode = self.tarmodes[self.tarmode]
             tar = tarfile.open(self.dst, 'w|'+mode)
         except Exception as e:
-            self.error = e
-            return 
-
+            return message.exception(e)
         try:
             if isinstance(self.src, list):
                 for f in self.src:
-                    self._add(tar, f)
+                    self.add(tar, f)
             else:
-                self._add(tar, self.src)
+                self.add(tar, self.src)
         except FilectrlCancel as e:
             self.error = e
-        tar.close()
-
+        finally:
+            tar.close()
         if not isinstance(self.src, list):
             lst = os.lstat(self.src)
             os.utime(self.dst, (lst.st_mtime, lst.st_mtime))
         os.chmod(self.dst, 0o644)
-
-        self.active = False
 
     def kill(self):
         self.status = "Waiting..."
@@ -368,21 +363,24 @@ class TarThread(JobThread):
         self.active = False
         self.join()
 
-    def _add(self, tar, source):
+    def add(self, tar, source):
         if os.path.isdir(source):
-            self.__add(tar, source)
+            self.add_file(tar, source)
             for root, dnames, fnames in os.walk(source):
                 for name in fnames+dnames:
                     path = os.path.normpath(os.path.join(root, name))
-                    self.__add(tar, path)
+                    self.add_file(tar, path)
         else:
-            self.__add(tar, source)
+            self.add_file(tar, source)
 
-    def __add(self, tar, source):
+    def add_file(self, tar, source):
         arcname = source.replace(os.path.commonprefix([source, self.src_dirname]), '')
         self.status = "Adding: " + arcname
         view_threads()
-        tar.add(source, os.path.join(self.wrap, arcname), recursive=False)
+        try:
+            tar.add(source, os.path.join(self.wrap, arcname), recursive=False)
+        except Exception as e:
+            message.exception(e)
         if not self.active:
             raise FilectrlCancel("Tar canceled: %s" % arcname)
 
