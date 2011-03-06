@@ -28,70 +28,60 @@ if __name__ == '__main__':
         sys.path.insert(0, libdir)
 
 from optparse import OptionParser
-from pyful import __version__
 
 def option_parse():
     usage = "usage: %prog [options]"
     parser = OptionParser(usage)
-
     parser.add_option('-v', '--version', action='store_true', dest='version',
                       help=('display program version'))
     parser.add_option('-c', '--config', dest='config',
                       help=('load configure file'))
     parser.add_option('-e', action='store_true', dest='enter',
                       help=('wait of the user input'))
-
     (options, args) = parser.parse_args()
 
     if options.version:
         print('%s v%s' % ('pyful', __version__))
         sys.exit(0)
-
     if options.enter:
         from pyful import util
         util.wait_restore()
         sys.exit(0)
-
     if options.config is not None:
         if not os.path.exists(options.config):
             print('No such rcfile (%s)' % (options.config))
             sys.exit(1)
-
     return options
-
-__options__ = option_parse()
 
 import locale
 import imp
-import shutil
 
 locale.setlocale(locale.LC_ALL, "")
 imp.reload(sys)
 sys.setdefaultencoding("utf-8")
 
-from pyful import Pyful, loadrcfile, createconf, setsignal
+from pyful import __version__, Pyful, loadrcfile, createconf, setsignal
 from pyful import message
 from pyful import ui
 
 if __name__ == '__main__':
-    setsignal()
+    options = option_parse()
     Pyful.binpath = os.path.abspath(__file__)
 
     pyful = Pyful()
-    error = loadrcfile(__options__.config)
-
+    error = loadrcfile(options.config)
     ui.start_curses()
     pyful.init_function()
+    setsignal()
 
-    ui.getcomponent("Stdscr").win.refresh()
     message.puts("Python %s" % sys.version)
     if error:
         message.exception(error)
     message.puts("Loaded %s" % Pyful.environs['RCFILE'])
     message.puts("Welcome to pyful v%s" % __version__)
-    pyful.view()
 
     try:
+        pyful.view()
         pyful.main_loop()
     except SystemExit:
         createconf()

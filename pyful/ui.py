@@ -66,13 +66,17 @@ def refresh():
     resize()
 
 def start_curses():
-    StandardScreen()
-    look.init_colors()
-    CmdlineScreen()
-    Titlebar()
-    InfoBox.resize()
-    getcomponent("MessageBox").resize()
-    getcomponent("Filer").default_init()
+    try:
+        curses.beep()
+    except curses.error:
+        StandardScreen()
+        look.init_colors()
+        CmdlineScreen()
+        Titlebar()
+        InfoBox.resize()
+        getcomponent("MessageBox").resize()
+        getcomponent("Filer").default_init()
+        getcomponent("Stdscr").win.refresh()
 
 class ComponentDuplication(Exception):
     pass
