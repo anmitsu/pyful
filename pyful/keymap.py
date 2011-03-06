@@ -16,7 +16,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import curses
+import curses as _curses
 
 KEY_CTRL_A = 1
 KEY_CTRL_B = 2
@@ -50,28 +50,28 @@ KEY_ESCAPE = 27
 KEY_SPACE = 32
 KEY_CTRL_SPACE = 0
 
-KEY_DOWN = curses.KEY_DOWN
-KEY_UP = curses.KEY_UP
-KEY_RIGHT = curses.KEY_RIGHT
-KEY_LEFT = curses.KEY_LEFT
-KEY_BACKSPACE = curses.KEY_BACKSPACE
-KEY_HOME = curses.KEY_HOME
-KEY_END = curses.KEY_END
-KEY_DC = curses.KEY_DC
-KEY_NPAGE = curses.KEY_NPAGE
-KEY_PPAGE = curses.KEY_PPAGE
-KEY_F1 = curses.KEY_F1
-KEY_F2 = curses.KEY_F2
-KEY_F3 = curses.KEY_F3
-KEY_F4 = curses.KEY_F4
-KEY_F5 = curses.KEY_F5
-KEY_F6 = curses.KEY_F6
-KEY_F7 = curses.KEY_F7
-KEY_F8 = curses.KEY_F8
-KEY_F9 = curses.KEY_F9
-KEY_F10 = curses.KEY_F10
-KEY_F11 = curses.KEY_F11
-KEY_F12 = curses.KEY_F12
+KEY_DOWN = _curses.KEY_DOWN
+KEY_UP = _curses.KEY_UP
+KEY_RIGHT = _curses.KEY_RIGHT
+KEY_LEFT = _curses.KEY_LEFT
+KEY_BACKSPACE = _curses.KEY_BACKSPACE
+KEY_HOME = _curses.KEY_HOME
+KEY_END = _curses.KEY_END
+KEY_DC = _curses.KEY_DC
+KEY_NPAGE = _curses.KEY_NPAGE
+KEY_PPAGE = _curses.KEY_PPAGE
+KEY_F1 = _curses.KEY_F1
+KEY_F2 = _curses.KEY_F2
+KEY_F3 = _curses.KEY_F3
+KEY_F4 = _curses.KEY_F4
+KEY_F5 = _curses.KEY_F5
+KEY_F6 = _curses.KEY_F6
+KEY_F7 = _curses.KEY_F7
+KEY_F8 = _curses.KEY_F8
+KEY_F9 = _curses.KEY_F9
+KEY_F10 = _curses.KEY_F10
+KEY_F11 = _curses.KEY_F11
+KEY_F12 = _curses.KEY_F12
 
 KEY_0 = ord("0")
 KEY_1 = ord("1")
