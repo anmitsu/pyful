@@ -456,17 +456,20 @@ class UnzipThread(JobThread):
             self.src = util.abspath(src)
             self.title = "Unzip: %s" % self.src
         self.dstdir = util.abspath(dstdir)
-        self.dirattrcopy = []
+        self.dirlist = []
 
     def run(self):
-        if isinstance(self.src, list):
-            for f in self.src:
-                self.extract(f)
-        else:
-            self.extract(self.src)
-        for f in self.dirattrcopy:
-            f()
-        self.active = False
+        if not os.access(self.dstdir, os.W_OK):
+            self.error = OSError("No permission: %s" % self.dstdir)
+            return
+        try:
+            if isinstance(self.src, list):
+                for f in self.src:
+                    self.extract(f)
+            else:
+                self.extract(self.src)
+        except FilectrlCancel as e:
+            self.error = e
 
     def kill(self):
         self.status = "Waiting..."
@@ -474,90 +477,64 @@ class UnzipThread(JobThread):
         self.active = False
         self.join()
 
+    def extract(self, zippath):
+        import zipfile
+        try:
+            myzip = zipfile.ZipFile(zippath, 'r')
+        except Exception as e:
+            return message.exception(e)
+        try:
+            for info in myzip.infolist():
+                if not self.active:
+                    raise FilectrlCancel("unzip canceled: %s" % info.filename)
+                try:
+                    self.extract_file(myzip, info)
+                except Exception as e:
+                    message.exception(e)
+        finally:
+            for d in reversed(sorted(self.dirlist)):
+                self.copy_external_attr(myzip, d)
+            self.dirlist[:] = []
+            myzip.close()
+
+    def extract_file(self, myzip, zipinfo):
+        fname = zipinfo.filename
+        ufname = util.force_decode(fname)
+        path = os.path.join(self.dstdir, ufname)
+
+        if stat.S_ISDIR(zipinfo.external_attr >> 16):
+            dirpath = os.path.join(self.dstdir, ufname)
+            if not os.path.exists(dirpath):
+                os.makedirs(dirpath)
+            self.dirlist.append(fname)
+        else:
+            dirpath = os.path.join(self.dstdir, util.unix_dirname(ufname))
+            if not os.path.exists(dirpath):
+                os.makedirs(dirpath)
+            source = myzip.open(fname)
+            target = open(path, 'wb')
+            self.status = 'Inflating: ' + ufname
+            view_threads()
+            shutil.copyfileobj(source, target)
+            source.close()
+            target.close()
+            self.copy_external_attr(myzip, fname)
+
     def copy_external_attr(self, myzip, path):
         try:
-            info = myzip.getinfo(path+os.sep)
-        except KeyError:
-            try:
-                info = myzip.getinfo(path)
-            except KeyError:
-                return
+            info = myzip.getinfo(path)
         except Exception as e:
-            self.error = e
-            return 
+            return message.exception(e)
         perm = info.external_attr >> 16
         date = list(info.date_time) + [-1, -1, -1]
         path = util.force_decode(path)
         abspath = os.path.join(self.dstdir, path)
-        if perm == 0:
-            if os.path.isdir(abspath):
-                perm = 0o755
-            else:
-                perm = 0o644
-        os.chmod(abspath, perm)
-        atime = mtime = time.mktime(date)
-        os.utime(abspath, (atime, mtime))
-
-    def makedirs(self, myzip, unipath, oripath, mode=0o755):
-        abspath = os.path.join(self.dstdir, unipath)
-        head, tail = os.path.split(abspath)
-        if not tail:
-            head, tail = os.path.split(head)
-        if head and tail and not os.path.exists(head):
-            try:
-                self.makedirs(myzip, head, mode)
-            except OSError as e:
-                if e.errno != errno.EEXIST:
-                    raise
-            if tail == os.curdir:
-                return
-        self.status = 'Creating: ' + unipath
-        view_threads()
-        os.mkdir(abspath, mode)
-        self.dirattrcopy.append(lambda: self.copy_external_attr(myzip, oripath))
-
-    def extract(self, srczippath):
-        import zipfile
-
         try:
-            myzip = zipfile.ZipFile(srczippath, 'r')
+            os.chmod(abspath, perm)
+            atime = mtime = time.mktime(date)
+            os.utime(abspath, (atime, mtime))
         except Exception as e:
-            self.error = e
-            return 
-
-        for info in myzip.infolist():
-            if not self.active:
-                break
-            fname = info.filename
-            unifname = util.force_decode(fname)
-            try:
-                path = os.path.join(self.dstdir, unifname)
-            except UnicodeError:
-                message.error("UnicodeError: Not support `%s' encoding" % fname)
-                continue
-
-            myzip_unidirname = util.unix_dirname(unifname)
-            myzip_oridirname = util.unix_dirname(fname)
-            if not os.path.isdir(os.path.join(self.dstdir, myzip_unidirname)):
-                try:
-                    self.makedirs(myzip, myzip_unidirname, myzip_oridirname)
-                except OSError as e:
-                    message.exception(e)
-                    continue
-            try:
-                source = myzip.open(fname, pwd=path)
-                target = open(path, 'wb')
-                self.status = 'Inflating: ' + unifname
-                view_threads()
-                shutil.copyfileobj(source, target)
-                source.close()
-                target.close()
-                self.copy_external_attr(myzip, fname)
-            except IOError as e:
-                if errno.EISDIR != e[0]:
-                    message.exception(e)
-                    continue
-        myzip.close()
+            message.exception(e)
 
 class ZipThread(JobThread):
     def __init__(self, src, dst, wrap=''):
