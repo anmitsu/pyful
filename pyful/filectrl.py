@@ -424,7 +424,7 @@ class UntarThread(JobThread):
             self.src = [util.abspath(f) for f in src]
         else:
             self.title = "Untar: %s -> %s" % (src, dstdir)
-            self.src = util.abspath(src)
+            self.src = [util.abspath(src)]
         self.dstdir = util.abspath(dstdir)
         self.dirlist = []
 
@@ -433,18 +433,15 @@ class UntarThread(JobThread):
             self.error = OSError("No permission: %s" % self.dstdir)
             return
         try:
-            if isinstance(self.src, list):
-                for f in self.src:
-                    self.extract(f)
-            else:
-                self.extract(self.src)
+            for tarpath in self.src:
+                self.extract(tarpath)
         except FilectrlCancel as e:
             self.error = e
 
     def extract(self, source):
-        import tarfile
         mode = self.tarmodes.get(util.extname(source), 'gz')
         try:
+            import tarfile
             tar = tarfile.open(source, 'r:'+mode)
         except Exception as e:
             message.exception(e)
@@ -473,7 +470,7 @@ class UnzipThread(JobThread):
             self.src = [util.abspath(f) for f in src]
         else:
             self.title = "Unzip: %s -> %s" % (src, dstdir)
-            self.src = util.abspath(src)
+            self.src = [util.abspath(src)]
         self.dstdir = util.abspath(dstdir)
         self.dirlist = []
 
@@ -482,17 +479,14 @@ class UnzipThread(JobThread):
             self.error = OSError("No permission: %s" % self.dstdir)
             return
         try:
-            if isinstance(self.src, list):
-                for f in self.src:
-                    self.extract(f)
-            else:
-                self.extract(self.src)
+            for zippath in self.src:
+                self.extract(zippath)
         except FilectrlCancel as e:
             self.error = e
 
     def extract(self, zippath):
-        import zipfile
         try:
+            import zipfile
             myzip = zipfile.ZipFile(zippath, 'r')
         except Exception as e:
             return message.exception(e)
