@@ -410,6 +410,7 @@ class TarThread(JobThread):
             tar.add(source, os.path.join(self.wrap, arcname), recursive=False)
         except Exception as e:
             message.exception(e)
+            raise FilectrlCancel("Exception occurred while `tar'")
         if not self.active:
             raise FilectrlCancel(self.title)
 
@@ -452,7 +453,8 @@ class UntarThread(JobThread):
         try:
             tar = tarfile.open(source, 'r:'+mode)
         except Exception as e:
-            return message.exception(e)
+            message.exception(e)
+            raise FilectrlCancel("Exception occurred while `untar'")
         try:
             for info in tar.getmembers():
                 if not self.active:
@@ -513,6 +515,7 @@ class UnzipThread(JobThread):
                     self.extract_file(myzip, info)
                 except Exception as e:
                     message.exception(e)
+                    raise FilectrlCancel("Exception occurred while `unzip'")
         finally:
             for d in reversed(sorted(self.dirlist)):
                 self.copy_external_attr(myzip, d)
@@ -623,6 +626,7 @@ class ZipThread(JobThread):
             myzip.write(source, os.path.join(self.wrap, arcname))
         except Exception as e:
             message.exception(e)
+            raise FilectrlCancel("Exception occurred while `zip'")
         if not self.active:
             raise FilectrlCancel(self.title)
 
