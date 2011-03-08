@@ -954,21 +954,15 @@ def _trashbox():
         if "Yes" == message.confirm("Trashbox doesn't exist. Make trashbox? (%s):" % trashbox, ["No", "Yes"]):
             try:
                 os.makedirs(trashbox)
-            except EnvironmentError as e:
-                return message.error(str(e))
+            except Exception as e:
+                return message.exception(e)
         else:
             return
-
     if filer.dir.ismark():
-        mfiles = filer.dir.get_mark_files()
-        ret = message.confirm("Move mark files to trashbox? ", ["No", "Yes"], mfiles)
-        if ret == "No" or ret is None:
-            return
-
-        for f in mfiles:
-            filectrl.move(f, trashbox)
-        filer.dir.mark_clear()
-        filer.workspace.all_reload()
+        files = filer.dir.get_mark_files()
+        ret = message.confirm("Move mark files to trashbox? ", ["No", "Yes"], files)
+        if ret == "Yes":
+            filectrl.move(files, trashbox)
     else:
         cmdline.start(mode.TrashBox(), filer.file.name)
 
