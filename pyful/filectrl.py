@@ -326,7 +326,8 @@ class JobThread(threading.Thread):
         pass
 
     def kill(self):
-        pass
+        self.view_thread("Waiting...")
+        self.active = False
 
     def view_thread(self, status):
         message.puts(status, 0)
@@ -388,11 +389,6 @@ class TarThread(JobThread):
             os.utime(self.dst, (lst.st_mtime, lst.st_mtime))
         os.chmod(self.dst, 0o644)
 
-    def kill(self):
-        self.view_thread("Waiting...")
-        self.active = False
-        self.join()
-
     def add(self, tar, source):
         if os.path.isdir(source):
             self.add_file(tar, source)
@@ -442,11 +438,6 @@ class UntarThread(JobThread):
         except FilectrlCancel as e:
             self.error = e
 
-    def kill(self):
-        self.view_thread("Waiting...")
-        self.active = False
-        self.join()
-
     def extract(self, source):
         import tarfile
         mode = self.tarmodes.get(util.extname(source), 'gz')
@@ -495,11 +486,6 @@ class UnzipThread(JobThread):
                 self.extract(self.src)
         except FilectrlCancel as e:
             self.error = e
-
-    def kill(self):
-        self.view_thread("Waiting...")
-        self.active = False
-        self.join()
 
     def extract(self, zippath):
         import zipfile
@@ -604,11 +590,6 @@ class ZipThread(JobThread):
             lst = os.lstat(self.src)
             os.utime(self.dst, (lst.st_mtime, lst.st_mtime))
 
-    def kill(self):
-        self.view_thread("Waiting...")
-        self.active = False
-        self.join()
-
     def write(self, myzip, source):
         if os.path.isdir(source):
             self.write_file(myzip, source)
@@ -655,9 +636,6 @@ class DeleteThread(JobThread):
             self.delete_dirs()
         except FilectrlCancel as e:
             self.error = e
-
-    def kill(self):
-        self.active = False
 
     def delete_file(self, f):
         try:
@@ -720,11 +698,6 @@ class CopyThread(JobThread):
             self.error = e
         fjg.copydirs()
 
-    def kill(self):
-        self.view_thread("Waiting...")
-        self.active = False
-        self.join()
-
 class MoveThread(JobThread):
     def __init__(self, src, dst):
         JobThread.__init__(self)
@@ -763,11 +736,6 @@ class MoveThread(JobThread):
             except Exception as e:
                 if e[0] != errno.ENOTEMPTY:
                     message.exception(e)
-
-    def kill(self):
-        self.view_thread("Waiting...")
-        self.active = False
-        self.join()
 
 class FileJobGenerator(object):
     def __init__(self):
