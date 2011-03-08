@@ -865,6 +865,7 @@ class FileJob(object):
                 shutil.copystat(self.src, self.dst)
         except Exception as e:
             message.exception(e)
+            raise FilectrlCancel("Exception occurred while copying")
 
     def move(self, thread):
         try:
@@ -884,5 +885,7 @@ class FileJob(object):
                         os.remove(self.src)
                     except EnvironmentError as e:
                         message.exception(e)
+                        raise FilectrlCancel("Exception occurred while removing")
             else:
                 message.exception(e)
+                raise FilectrlCancel("Exception occurred while moving")
