@@ -732,16 +732,16 @@ class MoveThread(JobThread):
 
 class FileJobGenerator(object):
     def __init__(self):
-        self.confirm = "importunate"
+        self.confirm = "Importunate"
         self.dirlist = []
         self.dircopylist = []
 
     def generate(self, src, dst):
         def _checkfile(src, dst):
             ret = self.check_override(src, dst)
-            if ret == "cancel":
+            if ret == "Cancel":
                 raise FilectrlCancel("Filejob canceled: %s -> %s" % (src, dst))
-            if ret == "yes":
+            if ret == "Yes":
                 return FileJob(src, dst)
 
         def _checkdir(src, dst):
@@ -768,40 +768,32 @@ class FileJobGenerator(object):
 
     def check_override(self, src, dst):
         if not os.path.lexists(dst):
-            return "yes"
+            return "Yes"
         if not util.unix_basename(src) == util.unix_basename(dst):
-            return "yes"
-
-        if "importunate" == self.confirm:
+            return "Yes"
+        if "Yes(all)" == self.confirm:
+            return "Yes"
+        elif "No(all)" == self.confirm:
+            return "No"
+        elif "Importunate" == self.confirm:
             Filectrl.event.clear()
-            sstat = os.stat(src)
-            dstat = os.stat(dst)
-            ssize = str(sstat.st_size)
-            dsize = str(dstat.st_size)
-            stime = time.strftime("%y-%m-%d %H:%M:%S", time.localtime(sstat.st_mtime))
-            dtime = time.strftime("%y-%m-%d %H:%M:%S", time.localtime(dstat.st_mtime))
-            msglist = ["source", "path: " + src, "size: " + ssize, "time: " + stime, "",
-                       "destination", "path: " + dst, "size: " + dsize, "time: " + dtime]
-            ret = message.confirm("Override?", ["Yes", "No", "Yes(all)", "No(all)", "Cancel"], msglist)
+            sstat = os.lstat(src)
+            dstat = os.lstat(dst)
+            stime = time.strftime("%c", time.localtime(sstat.st_mtime))
+            dtime = time.strftime("%c", time.localtime(dstat.st_mtime))
+            m = ["Source",
+                 "Path: %s"%src, "Size: %s"%sstat.st_size, "Time: %s"%stime, "",
+                 "Destination",
+                 "Path: %s"%dst, "Size: %s"%dstat.st_size, "Time: %s"%dtime]
+            ret = message.confirm("Override?", ["Yes", "No", "Yes(all)", "No(all)", "Cancel"], m)
             Filectrl.event.set()
-            if ret == "Yes":
-                return "yes"
-            elif ret == "No":
-                return "no"
-            elif ret == "Cancel":
-                return "cancel"
-            elif ret == "Yes(all)":
-                self.confirm = "yes_all"
-                return "yes"
-            elif ret == "No(all)":
-                self.confirm = "no_all"
-                return "no"
+            if ret == "Yes" or ret == "No" or ret == "Cancel":
+                return ret
+            elif ret == "Yes(all)" or ret == "No(all)":
+                self.confirm = ret
+                return ret.replace("(all)", '')
             else:
-                return "cancel"
-        elif "yes_all" == self.confirm:
-            return "yes"
-        elif "no_all" == self.confirm:
-            return "no"
+                return "Cancel"
 
     def copydirs(self):
         for d in reversed(sorted(self.dircopylist)):
