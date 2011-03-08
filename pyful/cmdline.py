@@ -357,7 +357,7 @@ class History(ui.InfoBox):
     def __init__(self, cmdline):
         ui.InfoBox.__init__(self, "History")
         self.cmdline = cmdline
-        self.source = None
+        self.source_string = self.cmdline.string
 
     def loadfile(self, path, key):
         try:
@@ -399,26 +399,23 @@ class History(ui.InfoBox):
         li = self.index(self.cmdline.mode.__class__.__name__)
         if not 0 <= self.cursor < len(li):
             return
-        if not li or self.info is None:
+        if not li or not self.info:
             return
 
-        if self.cursor_item().string in li:
-            li.remove(self.cursor_item().string)
+        item = self.cursor_item()
+        if item.string in li:
+            li.remove(item.string)
         x = self.cursor
-        if self.source:
-            self.cmdline.string = self.source
-        else:
-            self.cmdline.string = ''
+        self.cmdline.string = self.source_string
         self.start()
         self.setcursor(x)
 
     def restart(self):
         self.hide()
-        self.source = None
         self.start()
 
     def start(self):
-        self.source = None
+        self.source_string = self.cmdline.string
         info = []
         for item in self.index(self.cmdline.mode.__class__.__name__):
             if self.cmdline.string in item:
@@ -429,20 +426,15 @@ class History(ui.InfoBox):
             self.hide()
 
     def mvcursor(self, x):
-        if self.source is None:
-            self.source = self.cmdline.string
-
         super(self.__class__, self).mvcursor(x)
-
         if self.cursor == -1:
-            self.cmdline.string = self.source
-            self.cmdline.cursor = util.mbslen(self.cmdline.string)
-            self.source = None
+            self.cmdline.string = self.source_string
+            self.cmdline.cursor = util.mbslen(self.source_string)
         else:
             item = self.cursor_item()
             if item:
                 self.cmdline.string = item.string
-                self.cmdline.cursor = util.mbslen(self.cmdline.string)
+                self.cmdline.cursor = util.mbslen(item.string)
 
 class Clipboard(ui.InfoBox):
     _maxsave = 100
@@ -477,9 +469,9 @@ class Clipboard(ui.InfoBox):
             return
 
     def insert(self):
-        item = self.cursor_item().string
-        self.cmdline.string = util.insertstr(self.cmdline.string, item, self.cmdline.cursor)
-        self.cmdline.cursor += util.mbslen(item)
+        item = self.cursor_item()
+        self.cmdline.string = util.insertstr(self.cmdline.string, item.string, self.cmdline.cursor)
+        self.cmdline.cursor += util.mbslen(item.string)
         self.hide()
         self.cmdline.history.start()
 
