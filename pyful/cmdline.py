@@ -439,9 +439,9 @@ class History(ui.InfoBox):
             self.cmdline.cursor = util.mbslen(self.cmdline.string)
             self.source = None
         else:
-            item = self.cursor_item().string
+            item = self.cursor_item()
             if item:
-                self.cmdline.string = item
+                self.cmdline.string = item.string
                 self.cmdline.cursor = util.mbslen(self.cmdline.string)
 
 class Clipboard(ui.InfoBox):
