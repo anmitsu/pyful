@@ -189,14 +189,17 @@ def kill_thread():
             th.kill()
 
 def get_file_length(*paths):
-    length = 0
+    flen = 0
+    dlen = 0
     for path in paths:
         if not os.path.isdir(path):
-            length += 1
+            flen += 1
         else:
+            dlen += 1
             for root, dirs, files in os.walk(path):
-                length += len(files)
-    return length
+                flen += len(files)
+                dlen += len(dirs)
+    return (flen, dlen)
 
 class Subloop(object):
     def __init__(self):
@@ -559,50 +562,38 @@ class ZipThread(JobThread):
             self.src_dirname = util.U(os.getcwd()) + os.sep
         else:
             self.title = "Zip: %s -> %s" % (src, dst)
-            self.src = util.abspath(src)
-            self.src_dirname = util.unix_dirname(self.src) + os.sep
+            self.src = [util.abspath(src)]
+            self.src_dirname = util.unix_dirname(self.src[0]) + os.sep
         self.wrap = wrap
 
     def run(self):
-        if not isinstance(self.src, list):
-            if not os.path.exists(self.src):
-                return message.error("No such file or directory - %s" % self.src)
         try:
             import zipfile
             myzip = zipfile.ZipFile(self.dst, 'w', compression=zipfile.ZIP_DEFLATED)
         except Exception as e:
             return message.exception(e)
         try:
-            if isinstance(self.src, list):
-                for f in self.src:
-                    if not os.path.exists(f):
-                        message.error("No such file or directory - %s" % f)
-                    else:
-                        self.write(myzip, f)
-            else:
-                self.write(myzip, self.src)
+            goal = sum(get_file_length(*self.src))
+            elapse = 1
+            for path in self.src:
+                for f in self.writelist_generate(path):
+                    arcname = f.replace(os.path.commonprefix([f, self.src_dirname]), '')
+                    self.view_thread("Adding(%s/%s): %s" % (elapse, goal, arcname))
+                    self.write_file(myzip, f, arcname)
+                    elapse += 1
         except FilectrlCancel as e:
             self.error = e
         finally:
             myzip.close()
 
-        if not isinstance(self.src, list):
-            lst = os.lstat(self.src)
-            os.utime(self.dst, (lst.st_mtime, lst.st_mtime))
+        if not self.error and len(self.src) == 1:
+            try:
+                lst = os.lstat(self.src[0])
+                os.utime(self.dst, (lst.st_mtime, lst.st_mtime))
+            except Exception as e:
+                message.exception(e)
 
-    def write(self, myzip, source):
-        if os.path.isdir(source):
-            self.write_file(myzip, source)
-            for root, dnames, fnames in os.walk(source):
-                for name in fnames+dnames:
-                    path = os.path.normpath(os.path.join(root, name))
-                    self.write_file(myzip, path)
-        else:
-            self.write_file(myzip, source)
-
-    def write_file(self, myzip, source):
-        arcname = source.replace(os.path.commonprefix([source, self.src_dirname]), '')
-        self.view_thread("Adding: " + arcname)
+    def write_file(self, myzip, source, arcname):
         try:
             myzip.write(source, os.path.join(self.wrap, arcname))
         except Exception as e:
@@ -610,6 +601,16 @@ class ZipThread(JobThread):
             raise FilectrlCancel("Exception occurred while `zip'")
         if not self.active:
             raise FilectrlCancel(self.title)
+
+    def writelist_generate(self, path):
+        if os.path.isdir(path):
+            yield path
+            for sub in os.listdir(path):
+                subpath = os.path.join(path, sub)
+                for f in self.writelist_generate(subpath):
+                    yield f
+        else:
+            yield path
 
 class DeleteThread(JobThread):
     def __init__(self, path):
@@ -621,11 +622,11 @@ class DeleteThread(JobThread):
         else:
             self.title = "Delete: %s" % path
             self.path = [util.abspath(path)]
-            self.view_thread("Deleting: %s" % self.path)
+            self.view_thread("Deleting: %s" % path)
         self.dirlist = []
 
     def run(self):
-        goal = get_file_length(*self.path)
+        goal = get_file_length(*self.path)[0]
         elapse = 1
         try:
             for path in self.path:
@@ -643,6 +644,8 @@ class DeleteThread(JobThread):
         except Exception as e:
             message.exception(e)
             raise FilectrlCancel("Exception occurred while deleting")
+        if not self.active:
+            raise FilectrlCancel(self.title)
 
     def delete_dirs(self):
         for d in reversed(sorted(self.dirlist)):
@@ -659,9 +662,7 @@ class DeleteThread(JobThread):
         else:
             self.dirlist.append(path)
             for root, dirs, files in os.walk(path):
-                for i, f in enumerate(files):
-                    if not self.active:
-                        raise FilectrlCancel(self.title)
+                for f in files:
                     yield os.path.join(root, f)
                 for d in dirs:
                     self.dirlist.append(os.path.join(root, d))
@@ -682,7 +683,7 @@ class CopyThread(JobThread):
             self.dst = util.abspath(dst)
 
     def run(self):
-        goal = get_file_length(*self.src)
+        goal = get_file_length(*self.src)[0]
         fjg = FileJobGenerator()
         elapse = 1
         try:
@@ -714,7 +715,7 @@ class MoveThread(JobThread):
             self.dst = util.abspath(dst)
 
     def run(self):
-        goal = get_file_length(*self.src)
+        goal = get_file_length(*self.src)[0]
         fjg = FileJobGenerator()
         elapse = 1
         try:
