@@ -677,7 +677,7 @@ class Directory(object):
     def reload(self):
         try:
             util.chdir(self.path)
-        except EnvironmentError as e:
+        except Exception as e:
             message.exception(e)
             self.chdir('/')
         self.diskread()
@@ -723,7 +723,7 @@ class Directory(object):
         path = util.abspath(util.expanduser(path), self.path)
         try:
             util.chdir(path)
-        except EnvironmentError as e:
+        except Exception as e:
             return message.exception(e)
 
         if history:
