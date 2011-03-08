@@ -689,6 +689,7 @@ class CopyThread(JobThread):
                 if not self.active:
                     break
                 if job:
+                    self.view_thread("Coping: " + util.unix_basename(job.src))
                     job.copy(self)
         except FilectrlCancel as e:
             self.error = e
@@ -722,6 +723,7 @@ class MoveThread(JobThread):
                 if not self.active:
                     break
                 if job:
+                    self.view_thread("Moving: " + util.unix_basename(job.src))
                     job.move(self)
         except FilectrlCancel as e:
             self.error = e
@@ -827,11 +829,14 @@ class FileJobGenerator(object):
                 os.makedirs(d[1])
             except OSError as e:
                 if e.errno != errno.EEXIST:
-                    raise
+                    message.exception(e)
             sst = d[0]
             dst = d[1]
-            os.utime(dst, (sst.st_atime, sst.st_mtime))
-            os.chmod(dst, stat.S_IMODE(sst.st_mode))
+            try:
+                os.utime(dst, (sst.st_atime, sst.st_mtime))
+                os.chmod(dst, stat.S_IMODE(sst.st_mode))
+            except Exception as e:
+                message.exception(e)
 
 class FileJob(object):
     def __init__(self, src, dst):
@@ -853,15 +858,13 @@ class FileJob(object):
                 if not os.access(self.dst, os.W_OK):
                     os.remove(self.dst)
 
-            thread.view_thread("Coping: " + util.unix_basename(self.src))
-
             if os.path.islink(self.src):
                 self.copysymlink(self.src, self.dst)
             else:
                 shutil.copyfile(self.src, self.dst)
                 shutil.copystat(self.src, self.dst)
         except Exception as e:
-            thread.error = e
+            message.exception(e)
 
     def move(self, thread):
         try:
@@ -872,8 +875,6 @@ class FileJob(object):
                 if not os.access(self.dst, os.W_OK):
                     os.remove(self.dst)
 
-            thread.view_thread("Moving: " + util.unix_basename(self.src))
-
             os.rename(self.src, self.dst)
         except EnvironmentError as e:
             if errno.EXDEV == e[0]:
@@ -882,7 +883,6 @@ class FileJob(object):
                     try:
                         os.remove(self.src)
                     except EnvironmentError as e:
-                        thread.error = e
+                        message.exception(e)
             else:
-                thread.error = e
-
+                message.exception(e)
