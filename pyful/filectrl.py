@@ -242,7 +242,7 @@ class Subloop(object):
         curses.doupdate()
 
     def run(self):
-        self.stdscr.timeout(10)
+        self.stdscr.timeout(100)
         self.view()
         (meta, key) = ui.getch()
         if key != -1:
@@ -334,7 +334,6 @@ class JobThread(threading.Thread):
 
     def view_thread(self, status):
         message.puts(status, 0)
-        curses.doupdate()
 
 class TarThread(JobThread):
     tarmodes = {'tar': '', 'gzip': 'gz', 'bzip2': 'bz2'}
