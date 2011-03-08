@@ -55,7 +55,7 @@ def chown(path, uid, gid):
     try:
         os.chown(path, uid, gid)
         message.puts("Changed owner: %s: uid -> %s, gid -> %s" % (path, uid, gid))
-    except EnvironmentError as e:
+    except Exception as e:
         message.exception(e)
 
 def copy(src, dst):
@@ -70,7 +70,7 @@ def link(src, dst):
             dst = os.path.join(dst, util.unix_basename(src))
         os.link(src, dst)
         message.puts("Created hard links: %s -> %s" % (src, dst))
-    except EnvironmentError as e:
+    except Exception as e:
         message.exception(e)
 
 def symlink(src, dst):
@@ -79,21 +79,21 @@ def symlink(src, dst):
             dst = os.path.join(dst, util.unix_basename(src))
         os.symlink(src, dst)
         message.puts("Created symlink: %s -> %s" % (src, dst))
-    except EnvironmentError as e:
+    except Exception as e:
         message.exception(e)
 
 def mkdir(path, mode=0o755):
     try:
         os.makedirs(path, mode)
         message.puts("Created directory: %s (%o)" % (path, mode))
-    except EnvironmentError as e:
+    except Exception as e:
         message.exception(e)
 
 def mknod(path, mode=0o644):
     try:
         os.mknod(path, mode)
         message.puts("Created file: %s (%o)" % (path, mode))
-    except EnvironmentError as e:
+    except Exception as e:
         message.exception(e)
 
 def move(src, dst):
@@ -149,7 +149,7 @@ def replace(pattern, repstr):
         try:
             os.renames(src, dst)
             message.puts("Renamed: %s -> %s" % (src, dst))
-        except EnvironmentError as e:
+        except Exception as e:
             message.exception(e)
             break
 
