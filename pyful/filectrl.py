@@ -656,9 +656,6 @@ class DeleteThread(JobThread):
         self.active = False
 
     def delete_file(self, f):
-        if not os.access(f, os.R_OK) and not os.path.islink(f):
-            message.exception(OSError("No permission: %s" % path))
-            raise FilectrlCancel("Exception occurred while deleting")
         try:
             os.remove(f)
         except Exception as e:
@@ -670,9 +667,7 @@ class DeleteThread(JobThread):
             try:
                 os.rmdir(d)
             except Exception as e:
-                if e[0] == errno.ENOTEMPTY:
-                    pass
-                else:
+                if e[0] != errno.ENOTEMPTY:
                     message.exception(e)
                     raise FilectrlCancel("Exception occurred while directory deleting")
 
