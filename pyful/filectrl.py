@@ -612,11 +612,9 @@ class DeleteThread(JobThread):
         if isinstance(path, list):
             self.title = "Delete: mark files"
             self.path = [util.abspath(f) for f in path]
-            self.view_thread("Deleting: mark files")
         else:
             self.title = "Delete: %s" % path
             self.path = [util.abspath(path)]
-            self.view_thread("Deleting: %s" % path)
         self.dirlist = []
 
     def run(self):
