@@ -188,6 +188,16 @@ def kill_thread():
         if th.title == ret:
             th.kill()
 
+def get_file_length(*paths):
+    length = 0
+    for path in paths:
+        if not os.path.isdir(path):
+            length += 1
+        else:
+            for root, dirs, files in os.walk(path):
+                length += len(files)
+    return length
+
 class Subloop(object):
     def __init__(self):
         self.cmdline = ui.getcomponent("Cmdline")
@@ -621,50 +631,63 @@ class DeleteThread(JobThread):
         JobThread.__init__(self)
         if isinstance(path, list):
             self.title = "Delete: mark files"
-            self.view_thread("Deleting: mark files")
             self.path = [util.abspath(f) for f in path]
+            self.view_thread("Deleting: mark files")
         else:
             self.title = "Delete: %s" % path
-            self.view_thread("Deleting: %s" % path)
-            self.path = util.abspath(path)
+            self.path = [util.abspath(path)]
+            self.view_thread("Deleting: %s" % self.path)
+        self.dirlist = []
 
     def run(self):
+        goal = get_file_length(*self.path)
+        elapse = 1
         try:
-            if isinstance(self.path, list):
-                for f in self.path:
-                    self.delete(f)
-            else:
-                self.delete(self.path)
-        except Exception as e:
+            for path in self.path:
+                for f in self.deletelist_generate(path):
+                    self.view_thread("Deleting(%s/%s): %s" % (elapse, goal, util.unix_basename(f)))
+                    self.delete_file(f)
+                    elapse += 1
+            self.delete_dirs()
+        except FilectrlCancel as e:
             self.error = e
 
     def kill(self):
         self.active = False
 
-    def delete(self, path):
-        if not os.access(path, os.R_OK) and not os.path.islink(path):
-            raise OSError("No permission: %s" % path)
+    def delete_file(self, f):
+        if not os.access(f, os.R_OK) and not os.path.islink(f):
+            message.exception(OSError("No permission: %s" % path))
+            raise FilectrlCancel("Exception occurred while deleting")
+        try:
+            os.remove(f)
+        except Exception as e:
+            message.exception(e)
+            raise FilectrlCancel("Exception occurred while deleting")
+
+    def delete_dirs(self):
+        for d in reversed(sorted(self.dirlist)):
+            try:
+                os.rmdir(d)
+            except Exception as e:
+                if e[0] == errno.ENOTEMPTY:
+                    pass
+                else:
+                    message.exception(e)
+                    raise FilectrlCancel("Exception occurred while directory deleting")
+
+    def deletelist_generate(self, path):
         if os.path.islink(path) or not os.path.isdir(path):
-            self.view_thread("Deleting: " + util.unix_basename(path))
-            os.remove(path)
+            yield path
         else:
-            dirlist = [path]
+            self.dirlist.append(path)
             for root, dirs, files in os.walk(path):
-                for f in files:
-                    self.view_thread("Deleting: " + f)
-                    os.remove(os.path.join(root, f))
+                for i, f in enumerate(files):
                     if not self.active:
-                        raise FilectrlCancel("Delete canceled: %s" % f)
+                        raise FilectrlCancel(self.title)
+                    yield os.path.join(root, f)
                 for d in dirs:
-                    dirlist.append(os.path.join(root, d))
-            for d in reversed(sorted(dirlist)):
-                if not os.access(path, os.R_OK) and not os.path.islink(path):
-                    raise OSError("No permission: %s" % d)
-                try:
-                    os.rmdir(d)
-                except Exception as e:
-                    if e[0] == errno.ENOTEMPTY:
-                        pass
+                    self.dirlist.append(os.path.join(root, d))
 
 class CopyThread(JobThread):
     def __init__(self, src, dst):
@@ -672,28 +695,31 @@ class CopyThread(JobThread):
         self.view_thread("Copy starting...")
         if isinstance(src, list):
             self.title = "Copy: mark files -> %s" % dst
-            src = [util.abspath(f) for f in src]
+            self.src = [util.abspath(f) for f in src]
         else:
             self.title = "Copy: %s -> %s" % (src, dst)
-            src = util.abspath(src)
+            self.src = [util.abspath(src)]
         if dst.endswith(os.sep):
-            dst = util.abspath(dst) + os.sep
+            self.dst = util.abspath(dst) + os.sep
         else:
-            dst = util.abspath(dst)
-        self.fjg = FileJobGenerator()
-        self.jobs = self.fjg.generate(src, dst)
+            self.dst = util.abspath(dst)
 
     def run(self):
+        goal = get_file_length(*self.src)
+        fjg = FileJobGenerator()
+        elapse = 1
         try:
-            for job in self.jobs:
-                if not self.active:
-                    break
-                if job:
-                    self.view_thread("Coping: " + util.unix_basename(job.src))
-                    job.copy(self)
+            for f in self.src:
+                for job in fjg.generate(f, self.dst):
+                    if not self.active:
+                        raise FilectrlCancel(self.title)
+                    if job:
+                        self.view_thread("Coping(%s/%s): %s" % (elapse, goal, util.unix_basename(job.src)))
+                        job.copy(self)
+                    elapse += 1
         except FilectrlCancel as e:
             self.error = e
-        self.fjg.copydirs()
+        fjg.copydirs()
 
     def kill(self):
         self.view_thread("Waiting...")
@@ -706,38 +732,38 @@ class MoveThread(JobThread):
         self.view_thread("Move starting...")
         if isinstance(src, list):
             self.title = "Move: mark files -> %s" % dst
-            src = [util.abspath(f) for f in src]
+            self.src = [util.abspath(f) for f in src]
         else:
             self.title = "Move: %s -> %s" % (src, dst)
-            src = util.abspath(src)
+            self.src = [util.abspath(src)]
         if dst.endswith(os.sep):
-            dst = util.abspath(dst) + os.sep
+            self.dst = util.abspath(dst) + os.sep
         else:
-            dst = util.abspath(dst)
-        self.fjg = FileJobGenerator()
-        self.jobs = self.fjg.generate(src, dst)
+            self.dst = util.abspath(dst)
 
     def run(self):
+        goal = get_file_length(*self.src)
+        fjg = FileJobGenerator()
+        elapse = 1
         try:
-            for job in self.jobs:
-                if not self.active:
-                    break
-                if job:
-                    self.view_thread("Moving: " + util.unix_basename(job.src))
-                    job.move(self)
+            for f in self.src:
+                for job in fjg.generate(f, self.dst):
+                    if not self.active:
+                        raise FilectrlCancel(self.title)
+                    if job:
+                        self.view_thread("Moving(%s/%s): %s" % (elapse, goal, util.unix_basename(job.src)))
+                        job.move(self)
+                    elapse += 1
         except FilectrlCancel as e:
             self.error = e
 
-        self.fjg.copydirs()
-
-        self.fjg.dirlist.sort()
-        self.fjg.dirlist.reverse()
-        for d in self.fjg.dirlist:
+        fjg.copydirs()
+        for d in reversed(sorted(fjg.dirlist)):
             try:
                 os.rmdir(d)
-            except EnvironmentError as e:
-                if e[0] == errno.ENOTEMPTY:
-                    pass
+            except Exception as e:
+                if e[0] != errno.ENOTEMPTY:
+                    message.exception(e)
 
     def kill(self):
         self.view_thread("Waiting...")
@@ -772,19 +798,13 @@ class FileJobGenerator(object):
                 else:
                     yield _checkfile(ssub, dsub)
 
-        if isinstance(src, list):
-            for f in src:
-                for checked in self.generate(f, dst):
-                    yield checked
+        if dst.endswith(os.sep) or os.path.isdir(dst):
+            dst = os.path.join(dst, util.unix_basename(src))
+        if os.path.isdir(src) and not os.path.islink(src):
+            for checked in _checkdir(src, dst):
+                yield checked
         else:
-            if dst.endswith(os.sep) or os.path.isdir(dst):
-                dst = os.path.join(dst, util.unix_basename(src))
-
-            if os.path.isdir(src) and not os.path.islink(src):
-                for checked in _checkdir(src, dst):
-                    yield checked
-            else:
-                yield _checkfile(src, dst)
+            yield _checkfile(src, dst)
 
     def check_override(self, src, dst):
         if not os.path.lexists(dst):
