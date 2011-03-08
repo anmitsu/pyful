@@ -80,11 +80,7 @@ def _open_at_system():
 def _spawn_editor():
     """Spawn the editor registered in Pyful.environs['EDITOR']"""
     try:
-        editor = Pyful.environs['EDITOR']
-    except KeyError:
-        editor = 'vim'
-    try:
-        process.spawn(editor+' %f')
+        process.spawn(Pyful.environs['EDITOR'] + ' %f')
     except Exception as e:
         message.exception(e)
 
@@ -108,30 +104,29 @@ def _spawn_terminal():
 @defcmd
 def _exit():
     """Termination of application."""
-    ret =  message.confirm('Exit?', ['Yes', 'No'])
-    if ret == 'Yes':
+    if 'Yes' == message.confirm('Exit?', ['Yes', 'No']):
         message.timerkill()
         sys.exit(0)
 
 @defcmd
 def _shell():
     """Invoke command line of shell mode."""
-    ui.getcomponent('Cmdline').start(mode.Shell(), '')
+    ui.getcomponent('Cmdline').start(mode.Shell())
 
 @defcmd
 def _eval():
     """Invoke command line of eval mode."""
-    ui.getcomponent('Cmdline').start(mode.Eval(), '')
+    ui.getcomponent('Cmdline').start(mode.Eval())
 
 @defcmd
 def _mx():
     """Invoke command line of mx mode."""
-    ui.getcomponent('Cmdline').start(mode.Mx(), '')
+    ui.getcomponent('Cmdline').start(mode.Mx())
 
 @defcmd
 def _help():
     """Invoke command line of help mode."""
-    ui.getcomponent('Cmdline').start(mode.Help(), '')
+    ui.getcomponent('Cmdline').start(mode.Help())
 
 @defcmd
 def _help_all():
@@ -149,22 +144,22 @@ def _change_looks():
     Present looks is preserved in Pyful.environs['LOOKS'].
     The setting concerning looks consults the pyful.look module.
     """
-    ui.getcomponent('Cmdline').start(mode.ChangeLooks(), '')
+    ui.getcomponent('Cmdline').start(mode.ChangeLooks())
 
 @defcmd
 def _google_search():
     """Search word in google on the regulated web browser."""
-    ui.getcomponent('Cmdline').start(mode.WebSearch('Google'), '')
+    ui.getcomponent('Cmdline').start(mode.WebSearch('Google'))
 
 @defcmd
 def _open_listfile():
     """Invoke command line of open list file mode."""
-    ui.getcomponent('Cmdline').start(mode.OpenListfile(), '')
+    ui.getcomponent('Cmdline').start(mode.OpenListfile())
 
 @defcmd
 def _zoom_infobox():
     """Invoke command line of zoom infobox mode."""
-    ui.getcomponent('Cmdline').start(mode.ZoomInfoBox(), '')
+    ui.getcomponent('Cmdline').start(mode.ZoomInfoBox())
 
 @defcmd
 def _zoom_in_infobox():
@@ -237,7 +232,7 @@ def _pack():
         filer = ui.getcomponent('Filer')
         cmdline = ui.getcomponent('Cmdline')
         if filer.dir.ismark():
-            cmdline.start(mode.Tar(ret), '')
+            cmdline.start(mode.Tar(ret))
         else:
             cmdline.start(mode.Tar(ret), filer.file.name)
     elif ret == "rar":
@@ -314,7 +309,8 @@ def _enter_listfile():
     """Behavior of list file.
     list file is a file to which the absolute path is written.
     """
-    ui.getcomponent('Filer').dir.open_listfile(ui.getcomponent('Filer').file.name)
+    filer = ui.getcomponent('Filer')
+    filer.dir.open_listfile(filer.file.name)
 
 @defcmd
 def _finder_start():
@@ -336,7 +332,7 @@ def _switch_workspace():
 @defcmd
 def _create_workspace():
     """Create new workspace."""
-    ui.getcomponent('Cmdline').start(mode.CreateWorkspace(), '')
+    ui.getcomponent('Cmdline').start(mode.CreateWorkspace())
 
 @defcmd
 def _close_workspace():
@@ -346,7 +342,7 @@ def _close_workspace():
 @defcmd
 def _change_workspace_title():
     """Change current workspace's title."""
-    ui.getcomponent('Cmdline').start(mode.ChangeWorkspaceTitle(), "")
+    ui.getcomponent('Cmdline').start(mode.ChangeWorkspaceTitle())
 
 @defcmd
 def _change_workspace_layout():
@@ -434,7 +430,8 @@ def _chdir_home():
 @defcmd
 def _chdir_neighbor():
     """Change current directory to neighbor directory."""
-    ui.getcomponent('Filer').dir.chdir(ui.getcomponent('Filer').workspace.nextdir.path)
+    filer = ui.getcomponent('Filer')
+    filer.dir.chdir(filer.workspace.nextdir.path)
 
 @defcmd
 def _chdir_backward():
@@ -785,12 +782,12 @@ def _chdir():
 @defcmd
 def _chmod():
     """Invoke command line of chmod mode."""
-    ui.getcomponent('Cmdline').start(mode.Chmod(), '')
+    ui.getcomponent('Cmdline').start(mode.Chmod())
 
 @defcmd
 def _chown():
     """Invoke command line of chown mode."""
-    ui.getcomponent('Cmdline').start(mode.Chown(), '')
+    ui.getcomponent('Cmdline').start(mode.Chown())
 
 @defcmd
 def _copy():
@@ -827,12 +824,12 @@ def _delete():
 @defcmd
 def _glob():
     """Invoke command line of glob mode."""
-    ui.getcomponent('Cmdline').start(mode.Glob(), '')
+    ui.getcomponent('Cmdline').start(mode.Glob())
 
 @defcmd
 def _globdir():
     """Invoke command line of globdir mode."""
-    ui.getcomponent('Cmdline').start(mode.GlobDir(), '')
+    ui.getcomponent('Cmdline').start(mode.GlobDir())
 
 @defcmd
 def _link():
@@ -847,22 +844,22 @@ def _link():
 @defcmd
 def _mark():
     """Invoke command line of mark mode."""
-    ui.getcomponent('Cmdline').start(mode.Mark(), '')
+    ui.getcomponent('Cmdline').start(mode.Mark())
 
 @defcmd
 def _mask():
     """Invoke command line of mask mode."""
-    ui.getcomponent('Cmdline').start(mode.Mask(), '')
+    ui.getcomponent('Cmdline').start(mode.Mask())
 
 @defcmd
 def _menu():
     """Invoke command line of menu mode."""
-    ui.getcomponent('Cmdline').start(mode.Menu(), '')
+    ui.getcomponent('Cmdline').start(mode.Menu())
 
 @defcmd
 def _mkdir():
     """Invoke command line of mkdir mode."""
-    ui.getcomponent('Cmdline').start(mode.Mkdir(), '')
+    ui.getcomponent('Cmdline').start(mode.Mkdir())
 
 @defcmd
 def _move():
@@ -887,7 +884,7 @@ def _move():
 @defcmd
 def _newfile():
     """Invoke command line of new file mode."""
-    ui.getcomponent('Cmdline').start(mode.Newfile(), '')
+    ui.getcomponent('Cmdline').start(mode.Newfile())
 
 @defcmd
 def _rename():
@@ -895,7 +892,7 @@ def _rename():
     filer = ui.getcomponent('Filer')
     cmdline = ui.getcomponent('Cmdline')
     if filer.dir.ismark():
-        cmdline.start(mode.Replace(), "")
+        cmdline.start(mode.Replace())
     else:
         cmdline.start(mode.Rename(), filer.file.name, -len(util.extname(filer.file.name)))
 
@@ -911,7 +908,7 @@ def _replace():
     # Specify the replacing string:
     $  $Replace regexp \.py\$ with:$  .txt
     """
-    ui.getcomponent('Cmdline').start(mode.Replace(), '')
+    ui.getcomponent('Cmdline').start(mode.Replace())
 
 @defcmd
 def _symlink():
@@ -932,7 +929,7 @@ def _tar():
     filer = ui.getcomponent('Filer')
     cmdline = ui.getcomponent('Cmdline')
     if filer.dir.ismark():
-        cmdline.start(mode.Tar(tarmode), '')
+        cmdline.start(mode.Tar(tarmode))
     else:
         cmdline.start(mode.Tar(tarmode), filer.file.name)
 
@@ -942,7 +939,7 @@ def _tareach():
     tarmode = message.confirm("Tar mode:", ["gzip", "bzip2", "tar"])
     if tarmode is None:
         return
-    ui.getcomponent('Cmdline').start(mode.Tar(tarmode, each=True), '')
+    ui.getcomponent('Cmdline').start(mode.Tar(tarmode, each=True))
 
 @defcmd
 def _trashbox():
@@ -997,11 +994,11 @@ def _zip():
     filer = ui.getcomponent('Filer')
     cmdline = ui.getcomponent('Cmdline')
     if filer.dir.ismark():
-        cmdline.start(mode.Zip(), '')
+        cmdline.start(mode.Zip())
     else:
         cmdline.start(mode.Zip(), filer.file.name)
 
 @defcmd
 def _zipeach():
     """Invoke command line of zipeach mode."""
-    ui.getcomponent('Cmdline').start(mode.Zip(each=True), '')
+    ui.getcomponent('Cmdline').start(mode.Zip(each=True))
