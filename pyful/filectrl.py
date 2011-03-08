@@ -411,7 +411,7 @@ class TarThread(JobThread):
         except Exception as e:
             message.exception(e)
         if not self.active:
-            raise FilectrlCancel("Tar canceled: %s" % arcname)
+            raise FilectrlCancel(self.title)
 
 class UntarThread(JobThread):
     tarmodes = {'.tar': '', '.tgz': 'gz', '.gz': 'gz', '.bz2': 'bz2',}
@@ -456,7 +456,7 @@ class UntarThread(JobThread):
         try:
             for info in tar.getmembers():
                 if not self.active:
-                    raise FilectrlCancel("Untar canceled: %s" % info.name)
+                    raise FilectrlCancel(self.title)
                 self.view_thread("Untar: " + info.name)
                 tar.extract(info, self.dstdir)
                 if info.isdir():
@@ -508,7 +508,7 @@ class UnzipThread(JobThread):
         try:
             for info in myzip.infolist():
                 if not self.active:
-                    raise FilectrlCancel("Unzip canceled: %s" % info.filename)
+                    raise FilectrlCancel(self.title)
                 try:
                     self.extract_file(myzip, info)
                 except Exception as e:
@@ -624,7 +624,7 @@ class ZipThread(JobThread):
         except Exception as e:
             message.exception(e)
         if not self.active:
-            raise FilectrlCancel("Zip canceled: %s" % arcname)
+            raise FilectrlCancel(self.title)
 
 class DeleteThread(JobThread):
     def __init__(self, path):
