@@ -685,7 +685,7 @@ class CopyThread(JobThread):
                         raise FilectrlCancel(self.title)
                     if job:
                         self.view_thread("Coping(%s/%s): %s" % (elapse, goal, util.unix_basename(job.src)))
-                        job.copy(self)
+                        job.copy()
                     elapse += 1
         except FilectrlCancel as e:
             self.error = e
@@ -717,7 +717,7 @@ class MoveThread(JobThread):
                         raise FilectrlCancel(self.title)
                     if job:
                         self.view_thread("Moving(%s/%s): %s" % (elapse, goal, util.unix_basename(job.src)))
-                        job.move(self)
+                        job.move()
                     elapse += 1
         except FilectrlCancel as e:
             self.error = e
@@ -829,7 +829,7 @@ class FileJob(object):
         linkto = os.readlink(src)
         os.symlink(linkto, dst)
 
-    def copy(self, thread):
+    def copy(self):
         try:
             if not os.path.isdir(util.unix_dirname(self.dst)):
                 os.makedirs(util.unix_dirname(self.dst))
@@ -847,7 +847,7 @@ class FileJob(object):
             message.exception(e)
             raise FilectrlCancel("Exception occurred while copying")
 
-    def move(self, thread):
+    def move(self):
         try:
             if not os.path.isdir(util.unix_dirname(self.dst)):
                 os.makedirs(util.unix_dirname(self.dst))
@@ -857,15 +857,14 @@ class FileJob(object):
                     os.remove(self.dst)
 
             os.rename(self.src, self.dst)
-        except EnvironmentError as e:
+        except Exception as e:
             if errno.EXDEV == e[0]:
-                self.copy(thread)
-                if thread.active:
-                    try:
-                        os.remove(self.src)
-                    except EnvironmentError as e:
-                        message.exception(e)
-                        raise FilectrlCancel("Exception occurred while removing")
+                self.copy()
+                try:
+                    os.remove(self.src)
+                except Exception as e:
+                    message.exception(e)
+                    raise FilectrlCancel("Exception occurred while removing")
             else:
                 message.exception(e)
                 raise FilectrlCancel("Exception occurred while moving")
