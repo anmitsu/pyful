@@ -73,15 +73,6 @@ def link(src, dst):
     except Exception as e:
         message.exception(e)
 
-def symlink(src, dst):
-    try:
-        if os.path.isdir(dst):
-            dst = os.path.join(dst, util.unix_basename(src))
-        os.symlink(src, dst)
-        message.puts("Created symlink: %s -> %s" % (src, dst))
-    except Exception as e:
-        message.exception(e)
-
 def mkdir(path, mode=0o755):
     try:
         os.makedirs(path, mode)
@@ -103,10 +94,7 @@ def rename(src, dst):
     if os.path.exists(dst) and os.path.samefile(src, dst):
         return
     if os.path.exists(dst):
-        ret = message.confirm("File exist - (%s). Override?" % dst, ["Yes", "No", "Cancel"])
-        if ret == "Yes":
-            pass
-        else:
+        if "Yes" != message.confirm("File exist - (%s). Override?" % dst, ["Yes", "No", "Cancel"]):
             return
     try:
         os.renames(src, dst)
@@ -118,7 +106,6 @@ def replace(pattern, repstr):
     filer = ui.getcomponent("Filer")
     files = filer.dir.get_mark_files()
     renamed = [pattern.sub(r""+repstr, f) for f in files]
-
     msg = []
     matched = []
     for i in range(0, len(files)):
@@ -127,11 +114,10 @@ def replace(pattern, repstr):
             matched.append((files[i], renamed[i]))
     if not matched:
         return message.error("No pattern matched for mark files: %s " % pattern.pattern)
-
-    ret = message.confirm("Replace:", ["Start", "Cancel"], msg)
-    if ret != "Start":
+    if "Start" != message.confirm("Replace:", ["Start", "Cancel"], msg):
         return
 
+    ret = ''
     for member in matched:
         src = member[0]
         dst = member[1]
@@ -139,7 +125,8 @@ def replace(pattern, repstr):
             if ret == "No(all)":
                 continue
             if ret != "Yes(all)":
-                ret = message.confirm("File exist - (%s). Override?" % dst, ["Yes", "No", "Yes(all)", "No(all)", "Cancel"])
+                ret = message.confirm("File exist - (%s). Override?" % dst,
+                                      ["Yes", "No", "Yes(all)", "No(all)", "Cancel"])
                 if ret == "Yes" or ret == "Yes(all)":
                     pass
                 elif ret == "No" or ret == "No(all)":
@@ -153,18 +140,14 @@ def replace(pattern, repstr):
             message.exception(e)
             break
 
-def unzip(src, dstdir):
-    if not dstdir:
-        dstdir  = './'
-    Filectrl().unzip(src, dstdir)
-
-def zip(src, dst, wrap=''):
-    Filectrl().zip(src, dst, wrap)
-
-def zipeach(src, dst, wrap=''):
-    if not isinstance(src, list):
-        return message.error("source must present `list'")
-    Filectrl().zipeach(src, dst, wrap)
+def symlink(src, dst):
+    try:
+        if os.path.isdir(dst):
+            dst = os.path.join(dst, util.unix_basename(src))
+        os.symlink(src, dst)
+        message.puts("Created symlink: %s -> %s" % (src, dst))
+    except Exception as e:
+        message.exception(e)
 
 def tar(src, dst, tarmode='gzip', wrap=''):
     Filectrl().tar(src, dst, tarmode, wrap)
@@ -179,10 +162,23 @@ def untar(src, dstdir):
         dstdir  = './'
     Filectrl().untar(src, dstdir)
 
+def unzip(src, dstdir):
+    if not dstdir:
+        dstdir  = './'
+    Filectrl().unzip(src, dstdir)
+
+def zip(src, dst, wrap=''):
+    Filectrl().zip(src, dst, wrap)
+
+def zipeach(src, dst, wrap=''):
+    if not isinstance(src, list):
+        return message.error("source must present `list'")
+    Filectrl().zipeach(src, dst, wrap)
+
+
 def kill_thread():
     if len(Filectrl.threads) == 0:
-        message.error("Thread doesn't exist.")
-        return
+        return message.error("Thread doesn't exist.")
     ret = message.confirm("Kill thread: ", [t.title for t in Filectrl.threads])
     for th in Filectrl.threads:
         if th.title == ret:
@@ -445,7 +441,7 @@ class UntarThread(JobThread):
             for info in tar.getmembers():
                 if not self.active:
                     raise FilectrlCancel(self.title)
-                self.view_thread("Untar: " + info.name)
+                self.view_thread("Untar: %s" % info.name)
                 tar.extract(info, self.dstdir)
                 if info.isdir():
                     self.dirlist.append(info)
@@ -516,7 +512,7 @@ class UnzipThread(JobThread):
                 os.makedirs(dirpath)
             source = myzip.open(fname)
             target = open(path, 'wb')
-            self.view_thread('Inflating: ' + ufname)
+            self.view_thread('Inflating: %s' % ufname)
             shutil.copyfileobj(source, target)
             source.close()
             target.close()
@@ -716,14 +712,8 @@ class MoveThread(JobThread):
                     elapse += 1
         except FilectrlCancel as e:
             self.error = e
-
         fjg.copydirs()
-        for d in reversed(sorted(fjg.dirlist)):
-            try:
-                os.rmdir(d)
-            except Exception as e:
-                if e[0] != errno.ENOTEMPTY:
-                    message.exception(e)
+        fjg.removedirs()
 
 class FileJobGenerator(object):
     def __init__(self):
@@ -805,6 +795,14 @@ class FileJobGenerator(object):
             except Exception as e:
                 message.exception(e)
 
+    def removedirs(self):
+        for d in reversed(sorted(self.dirlist)):
+            try:
+                os.rmdir(d)
+            except Exception as e:
+                if e[0] != errno.ENOTEMPTY:
+                    message.exception(e)
+
 class FileJob(object):
     def __init__(self, src, dst):
         self.src = src
@@ -820,11 +818,9 @@ class FileJob(object):
         try:
             if not os.path.isdir(util.unix_dirname(self.dst)):
                 os.makedirs(util.unix_dirname(self.dst))
-
             if os.path.isfile(self.dst):
                 if not os.access(self.dst, os.W_OK):
                     os.remove(self.dst)
-
             if os.path.islink(self.src):
                 self.copysymlink(self.src, self.dst)
             else:
@@ -838,11 +834,9 @@ class FileJob(object):
         try:
             if not os.path.isdir(util.unix_dirname(self.dst)):
                 os.makedirs(util.unix_dirname(self.dst))
-
             if os.path.isfile(self.dst):
                 if not os.access(self.dst, os.W_OK):
                     os.remove(self.dst)
-
             os.rename(self.src, self.dst)
         except Exception as e:
             if errno.EXDEV == e[0]:
