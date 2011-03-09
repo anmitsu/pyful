@@ -185,10 +185,11 @@ def kill_thread():
             th.kill()
 
 def get_file_length(*paths):
-    flen = 0
-    dlen = 0
+    flen, dlen = 0, 0
     for path in paths:
-        if not os.path.isdir(path):
+        if not os.path.exists(path):
+            continue
+        elif not os.path.isdir(path):
             flen += 1
         else:
             dlen += 1
