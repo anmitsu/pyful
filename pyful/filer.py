@@ -25,7 +25,6 @@ import pwd
 import re
 import stat
 import time
-from string import Template
 
 from pyful import look
 from pyful import message
@@ -480,7 +479,7 @@ class Workspace(object):
 class Directory(object):
     sort_kind = 'Name[^]'
     scroll_type = 'HalfScroll'
-    statusbar_format = " [$MARK/$FILE] ${MARKSIZE}bytes $SCROLL($CURSOR) $SORT "
+    statusbar_format = " [{MARK}/{FILE}] {MARKSIZE}bytes {SCROLL}({CURSOR}) {SORT} "
     keymap = {}
 
     def __init__(self, path, height, width, begy, begx):
@@ -1149,7 +1148,7 @@ class Directory(object):
             else:
                 p = str(int(p)) + '%'
 
-            status = Template(self.statusbar_format).safe_substitute(
+            status = self.statusbar_format.format(
                 MARK=len(self.mark_files), FILE=size-1,
                 MARKSIZE=self.mark_size, SCROLL=p,
                 CURSOR=self.cursor, SORT=self.sort_kind)
