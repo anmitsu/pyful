@@ -529,7 +529,8 @@ class UnzipThread(JobThread):
         path = util.force_decode(path)
         abspath = os.path.join(self.dstdir, path)
         try:
-            os.chmod(abspath, perm)
+            if perm:
+                os.chmod(abspath, perm)
             atime = mtime = time.mktime(date)
             os.utime(abspath, (atime, mtime))
         except Exception as e:
