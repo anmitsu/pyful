@@ -80,7 +80,7 @@ class Message(ui.Component):
             self.start_timer(timex)
 
     def exception(self, except_cls):
-        self.error('%s: %s' % (except_cls.__class__.__name__, str(except_cls)))
+        self.error('{0}: {1}'.format(except_cls.__class__.__name__, except_cls))
 
     def confirm(self, msg, options, msglist=None, position=0):
         cnf = Confirm(msg, options, msglist)

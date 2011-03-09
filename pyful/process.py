@@ -79,7 +79,7 @@ class Process(object):
         os.system("clear")
         try:
             exec(cmd)
-            message.puts("Eval: %s" % cmd)
+            message.puts("Eval: {0}".format(cmd))
             if not self.quick:
                 util.wait_restore()
         except Exception as e:
@@ -91,7 +91,7 @@ class Process(object):
                 proc = Popen(cmd, shell=True, executable=self.shell[0],
                              close_fds=True, preexec_fn=os.setsid, stdout=PIPE, stderr=PIPE)
                 self.procs.append(proc)
-                message.puts("Spawn: %s (%s)" % (cmd.strip(), proc.pid))
+                message.puts("Spawn: {0} ({1})".format(cmd.strip(), proc.pid))
             except Exception as e:
                 message.exception(e)
         else:
@@ -104,7 +104,7 @@ class Process(object):
                 proc.wait()
                 if not self.quick:
                     util.wait_restore()
-                message.puts("Spawn: %s (%s)" % (cmd.strip(), proc.pid))
+                message.puts("Spawn: {0} ({1})".format(cmd.strip(), proc.pid))
             except Exception as e:
                 message.exception(e)
             finally:
@@ -114,12 +114,12 @@ class Process(object):
         if self.quick:
             Popen(["screen", "-t", title, self.shell[0], self.shell[1], cmd])
         else:
-            Popen(["screen", "-t", title, self.shell[0], self.shell[1], "%s; python %s -e" % (cmd, Pyful.binpath)])
-        message.puts("Spawn: %s (screen)" % cmd.strip())
+            Popen(["screen", "-t", title, self.shell[0], self.shell[1], "{0}; python {1} -e".format(cmd, Pyful.binpath)])
+        message.puts("Spawn: {0} (screen)".format(cmd.strip()))
 
     def terminal(self, cmd):
         Popen([self.terminal_emulator[0], self.terminal_emulator[1], cmd])
-        message.puts("Spawn: %s (%s)" % (cmd.strip(), self.terminal_emulator[0]))
+        message.puts("Spawn: {0} ({1})".format(cmd.strip(), self.terminal_emulator[0]))
 
     def parsemacro(self, string):
         ret = string

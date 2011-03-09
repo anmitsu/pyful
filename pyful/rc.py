@@ -582,5 +582,5 @@ if'screen' in os.environ['TERM']:
 else:
     # Change terminal emulator's title.
     import socket
-    sys.stdout.write('\033]0;pyful@%s\007' % socket.gethostname())
+    sys.stdout.write('\033]0;pyful@{0}\007'.format(socket.gethostname()))
 

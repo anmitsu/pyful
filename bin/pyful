@@ -28,20 +28,21 @@ if __name__ == '__main__':
         sys.path.insert(0, libdir)
 
 from optparse import OptionParser
+from pyful import __version__
 
 def option_parse():
     usage = "usage: %prog [options]"
     parser = OptionParser(usage)
     parser.add_option('-v', '--version', action='store_true', dest='version',
-                      help=('display program version'))
+                      help='display program version')
     parser.add_option('-c', '--config', dest='config',
-                      help=('load configure file'))
+                      help='load configure file')
     parser.add_option('-e', action='store_true', dest='enter',
-                      help=('wait of the user input'))
+                      help='wait of the user input')
     (options, args) = parser.parse_args()
 
     if options.version:
-        print('%s v%s' % ('pyful', __version__))
+        print('{0} v{1}'.format('pyful', __version__))
         sys.exit(0)
     if options.enter:
         from pyful import util
@@ -49,9 +50,10 @@ def option_parse():
         sys.exit(0)
     if options.config is not None:
         if not os.path.exists(options.config):
-            print('No such rcfile (%s)' % (options.config))
+            print('No such rcfile ({0})'.format(options.config))
             sys.exit(1)
     return options
+
 
 import locale
 import imp
@@ -60,7 +62,7 @@ locale.setlocale(locale.LC_ALL, "")
 imp.reload(sys)
 sys.setdefaultencoding("utf-8")
 
-from pyful import __version__, Pyful, loadrcfile, createconf, setsignal
+from pyful import Pyful, loadrcfile, createconf, setsignal
 from pyful import message
 from pyful import ui
 
@@ -74,11 +76,11 @@ if __name__ == '__main__':
     pyful.init_function()
     setsignal()
 
-    message.puts("Python %s" % sys.version)
+    message.puts("Python {0}".format(sys.version))
     if error:
         message.exception(error)
-    message.puts("Loaded %s" % Pyful.environs['RCFILE'])
-    message.puts("Welcome to pyful v%s" % __version__)
+    message.puts("Loaded {0}".format(Pyful.environs['RCFILE']))
+    message.puts("Welcome to pyful v{0}".format(__version__))
 
     try:
         pyful.view()

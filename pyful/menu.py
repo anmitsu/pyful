@@ -47,7 +47,7 @@ class Menu(ui.Component):
 
     def show(self, name):
         if name not in self.items:
-            message.error("Undefined menu `%s'" % name)
+            message.error("Undefined menu `{0}'".format(name))
             return
         self.title = name
         self.active = self._items[name]

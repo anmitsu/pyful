@@ -23,7 +23,6 @@ import pwd
 import re
 import sys
 
-from pyful import look
 from pyful import ui
 from pyful import util
 

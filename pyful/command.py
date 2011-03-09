@@ -50,7 +50,7 @@ def _reload_rcfile():
     if error:
         message.exception(error)
     else:
-        message.puts("Reloaded: %s" % Pyful.environs['RCFILE'])
+        message.puts("Reloaded: {0}".format(Pyful.environs['RCFILE']))
     
 @defcmd
 def _refresh_window():
@@ -196,7 +196,7 @@ def _drivejump():
         def _wrap(path):
             return lambda: ui.getcomponent('Filer').dir.chdir(path)
         num = str(i+1)
-        li.append(('(%s) %s' % (num, f), ord(num), _wrap(f)))
+        li.append(('({0}) {1}'.format(num, f), ord(num), _wrap(f)))
     menu.items['Drives'] = li
     menu.show('Drives')
 
@@ -948,7 +948,7 @@ def _trashbox():
     cmdline = ui.getcomponent('Cmdline')
     trashbox = os.path.expanduser(Pyful.environs['TRASHBOX'])
     if not os.path.exists(trashbox):
-        if "Yes" == message.confirm("Trashbox doesn't exist. Make trashbox? (%s):" % trashbox, ["No", "Yes"]):
+        if "Yes" == message.confirm("Trashbox doesn't exist. Make trashbox? ({0}):".format(trashbox), ["No", "Yes"]):
             try:
                 os.makedirs(trashbox)
             except Exception as e:

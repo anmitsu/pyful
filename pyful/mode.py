@@ -57,7 +57,7 @@ class Mx(object):
         try:
             commands[cmd]()
         except KeyError:
-            message.error("Undefined command `%s'" % cmd)
+            message.error("Undefined command `{0}'".format(cmd))
 
 class ChangeLooks(object):
     prompt = "Change looks:"
@@ -71,7 +71,7 @@ class ChangeLooks(object):
             look.init_colors()
             ui.refresh()
         else:
-            message.error("`%s' looks doesn't exist" % name)
+            message.error("`{0}' looks doesn't exist".format(name))
 
 class ChangeWorkspaceTitle(object):
     prompt = 'Change workspace title:'
@@ -98,8 +98,7 @@ class Chmod(object):
         if filer.dir.ismark():
             return "Chmod mark files:"
         else:
-            mode = "%o" % filer.file.stat.st_mode
-            return "Chmod (%s - %s):" % (filer.file.name, mode)
+            return "Chmod ({0} - {1:#o}):".format(filer.file.name, filer.file.stat.st_mode)
 
     def complete(self, comp):
         symbols = ['+r', '-r', '+w', '-w', '+x', '-x']
@@ -118,17 +117,17 @@ class Chmod(object):
 
     def _getmode(self, st, mode):
         if mode == '+r':
-            return "%o" % (st.st_mode | 0o400)
+            return "{0:#o}".format(st.st_mode | 0o400)
         elif mode == '-r':
-            return "%o" % (st.st_mode & 0o377)
+            return "{0:#o}".format(st.st_mode & 0o377)
         elif mode == '+w':
-            return "%o" % (st.st_mode | 0o200)
+            return "{0:#o}".format(st.st_mode | 0o200)
         elif mode == '-w':
-            return "%o" % (st.st_mode & 0o577)
+            return "{0:#o}".format(st.st_mode & 0o577)
         elif mode == '+x':
-            return "%o" % (st.st_mode | 0o111)
+            return "{0:#o}".format(st.st_mode | 0o111)
         elif mode == '-x':
-            return "%o" % (st.st_mode & 0o666)
+            return "{0:#o}".format(st.st_mode & 0o666)
         else:
             return mode
 
@@ -175,7 +174,7 @@ class Copy(object):
         if ui.getcomponent("Filer").dir.ismark():
             return "Copy mark files to:"
         elif self.src:
-            return "Copy from %s to:" % self.src
+            return "Copy from {0} to:".format(self.src)
         elif self.src is None:
             return "Copy from:"
         else:
@@ -217,7 +216,7 @@ class Delete(object):
     def execute(self, path):
         filer = ui.getcomponent("Filer")
         msg = path.replace(filer.dir.path, "")
-        ret = message.confirm("Delete? (%s):"%msg, ["No", "Yes"])
+        ret = message.confirm("Delete? ({0}):".format(msg), ["No", "Yes"])
         if ret == "No" or ret is None:
             return
         filectrl.delete(path)
@@ -231,7 +230,7 @@ class Glob(object):
         if self.default == "":
             return "Glob pattern:"
         else:
-            return "Glob pattern (default %s):" % self.default
+            return "Glob pattern (default {0}):".format(self.default)
 
     def complete(self, comp):
         return comp.comp_files()
@@ -254,7 +253,7 @@ class GlobDir(object):
         if self.default == "":
             return "Glob dir pattern:"
         else:
-            return "Glob dir pattern (default %s):" % self.default
+            return "Glob dir pattern (default {0}):".format(self.default)
 
     def complete(self, comp):
         return comp.comp_files()
@@ -287,7 +286,7 @@ class Link(object):
         if ui.getcomponent("Filer").dir.ismark():
             return "Link mark files to:"
         elif self.src:
-            return "Link from `%s' to:" % self.src
+            return "Link from `{0}' to:".format(self.src)
         elif self.src is None:
             return "Link from:"
         else:
@@ -319,7 +318,7 @@ class Mark(object):
     @property
     def prompt(self):
         if self.default:
-            return "Mark pattern (%s):" % self.default.pattern
+            return "Mark pattern ({0}):".format(self.default.pattern)
         else:
             return "Mark pattern:"
 
@@ -345,7 +344,7 @@ class Mask(object):
     @property
     def prompt(self):
         if self.default:
-            return "Mask pattern %s:" % self.default.pattern
+            return "Mask pattern {0}:".format(self.default.pattern)
         else:
             return "Mask pattern:"
 
@@ -358,11 +357,11 @@ class Mask(object):
             filer.dir.mask(self.default)
         else:
             try:
-                reg = re.compile(pattern)
-            except:
-                return message.error("Argument error: Can't complile `%s'" % pattern)
-            self.__class__.default = reg
-            filer.dir.mask(reg)
+                r = re.compile(pattern)
+            except re.error as e:
+                return message.exception(e)
+            self.__class__.default = r
+            filer.dir.mask(r)
 
 class Menu(object):
     prompt = 'Menu name:'
@@ -396,7 +395,7 @@ class Move(object):
         if ui.getcomponent("Filer").dir.ismark():
             return "Move mark files to:"
         elif self.src:
-            return "Move from %s to:" % self.src
+            return "Move from {0} to:".format(self.src)
         elif self.src is None:
             return "Move from:"
         else:
@@ -428,7 +427,7 @@ class Newfile(object):
     def execute(self, path):
         filer = ui.getcomponent("Filer")
         if os.path.exists(util.abspath(path)):
-            message.error("Error: file exists - %s" % path)
+            message.error("Error: file exists - {0}".format(path))
             return
         filectrl.mknod(path, self.filemode)
         filer.workspace.all_reload()
@@ -459,7 +458,7 @@ class Rename(object):
     def prompt(self):
         try:
             util.U(self.path)
-            return "Rename: %s ->" % self.path
+            return "Rename: {0} ->".format(self.path)
         except UnicodeError:
             return "Rename invalid encoding to:"
 
@@ -477,11 +476,11 @@ class Replace(object):
     @property
     def prompt(self):
         if self.pattern is None and self.default:
-            return "Replace regexp (default %s -> %s):" % (self.default[0].pattern, self.default[1])
+            return "Replace regexp (default {0} -> {1}):".format(self.default[0].pattern, self.default[1])
         elif self.pattern is None:
             return "Replace pattern:"
         else:
-            return "Replace regexp %s with:" % self.pattern.pattern
+            return "Replace regexp {0} with:".format(self.pattern.pattern)
 
     def complete(self, comp):
         return comp.comp_files()
@@ -496,7 +495,7 @@ class Replace(object):
             try:
                 self.pattern = re.compile(util.U(pattern))
             except Exception:
-                return message.error("Argument error: Can't complile `%s'" % pattern)
+                return message.error("Argument error: Can't complile `{0}'".format(pattern))
             ui.getcomponent("Cmdline").restart("")
         else:
             filectrl.replace(self.pattern, pattern)
@@ -516,7 +515,7 @@ class Symlink(object):
         if filer.dir.ismark():
             return "Symlink mark files to:"
         elif self.src:
-            return "Symlink from `%s' to:" % self.src
+            return "Symlink from `{0}' to:".format(self.src)
         elif self.src is None:
             return "Symlink from:"
         else:
@@ -552,7 +551,7 @@ class TrashBox(object):
         filer = ui.getcomponent("Filer")
         trashbox = os.path.expanduser(Pyful.environs['TRASHBOX'])
         msg = path.replace(filer.dir.path, "")
-        ret = message.confirm("Move `%s' to trashbox? " % msg, ["No", "Yes"])
+        ret = message.confirm("Move `{0}' to trashbox? ".format(msg), ["No", "Yes"])
         if ret == "No" or ret is None:
             return
 
@@ -570,17 +569,17 @@ class Utime(object):
         if not self.path:
             return "Utime path:"
         elif len(self.sttime) == 0:
-            return "Utime year: %s ->" % self.timesec[0]
+            return "Utime year: {0} ->".format(self.timesec[0])
         elif len(self.sttime) == 1:
-            return "Utime month: %s ->" % self.timesec[1]
+            return "Utime month: {0} ->".format(self.timesec[1])
         elif len(self.sttime) == 2:
-            return "Utime day: %s ->" % self.timesec[2]
+            return "Utime day: {0} ->".format(self.timesec[2])
         elif len(self.sttime) == 3:
-            return "Utime hour: %s ->" % self.timesec[3]
+            return "Utime hour: {0} ->".format(self.timesec[3])
         elif len(self.sttime) == 4:
-            return "Utime min: %s ->" % self.timesec[4]
+            return "Utime min: {0} ->".format(self.timesec[4])
         elif len(self.sttime) == 5:
-            return "Utime sec: %s ->" % self.timesec[5]
+            return "Utime sec: {0} ->".format(self.timesec[5])
 
     def complete(self, comp):
         if not self.path:
@@ -606,7 +605,7 @@ class Utime(object):
                 self.timesec = time.localtime(os.stat(self.path).st_mtime)
                 cmdline.restart("")
             else:
-                return message.error("%s doesn't exist." % st)
+                return message.error("{0} doesn't exist.".format(st))
 
         elif len(self.sttime) == 0:
             if st == "":
@@ -677,13 +676,13 @@ class Tar(object):
                 return 'Mark files wrap is:'
             else:
                 if self.each:
-                    return 'Mark files %s each to:' % self.tarmode
+                    return 'Mark files {0} each to:'.format(self.tarmode)
                 else:
-                    return 'Mark files %s to:' % self.tarmode
+                    return 'Mark files {0} to:'.format(self.tarmode)
         elif self.src is None:
-            return '%s from:' % self.tarmode
+            return '{0} from:'.format(self.tarmode)
         else:
-            return '%s from %s to:' % (self.tarmode, self.src)
+            return '{0} from {1} to:'.format(self.tarmode, self.src)
 
     def complete(self, comp):
         return comp.comp_files()
@@ -727,7 +726,7 @@ class UnTar(object):
         elif self.src is None:
             return 'Untar from:'
         else:
-            return 'Untar from %s to:' % self.src
+            return 'Untar from {0} to:'.format(self.src)
 
     def complete(self, comp):
         return comp.comp_files()
@@ -750,7 +749,7 @@ class WebSearch(object):
 
     @property
     def prompt(self):
-        return '%s search:' % self.engine
+        return '{0} search:'.format(self.engine)
 
     def complete(self, comp):
         return comp.comp_files()
@@ -759,7 +758,7 @@ class WebSearch(object):
         import webbrowser
         if self.engine == 'Google':
             word = word.replace(' ', '+')
-            search = 'http://www.google.com/search?&q=%s' % word
+            search = 'http://www.google.com/search?&q={0}'.format(word)
         else:
             pass
         try:
@@ -787,7 +786,7 @@ class Zip(object):
         elif self.src is None:
             return 'Zip from:'
         else:
-            return 'Zip from %s to:' % self.src
+            return 'Zip from {0} to:'.format(self.src)
 
     def complete(self, comp):
         return comp.comp_files()
@@ -831,7 +830,7 @@ class UnZip(object):
         elif self.src is None:
             return 'Unzip from:'
         else:
-            return 'Unzip from %s to:' % self.src
+            return 'Unzip from {0} to:'.format(self.src)
 
     def complete(self, comp):
         return comp.comp_files()

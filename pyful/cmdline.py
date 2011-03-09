@@ -175,7 +175,7 @@ class Cmdline(ui.Component):
         cmdscr = ui.getcomponent("Cmdscr").win
         cmdscr.erase()
         cmdscr.move(0, 0)
-        prompt = " %s " % self.mode.prompt
+        prompt = " {0} ".format(self.mode.prompt)
         promptlen = util.termwidth(prompt)
 
         (maxy, maxx) = cmdscr.getmaxyx()
@@ -534,9 +534,9 @@ class Output(ui.InfoBox):
             li = self.cursor_item().string.split(":")
             fname = li[0]
             lnum = li[1]
-            process.spawn("%s +%s %s" % (Pyful.environs['EDITOR'], lnum, fname))
+            process.spawn("{0} +{1} {2}".format(Pyful.environs['EDITOR'], lnum, fname))
         except Exception as e:
-            message.error("edit: %s" % str(e))
+            message.exception(e)
 
     def infoarea(self, string=None):
         from pyful import mode

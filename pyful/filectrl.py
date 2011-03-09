@@ -26,7 +26,6 @@ import pwd
 import grp
 import errno
 
-from pyful import Pyful
 from pyful import message
 from pyful import process
 from pyful import ui
@@ -35,7 +34,7 @@ from pyful import util
 def chmod(path, mode):
     try:
         os.chmod(path, int(mode, 8))
-        message.puts("Changed mode: %s -> %s" % (path, mode))
+        message.puts("Changed mode: {0} -> {1}".format(path, mode))
     except Exception as e:
         message.exception(e)
 
@@ -54,7 +53,7 @@ def chown(path, uid, gid):
             return
     try:
         os.chown(path, uid, gid)
-        message.puts("Changed owner: %s: uid -> %s, gid -> %s" % (path, uid, gid))
+        message.puts("Changed owner: {0}: uid -> {1}, gid -> {2}".format(path, uid, gid))
     except Exception as e:
         message.exception(e)
 
@@ -69,21 +68,21 @@ def link(src, dst):
         if os.path.isdir(dst):
             dst = os.path.join(dst, util.unix_basename(src))
         os.link(src, dst)
-        message.puts("Created hard links: %s -> %s" % (src, dst))
+        message.puts("Created hard links: {0} -> {1}".format(src, dst))
     except Exception as e:
         message.exception(e)
 
 def mkdir(path, mode=0o755):
     try:
         os.makedirs(path, mode)
-        message.puts("Created directory: %s (%o)" % (path, mode))
+        message.puts("Created directory: {0} ({1:#o})".format(path, mode))
     except Exception as e:
         message.exception(e)
 
 def mknod(path, mode=0o644):
     try:
         os.mknod(path, mode)
-        message.puts("Created file: %s (%o)" % (path, mode))
+        message.puts("Created file: {0} ({1:#o})".format(path, mode))
     except Exception as e:
         message.exception(e)
 
@@ -94,11 +93,11 @@ def rename(src, dst):
     if os.path.exists(dst) and os.path.samefile(src, dst):
         return
     if os.path.exists(dst):
-        if "Yes" != message.confirm("File exist - (%s). Override?" % dst, ["Yes", "No", "Cancel"]):
+        if "Yes" != message.confirm("File exist - ({0}). Override?".format(dst), ["Yes", "No", "Cancel"]):
             return
     try:
         os.renames(src, dst)
-        message.puts("Renamed: %s -> %s" % (src, dst))
+        message.puts("Renamed: {0} -> {1}".format(src, dst))
     except Exception as e:
         message.exception(e)
 
@@ -110,10 +109,10 @@ def replace(pattern, repstr):
     matched = []
     for i in range(0, len(files)):
         if files[i] != renamed[i]:
-            msg.append("%s -> %s" % (files[i], renamed[i]))
+            msg.append("{0} -> {1}".format(files[i], renamed[i]))
             matched.append((files[i], renamed[i]))
     if not matched:
-        return message.error("No pattern matched for mark files: %s " % pattern.pattern)
+        return message.error("No pattern matched for mark files: {0} ".format(pattern.pattern))
     if "Start" != message.confirm("Replace:", ["Start", "Cancel"], msg):
         return
 
@@ -125,7 +124,7 @@ def replace(pattern, repstr):
             if ret == "No(all)":
                 continue
             if ret != "Yes(all)":
-                ret = message.confirm("File exist - (%s). Override?" % dst,
+                ret = message.confirm("File exist - ({0}). Override?".format(dst),
                                       ["Yes", "No", "Yes(all)", "No(all)", "Cancel"])
                 if ret == "Yes" or ret == "Yes(all)":
                     pass
@@ -135,7 +134,7 @@ def replace(pattern, repstr):
                     break
         try:
             os.renames(src, dst)
-            message.puts("Renamed: %s -> %s" % (src, dst))
+            message.puts("Renamed: {0} -> {1}".format(src, dst))
         except Exception as e:
             message.exception(e)
             break
@@ -145,7 +144,7 @@ def symlink(src, dst):
         if os.path.isdir(dst):
             dst = os.path.join(dst, util.unix_basename(src))
         os.symlink(src, dst)
-        message.puts("Created symlink: %s -> %s" % (src, dst))
+        message.puts("Created symlink: {0} -> {1}".format(src, dst))
     except Exception as e:
         message.exception(e)
 
@@ -211,7 +210,7 @@ class Subloop(object):
         y, x = cmdscr.getmaxyx()
         string = ""
         for i, t in enumerate(Filectrl.threads):
-            string += "[%d] %s " % (i+1, t.title)
+            string += "[{0}] {1} ".format(i+1, t.title)
         cmdscr.move(0, 1)
         cmdscr.addstr(util.mbs_ljust(string, x-2), curses.A_BOLD)
         cmdscr.noutrefresh()
@@ -264,7 +263,7 @@ class Filectrl(object):
         if thread.error:
             message.exception(thread.error)
         else:
-            message.puts("Thread finished: %s" % thread.title)
+            message.puts("Thread finished: {0}".format(thread.title))
         self.threads.remove(thread)
         ui.getcomponent("Filer").workspace.all_reload()
 
@@ -344,11 +343,11 @@ class TarThread(JobThread):
             dst += ext
         self.dst = util.abspath(dst)
         if isinstance(src, list):
-            self.title = "Tar: mark files -> %s" % dst
+            self.title = "Tar: mark files -> {0}".format(dst)
             self.src = [util.abspath(f) for f in src]
             self.src_dirname = util.U(os.getcwd()) + os.sep
         else:
-            self.title = "Tar: %s -> %s" % (src, dst)
+            self.title = "Tar: {0} -> {1}".format(src, dst)
             self.src = [util.abspath(src)]
             self.src_dirname = util.unix_dirname(self.src[0]) + os.sep
         self.tarmode = tarmode
@@ -372,7 +371,7 @@ class TarThread(JobThread):
             for path in self.src:
                 for f in self.addlist_generate(path):
                     arcname = f.replace(os.path.commonprefix([f, self.src_dirname]), '')
-                    self.view_thread("Adding(%s/%s): %s" % (elapse, goal, arcname))
+                    self.view_thread("Adding({0}/{1}): {2}".format(elapse, goal, arcname))
                     self.add_file(tar, f, arcname)
                     elapse += 1
         except FilectrlCancel as e:
@@ -412,17 +411,17 @@ class UntarThread(JobThread):
         JobThread.__init__(self)
         self.view_thread("Reading...")
         if isinstance(src, list):
-            self.title = "Untar: mark files -> %s" % dstdir
+            self.title = "Untar: mark files -> {0}".format(dstdir)
             self.src = [util.abspath(f) for f in src]
         else:
-            self.title = "Untar: %s -> %s" % (src, dstdir)
+            self.title = "Untar: {0} -> {1}".format(src, dstdir)
             self.src = [util.abspath(src)]
         self.dstdir = util.abspath(dstdir)
         self.dirlist = []
 
     def run(self):
         if not os.access(self.dstdir, os.W_OK):
-            self.error = OSError("No permission: %s" % self.dstdir)
+            self.error = OSError("No permission: {0}".format(self.dstdir))
             return
         try:
             for tarpath in self.src:
@@ -442,7 +441,7 @@ class UntarThread(JobThread):
             for info in tar.getmembers():
                 if not self.active:
                     raise FilectrlCancel(self.title)
-                self.view_thread("Untar: %s" % info.name)
+                self.view_thread("Untar: {0}".format(info.name))
                 tar.extract(info, self.dstdir)
                 if info.isdir():
                     self.dirlist.append(info)
@@ -458,17 +457,17 @@ class UnzipThread(JobThread):
         JobThread.__init__(self)
         self.view_thread('Reading...')
         if isinstance(src, list):
-            self.title = "Unzip: mark files -> %s" % dstdir
+            self.title = "Unzip: mark files -> {0}".format(dstdir)
             self.src = [util.abspath(f) for f in src]
         else:
-            self.title = "Unzip: %s -> %s" % (src, dstdir)
+            self.title = "Unzip: {0} -> {1}".format(src, dstdir)
             self.src = [util.abspath(src)]
         self.dstdir = util.abspath(dstdir)
         self.dirlist = []
 
     def run(self):
         if not os.access(self.dstdir, os.W_OK):
-            self.error = OSError("No permission: %s" % self.dstdir)
+            self.error = OSError("No permission: {0}".format(self.dstdir))
             return
         try:
             for zippath in self.src:
@@ -513,7 +512,7 @@ class UnzipThread(JobThread):
                 os.makedirs(dirpath)
             source = myzip.open(fname)
             target = open(path, 'wb')
-            self.view_thread('Inflating: %s' % ufname)
+            self.view_thread('Inflating: {0}'.format(ufname))
             shutil.copyfileobj(source, target)
             source.close()
             target.close()
@@ -544,11 +543,11 @@ class ZipThread(JobThread):
             dst += '.zip'
         self.dst = util.abspath(dst)
         if isinstance(src, list):
-            self.title = "Zip: mark files -> %s" % dst
+            self.title = "Zip: mark files -> {0}".format(dst)
             self.src = [util.abspath(f) for f in src]
             self.src_dirname = util.U(os.getcwd()) + os.sep
         else:
-            self.title = "Zip: %s -> %s" % (src, dst)
+            self.title = "Zip: {0} -> {0}".format(src, dst)
             self.src = [util.abspath(src)]
             self.src_dirname = util.unix_dirname(self.src[0]) + os.sep
         self.wrap = wrap
@@ -565,7 +564,7 @@ class ZipThread(JobThread):
             for path in self.src:
                 for f in self.writelist_generate(path):
                     arcname = f.replace(os.path.commonprefix([f, self.src_dirname]), '')
-                    self.view_thread("Adding(%s/%s): %s" % (elapse, goal, arcname))
+                    self.view_thread("Adding({0}/{1}): {2}".format(elapse, goal, arcname))
                     self.write_file(myzip, f, arcname)
                     elapse += 1
         except FilectrlCancel as e:
@@ -606,7 +605,7 @@ class DeleteThread(JobThread):
             self.title = "Delete: mark files"
             self.path = [util.abspath(f) for f in path]
         else:
-            self.title = "Delete: %s" % path
+            self.title = "Delete: {0}".format(path)
             self.path = [util.abspath(path)]
         self.dirlist = []
 
@@ -616,7 +615,7 @@ class DeleteThread(JobThread):
         try:
             for path in self.path:
                 for f in self.deletelist_generate(path):
-                    self.view_thread("Deleting(%s/%s): %s" % (elapse, goal, util.unix_basename(f)))
+                    self.view_thread("Deleting({0}/{1}): {2}".format(elapse, goal, util.unix_basename(f)))
                     self.delete_file(f)
                     elapse += 1
             self.delete_dirs()
@@ -657,10 +656,10 @@ class CopyThread(JobThread):
         JobThread.__init__(self)
         self.view_thread("Copy starting...")
         if isinstance(src, list):
-            self.title = "Copy: mark files -> %s" % dst
+            self.title = "Copy: mark files -> {0}".format(dst)
             self.src = [util.abspath(f) for f in src]
         else:
-            self.title = "Copy: %s -> %s" % (src, dst)
+            self.title = "Copy: {0} -> {1}".format(src, dst)
             self.src = [util.abspath(src)]
         if dst.endswith(os.sep):
             self.dst = util.abspath(dst) + os.sep
@@ -677,7 +676,7 @@ class CopyThread(JobThread):
                     if not self.active:
                         raise FilectrlCancel(self.title)
                     if job:
-                        self.view_thread("Coping(%s/%s): %s" % (elapse, goal, util.unix_basename(job.src)))
+                        self.view_thread("Coping({0}/{1}): {2}".format(elapse, goal, util.unix_basename(job.src)))
                         job.copy()
                     elapse += 1
         except FilectrlCancel as e:
@@ -689,10 +688,10 @@ class MoveThread(JobThread):
         JobThread.__init__(self)
         self.view_thread("Move starting...")
         if isinstance(src, list):
-            self.title = "Move: mark files -> %s" % dst
+            self.title = "Move: mark files -> {0}".format(dst)
             self.src = [util.abspath(f) for f in src]
         else:
-            self.title = "Move: %s -> %s" % (src, dst)
+            self.title = "Move: {0} -> {1}".format(src, dst)
             self.src = [util.abspath(src)]
         if dst.endswith(os.sep):
             self.dst = util.abspath(dst) + os.sep
@@ -709,7 +708,7 @@ class MoveThread(JobThread):
                     if not self.active:
                         raise FilectrlCancel(self.title)
                     if job:
-                        self.view_thread("Moving(%s/%s): %s" % (elapse, goal, util.unix_basename(job.src)))
+                        self.view_thread("Moving({0}/{1}): {2}".format(elapse, goal, util.unix_basename(job.src)))
                         job.move()
                     elapse += 1
         except FilectrlCancel as e:
@@ -727,7 +726,7 @@ class FileJobGenerator(object):
         def _checkfile(src, dst):
             ret = self.check_override(src, dst)
             if ret == "Cancel":
-                raise FilectrlCancel("Filejob canceled: %s -> %s" % (src, dst))
+                raise FilectrlCancel("Filejob canceled: {0} -> {1}".format(src, dst))
             if ret == "Yes":
                 return FileJob(src, dst)
 
@@ -768,10 +767,8 @@ class FileJobGenerator(object):
             dstat = os.lstat(dst)
             stime = time.strftime("%c", time.localtime(sstat.st_mtime))
             dtime = time.strftime("%c", time.localtime(dstat.st_mtime))
-            m = ["Source",
-                 "Path: %s"%src, "Size: %s"%sstat.st_size, "Time: %s"%stime, "",
-                 "Destination",
-                 "Path: %s"%dst, "Size: %s"%dstat.st_size, "Time: %s"%dtime]
+            m = "Source,Path: {0},Size: {1},Time: {2},,Destination,Path: {3},Size: {4},Time: {5}".format(
+                src, sstat.st_size, stime, dst, dstat.st_size, dtime).split(',')
             ret = message.confirm("Override?", ["Yes", "No", "Yes(all)", "No(all)", "Cancel"], m)
             Filectrl.event.set()
             if ret == "Yes" or ret == "No" or ret == "Cancel":

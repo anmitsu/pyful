@@ -163,7 +163,7 @@ class Filer(ui.Component):
             return message.error('terminal size very small')
 
         for i, path in enumerate([d.path for d in self.workspace.dirs]):
-            num = '[%d] ' % (i+1)
+            num = '[{0}] '.format(i+1)
             numlen = len(num)
             path = path.replace(os.environ['HOME'], "~", 1)
             path = util.path_omission(path, width-numlen-1)
@@ -597,12 +597,12 @@ class Directory(object):
         self.reload()
 
     def glob(self, pattern):
-        self.list_title = 'Grob:(%s)' % pattern
+        self.list_title = 'Grob:({0})'.format(pattern)
         self.list = list(glob.iglob(pattern))
         self.reload()
 
     def globdir(self, pattern):
-        self.list_title = 'Grobdir:(%s)' % pattern
+        self.list_title = 'Grobdir:({0})'.format(pattern)
 
         def _globdir(dirname, patternname):
             try:
@@ -621,7 +621,7 @@ class Directory(object):
         self.reload()
 
     def open_listfile(self, path):
-        self.list_title = "File:(%s)" % path
+        self.list_title = "File:({0})".format(path)
         self.list = []
         try:
             with open(path, "r") as f:
@@ -685,7 +685,7 @@ class Directory(object):
 
     def invalid_encoding_error(self, fname):
         fs = FileStat(fname, force=True)
-        size = fs.get_file_size() + ' (%s)' % fs.stat.st_size
+        size = fs.get_file_size() + ' ({0})'.format(fs.stat.st_size)
         time = fs.get_mtime()
         user = fs.get_user_name()
         group = fs.get_group_name()
@@ -1154,7 +1154,7 @@ class Directory(object):
                 CURSOR=self.cursor, SORT=self.sort_kind)
 
             if self.maskreg is not None:
-                status += ' Mask:%s' % self.maskreg.pattern
+                status += ' Mask: {0}'.format(self.maskreg.pattern)
             if self.list_title is not None:
                 status += ' ' + self.list_title
 
@@ -1182,20 +1182,21 @@ class Finder(object):
         self._stringcue = []
 
     def find(self, pattern):
-        try:
-            if self.smartcase and re.match("[A-Z]", pattern) is None:
-                if self.migemo:
-                    pattern = self.migemo.query(pattern)
-                reg = re.compile(pattern, re.IGNORECASE)
-            else:
-                if self.migemo:
-                    pattern = self.migemo.query(pattern)
-                reg = re.compile(pattern)
-        except Exception:
-            return
-
-        self.results = [f.name for f in self.cache if f.name != os.pardir and reg.search(f.name)]
-
+        if self.smartcase and re.match("[A-Z]", pattern) is None:
+            if self.migemo:
+                pattern = self.migemo.query(pattern)
+            try:
+                r = re.compile(pattern, re.IGNORECASE)
+            except re.error:
+                return
+        else:
+            if self.migemo:
+                pattern = self.migemo.query(pattern)
+            try:
+                r = re.compile(pattern)
+            except re.error:
+                return
+        self.results = [f.name for f in self.cache if f.name != os.pardir and r.search(f.name)]
         self.dir.reload()
         self.dir.setcursor(1)
 
@@ -1352,22 +1353,22 @@ class FileStat(object):
     def get_file_stat(self):
         fstat = ''
         if self.view_ext and not self.isdir() and not self.islink():
-            fstat += ' %s' % util.extname(self.name)
+            fstat += ' {0}'.format(util.extname(self.name))
         if self.view_user:
-            fstat += ' %s' % self.get_user_name()
+            fstat += ' {0}'.format(self.get_user_name())
         if self.view_group:
-            fstat += ' %s' % self.get_group_name()
+            fstat += ' {0}'.format(self.get_group_name())
         if self.view_nlink:
-            fstat += ' %3s' % self.stat.st_nlink
+            fstat += ' {0:>3}'.format(self.stat.st_nlink)
         if self.view_size:
             if self.isdir():
-                fstat += ' %7s' % '<DIR>'
+                fstat += ' {0:>7}'.format('<DIR>')
             else:
-                fstat += ' %7s' % self.get_file_size()
+                fstat += ' {0:>7}'.format(self.get_file_size())
         if self.view_permission:
-            fstat += ' %s' % self.get_permission()
+            fstat += ' {0}'.format(self.get_permission())
         if self.view_mtime:
-            fstat += ' %s' % self.get_mtime()
+            fstat += ' {0}'.format(self.get_mtime())
         return fstat
 
     def get_attr(self):
@@ -1386,11 +1387,11 @@ class FileStat(object):
     def get_file_size(self):
         s = self.stat.st_size
         if s > 1024**3:
-            return '%.1fG' % (float(s) / (1024**3))
+            return '{0:.1f}G'.format(float(s) / (1024**3))
         elif s > 1024**2:
-            return '%.1fM' % (float(s) / (1024**2))
+            return '{0:.1f}M'.format(float(s) / (1024**2))
         elif s > 1024:
-            return '%.1fk' % (float(s) / 1024)
+            return '{0:.1f}k'.format(float(s) / 1024)
         else:
             return str(s)
 
@@ -1459,7 +1460,7 @@ class FileStat(object):
         mtime = time.strftime(self.time_format, time.localtime(self.stat.st_mtime))
         name = self.name
 
-        fstat = '%s %s %s %s %d %s %s' % (perm, nlink, user, group, size, mtime, name)
+        fstat = '{0} {1} {2} {3} {4} {5} {6}'.format(perm, nlink, user, group, size, mtime, name)
         fstat = util.mbs_ljust(fstat, ui.getcomponent("Stdscr").win.getmaxyx()[1]-1)
         cmdscr.move(1, 0)
         cmdscr.addstr(fstat)

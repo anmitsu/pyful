@@ -59,7 +59,7 @@ class Help(ui.InfoBox):
                 level = count
             elif line.startswith('#'):
                 line = line.replace('#', '', 1).strip()
-                line = '%s. %s' % (number, line)
+                line = '{0}. {1}'.format(number, line)
                 indent = level*self.indent
                 attr = 0
                 number += 1
@@ -99,16 +99,16 @@ class Help(ui.InfoBox):
                     continue
                 keybind = curses.keyname(k[1])
                 if keybind.isupper() and len(keybind) == 1:
-                    keybind = 'Shift + %s' % keybind.lower()
+                    keybind = 'Shift + {0}'.format(keybind.lower())
                 elif keybind.startswith('^'):
-                    keybind = 'Control + %s' % keybind.lower().replace('^', '')
+                    keybind = 'Control + {0}'.format(keybind.lower().replace('^', ''))
                 elif keybind == ' ':
                     keybind = 'KEY_SPACE'
 
                 if k[0]:
-                    keybind = 'Meta + %s' % keybind
+                    keybind = 'Meta + {0}'.format(keybind)
                 if len(k) == 3:
-                    keybind += ' (%s)' % k[2]
+                    keybind += ' ({0})'.format(k[2])
                 key.append(ui.InfoBoxContext(self.indent+keybind))
         return key
 
@@ -118,10 +118,10 @@ class Help(ui.InfoBox):
         if not name:
             return
         if not name in commands:
-            return message.error("Undefined command `%s'" % name)
+            return message.error("Undefined command `{0}'".format(name))
         doc = commands[name].__doc__
         if not doc:
-            return message.error("`%s' hasn't documentation" % name)
+            return message.error("`{0}' hasn't documentation".format(name))
 
         info = []
         info.append(ui.InfoBoxContext("Name:", attr=curses.A_BOLD))
@@ -186,7 +186,7 @@ class AttributeContext(ui.InfoBoxContext):
         win.addstr(self.indent, self.attr)
         for s in self.rematch.split(string):
             if s.startswith(symbol) and s.endswith(symbol):
-                s = s.replace('\%s' % symbol, symbol)
+                s = s.replace('\{0}'.format(symbol), symbol)
                 win.addstr(s.strip(symbol), self.attr | self.hiattr)
             else:
                 win.addstr(s, self.attr)

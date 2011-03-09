@@ -85,11 +85,11 @@ def string_to_safe(string):
 
 def quote(string):
     if re.search("[']", string):
-        return '"%s"' % string
+        return '"{0}"'.format(string)
     elif re.search("[\"]", string):
-        return "'%s'" % string
+        return "'{0}'".format(string)
     elif re.search("[\s!\#\$&\(\)~\|\[\]\{\}\*;\?<>]", string):
-        return '"%s"' % string
+        return '"{0}"'.format(string)
     else:
         return string
 

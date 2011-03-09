@@ -87,7 +87,7 @@ class Component(object):
         if not name in _components:
             _components[name] = self
         else:
-            raise ComponentDuplication("`%s' overlap for components" % name)
+            raise ComponentDuplication("`{0}' overlap for components".format(name))
 
     @property
     def is_active(self):
@@ -281,7 +281,7 @@ class InfoBox(Component):
         else:
             current_page = self._cursor//(height*maxrow)+1
         max_page = (size-1)//(height*maxrow)+1
-        self.win.addstr("%s(%d) [%d/%d]" %
+        self.win.addstr("{0}({1}) [{2}/{3}]".format
                         (self._title, size, current_page, max_page),
                         look.colors['InfoBoxTitle'])
 
@@ -316,7 +316,7 @@ class InfoBoxContext(object):
     def addstr(self, win, width):
         string = util.mbs_ljust(self.string, width)
         if self.histr:
-            r = re.compile(r"(%s)" % re.escape(self.histr))
+            r = re.compile(r"({0})".format(re.escape(self.histr)))
             for s in r.split(string):
                 if r.match(s):
                     win.addstr(s, self.attr | self.hiattr)
