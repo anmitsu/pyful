@@ -352,21 +352,17 @@ class TarThread(JobThread):
             self.src_dirname = util.U(os.getcwd()) + os.sep
         else:
             self.title = "Tar: %s -> %s" % (src, dst)
-            self.src = util.abspath(src)
-            self.src_dirname = util.unix_dirname(self.src) + os.sep
+            self.src = [util.abspath(src)]
+            self.src_dirname = util.unix_dirname(self.src[0]) + os.sep
         self.tarmode = tarmode
         self.wrap = wrap
 
     def run(self):
-        if not isinstance(self.src, list):
-            if not os.path.exists(self.src):
-                return message.error("No such file or directory - %s" % self.src)
         try:
             unicode
             self.dst = self.dst.encode()
         except:
             pass
-
         try:
             import tarfile
             mode = self.tarmodes[self.tarmode]
@@ -374,36 +370,26 @@ class TarThread(JobThread):
         except Exception as e:
             return message.exception(e)
         try:
-            if isinstance(self.src, list):
-                for f in self.src:
-                    if not os.path.exists(f):
-                        message.error("No such file or directory - %s" % f)
-                    else:
-                        self.add(tar, f)
-            else:
-                self.add(tar, self.src)
+            goal = sum(get_file_length(*self.src))
+            elapse = 1
+            for path in self.src:
+                for f in self.addlist_generate(path):
+                    arcname = f.replace(os.path.commonprefix([f, self.src_dirname]), '')
+                    self.view_thread("Adding(%s/%s): %s" % (elapse, goal, arcname))
+                    self.add_file(tar, f, arcname)
+                    elapse += 1
         except FilectrlCancel as e:
             self.error = e
         finally:
             tar.close()
-        if not isinstance(self.src, list):
-            lst = os.lstat(self.src)
-            os.utime(self.dst, (lst.st_mtime, lst.st_mtime))
-        os.chmod(self.dst, 0o644)
+        try:
+            if not self.error and len(self.src) == 1:
+                lst = os.lstat(self.src[0])
+                os.utime(self.dst, (lst.st_mtime, lst.st_mtime))
+        except Exception as e:
+            message.exception(e)
 
-    def add(self, tar, source):
-        if os.path.isdir(source):
-            self.add_file(tar, source)
-            for root, dnames, fnames in os.walk(source):
-                for name in fnames+dnames:
-                    path = os.path.normpath(os.path.join(root, name))
-                    self.add_file(tar, path)
-        else:
-            self.add_file(tar, source)
-
-    def add_file(self, tar, source):
-        arcname = source.replace(os.path.commonprefix([source, self.src_dirname]), '')
-        self.view_thread("Adding: " + arcname)
+    def add_file(self, tar, source, arcname):
         try:
             tar.add(source, os.path.join(self.wrap, arcname), recursive=False)
         except Exception as e:
@@ -411,6 +397,16 @@ class TarThread(JobThread):
             raise FilectrlCancel("Exception occurred while `tar'")
         if not self.active:
             raise FilectrlCancel(self.title)
+
+    def addlist_generate(self, path):
+        if os.path.isdir(path):
+            yield path
+            for sub in os.listdir(path):
+                subpath = os.path.join(path, sub)
+                for f in self.addlist_generate(subpath):
+                    yield f
+        else:
+            yield path
 
 class UntarThread(JobThread):
     tarmodes = {'.tar': '', '.tgz': 'gz', '.gz': 'gz', '.bz2': 'bz2',}
