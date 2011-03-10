@@ -118,8 +118,7 @@ def replace(pattern, repstr):
 
     ret = ''
     for member in matched:
-        src = member[0]
-        dst = member[1]
+        src, dst = member
         if os.path.exists(os.path.join(filer.dir.path, dst)):
             if ret == "No(all)":
                 continue
@@ -184,7 +183,7 @@ def kill_thread():
             th.kill()
 
 def get_file_length(*paths):
-    flen, dlen = 0, 0
+    flen = dlen = 0
     for path in paths:
         if not os.path.exists(path):
             continue
@@ -547,7 +546,7 @@ class ZipThread(JobThread):
             self.src = [util.abspath(f) for f in src]
             self.src_dirname = util.U(os.getcwd()) + os.sep
         else:
-            self.title = "Zip: {0} -> {0}".format(src, dst)
+            self.title = "Zip: {0} -> {1}".format(src, dst)
             self.src = [util.abspath(src)]
             self.src_dirname = util.unix_dirname(self.src[0]) + os.sep
         self.wrap = wrap
@@ -763,13 +762,14 @@ class FileJobGenerator(object):
             return "No"
         elif "Importunate" == self.confirm:
             Filectrl.event.clear()
-            sstat = os.lstat(src)
-            dstat = os.lstat(dst)
+            sstat, dstat = os.lstat(src), os.lstat(dst)
             stime = time.strftime("%c", time.localtime(sstat.st_mtime))
             dtime = time.strftime("%c", time.localtime(dstat.st_mtime))
-            m = "Source,Path: {0},Size: {1},Time: {2},,Destination,Path: {3},Size: {4},Time: {5}".format(
-                src, sstat.st_size, stime, dst, dstat.st_size, dtime).split(',')
-            ret = message.confirm("Override?", ["Yes", "No", "Yes(all)", "No(all)", "Cancel"], m)
+            ret = message.confirm(
+                "Override?", ["Yes", "No", "Yes(all)", "No(all)", "Cancel"],
+                "Source{0}Path: {1}{0}Size: {2}{0}Time: {3}{0}{0}Destination{0}Path: {4}{0}Size: {5}{0}Time: {6}".format(
+                    os.linesep, src, sstat.st_size, stime, dst, dstat.st_size, dtime).split(os.linesep)
+                )
             Filectrl.event.set()
             if ret == "Yes" or ret == "No" or ret == "Cancel":
                 return ret
@@ -786,8 +786,7 @@ class FileJobGenerator(object):
             except OSError as e:
                 if e.errno != errno.EEXIST:
                     message.exception(e)
-            sst = d[0]
-            dst = d[1]
+            sst, dst = d
             try:
                 os.utime(dst, (sst.st_atime, sst.st_mtime))
                 os.chmod(dst, stat.S_IMODE(sst.st_mode))
