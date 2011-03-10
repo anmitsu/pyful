@@ -1182,20 +1182,17 @@ class Finder(object):
         self._stringcue = []
 
     def find(self, pattern):
-        if self.smartcase and re.match("[A-Z]", pattern) is None:
-            if self.migemo:
-                pattern = self.migemo.query(pattern)
-            try:
+        try:
+            if self.smartcase and re.match("[A-Z]", pattern) is None:
+                if self.migemo:
+                    pattern = self.migemo.query(pattern)
                 r = re.compile(pattern, re.IGNORECASE)
-            except re.error:
-                return
-        else:
-            if self.migemo:
-                pattern = self.migemo.query(pattern)
-            try:
+            else:
+                if self.migemo:
+                    pattern = self.migemo.query(pattern)
                 r = re.compile(pattern)
-            except re.error:
-                return
+        except (re.error, AssertionError):
+            return
         self.results = [f.name for f in self.cache if f.name != os.pardir and r.search(f.name)]
         self.dir.reload()
         self.dir.setcursor(1)
