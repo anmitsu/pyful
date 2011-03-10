@@ -1,4 +1,4 @@
-pyful - python file management utility
+pyful - Python file management utility
 ======================================
 
 pyful is CUI filer of the keyboard operation for Linux.

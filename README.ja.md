@@ -1,4 +1,4 @@
-pyful - python file management utility
+pyful - Python file management utility
 ======================================
 
 pyfulはLinuxのためのキーボード操作のCUIファイラーです。
