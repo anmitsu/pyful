@@ -228,10 +228,8 @@ class Subloop(object):
             self.menu.view()
         if self.cmdline.is_active:
             self.cmdline.view()
-        elif self.message.is_active:
-            self.subthreads_view()
-            self.message.view()
         else:
+            self.message.view()
             self.subthreads_view()
         process.view_process()
         curses.doupdate()
