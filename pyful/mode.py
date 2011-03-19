@@ -187,8 +187,7 @@ class Copy(object):
         filer = ui.getcomponent("Filer")
         if filer.dir.ismark():
             if not path.endswith(os.sep) and not os.path.isdir(path):
-                message.error("Copy error: Destination is not directory")
-                return
+                return message.error("Copy error: Destination is not directory")
             filectrl.copy(filer.dir.get_mark_files(), path)
         elif self.src is None:
             self.src = path
@@ -217,10 +216,8 @@ class Delete(object):
         filer = ui.getcomponent("Filer")
         msg = path.replace(filer.dir.path, "")
         ret = message.confirm("Delete? ({0}):".format(msg), ["No", "Yes"])
-        if ret == "No" or ret is None:
-            return
-        filectrl.delete(path)
-        filer.workspace.all_reload()
+        if ret == "Yes":
+            filectrl.delete(path)
 
 class Glob(object):
     default = ""
@@ -427,8 +424,7 @@ class Newfile(object):
     def execute(self, path):
         filer = ui.getcomponent("Filer")
         if os.path.exists(util.abspath(path)):
-            message.error("Error: file exists - {0}".format(path))
-            return
+            return message.error("Error: file exists - {0}".format(path))
         filectrl.mknod(path, self.filemode)
         filer.workspace.all_reload()
         filer.dir.setcursor(filer.dir.get_index(path))
@@ -552,11 +548,9 @@ class TrashBox(object):
         trashbox = os.path.expanduser(Pyful.environs['TRASHBOX'])
         msg = path.replace(filer.dir.path, "")
         ret = message.confirm("Move `{0}' to trashbox? ".format(msg), ["No", "Yes"])
-        if ret == "No" or ret is None:
-            return
-
-        filectrl.move(path, trashbox)
-        filer.workspace.all_reload()
+        if ret == "Yes":
+            filectrl.move(path, trashbox)
+            filer.workspace.all_reload()
 
 class Utime(object):
     def __init__(self):
