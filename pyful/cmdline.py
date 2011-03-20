@@ -345,14 +345,8 @@ class Cmdline(ui.Component):
             self.history.restart()
 
 class History(ui.InfoBox):
-    _maxsave = 10000
-    def _get_maxsave(self):
-        return self._maxsave
-    def _set_maxsave(self, i):
-        self.__class__._maxsave = i
-    maxsave = property(_get_maxsave, _set_maxsave)
-
-    _index = {}
+    maxsave = 10000
+    histories = {}
 
     def __init__(self, cmdline):
         ui.InfoBox.__init__(self, "History")
@@ -363,9 +357,9 @@ class History(ui.InfoBox):
         try:
             with open(os.path.expanduser(path), "r") as f:
                 for i, line in enumerate(f):
-                    if self._maxsave <= i:
+                    if self.maxsave <= i:
                         break
-                    self.index(key).append(line.strip(os.linesep))
+                    self.gethistory(key).append(line.strip(os.linesep))
         except IOError:
             return
 
@@ -375,28 +369,28 @@ class History(ui.InfoBox):
             if not os.path.exists(dirname):
                 os.makedirs(dirname)
             with open(os.path.expanduser(path), "w") as f:
-                for cmd in self.index(key):
+                for cmd in self.gethistory(key):
                     f.write(cmd+os.linesep)
         except IOError:
             return
 
-    def index(self, key):
-        if not key in self._index:
-            self.__class__._index[key] = []
-        return self._index[key]
+    def gethistory(self, key):
+        if not key in self.histories:
+            self.histories[key] = []
+        return self.histories[key]
 
     def append(self, string):
         if not string:
             return
-        li = self.index(self.cmdline.mode.__class__.__name__)
+        li = self.gethistory(self.cmdline.mode.__class__.__name__)
         if string in li:
             li.remove(string)
-        if self._maxsave <= len(li):
+        if self.maxsave <= len(li):
             li.pop(0)
         li.append(string)
 
     def delete(self):
-        li = self.index(self.cmdline.mode.__class__.__name__)
+        li = self.gethistory(self.cmdline.mode.__class__.__name__)
         if not 0 <= self.cursor < len(li):
             return
         if not li or not self.info:
@@ -417,7 +411,7 @@ class History(ui.InfoBox):
     def start(self):
         self.source_string = self.cmdline.string
         info = []
-        for item in self.index(self.cmdline.mode.__class__.__name__):
+        for item in self.gethistory(self.cmdline.mode.__class__.__name__):
             if self.cmdline.string in item:
                 info.insert(0, ui.InfoBoxContext(item, histr=self.cmdline.string))
         if info:
@@ -437,13 +431,7 @@ class History(ui.InfoBox):
                 self.cmdline.cursor = util.mbslen(item.string)
 
 class Clipboard(ui.InfoBox):
-    _maxsave = 100
-    def _get_maxsave(self):
-        return self.__class__._maxsave
-    def _set_maxsave(self, v):
-        self.__class__._maxsave = v
-    maxsave = property(_get_maxsave, _set_maxsave)
-
+    maxsave = 100
     clip = []
 
     def __init__(self, cmdline):
@@ -454,16 +442,16 @@ class Clipboard(ui.InfoBox):
         try:
             with open(os.path.expanduser(path), "r") as f:
                 for i, line in enumerate(f):
-                    if self._maxsave <= i:
+                    if self.maxsave <= i:
                         break
-                    self.__class__.clip.append(line.strip(os.linesep))
+                    self.clip.append(line.strip(os.linesep))
         except IOError:
             return
 
     def savefile(self, path):
         try:
             with open(os.path.expanduser(path), "w") as f:
-                for c in self.__class__.clip:
+                for c in self.clip:
                     f.write(c+os.linesep)
         except IOError:
             return
@@ -478,7 +466,7 @@ class Clipboard(ui.InfoBox):
     def delete(self):
         if not self.clip:
             return
-        self.__class__.clip.remove(self.cursor_item().string)
+        self.clip.remove(self.cursor_item().string)
         c = self.cursor
         self.restart()
         self.setcursor(c)
@@ -489,10 +477,10 @@ class Clipboard(ui.InfoBox):
         string = util.U(string)
 
         if string in self.clip:
-            self.__class__.clip.remove(string)
-        if len(self.clip) >= self._maxsave:
+            self.clip.remove(string)
+        if len(self.clip) >= self.maxsave:
             self.clip.pop(0)
-        self.__class__.clip.append(string)
+        self.clip.append(string)
 
     def paste(self):
         if not self.clip:
