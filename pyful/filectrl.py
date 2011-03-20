@@ -93,7 +93,10 @@ def rename(src, dst):
     if os.path.exists(dst) and os.path.samefile(src, dst):
         return
     if os.path.exists(dst):
-        if "Yes" != message.confirm("File exist - ({0}). Override?".format(dst), ["Yes", "No", "Cancel"]):
+        ret = message.confirm(
+            "{0}; Override? {{{1} -> {2}}}".format(os.strerror(errno.EEXIST), src, dst),
+            ["Yes", "No", "Cancel"])
+        if "Yes" != ret:
             return
     try:
         os.renames(src, dst)
@@ -123,8 +126,9 @@ def replace(pattern, repstr):
             if ret == "No(all)":
                 continue
             if ret != "Yes(all)":
-                ret = message.confirm("File exist - ({0}). Override?".format(dst),
-                                      ["Yes", "No", "Yes(all)", "No(all)", "Cancel"])
+                ret = message.confirm(
+                    "{0}; Override? {{{1} -> {2}}}".format(os.strerror(errno.EEXIST), src, dst),
+                    ["Yes", "No", "Yes(all)", "No(all)", "Cancel"])
                 if ret == "Yes" or ret == "Yes(all)":
                     pass
                 elif ret == "No" or ret == "No(all)":
