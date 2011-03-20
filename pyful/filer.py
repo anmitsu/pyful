@@ -1097,8 +1097,17 @@ class Directory(object):
 
         self.win.erase()
         ui.box(self.win)
+        title = ""
+        titlewidth = width
+        if not self.path.endswith(os.sep):
+            title += os.sep
+            titlewidth -= len(os.sep)
+        if self.maskreg:
+            title += "{{{0}}}".format(self.maskreg.pattern)
+            titlewidth -= util.termwidth(self.maskreg.pattern)
+        title = util.path_omission(self.path.replace(os.environ['HOME'], '~', 1), titlewidth) + title
         self.win.move(0, 2)
-        self.win.addstr(util.path_omission(self.path.replace(os.environ['HOME'], "~", 1), width), look.colors['DirectoryPath'])
+        self.win.addstr(title, look.colors['DirectoryPath'])
 
         if width < 30:
             return message.error('terminal size very small')
@@ -1153,10 +1162,8 @@ class Directory(object):
                 MARKSIZE=self.mark_size, SCROLL=p,
                 CURSOR=self.cursor, SORT=self.sort_kind)
 
-            if self.maskreg is not None:
-                status += ' Mask: {0}'.format(self.maskreg.pattern)
             if self.list_title is not None:
-                status += ' ' + self.list_title
+                status += self.list_title
 
             (sy, sx) = self.statwin.getmaxyx()
             if util.termwidth(status) > sx-2:
