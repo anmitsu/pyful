@@ -157,12 +157,12 @@ def tareach(src, dst, tarmode='gzip', wrap=''):
 
 def untar(src, dstdir):
     if not dstdir:
-        dstdir  = './'
+        dstdir = os.curdir + os.sep
     Filectrl().untar(src, dstdir)
 
 def unzip(src, dstdir):
     if not dstdir:
-        dstdir  = './'
+        dstdir = os.curdir + os.sep
     Filectrl().unzip(src, dstdir)
 
 def zip(src, dst, wrap=''):
