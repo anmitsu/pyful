@@ -186,7 +186,7 @@ def kill_thread():
         if th.title == ret:
             th.kill()
 
-def get_file_length(*paths):
+def _get_file_length(*paths):
     flen = dlen = 0
     for path in paths:
         if not os.path.lexists(path):
@@ -372,7 +372,7 @@ class TarThread(JobThread):
         except Exception as e:
             return message.exception(e)
         try:
-            goal = sum(get_file_length(*self.src))
+            goal = sum(_get_file_length(*self.src))
             elapse = 1
             for path in self.src:
                 for f in self.addlist_generate(path):
@@ -567,7 +567,7 @@ class ZipThread(JobThread):
             self.error = e
             return
         try:
-            goal = sum(get_file_length(*self.src))
+            goal = sum(_get_file_length(*self.src))
             elapse = 1
             for path in self.src:
                 for f in self.writelist_generate(path):
@@ -633,7 +633,7 @@ class DeleteThread(JobThread):
         self.dirlist = []
 
     def run(self):
-        goal = get_file_length(*self.path)[0]
+        goal = _get_file_length(*self.path)[0]
         elapse = 1
         try:
             for path in self.path:
@@ -690,7 +690,7 @@ class CopyThread(JobThread):
             self.dst = util.abspath(dst)
 
     def run(self):
-        goal = get_file_length(*self.src)[0]
+        goal = _get_file_length(*self.src)[0]
         fjg = FileJobGenerator()
         elapse = 1
         try:
@@ -722,7 +722,7 @@ class MoveThread(JobThread):
             self.dst = util.abspath(dst)
 
     def run(self):
-        goal = get_file_length(*self.src)[0]
+        goal = _get_file_length(*self.src)[0]
         fjg = FileJobGenerator()
         elapse = 1
         try:
