@@ -329,9 +329,8 @@ class Mark(object):
         else:
             try:
                 reg = re.compile(pattern)
-            except Exception as e:
-                message.error("Regexp error: " + str(e))
-                return
+            except re.error as e:
+                return message.exception(e)
             self.__class__.default = reg
             filer.dir.mark(reg)
 
@@ -490,8 +489,8 @@ class Replace(object):
         elif self.pattern is None:
             try:
                 self.pattern = re.compile(util.U(pattern))
-            except Exception:
-                return message.error("Argument error: Can't complile `{0}'".format(pattern))
+            except re.error as e:
+                return message.exception(e)
             ui.getcomponent("Cmdline").restart("")
         else:
             filectrl.replace(self.pattern, pattern)
@@ -652,7 +651,7 @@ class Utime(object):
                 atime = mtime = time.mktime(tuple(self.sttime))
                 os.utime(self.path, (atime, mtime))
             except Exception as e:
-                message.error(str(e))
+                message.exception(e)
             ui.getcomponent("Filer").workspace.all_reload()
 
 class Tar(object):
