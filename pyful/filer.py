@@ -166,7 +166,10 @@ class Filer(ui.Component):
             num = '[{0}] '.format(i+1)
             numlen = len(num)
             path = path.replace(os.environ['HOME'], "~", 1)
-            path = util.path_omission(path, width-numlen-1)
+            if path.endswith(os.sep):
+                path = util.path_omission(path, width-numlen-1)
+            else:
+                path = util.path_omission(path, width-numlen-1-len(os.sep)) + os.sep
             if i == 0:
                 w = width-numlen+odd
             else:
