@@ -315,7 +315,7 @@ class Mark(object):
     @property
     def prompt(self):
         if self.default:
-            return "Mark pattern ({0}):".format(self.default.pattern)
+            return "Mark pattern (default {0}):".format(self.default.pattern)
         else:
             return "Mark pattern:"
 
@@ -341,7 +341,7 @@ class Mask(object):
     @property
     def prompt(self):
         if self.default:
-            return "Mask pattern {0}:".format(self.default.pattern)
+            return "Mask pattern (default {0}):".format(self.default.pattern)
         else:
             return "Mask pattern:"
 
