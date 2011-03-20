@@ -1257,7 +1257,10 @@ class Finder(object):
 
     def view(self):
         self.dir.statwin.move(0, 1)
-        self.dir.statwin.addstr(' Finder: ', look.colors['Finder'])
+        if self.migemo:
+            self.dir.statwin.addstr(' Finder(migemo): ', look.colors['Finder'])
+        else:
+            self.dir.statwin.addstr(' Finder: ', look.colors['Finder'])
         try:
             self.dir.statwin.addstr(' ' + self.string)
         except Exception:
