@@ -188,7 +188,7 @@ class Copy(object):
         filer = ui.getcomponent("Filer")
         if filer.dir.ismark():
             if not path.endswith(os.sep) and not os.path.isdir(path):
-                return message.error("Copy error: Destination is not directory")
+                return message.error("{0} - {1}".format(os.strerror(errno.ENOTDIR), path))
             filectrl.copy(filer.dir.get_mark_files(), path)
         elif self.src is None:
             self.src = path
@@ -297,8 +297,7 @@ class Link(object):
         filer = ui.getcomponent("Filer")
         if filer.dir.ismark():
             if not path.endswith(os.sep) and not os.path.isdir(path):
-                message.error("Error: Destination is not directory")
-                return
+                return message.error("{0} - {1}".format(os.strerror(errno.ENOTDIR), path))
             for f in filer.dir.get_mark_files():
                 dst = os.path.join(path, util.unix_basename(f))
                 filectrl.link(f, dst)
@@ -405,8 +404,7 @@ class Move(object):
         filer = ui.getcomponent("Filer")
         if filer.dir.ismark():
             if not path.endswith(os.sep) and not os.path.isdir(path):
-                message.error("Move error: Destination is not directory")
-                return
+                return message.error("{0} - {1}".format(os.strerror(errno.ENOTDIR), path))
             filectrl.move(filer.dir.get_mark_files(), path)
         elif self.src is None:
             self.src = path
@@ -423,8 +421,6 @@ class Newfile(object):
 
     def execute(self, path):
         filer = ui.getcomponent("Filer")
-        if os.path.exists(util.abspath(path)):
-            return message.error("Error: file exists - {0}".format(path))
         filectrl.mknod(path, self.filemode)
         filer.workspace.all_reload()
         filer.dir.setcursor(filer.dir.get_index(path))
