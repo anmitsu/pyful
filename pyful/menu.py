@@ -25,13 +25,7 @@ from pyful import util
 
 class Menu(ui.Component):
     keymap = {}
-    _items = {}
-
-    def getitems(self):
-        return self.__class__._items
-    def setitems(self, itm):
-        self.__class__._items.update(itm)
-    items = property(getitems, setitems)
+    items = {}
 
     def __init__(self):
         ui.Component.__init__(self, "Menu")
@@ -50,7 +44,7 @@ class Menu(ui.Component):
             message.error("Undefined menu `{0}'".format(name))
             return
         self.title = name
-        self.active = self._items[name]
+        self.active = self.items[name]
         self.win = curses.newwin(len(self.active)+2, 50, 1, 0)
         self.win.bkgd(look.colors['MenuWindow'])
 
