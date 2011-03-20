@@ -551,10 +551,12 @@ class ZipThread(JobThread):
 
     def run(self):
         try:
+            mode = self.get_mode()
             import zipfile
-            myzip = zipfile.ZipFile(self.dst, 'w', compression=zipfile.ZIP_DEFLATED)
+            myzip = zipfile.ZipFile(self.dst, mode, compression=zipfile.ZIP_DEFLATED)
         except Exception as e:
-            return message.exception(e)
+            self.error = e
+            return
         try:
             goal = sum(get_file_length(*self.src))
             elapse = 1
@@ -575,6 +577,21 @@ class ZipThread(JobThread):
                 os.utime(self.dst, (lst.st_mtime, lst.st_mtime))
             except Exception as e:
                 message.exception(e)
+
+    def get_mode(self):
+        if os.path.exists(self.dst):
+            Filectrl.event.clear()
+            ret = message.confirm("Zip file exist - {0}:".format(self.dst),
+                                  ['Add', 'Override', 'Cancel'])
+            Filectrl.event.set()
+            if ret == 'Add':
+                return 'a'
+            elif ret == 'Override':
+                return 'w'
+            else:
+                raise FilectrlCancel('Zip canceled')
+        else:
+            return 'w'
 
     def write_file(self, myzip, source, arcname):
         try:
