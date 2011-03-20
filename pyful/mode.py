@@ -16,6 +16,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import errno
 import os
 import re
 import time
@@ -522,12 +523,13 @@ class Symlink(object):
     def execute(self, path):
         filer = ui.getcomponent("Filer")
         if filer.dir.ismark():
-            if not path.endswith(os.sep) and not os.path.isdir(path):
-                message.error("Symlink error: Destination is not directory")
-                return
+            if not os.path.exists(path):
+                return message.error("{0} - {1}".format(os.strerror(errno.ENOENT), path))
+            elif not os.path.isdir(path):
+                return message.error("{0} - {1}".format(os.strerror(errno.ENOTDIR), path))
             for f in filer.dir.get_mark_files():
                 dst = os.path.join(path, os.path.basename(f))
-                filectrl.symlink(f, dst)
+                filectrl.symlink(os.path.abspath(f), dst)
             filer.workspace.all_reload()
         elif self.src is None:
             self.src = path
