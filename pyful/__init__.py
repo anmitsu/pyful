@@ -84,7 +84,8 @@ class Pyful(object):
     initfuncs = []
     exitfuncs = []
 
-    def __init__(self):
+    def __init__(self, binpath):
+        Pyful.binpath = binpath
         from pyful.cmdline import Cmdline
         from pyful.filer import Filer
         from pyful.message import Message

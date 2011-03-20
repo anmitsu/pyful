@@ -68,9 +68,8 @@ from pyful import ui
 
 if __name__ == '__main__':
     options = option_parse()
-    Pyful.binpath = os.path.abspath(__file__)
 
-    pyful = Pyful()
+    pyful = Pyful(os.path.abspath(__file__))
     error = loadrcfile(options.config)
     ui.start_curses()
     pyful.init_function()
