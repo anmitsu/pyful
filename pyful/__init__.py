@@ -79,13 +79,14 @@ class Pyful(object):
         'TRASHBOX': '~/.pyful/trashbox',
         'RCFILE': '~/.pyful/rc.py',
         'LOOKS': look.looks['default'],
+        'SCRIPT': '',
         }
-    binpath = None
     initfuncs = []
     exitfuncs = []
 
     def __init__(self, binpath):
-        Pyful.binpath = binpath
+        self.environs['SCRIPT'] = binpath
+
         from pyful.cmdline import Cmdline
         from pyful.filer import Filer
         from pyful.message import Message
