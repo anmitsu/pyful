@@ -202,6 +202,7 @@ class Subloop(object):
         self.filer = ui.getcomponent("Filer")
         self.menu = ui.getcomponent("Menu")
         self.message = ui.getcomponent("Message")
+        self.help = ui.getcomponent("Help")
         self.stdscr = ui.getcomponent("Stdscr").win
 
     def subthreads_view(self):
@@ -219,6 +220,8 @@ class Subloop(object):
             self.cmdline.input(meta, key)
         elif self.menu.is_active:
             self.menu.input(meta, key)
+        elif self.help.is_active:
+            self.help.input(meta, key)
         else:
             self.filer.input(meta, key)
 
@@ -228,6 +231,8 @@ class Subloop(object):
             self.menu.view()
         if self.cmdline.is_active:
             self.cmdline.view()
+        elif self.help.is_active:
+            self.help.view()
         else:
             self.message.view()
             self.subthreads_view()
