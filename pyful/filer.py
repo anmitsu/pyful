@@ -1219,11 +1219,13 @@ class Finder(object):
                 r = re.compile(pattern)
         except (re.error, AssertionError):
             return
-        self.results = [f.name for f in self.cache if f.name != os.pardir and r.search(f.name)]
+        self.results = [f for f in self.cache if r.search(f)]
         self.dir.reload()
         self.dir.setcursor(1)
 
     def insert(self, c):
+        if len(self.results) <= 1:
+            return
         try:
             s = util.U(c)
         except UnicodeError:
@@ -1264,14 +1266,14 @@ class Finder(object):
 
     def start(self):
         self.active = True
-        self.cache = self.dir.files[:]
+        self.results = self.cache = [f.name for f in self.dir.files if f.name != os.pardir]
         self.startfname = self.dir.file.name
 
     def finish(self):
         self.add_histroy(self.string)
         self.h_select = 0
         self.string = ''
-        self.results = []
+        self.results[:] = []
         self.cache[:] = []
         self.active = False
         self.select_result()
