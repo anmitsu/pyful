@@ -217,9 +217,6 @@ def expanduser(path):
     else:
         return os.path.expanduser(path)
 
-def chdir(path):
-    os.chdir(os.path.expanduser(path))
-
 def extname(path):
     root, ext = os.path.splitext(path)
     return ext

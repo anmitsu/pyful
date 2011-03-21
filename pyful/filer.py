@@ -417,7 +417,7 @@ class Workspace(object):
         elif self.cursor < 0:
             self.cursor = len(self.dirs) - 1
         try:
-            util.chdir(self.dir.path)
+            os.chdir(self.dir.path)
         except:
             self.dir.chdir('/')
         return self.cursor
@@ -427,7 +427,7 @@ class Workspace(object):
             return
         self.cursor = x
         try:
-            util.chdir(self.dir.path)
+            os.chdir(self.dir.path)
         except:
             self.dir.chdir('/')
         return self.cursor
@@ -458,12 +458,12 @@ class Workspace(object):
 
     def focus_reload(self):
         self.dir.reload()
-        util.chdir(self.dir.path)
+        os.chdir(self.dir.path)
 
     def all_reload(self):
         for d in self.dirs:
             d.reload()
-        util.chdir(self.dir.path)
+        os.chdir(self.dir.path)
         return self
 
     def clear(self):
@@ -649,7 +649,7 @@ class Directory(object):
 
     def reload(self):
         try:
-            util.chdir(self.path)
+            os.chdir(self.path)
         except Exception as e:
             message.exception(e)
             self.chdir('/')
@@ -695,7 +695,7 @@ class Directory(object):
         parent_fname = util.unix_basename(self.path)
         path = util.abspath(util.expanduser(path), self.path)
         try:
-            util.chdir(path)
+            os.chdir(path)
         except Exception as e:
             return message.exception(e)
 
