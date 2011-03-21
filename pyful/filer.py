@@ -638,15 +638,14 @@ class Directory(object):
             if self.maskreg:
                 if not os.path.isdir(f) and not self.maskreg.search(f):
                     continue
-
             try:
                 fs = FileStat(f)
-                if fs.name in marks:
-                    fs.marked = True
-                    self.mark_files[fs.name] = fs
-                self.files.append(fs)
-            except UnicodeError:
-                self.invalid_encoding_error(f)
+            except InvalidEncodingError:
+                continue
+            if fs.name in marks:
+                fs.marked = True
+                self.mark_files[fs.name] = fs
+            self.files.append(fs)
         return self
 
     def reload(self):
@@ -658,31 +657,6 @@ class Directory(object):
             message.exception(e)
             self.chdir(Workspace.default_path)
         return self
-
-    def invalid_encoding_error(self, fname):
-        fs = FileStat(fname, force=True)
-        size = fs.get_file_size() + ' ({0})'.format(fs.stat.st_size)
-        time = fs.get_mtime()
-        user = fs.get_user_name()
-        group = fs.get_group_name()
-        nlink = str(fs.stat.st_nlink)
-        perm = fs.get_permission()
-        msglist = ['The file of invalid encoding status',
-                   '===================================', '',
-                   'permission: '+perm, 'nlink: '+nlink,
-                   'user: '+user, 'group: '+group,
-                   'size: '+size, 'time: '+time]
-
-        ret = message.confirm('Invalid encoding error. What do you do?',
-                              ['ignore', 'rename', 'delete'], msglist)
-        if ret is None or ret == 'ignore':
-            return False
-        elif ret == 'rename':
-            from pyful import mode
-            ui.getcomponent("Cmdline").start(mode.Rename(fname), '')
-        elif ret == 'delete':
-            from pyful import filectrl
-            filectrl.delete(fname)
 
     def chdir(self, path):
         self.list = None
@@ -1300,6 +1274,9 @@ class Finder(object):
             message.error('Warning: status window very small')
         self.dir.statwin.noutrefresh()
 
+class InvalidEncodingError(Exception):
+    pass
+
 class FileStat(object):
     view_ext = True
     view_permission = True
@@ -1313,16 +1290,9 @@ class FileStat(object):
     time_week_flag = '#'
     time_yore_flag = ' '
 
-    def __init__(self, name, force=False):
-        if force:
-            try:
-                self.name = util.U(name)
-            except UnicodeError:
-                self.name = name
-        else:
-            self.name = util.U(name)
+    def __init__(self, name):
         self.marked = False
-
+        self.view_file_string = None
         self.lstat = os.lstat(name)
         if self.islink():
             try:
@@ -1331,8 +1301,11 @@ class FileStat(object):
                 self.stat = self.lstat
         else:
             self.stat = self.lstat
-
-        self.view_file_string = None
+        try:
+            self.name = util.U(name)
+        except UnicodeError:
+            self.name = name
+            self.invalid_encoding_error()
 
     def isdir(self):
         return stat.S_ISDIR(self.stat.st_mode)
@@ -1487,6 +1460,30 @@ class FileStat(object):
         else: perm += '-'
 
         return perm
+
+    def invalid_encoding_error(self):
+        perm = self.get_permission()
+        nlink = self.stat.st_nlink
+        user = self.get_user_name()
+        group = self.get_group_name()
+        size = '{0} ({1})'.format(self.get_file_size(), self.stat.st_size)
+        time = self.get_mtime()
+        ret = message.confirm(
+            'Invalid encoding error. What do you do?',
+            ['ignore', 'delete'],
+            ["The file of invalid encoding status", '-'*100,
+             "Permission: {0}".format(perm), "Link: {0}".format(nlink),
+             "User: {0}".format(user), "Group: {0}".format(group),
+             "Size: {0}".format(size), "Time: {0}".format(time)])
+        if ret == 'delete':
+            import shutil
+            if self.isdir():
+                shutil.rmtree(self.name)
+            else:
+                os.remove(self.name)
+            raise InvalidEncodingError
+        else:
+            self.name = ""
 
     def view(self):
         cmdscr = ui.getcomponent("Cmdscr").win
