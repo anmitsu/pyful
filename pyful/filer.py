@@ -1162,7 +1162,7 @@ class PathHistory(object):
         self.updateflag = True
 
     def update(self, newpath):
-        if not self.updateflag:
+        if not self.updateflag or newpath == self.history[self.pos]:
             return
         self.history = self.history[:self.pos+1]
         self.history.append(newpath)
