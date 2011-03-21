@@ -1202,6 +1202,7 @@ class Finder(object):
         self.results = []
         self.cache = []
         self.string = ""
+        self.startfname = ""
         self.h_select = 0
         self.active = False
         self._stringcue = []
@@ -1240,7 +1241,10 @@ class Finder(object):
         self.find(self.string)
 
     def select_result(self):
-        n = self.dir.file.name
+        if len(self.dir.files) == 1:
+            n = self.startfname
+        else:
+            n = self.dir.file.name
         self.dir.reload()
         self.dir.setcursor(self.dir.get_index(n))
 
@@ -1261,6 +1265,7 @@ class Finder(object):
     def start(self):
         self.active = True
         self.cache = self.dir.files[:]
+        self.startfname = self.dir.file.name
 
     def finish(self):
         self.add_histroy(self.string)
