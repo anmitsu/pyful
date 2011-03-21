@@ -191,6 +191,8 @@ class Copy(object):
                 return message.error("{0} - {1}".format(os.strerror(errno.ENOTDIR), path))
             filectrl.copy(filer.dir.get_mark_files(), path)
         elif self.src is None:
+            if not path:
+                return
             self.src = path
             ui.getcomponent("Cmdline").restart(filer.workspace.nextdir.path)
         else:
@@ -214,6 +216,8 @@ class Delete(object):
         return comp.comp_files()
 
     def execute(self, path):
+        if not path:
+            return
         filer = ui.getcomponent("Filer")
         msg = path.replace(filer.dir.path, "")
         ret = message.confirm("Delete? ({0}):".format(msg), ["No", "Yes"])
@@ -303,6 +307,8 @@ class Link(object):
                 filectrl.link(f, dst)
             filer.workspace.all_reload()
         elif self.src is None:
+            if not path:
+                return
             self.src = path
             ui.getcomponent("Cmdline").restart(filer.workspace.nextdir.path)
         else:
@@ -407,6 +413,8 @@ class Move(object):
                 return message.error("{0} - {1}".format(os.strerror(errno.ENOTDIR), path))
             filectrl.move(filer.dir.get_mark_files(), path)
         elif self.src is None:
+            if not path:
+                return
             self.src = path
             ui.getcomponent("Cmdline").restart(filer.workspace.nextdir.path)
         else:
@@ -528,6 +536,8 @@ class Symlink(object):
                 filectrl.symlink(os.path.abspath(f), dst)
             filer.workspace.all_reload()
         elif self.src is None:
+            if not path:
+                return
             self.src = path
             ui.getcomponent("Cmdline").restart(filer.workspace.nextdir.path)
         else:
@@ -697,6 +707,8 @@ class Tar(object):
                     filectrl.tar(filer.dir.get_mark_files(), path, self.tarmode, self.wrap)
                 filer.workspace.all_reload()
         elif self.src is None:
+            if not path:
+                return
             self.src = path
             ext = filectrl.TarThread.tarexts[self.tarmode]
             tarpath = os.path.join(filer.workspace.nextdir.path, self.src + ext)
@@ -728,6 +740,8 @@ class UnTar(object):
             filectrl.untar(filer.dir.get_mark_files(), path)
             filer.workspace.all_reload()
         elif self.src is None:
+            if not path:
+                return
             self.src = path
             ui.getcomponent("Cmdline").restart(filer.workspace.nextdir.path)
         else:
@@ -801,6 +815,8 @@ class Zip(object):
                     filectrl.zip(filer.dir.get_mark_files(), path, self.wrap)
                 filer.workspace.all_reload()
         elif self.src is None:
+            if not path:
+                return
             self.src = path
             ext = '.zip'
             zippath = os.path.join(filer.workspace.nextdir.path, self.src + ext)
@@ -832,6 +848,8 @@ class UnZip(object):
             filectrl.unzip(filer.dir.get_mark_files(), path)
             filer.workspace.all_reload()
         elif self.src is None:
+            if not path:
+                return
             self.src = path
             ui.getcomponent("Cmdline").restart(filer.workspace.nextdir.path)
         else:
