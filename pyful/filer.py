@@ -1166,8 +1166,27 @@ class PathHistory(object):
 class Finder(object):
     keymap = {}
     smartcase = True
-    history = [""]
     migemo = None
+
+    class History(object):
+        history = [""]
+
+        def __init__(self):
+            self.pos = 0
+
+        def add(self, string):
+            if not string: return
+            if string in self.history:
+                self.history.remove(string)
+            self.history.insert(1, string)
+
+        def mvhistory(self, distance):
+            self.pos += distance
+            if self.pos < 0:
+                self.pos = 0
+            elif self.pos >= len(self.history) - 1:
+                self.pos = len(self.history) - 1
+            return self.history[self.pos]
 
     def __init__(self, dir):
         self.dir = dir
@@ -1175,7 +1194,7 @@ class Finder(object):
         self.cache = []
         self.string = ""
         self.startfname = ""
-        self.h_select = 0
+        self.history = self.History()
         self.active = False
         self._stringcue = []
 
@@ -1222,18 +1241,8 @@ class Finder(object):
         self.dir.reload()
         self.dir.setcursor(self.dir.get_index(n))
 
-    def add_histroy(self, string):
-        if not string: return
-        Finder.history.insert(1, string)
-        Finder.history = util.uniq(self.history)
-
     def history_select(self, distance):
-        self.h_select += distance
-        if self.h_select < 0:
-            self.h_select = 0
-        elif self.h_select >= len(self.history) - 1:
-            self.h_select = len(self.history) - 1
-        self.string = self.history[self.h_select]
+        self.string = self.history.mvhistory(distance)
         self.find(self.string)
 
     def start(self):
@@ -1242,8 +1251,8 @@ class Finder(object):
         self.startfname = self.dir.file.name
 
     def finish(self):
-        self.add_histroy(self.string)
-        self.h_select = 0
+        self.history.add(self.string)
+        self.history.pos = 0
         self.string = ''
         self.results[:] = []
         self.cache[:] = []
