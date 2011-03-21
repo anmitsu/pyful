@@ -511,14 +511,8 @@ class Directory(object):
 
     def input(self, meta, key):
         if self.finder.active:
-            try:
-                c = chr(key)
-            except ValueError:
+            if not self.finder.input(meta, key):
                 return
-            if (meta, key) in self.finder.keymap:
-                return self.finder.keymap[(meta, key)]()
-            elif c > " " and not meta:
-                return self.finder.insert(c)
         keymap = self.keymap
         f = self.file
         ext  = util.extname(f.name)
@@ -1238,7 +1232,6 @@ class Finder(object):
                 self._stringcue[:] = []
             except UnicodeError:
                 return
-
         self.string += s
         self.find(self.string)
 
@@ -1253,9 +1246,8 @@ class Finder(object):
 
     def add_histroy(self, string):
         if not string: return
-
-        self.__class__.history.insert(1, string)
-        self.__class__.history = util.uniq(self.history)
+        Finder.history.insert(1, string)
+        Finder.history = util.uniq(self.history)
 
     def history_select(self, distance):
         self.h_select += distance
@@ -1279,6 +1271,18 @@ class Finder(object):
         self.active = False
         self.select_result()
 
+    def input(self, meta, key):
+        try:
+            c = chr(key)
+        except ValueError:
+            return
+        if (meta, key) in self.keymap:
+            self.keymap[(meta, key)]()
+        elif c > " " and not meta:
+            self.insert(c)
+        else:
+            return True
+        
     def view(self):
         self.dir.statwin.move(0, 1)
         if self.migemo:
