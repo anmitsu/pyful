@@ -29,8 +29,8 @@ class Menu(ui.Component):
 
     def __init__(self):
         ui.Component.__init__(self, "Menu")
-        self.win = None
         self.cursor = 0
+        self.win = None
         self.title = None
 
     def mvcursor(self, x):
@@ -41,8 +41,7 @@ class Menu(ui.Component):
 
     def show(self, name):
         if name not in self.items:
-            message.error("Undefined menu `{0}'".format(name))
-            return
+            return message.error("Undefined menu `{0}'".format(name))
         self.title = name
         self.active = self.items[name]
         self.win = curses.newwin(len(self.active)+2, 50, 1, 0)
@@ -51,13 +50,13 @@ class Menu(ui.Component):
     def hide(self):
         self.win.erase()
         self.cursor = 0
+        self.win = None
         self.active = None
 
     def run(self):
         swap = self.active
-        value = self.active[self.cursor][-1]
-        if hasattr(value, '__call__'):
-            value()
+        func = self.active[self.cursor][-1]
+        func()
         if self.active is swap:
             self.hide()
 
@@ -65,13 +64,14 @@ class Menu(ui.Component):
         if (meta, key) in self.keymap:
             self.keymap[(meta, key)]()
         else:
-            for m in self.active:
-                if m[1] == key:
-                    swap = self.active
-                    m[-1]()
-                    if swap is self.active:
-                        self.hide()
-                    break
+            for name, keynum, func in self.active:
+                if keynum != key:
+                    continue
+                swap = self.active
+                func()
+                if swap is self.active:
+                    self.hide()
+                break
 
     def view(self):
         items = self.active
@@ -87,11 +87,11 @@ class Menu(ui.Component):
         self.win.addstr(self.title, curses.A_BOLD)
 
         for i, item in enumerate(items):
-            title = util.mbs_ljust(item[0], self.win.getmaxyx()[1]-4)
+            name = util.mbs_ljust(item[0], self.win.getmaxyx()[1]-4)
             if self.cursor == i:
                 self.win.move(i+1, 2)
-                self.win.addstr(title, curses.A_REVERSE)
+                self.win.addstr(name, curses.A_REVERSE)
             else:
                 self.win.move(i+1, 2)
-                self.win.addstr(title)
+                self.win.addstr(name)
         self.win.noutrefresh()
