@@ -418,8 +418,9 @@ class Workspace(object):
             self.cursor = len(self.dirs) - 1
         try:
             os.chdir(self.dir.path)
-        except:
-            self.dir.chdir('/')
+        except Exception as e:
+            message.exception(e)
+            self.dir.chdir(self.default_path)
         return self.cursor
 
     def setcursor(self, x):
@@ -428,8 +429,9 @@ class Workspace(object):
         self.cursor = x
         try:
             os.chdir(self.dir.path)
-        except:
-            self.dir.chdir('/')
+        except Exception as e:
+            message.exception(e)
+            self.dir.chdir(self.default_path)
         return self.cursor
 
     def swap_dir_inc(self):
@@ -650,11 +652,11 @@ class Directory(object):
     def reload(self):
         try:
             os.chdir(self.path)
+            self.diskread()
+            self.sort()
         except Exception as e:
             message.exception(e)
-            self.chdir('/')
-        self.diskread()
-        self.sort()
+            self.chdir(Workspace.default_path)
         return self
 
     def invalid_encoding_error(self, fname):
