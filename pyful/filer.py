@@ -1155,41 +1155,37 @@ class PathHistory(object):
         self.pos = 0
         self.updateflag = True
 
-    def update(self, newpath):
-        if not self.updateflag or newpath == self.history[self.pos]:
+    def update(self, path):
+        if not self.updateflag or path == self.history[self.pos]:
             return
         self.history = self.history[:self.pos+1]
-        self.history.append(newpath)
+        self.history.append(path)
         self.pos = len(self.history) - 1
         if self.maxsave < len(self.history):
             self.history = self.history[1:]
             self.pos = len(self.history) - 1
 
     def forward(self):
-        pos = self.pos
-        pos += 1
-        if pos >= len(self.history):
-            pos = len(self.history) - 1
-        path = self.history[pos]
-        if self.dir.path == path:
-            return
-        self.updateflag = False
-        self.dir.chdir(path)
-        self.updateflag = True
-        self.pos = pos
+        self.mvhistory(1)
 
     def backward(self):
-        pos = self.pos
-        pos -= 1
-        if pos < 0:
-            pos = 0
-        path = self.history[pos]
+        self.mvhistory(-1)
+
+    def mvhistory(self, x):
+        self.mvpos(x)
+        path = self.history[self.pos]
         if self.dir.path == path:
             return
         self.updateflag = False
         self.dir.chdir(path)
         self.updateflag = True
-        self.pos = pos
+
+    def mvpos(self, x):
+        self.pos += x
+        if self.pos < 0:
+            self.pos = 0
+        elif self.pos >= len(self.history):
+            self.pos = len(self.history) - 1
 
 class Finder(object):
     keymap = {}
