@@ -1162,8 +1162,8 @@ class PathHistory(object):
         self.history.append(newpath)
         self.pos = len(self.history) - 1
         if self.maxsave < len(self.history):
-            over = len(self.history) - self.maxsave
-            self.history = self.history[over:]
+            self.history = self.history[1:]
+            self.pos = len(self.history) - 1
 
     def forward(self):
         pos = self.pos
