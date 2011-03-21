@@ -520,7 +520,7 @@ class Directory(object):
         ext  = util.extname(f.name)
         if ext != '' and (meta, key, ext) in keymap:
             keymap[(meta, key, ext)]()
-        elif self.file.marked and (meta, key, '.mark') in keymap:
+        elif f.marked and (meta, key, '.mark') in keymap:
             keymap[(meta, key, '.mark')]()
         elif f.islink() and (meta, key, '.link') in keymap:
             keymap[(meta, key, '.link')]()
