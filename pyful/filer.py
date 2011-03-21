@@ -491,9 +491,6 @@ class Directory(object):
         self.statwin = curses.newwin(1, self.win.getmaxyx()[0], self.win.getmaxyx()[1], self.win.getbegyx()[1])
         self.statwin.bkgd(look.colors['Window'])
         self.path = util.abspath(path)
-        self.pathhistory = [self.path]
-        self.pathhistory_cursor = 0
-        self.pathhistory_max = 20
         self.files = [FileStat(os.pardir)]
         self.mark_files = {}
         self.mark_size = '0'
@@ -503,6 +500,7 @@ class Directory(object):
         self.list = None
         self.list_title = None
         self.finder = Finder(self)
+        self.history = PathHistory(self)
 
     @property
     def file(self):
@@ -573,27 +571,6 @@ class Directory(object):
     def enter_link(self):
         if self.file.isdir():
             self.enter_dir()
-
-    def pathhistory_update(self, newpath):
-        self.pathhistory = self.pathhistory[:self.pathhistory_cursor+1]
-        self.pathhistory.append(newpath)
-        self.pathhistory_cursor = len(self.pathhistory) - 1
-        if self.pathhistory_max < len(self.pathhistory):
-            over = len(self.pathhistory) - self.pathhistory_max
-            self.pathhistory = self.pathhistory[over:]
-
-    def pathhistory_forward(self):
-        self.pathhistory_cursor += 1
-        if self.pathhistory_cursor >= len(self.pathhistory):
-            self.pathhistory_cursor = len(self.pathhistory) - 1
-        self.chdir(self.pathhistory[self.pathhistory_cursor], None)
-
-    def pathhistory_backward(self):
-        self.flag = True
-        self.pathhistory_cursor -= 1
-        if self.pathhistory_cursor < 0:
-            self.pathhistory_cursor = 0
-        self.chdir(self.pathhistory[self.pathhistory_cursor], None)
 
     def mask(self, regexp):
         self.maskreg = regexp
@@ -711,7 +688,7 @@ class Directory(object):
             from pyful import filectrl
             filectrl.delete(fname)
 
-    def chdir(self, path, history=True):
+    def chdir(self, path):
         self.list = None
         self.list_title = None
         if self.finder.active:
@@ -728,8 +705,7 @@ class Directory(object):
         except Exception as e:
             return message.exception(e)
 
-        if history:
-            self.pathhistory_update(path)
+        self.history.update(path)
         self.path = path
         self.diskread()
         self.sort()
@@ -1175,6 +1151,51 @@ class Directory(object):
             self.statwin.noutrefresh()
             if focus:
                 self.file.view()
+
+class PathHistory(object):
+    maxsave = 20
+
+    def __init__(self, directory):
+        self.dir = directory
+        self.history = [self.dir.path]
+        self.pos = 0
+        self.updateflag = True
+
+    def update(self, newpath):
+        if not self.updateflag:
+            return
+        self.history = self.history[:self.pos+1]
+        self.history.append(newpath)
+        self.pos = len(self.history) - 1
+        if self.maxsave < len(self.history):
+            over = len(self.history) - self.maxsave
+            self.history = self.history[over:]
+
+    def forward(self):
+        pos = self.pos
+        pos += 1
+        if pos >= len(self.history):
+            pos = len(self.history) - 1
+        path = self.history[pos]
+        if self.dir.path == path:
+            return
+        self.updateflag = False
+        self.dir.chdir(path)
+        self.updateflag = True
+        self.pos = pos
+
+    def backward(self):
+        pos = self.pos
+        pos -= 1
+        if pos < 0:
+            pos = 0
+        path = self.history[pos]
+        if self.dir.path == path:
+            return
+        self.updateflag = False
+        self.dir.chdir(path)
+        self.updateflag = True
+        self.pos = pos
 
 class Finder(object):
     keymap = {}

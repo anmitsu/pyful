@@ -51,7 +51,7 @@ def _reload_rcfile():
         message.exception(error)
     else:
         message.puts("Reloaded: {0}".format(Pyful.environs['RCFILE']))
-    
+
 @defcmd
 def _refresh_window():
     """Refresh all window."""
@@ -436,12 +436,12 @@ def _chdir_neighbor():
 @defcmd
 def _chdir_backward():
     """Change current directory to backward of directory history."""
-    ui.getcomponent('Filer').dir.pathhistory_backward()
+    ui.getcomponent('Filer').dir.history.backward()
 
 @defcmd
 def _chdir_forward():
     """Change current directory to forward of directory history."""
-    ui.getcomponent('Filer').dir.pathhistory_forward()
+    ui.getcomponent('Filer').dir.history.forward()
 
 @defcmd
 def _sort_name():
