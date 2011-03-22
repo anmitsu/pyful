@@ -94,84 +94,71 @@ def quote(string):
         return string
 
 def expandmacro(string, shell=False):
-    ret = string
     from pyful import ui
     filer = ui.getcomponent("Filer")
+    m = {
+        "%m": re.search(r"(?<!\\)%m", string),
+        "%M": re.search(r"(?<!\\)%M", string),
+        "%d": re.search(r"(?<!\\)%d(?!2)", string),
+        "%d2": re.search(r"(?<!\\)%d2", string),
+        "%D": re.search(r"(?<!\\)%D(?!2)", string),
+        "%D2": re.search(r"(?<!\\)%D2", string),
+        "%f": re.search(r"(?<!\\)%f", string),
+        "%F": re.search(r"(?<!\\)%F", string),
+        "%x": re.search(r"(?<!\\)%x", string),
+        "%X": re.search(r"(?<!\\)%X", string),
+        }
+    def _replace(pattern, repl, string):
+        match = re.search(r"((?<!\\)%[mMdDfFxX])", repl)
+        if match:
+            repl = match.re.sub(r"\\\1", repl)
+        if (m["%m"] and pattern is m["%m"].re) or (m["%M"] and pattern is m["%M"].re):
+            pass
+        elif shell:
+            repl = quote(repl)
+        return pattern.sub(repl, string)
 
-    marks = ''
-    for f in filer.dir.get_mark_files():
-        if shell:
-            marks += string_to_safe(f) + ' '
-        else:
-            marks += f + ' '
-    ret = re.sub('(?<!\\\\)%m', marks[:-1], ret)
-
-    marks = ''
-    for f in filer.dir.get_mark_files():
-        if shell:
-            marks += abspath(string_to_safe(f)) + ' '
-        else:
-            marks += abspath(f) + ' '
-    ret = re.sub('(?<!\\\\)%M', marks[:-1], ret)
-
-    filename = re.compile('(?<!\\\\)%d(?!2)')
-    path = unix_basename(filer.dir.path) + os.sep
-    if shell:
-        ret = filename.sub(quote(path), ret)
-    else:
-        ret = filename.sub(path, ret)
-
-    filename = re.compile('(?<!\\\\)%d2')
-    path = unix_basename(filer.workspace.nextdir.path) + os.sep
-    if shell:
-        ret = filename.sub(quote(path), ret)
-    else:
-        ret = filename.sub(path, ret)
-
-    filename = re.compile('(?<!\\\\)%D(?!2)')
-    if shell:
-        ret = filename.sub(quote(filer.dir.path), ret)
-    else:
-        ret = filename.sub(filer.dir.path, ret)
-
-    filename = re.compile('(?<!\\\\)%D2')
-    if shell:
-        ret = filename.sub(quote(filer.workspace.nextdir.path), ret)
-    else:
-        ret = filename.sub(filer.workspace.nextdir.path, ret)
-
-    filename = re.compile('(?<!\\\\)%f')
-    if shell:
-        ret = filename.sub(quote(filer.file.name), ret)
-    else:
-        ret = filename.sub(filer.file.name, ret)
-
-    filename = re.compile('(?<!\\\\)%F')
-    path = abspath(filer.file.name)
-    if shell:
-        ret = filename.sub(quote(path), ret)
-    else:
-        ret = filename.sub(path, ret)
-
-    filename = re.compile('(?<!\\\\)%x')
-    fname = unix_basename(filer.file.name)
-    ext = extname(filer.file.name)
-    if shell:
-        ret = filename.sub(quote(fname.replace(ext, "")), ret)
-    else:
-        ret = filename.sub(fname.replace(ext, ""), ret)
-
-    filename = re.compile('(?<!\\\\)%X')
-    fname = unix_basename(filer.file.name)
-    ext = extname(filer.file.name)
-    fname = abspath(fname)
-    if shell:
-        ret = filename.sub(quote(fname.replace(ext, "")), ret)
-    else:
-        ret = filename.sub(fname.replace(ext, ""), ret)
-
-    ret = re.sub('\\\\(%[mMdDfFxX])', r'\1', ret)
-    return ret
+    if m["%m"]:
+        marks = ""
+        for f in filer.dir.get_mark_files():
+            if shell:
+                marks += string_to_safe(f) + ' '
+            else:
+                marks += f + ' '
+        string = _replace(m["%m"].re, marks[:-1], string)
+    if m["%M"]:
+        marks = ""
+        for f in filer.dir.get_mark_files():
+            if shell:
+                marks += string_to_safe(abspath(f)) + ' '
+            else:
+                marks += abspath(f) + ' '
+        string = _replace(m["%M"].re, marks[:-1], string)
+    if m["%d"]:
+        path = unix_basename(filer.dir.path) + os.sep
+        string = _replace(m["%d"].re, path, string)
+    if m["%d2"]:
+        path = unix_basename(filer.workspace.nextdir.path) + os.sep
+        string = _replace(m["%d2"].re, path, string)
+    if m["%D"]:
+        path = filer.dir.path
+        string = _replace(m["%D"].re, path, string)
+    if m["%D2"]:
+        path = filer.workspace.nextdir.path
+        string = _replace(m["%D2"].re, path, string)
+    if m["%f"]:
+        path = filer.file.name
+        string = _replace(m["%f"].re, path, string)
+    if m["%F"]:
+        path = abspath(filer.file.name)
+        string = _replace(m["%F"].re, path, string)
+    if m["%x"]:
+        path = os.path.splitext(filer.file.name)[0]
+        string = _replace(m["%x"].re, path, string)
+    if m["%X"]:
+        path = abspath(os.path.splitext(abspath(filer.file.name))[0])
+        string = _replace(m["%X"].re, path, string)
+    return re.sub(r"\\(%[mMdDfFxX])", r"\1", string)
 
 def wait_restore():
     while 1:
