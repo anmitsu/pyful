@@ -356,19 +356,19 @@ def _change_workspace_layout():
     * Fullscreen
     """
     ret =  message.confirm(
-        "Layout:", ["tile", "tileleft", "oneline", "onecolumn", "magnifier", "fullscreen"])
+        "Layout:", ["Tile", "TileLeft", "Oneline", "Onecolumn", "Magnifier", "Fullscreen"])
     filer = ui.getcomponent('Filer')
-    if "tile" == ret:
+    if "Tile" == ret:
         filer.workspace.tile()
-    elif "tileleft" == ret:
+    elif "TileLeft" == ret:
         filer.workspace.tileleft()
-    elif "oneline" == ret:
+    elif "Oneline" == ret:
         filer.workspace.oneline()
-    elif "onecolumn" == ret:
+    elif "Onecolumn" == ret:
         filer.workspace.onecolumn()
-    elif "magnifier" == ret:
+    elif "Magnifier" == ret:
         filer.workspace.magnifier()
-    elif "fullscreen" == ret:
+    elif "Fullscreen" == ret:
         filer.workspace.fullscreen()
 
 @defcmd
