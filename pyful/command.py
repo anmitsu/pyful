@@ -350,18 +350,24 @@ def _change_workspace_layout():
     Layouts are following kinds:
     * Tile
     * TileLeft
+    * TileTop
+    * TileBottom
     * Oneline
     * Onecolumn
     * Magnifier
     * Fullscreen
     """
     ret =  message.confirm(
-        "Layout:", ["Tile", "TileLeft", "Oneline", "Onecolumn", "Magnifier", "Fullscreen"])
+        "Layout:", ["Tile", "TileLeft", "TileTop", "TileBottom", "Oneline", "Onecolumn", "Magnifier", "Fullscreen"])
     filer = ui.getcomponent('Filer')
     if "Tile" == ret:
         filer.workspace.tile()
     elif "TileLeft" == ret:
         filer.workspace.tileleft()
+    elif "TileTop" == ret:
+        filer.workspace.tiletop()
+    elif "TileBottom" == ret:
+        filer.workspace.tilebottom()
     elif "Oneline" == ret:
         filer.workspace.oneline()
     elif "Onecolumn" == ret:
@@ -400,6 +406,16 @@ def _layout_tile():
 def _layout_tileleft():
     """Change workspace layout to Tile of left."""
     ui.getcomponent('Filer').workspace.tileleft()
+
+@defcmd
+def _layout_tiletop():
+    """Change workspace layout to Tile of top."""
+    ui.getcomponent('Filer').workspace.tiletop()
+
+@defcmd
+def _layout_tilebottom():
+    """Change workspace layout to Tile of bottom."""
+    ui.getcomponent('Filer').workspace.tilebottom()
 
 @defcmd
 def _layout_oneline():
