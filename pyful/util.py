@@ -93,6 +93,9 @@ def quote(string):
     else:
         return string
 
+def escapemacro(string):
+    return re.sub(r"((?<!\\)%[mMdDfFxX])", r"\\\1", string)
+
 def expandmacro(string, shell=False):
     from pyful import ui
     filer = ui.getcomponent("Filer")
@@ -109,9 +112,7 @@ def expandmacro(string, shell=False):
         "%X": re.search(r"(?<!\\)%X", string),
         }
     def _replace(pattern, repl, string):
-        match = re.search(r"((?<!\\)%[mMdDfFxX])", repl)
-        if match:
-            repl = match.re.sub(r"\\\1", repl)
+        repl = escapemacro(repl)
         if (m["%m"] and pattern is m["%m"].re) or (m["%M"] and pattern is m["%M"].re):
             pass
         elif shell:
