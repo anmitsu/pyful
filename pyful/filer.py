@@ -272,7 +272,7 @@ class Workspace(object):
     def __init__(self, title):
         self.title = title
         self.dirs = []
-        self.cursor = 0
+        self._cursor = 0
 
     @property
     def dir(self):
@@ -288,11 +288,36 @@ class Workspace(object):
 
     @property
     def prevdir(self):
-        s= self.cursor - 1
+        s = self.cursor - 1
         if s < 0:
             return self.dirs[-1]
         else:
             return self.dir[s]
+
+    @property
+    def cursor(self):
+        return self._cursor
+
+    @cursor.setter
+    def cursor(self, x):
+        self._cursor = x
+        if len(self.dirs) <= self._cursor:
+            self._cursor = 0
+        elif self._cursor < 0:
+            self._cursor = len(self.dirs) - 1
+        try:
+            os.chdir(self.dir.path)
+        except Exception as e:
+            message.exception(e)
+            self.dir.chdir(self.default_path)
+        if self.layout == 'Magnifier':
+            self.magnifier()
+
+    def mvcursor(self, x):
+        self.cursor += x
+
+    def setcursor(self, x):
+        self.cursor = x
 
     def create_dir(self, path=None):
         if path is None:
@@ -319,7 +344,7 @@ class Workspace(object):
         d = self.dirs[x]
         self.dirs.remove(d)
         if self.cursor > len(self.dirs) - 1:
-            self.cursor = len(self.dirs)-1
+            self.setcursor(len(self.dirs)-1)
         self.setcursor(self.cursor)
         self.resize()
         return d
@@ -336,9 +361,10 @@ class Workspace(object):
             self.oneline()
         elif self.layout == 'Onecolumn':
             self.onecolumn()
+        elif self.layout == 'Magnifier':
+            self.magnifier()
         elif self.layout == 'Fullscreen':
             self.fullscreen()
-        return self
 
     def tile(self, reverse=False):
         if reverse:
@@ -401,6 +427,26 @@ class Workspace(object):
         self.dirs[-1].resize(height+odd, width, height*(k-1)+1, 0)
         self.all_reload()
 
+    def magnifier(self):
+        self.layout = 'Magnifier'
+        (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
+        y -= ui.getcomponent("Cmdscr").win.getmaxyx()[0] + ui.getcomponent("Titlebar").win.getmaxyx()[0]
+        if len(self.dirs) == 1:
+            self.dirs[0].resize(y, x, 1, 0)
+            self.all_reload()
+            return
+        k = len(self.dirs)-1
+        odd = y % k
+        height = y // k
+        width = x
+        focusdir = self.dirs.pop(self.cursor)
+        focusdir.resize(y*3//4, x*3//4, (y-(y*3//4))//2, (x-(x*3//4))//2)
+        for i, d in enumerate(self.dirs[:-1]):
+            d.resize(height, width, height*i+1, 0)
+        self.dirs[-1].resize(height+odd, width, height*(k-1)+1, 0)
+        self.dirs.insert(self.cursor, focusdir)
+        self.all_reload()
+
     def fullscreen(self):
         self.layout = 'Fullscreen'
         (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
@@ -410,53 +456,27 @@ class Workspace(object):
             d.resize(height, width, 1, 0)
         self.all_reload()
 
-    def mvcursor(self, x):
-        self.cursor += x
-        if len(self.dirs) <= self.cursor:
-            self.cursor = 0
-        elif self.cursor < 0:
-            self.cursor = len(self.dirs) - 1
-        try:
-            os.chdir(self.dir.path)
-        except Exception as e:
-            message.exception(e)
-            self.dir.chdir(self.default_path)
-        return self.cursor
-
-    def setcursor(self, x):
-        if not 0 <= x < len(self.dirs):
-            return
-        self.cursor = x
-        try:
-            os.chdir(self.dir.path)
-        except Exception as e:
-            message.exception(e)
-            self.dir.chdir(self.default_path)
-        return self.cursor
-
     def swap_dir_inc(self):
         d = self.dir
         self.dirs.remove(d)
         if self.cursor < len(self.dirs):
             self.dirs.insert(self.cursor+1, d)
-            self.cursor += 1
+            self.mvcursor(1)
         else:
             self.dirs.insert(0, d)
-            self.cursor = 0
+            self.setcursor(0)
         self.resize()
-        return self
 
     def swap_dir_dec(self):
         d = self.dir
         self.dirs.remove(d)
         if self.cursor > 0:
             self.dirs.insert(self.cursor-1, d)
-            self.cursor -= 1
+            self.mvcursor(-1)
         else:
             self.dirs.insert(len(self.dirs), d)
-            self.cursor = len(self.dirs) - 1
+            self.setcursor(len(self.dirs)-1)
         self.resize()
-        return self
 
     def focus_reload(self):
         self.dir.reload()
@@ -466,7 +486,6 @@ class Workspace(object):
         for d in self.dirs:
             d.reload()
         os.chdir(self.dir.path)
-        return self
 
     def clear(self):
         for d in self.dirs:
@@ -1264,7 +1283,7 @@ class Finder(object):
             self.insert(c)
         else:
             return True
-        
+
     def view(self):
         self.dir.statwin.move(0, 1)
         if self.migemo:
