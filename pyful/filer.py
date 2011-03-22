@@ -1296,14 +1296,12 @@ class FileStat(object):
     def __init__(self, name):
         self.marked = False
         self.view_file_string = None
-        self.lstat = os.lstat(name)
+        self.lstat = self.stat = os.lstat(name)
         if self.islink():
             try:
                 self.stat = os.stat(name)
             except OSError:
-                self.stat = self.lstat
-        else:
-            self.stat = self.lstat
+                pass
         try:
             self.name = util.U(name)
         except UnicodeError:
