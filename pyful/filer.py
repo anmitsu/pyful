@@ -1069,19 +1069,13 @@ class Directory(object):
 
             f = self.files[i]
             fstr = f.get_view_file_string(self.path, width)
-
+            attr = f.get_attr()
+            if self.cursor == i and focus:
+                attr += curses.A_REVERSE
+            self.win.move(line, 1)
             if f.marked:
-                if self.cursor == i and focus:
-                    attr = look.colors['MarkFile'] | curses.A_REVERSE
-                else:
-                    attr = look.colors['MarkFile']
-                self.win.move(line, 1)
                 self.win.addstr('*' + fstr, attr)
             else:
-                attr = f.get_attr()
-                if self.cursor == i and focus:
-                    attr += curses.A_REVERSE
-                self.win.move(line, 1)
                 self.win.addstr(' ' + fstr, attr)
         self.win.noutrefresh()
 
@@ -1394,7 +1388,9 @@ class FileStat(object):
         return fstat
 
     def get_attr(self):
-        if self.islink():
+        if self.marked:
+            return look.colors['MarkFile']
+        elif self.islink():
             if self.isdir():
                 return look.colors['LinkDir']
             else:
