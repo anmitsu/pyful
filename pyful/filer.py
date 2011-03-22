@@ -355,8 +355,12 @@ class Workspace(object):
     def resize(self):
         if self.layout == 'Tile':
             self.tile()
-        if self.layout == 'TileLeft':
+        elif self.layout == 'TileLeft':
             self.tileleft()
+        elif self.layout == 'TileTop':
+            self.tiletop()
+        elif self.layout == 'TileBottom':
+            self.tilebottom()
         elif self.layout == 'Oneline':
             self.oneline()
         elif self.layout == 'Onecolumn':
@@ -370,44 +374,84 @@ class Workspace(object):
         self.layout = 'Tile'
         size = len(self.dirs)
         (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
-        height = y - (ui.getcomponent("Cmdscr").win.getmaxyx()[0] + ui.getcomponent("Titlebar").win.getmaxyx()[0])
+        y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0] + ui.getcomponent("Titlebar").win.getmaxyx()[0])
         if size == 1:
-            self.dirs[0].resize(height, x, 1, 0)
+            self.dirs[0].resize(y, x, 1, 0)
             self.all_reload()
             return
+        height = y
         width = x // 2
         wodd = x % 2
         self.dirs[0].resize(height, width, 1, 0)
-        size -= 1
-        odd = height % size
-        height //= size
-        for i in range(0, size):
-            if i == size-1:
-                self.dirs[i+1].resize(height+odd, width+wodd, height*i+1, width)
-            else:
-                self.dirs[i+1].resize(height, width+wodd, height*i+1, width)
+        k = size - 1
+        height = y // k
+        hodd = y % k
+        for i, d in enumerate(self.dirs[1:-1]):
+            d.resize(height, width+wodd, height*i+1, width)
+        self.dirs[-1].resize(height+hodd, width+wodd, height*(k-1)+1, width)
         self.all_reload()
 
     def tileleft(self):
         self.layout = 'TileLeft'
         size = len(self.dirs)
         (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
-        height = y - (ui.getcomponent("Cmdscr").win.getmaxyx()[0] + ui.getcomponent("Titlebar").win.getmaxyx()[0])
+        y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0] + ui.getcomponent("Titlebar").win.getmaxyx()[0])
         if size == 1:
-            self.dirs[0].resize(height, x, 1, 0)
+            self.dirs[0].resize(y, x, 1, 0)
             self.all_reload()
             return
+        height = y
         width = x // 2
         wodd = x % 2
         self.dirs[0].resize(height, width, 1, width)
-        size -= 1
-        odd = height % size
-        height //= size
-        for i in range(0, size):
-            if i == size-1:
-                self.dirs[i+1].resize(height+odd, width+wodd, height*i+1, 0)
-            else:
-                self.dirs[i+1].resize(height, width+wodd, height*i+1, 0)
+        k = size - 1
+        height = y // k
+        hodd = y % k
+        for i, d in enumerate(self.dirs[1:-1]):
+            d.resize(height, width+wodd, height*i+1, 0)
+        self.dirs[-1].resize(height+hodd, width+wodd, height*(k-1)+1, 0)
+        self.all_reload()
+
+    def tiletop(self):
+        self.layout = 'TileTop'
+        size = len(self.dirs)
+        (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
+        y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0] + ui.getcomponent("Titlebar").win.getmaxyx()[0])
+        if size == 1:
+            self.dirs[0].resize(y, x, 1, 0)
+            self.all_reload()
+            return
+        width = x
+        height = y // 2
+        hodd = y % 2
+        self.dirs[0].resize(height, width, height+hodd+1, 0)
+        k = size-1
+        width = x // k
+        wodd = x % k
+        for i, d in enumerate(self.dirs[1:-1]):
+            d.resize(height+hodd, width, 1, width*i)
+        self.dirs[-1].resize(height+hodd, width+wodd, 1, width*(k-1))
+        self.all_reload()
+
+    def tilebottom(self):
+        self.layout = 'TileBottom'
+        size = len(self.dirs)
+        (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
+        y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0] + ui.getcomponent("Titlebar").win.getmaxyx()[0])
+        if size == 1:
+            self.dirs[0].resize(y, x, 1, 0)
+            self.all_reload()
+            return
+        width = x
+        height = y // 2
+        hodd = y % 2
+        self.dirs[0].resize(height, width, 1, 0)
+        k = size-1
+        width = x // k
+        wodd = x % k
+        for i, d in enumerate(self.dirs[1:-1]):
+            d.resize(height+hodd, width, height+1, width*i)
+        self.dirs[-1].resize(height+hodd, width+wodd, height+1, width*(k-1))
         self.all_reload()
 
     def oneline(self):
