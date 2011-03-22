@@ -53,7 +53,7 @@ Workspace.default_path = '~/'
 # Set the workspace layout.
 #
 #     'Tile'
-#     'Tile reverse'
+#     'TileLeft'
 #     'Oneline'
 #     'Onecolumn'
 #     'Magnifier'
@@ -423,7 +423,7 @@ menu.items['filer'] = (
 
 menu.items['layout'] = (
     ('(t)ile'        , KEY_t, commands['layout_tile']),
-    ('(T)ile reverse', KEY_T, commands['layout_tile_rev']),
+    ('tile(L)eft'    , KEY_L, commands['layout_tileleft']),
     ('one(l)ine'     , KEY_l, commands['layout_oneline']),
     ('one(c)olumn'   , KEY_c, commands['layout_onecolumn']),
     ('(m)agnifier'   , KEY_m, commands['layout_magnifier']),
