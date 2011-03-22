@@ -399,42 +399,114 @@ def _swap_workspace_dec():
 
 @defcmd
 def _layout_tile():
-    """Change workspace layout to Tile"""
+    """Change workspace layout to Tile.
+    = Preview:
+    _________________________
+    |           |           |
+    |           |     2     |
+    |     1     |___________|
+    |           |           |
+    |           |     3     |
+    |___________|___________|
+    """
     ui.getcomponent('Filer').workspace.tile()
 
 @defcmd
 def _layout_tileleft():
-    """Change workspace layout to Tile of left."""
+    """Change workspace layout to Tile of left.
+    = Preview:
+    _________________________
+    |           |           |
+    |     2     |           |
+    |___________|     1     |
+    |           |           |
+    |     3     |           |
+    |___________|___________|
+    """
     ui.getcomponent('Filer').workspace.tileleft()
 
 @defcmd
 def _layout_tiletop():
-    """Change workspace layout to Tile of top."""
+    """Change workspace layout to Tile of top.
+    = Preview:
+    _________________________
+    |           |           |
+    |     2     |     3     |
+    |___________|___________|
+    |                       |
+    |           1           |
+    |_______________________|
+    """
     ui.getcomponent('Filer').workspace.tiletop()
 
 @defcmd
 def _layout_tilebottom():
-    """Change workspace layout to Tile of bottom."""
+    """Change workspace layout to Tile of bottom.
+    = Preview:
+    _________________________
+    |                       |
+    |           1           |
+    |_______________________|
+    |           |           |
+    |     2     |     3     |
+    |___________|___________|
+    """
     ui.getcomponent('Filer').workspace.tilebottom()
 
 @defcmd
 def _layout_oneline():
-    """Change workspace layout to Oneline."""
+    """Change workspace layout to Oneline.
+    = Preview:
+    _________________________
+    |       |       |       |
+    |       |       |       |
+    |   1   |   2   |   3   |
+    |       |       |       |
+    |       |       |       |
+    |_______|_______|_______|
+    """
     ui.getcomponent('Filer').workspace.oneline()
 
 @defcmd
 def _layout_onecolumn():
-    """Change workspace layout to Onecolumn."""
+    """Change workspace layout to Onecolumn.
+    = Preview:
+    _________________________
+    |           1           |
+    |_______________________|
+    |           2           |
+    |_______________________|
+    |           3           |
+    |_______________________|
+    """
     ui.getcomponent('Filer').workspace.onecolumn()
 
 @defcmd
 def _layout_magnifier():
-    """Change workspace layout to Magnifier."""
+    """Change workspace layout to Magnifier.
+    = Preview:
+    _________________________
+    |    _______________    |
+    | 2  |             |    |
+    |____|      1      |____|
+    |    |             |    |
+    | 3  |_____________|    |
+    |_______________________|
+    """
     ui.getcomponent('Filer').workspace.magnifier()
 
 @defcmd
 def _layout_fullscreen():
-    """Change workspace layout to Fullscreen."""
+    """Change workspace layout to Fullscreen.
+    = Preview:
+    _________________________
+    |                       |
+    |                       |
+    |        1, 2, 3        |
+    |                       |
+    |                       |
+    |_______________________|
+    """
     ui.getcomponent('Filer').workspace.fullscreen()
 
 @defcmd
