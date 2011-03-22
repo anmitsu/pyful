@@ -349,18 +349,19 @@ def _change_workspace_layout():
     """Change current workspace's layout.
     Layouts are following kinds:
     * Tile
-    * Tile of reverse
+    * TileLeft
     * Oneline
     * Onecolumn
+    * Magnifier
     * Fullscreen
     """
     ret =  message.confirm(
-        "Layout:", ["tile", "tilerevese", "oneline", "onecolumn", "magnifier", "fullscreen"])
+        "Layout:", ["tile", "tileleft", "oneline", "onecolumn", "magnifier", "fullscreen"])
     filer = ui.getcomponent('Filer')
     if "tile" == ret:
         filer.workspace.tile()
-    elif "tilerevese" == ret:
-        filer.workspace.tile(reverse=True)
+    elif "tileleft" == ret:
+        filer.workspace.tileleft()
     elif "oneline" == ret:
         filer.workspace.oneline()
     elif "onecolumn" == ret:
@@ -396,9 +397,9 @@ def _layout_tile():
     ui.getcomponent('Filer').workspace.tile()
 
 @defcmd
-def _layout_tile_rev():
-    """Change workspace layout to Tile of reverse."""
-    ui.getcomponent('Filer').workspace.tile(reverse=True)
+def _layout_tileleft():
+    """Change workspace layout to Tile of left."""
+    ui.getcomponent('Filer').workspace.tileleft()
 
 @defcmd
 def _layout_oneline():
