@@ -256,14 +256,7 @@ class Cmdline(ui.Component):
         self.history.start()
 
     def restart(self, string='', pos=0):
-        cmd = string
-        self.string = cmd
-        if pos > 0:
-            self.cursor = pos - 1
-        else:
-            self.cursor = util.mbslen(cmd) + pos
-        self.active = True
-        self.history.start()
+        self.start(self.mode, string, pos)
 
     def shell(self, string='', pos=0):
         from pyful import mode
