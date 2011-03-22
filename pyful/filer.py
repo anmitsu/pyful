@@ -355,8 +355,8 @@ class Workspace(object):
     def resize(self):
         if self.layout == 'Tile':
             self.tile()
-        if self.layout == 'Tile reverse':
-            self.tile(reverse=True)
+        if self.layout == 'TileLeft':
+            self.tileleft()
         elif self.layout == 'Oneline':
             self.oneline()
         elif self.layout == 'Onecolumn':
@@ -366,40 +366,48 @@ class Workspace(object):
         elif self.layout == 'Fullscreen':
             self.fullscreen()
 
-    def tile(self, reverse=False):
-        if reverse:
-            self.layout = 'Tile reverse'
-        else:
-            self.layout = 'Tile'
+    def tile(self):
+        self.layout = 'Tile'
         size = len(self.dirs)
-
         (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
         height = y - (ui.getcomponent("Cmdscr").win.getmaxyx()[0] + ui.getcomponent("Titlebar").win.getmaxyx()[0])
         if size == 1:
             self.dirs[0].resize(height, x, 1, 0)
-        else:
-            width = x // 2
-            wodd = x % 2
-
-            if reverse:
-                self.dirs[0].resize(height, width, 1, width)
+            self.all_reload()
+            return
+        width = x // 2
+        wodd = x % 2
+        self.dirs[0].resize(height, width, 1, 0)
+        size -= 1
+        odd = height % size
+        height //= size
+        for i in range(0, size):
+            if i == size-1:
+                self.dirs[i+1].resize(height+odd, width+wodd, height*i+1, width)
             else:
-                self.dirs[0].resize(height, width, 1, 0)
+                self.dirs[i+1].resize(height, width+wodd, height*i+1, width)
+        self.all_reload()
 
-            size -= 1
-            odd = height % size
-            height //= size
-            for i in range(0, size):
-                if i == size-1:
-                    if reverse:
-                        self.dirs[i+1].resize(height+odd, width+wodd, height*i+1, 0)
-                    else:
-                        self.dirs[i+1].resize(height+odd, width+wodd, height*i+1, width)
-                else:
-                    if reverse:
-                        self.dirs[i+1].resize(height, width+wodd, height*i+1, 0)
-                    else:
-                        self.dirs[i+1].resize(height, width+wodd, height*i+1, width)
+    def tileleft(self):
+        self.layout = 'TileLeft'
+        size = len(self.dirs)
+        (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
+        height = y - (ui.getcomponent("Cmdscr").win.getmaxyx()[0] + ui.getcomponent("Titlebar").win.getmaxyx()[0])
+        if size == 1:
+            self.dirs[0].resize(height, x, 1, 0)
+            self.all_reload()
+            return
+        width = x // 2
+        wodd = x % 2
+        self.dirs[0].resize(height, width, 1, width)
+        size -= 1
+        odd = height % size
+        height //= size
+        for i in range(0, size):
+            if i == size-1:
+                self.dirs[i+1].resize(height+odd, width+wodd, height*i+1, 0)
+            else:
+                self.dirs[i+1].resize(height, width+wodd, height*i+1, 0)
         self.all_reload()
 
     def oneline(self):
