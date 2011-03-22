@@ -354,7 +354,8 @@ def _change_workspace_layout():
     * Onecolumn
     * Fullscreen
     """
-    ret =  message.confirm("Layout:", ["tile", "tilerevese", "oneline", "onecolumn", "fullscreen"])
+    ret =  message.confirm(
+        "Layout:", ["tile", "tilerevese", "oneline", "onecolumn", "magnifier", "fullscreen"])
     filer = ui.getcomponent('Filer')
     if "tile" == ret:
         filer.workspace.tile()
@@ -364,6 +365,8 @@ def _change_workspace_layout():
         filer.workspace.oneline()
     elif "onecolumn" == ret:
         filer.workspace.onecolumn()
+    elif "magnifier" == ret:
+        filer.workspace.magnifier()
     elif "fullscreen" == ret:
         filer.workspace.fullscreen()
 
@@ -406,6 +409,11 @@ def _layout_oneline():
 def _layout_onecolumn():
     """Change workspace layout to Onecolumn."""
     ui.getcomponent('Filer').workspace.onecolumn()
+
+@defcmd
+def _layout_magnifier():
+    """Change workspace layout to Magnifier."""
+    ui.getcomponent('Filer').workspace.magnifier()
 
 @defcmd
 def _layout_fullscreen():
