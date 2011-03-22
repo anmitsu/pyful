@@ -491,8 +491,9 @@ class Workspace(object):
         odd = y % k
         height = y // k
         width = x
+        ratio = 0.8
         focusdir = self.dirs.pop(self.cursor)
-        focusdir.resize(y*3//4, x*3//4, (y-(y*3//4))//2, (x-(x*3//4))//2)
+        focusdir.resize(int(y*ratio), int(x*ratio), (y-(int(y*ratio)))//2, (x-(int(x*ratio)))//2)
         for i, d in enumerate(self.dirs[:-1]):
             d.resize(height, width, height*i+1, 0)
         self.dirs[-1].resize(height+odd, width, height*(k-1)+1, 0)
