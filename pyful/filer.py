@@ -676,7 +676,8 @@ class Directory(object):
                 for line in f:
                     line = line.strip(os.linesep)
                     if os.path.exists(line):
-                        self.list.append(re.sub(self.path+'?'+os.sep, '', line))
+                        line = re.sub("{0}?{1}".format(self.path, os.sep), '', line)
+                        self.list.append(line)
         except Exception as e:
             message.exception(e)
         self.reload()
@@ -703,7 +704,6 @@ class Directory(object):
             filelist = self.list
         else:
             filelist = os.listdir(self.path)
-
         for f in filelist:
             if not os.path.lexists(f):
                 continue
@@ -711,14 +711,10 @@ class Directory(object):
                 if not os.path.isdir(f) and not self.maskreg.search(f):
                     continue
             try:
-                fs = FileStat(f)
+                self.files.append(FileStat(f))
             except InvalidEncodingError:
                 continue
-            if fs.name in marks:
-                fs.marked = True
-                self.mark_files[fs.name] = fs
-            self.files.append(fs)
-        return self
+        self.mark_update([f for f in self.files if f.name in marks])
 
     def reload(self):
         try:
@@ -728,16 +724,13 @@ class Directory(object):
         except Exception as e:
             message.exception(e)
             self.chdir(Workspace.default_path)
-        return self
 
     def chdir(self, path):
         self.list = None
         self.list_title = None
         if self.finder.active:
             self.finder.finish()
-
-        self.mark_files.clear()
-        self.mark_size = '0'
+        self.mark_clear()
 
         parent_path = util.unix_dirname(self.path)
         parent_fname = util.unix_basename(self.path)
@@ -746,17 +739,14 @@ class Directory(object):
             os.chdir(path)
         except Exception as e:
             return message.exception(e)
-
         self.history.update(path)
         self.path = path
         self.diskread()
         self.sort()
-
         if self.path == parent_path:
             self.setcursor(self.get_index(parent_fname))
         else:
             self.setcursor(0)
-        return self
 
     def get_index(self, fname):
         for i, f in enumerate(self.files):
@@ -764,118 +754,62 @@ class Directory(object):
                 return i
         return 0
 
-    def markon(self):
-        f = self.file
-        if f.name == os.pardir:
-            return
-        f.marked = True
-        self.mark_files[f.name] = f
-        self.mark_size = self.get_mark_size()
-
-    def markoff(self):
-        f = self.file
-        if f.name == os.pardir:
-            return
-        f.marked = False
-        self.mark_files.pop(f.name)
-        self.mark_size = self.get_mark_size()
+    def mark(self, pattern):
+        self.mark_clear()
+        self.mark_update([f for f in self.files if pattern.search(f.name)])
 
     def mark_toggle(self):
-        f = self.file
-        if f.name == os.pardir:
-            return self.mvcursor(+1)
-        if f.marked:
-            f.marked = False
-            self.mark_files.pop(f.name)
-        else:
-            f.marked = True
-            self.mark_files[f.name] = f
-        self.mark_size = self.get_mark_size()
+        self.mark_update([self.file], toggle=True)
         self.mvcursor(+1)
 
     def mark_toggle_all(self):
-        self.mark_files.clear()
-        for f in self.files:
-            if f.name == os.pardir:
-                continue
-            f.marked = not f.marked
-            if f.marked:
-                self.mark_files[f.name] = f
-        self.mark_size = self.get_mark_size()
+        self.mark_update(self.files, toggle=True)
 
-    def mark(self, pattern):
-        for f in self.files:
-            if f.name == os.pardir:
-                continue
-            if pattern.search(f.name):
-                f.marked = True
-                self.mark_files[f.name] = f
-        self.mark_size = self.get_mark_size()
-
-    def mark_below_cursor(self, filetype='all'):
+    def mark_below_cursor(self, filetype="all"):
         self.mark_all(filetype, self.cursor)
 
-    def mark_all(self, filetype='all', start=0):
-        self.mark_files.clear()
-        for f in self.files[start:]:
-            if f.name == os.pardir:
+    def mark_all(self, filetype="all", start=0):
+        if filetype == "file":
+            files = [f for f in self.files[start:] if not f.isdir()]
+        elif filetype == "directory":
+            files = [f for f in self.files[start:] if f.isdir()]
+        elif filetype == "symlink":
+            files = [f for f in self.files[start:] if f.islink()]
+        elif filetype == "executable":
+            files = [f for f in self.files[start:] if f.isexec() and not f.isdir() and not f.islink()]
+        elif filetype == "socket":
+            files = [f for f in self.files[start:] if f.issocket()]
+        elif filetype == "fifo":
+            files = [f for f in self.files[start:] if f.isfifo()]
+        elif filetype == "chr":
+            files = [f for f in self.files[start:] if f.ischr()]
+        elif filetype == "block":
+            files = [f for f in self.files[start:] if f.isblock()]
+        else:
+            files = [f for f in self.files[start:]]
+        self.mark_clear()
+        self.mark_update(files)
+
+    def mark_update(self, fstats, toggle=False):
+        for fs in fstats:
+            if fs.name == os.pardir:
                 continue
-            if filetype == 'all':
-                f.marked = True
-                self.mark_files[f.name] = f
-            elif filetype == 'file':
-                if not f.isdir():
-                    f.marked = True
-                    self.mark_files[f.name] = f
+            if toggle:
+                if fs.marktoggle():
+                    self.mark_files[fs.name] = fs
                 else:
-                    f.marked = False
-            elif filetype == 'directory':
-                if f.isdir():
-                    f.marked = True
-                    self.mark_files[f.name] = f
-                else:
-                    f.marked = False
-            elif filetype == 'symlink':
-                if f.islink():
-                    f.marked = True
-                    self.mark_files[f.name] = f
-                else:
-                    f.marked = False
-            elif filetype == 'executable':
-                if f.isexec() and not f.isdir():
-                    f.marked = True
-                    self.mark_files[f.name] = f
-                else:
-                    f.marked = False
-            elif filetype == 'socket':
-                if f.issocket():
-                    f.marked = True
-                    self.mark_files[f.name] = f
-                else:
-                    f.marked = False
-            elif filetype == 'fifo':
-                if f.isfifo():
-                    f.marked = True
-                    self.mark_files[f.name] = f
-                else:
-                    f.marked = False
-            elif filetype == 'chr':
-                if f.ischr():
-                    f.marked = True
-                    self.mark_files[f.name] = f
-                else:
-                    f.marked = False
-            elif filetype == 'block':
-                if f.isblock():
-                    f.marked = True
-                    self.mark_files[f.name] = f
-                else:
-                    f.marked = False
+                    try:
+                        self.mark_files.pop(fs.name)
+                    except KeyError:
+                        pass
+            else:
+                fs.markon()
+                self.mark_files[fs.name] = fs
         self.mark_size = self.get_mark_size()
 
     def mark_clear(self):
-        for f in self.files:
-            f.marked = False
+        for f in self.mark_files.values():
+            f.markoff()
         self.mark_files.clear()
         self.mark_size = '0'
 
@@ -893,7 +827,7 @@ class Directory(object):
         if len(self.mark_files) == 0:
             return [self.file.name]
         else:
-            return [f.name for f in self.mark_files.values()]
+            return [f for f in self.mark_files.keys()]
 
     def ismark(self):
         return len(self.mark_files) != 0
@@ -1400,6 +1334,16 @@ class FileStat(object):
 
     def isexec(self):
         return stat.S_IEXEC & self.stat.st_mode
+
+    def markon(self):
+        self.marked = True
+
+    def markoff(self):
+        self.marked = False
+
+    def marktoggle(self):
+        self.marked = not self.marked
+        return self.marked
 
     def cache_clear(self):
         self.view_file_string = None
