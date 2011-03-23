@@ -120,21 +120,17 @@ def expandmacro(string, shell=False):
         return pattern.sub(repl, string)
 
     if m["%m"]:
-        marks = ""
-        for f in filer.dir.get_mark_files():
-            if shell:
-                marks += string_to_safe(f) + ' '
-            else:
-                marks += f + ' '
-        string = _replace(m["%m"].re, marks[:-1], string)
+        if shell:
+            marks = " ".join([string_to_safe(f) for f in filer.dir.get_mark_files()])
+        else:
+            marks = " ".join(filer.dir.get_mark_files())
+        string = _replace(m["%m"].re, marks, string)
     if m["%M"]:
-        marks = ""
-        for f in filer.dir.get_mark_files():
-            if shell:
-                marks += string_to_safe(abspath(f)) + ' '
-            else:
-                marks += abspath(f) + ' '
-        string = _replace(m["%M"].re, marks[:-1], string)
+        if shell:
+            marks = " ".join([string_to_safe(abspath(f)) for f in filer.dir.get_mark_files()])
+        else:
+            marks = " ".join([abspath(f) for f in filer.dir.get_mark_files()])
+        string = _replace(m["%M"].re, marks, string)
     if m["%d"]:
         path = unix_basename(filer.dir.path) + os.sep
         string = _replace(m["%d"].re, path, string)
