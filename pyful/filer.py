@@ -272,7 +272,7 @@ class Workspace(object):
     def __init__(self, title):
         self.title = title
         self.dirs = []
-        self._cursor = 0
+        self.cursor = 0
 
     @property
     def dir(self):
@@ -294,17 +294,7 @@ class Workspace(object):
         else:
             return self.dir[s]
 
-    @property
-    def cursor(self):
-        return self._cursor
-
-    @cursor.setter
-    def cursor(self, x):
-        self._cursor = x
-        if len(self.dirs) <= self._cursor:
-            self._cursor = 0
-        elif self._cursor < 0:
-            self._cursor = len(self.dirs) - 1
+    def mvfocus(self):
         try:
             os.chdir(self.dir.path)
         except Exception as e:
@@ -313,11 +303,18 @@ class Workspace(object):
         if self.layout == 'Magnifier':
             self.magnifier()
 
-    def mvcursor(self, x):
-        self.cursor += x
+    def mvcursor(self, amount):
+        self.cursor += amount
+        if len(self.dirs) <= self.cursor:
+            self.cursor = 0
+        elif self.cursor < 0:
+            self.cursor = len(self.dirs) - 1
+        self.mvfocus()
 
-    def setcursor(self, x):
-        self.cursor = x
+    def setcursor(self, dist):
+        if 0 < dist <= len(self.dirs):
+            self.cursor = dist
+            self.mvfocus()
 
     def create_dir(self, path=None):
         if path is None:
@@ -373,8 +370,9 @@ class Workspace(object):
     def tile(self):
         self.layout = 'Tile'
         size = len(self.dirs)
-        (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
-        y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0] + ui.getcomponent("Titlebar").win.getmaxyx()[0])
+        y, x = ui.getcomponent("Stdscr").win.getmaxyx()
+        y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0]
+              + ui.getcomponent("Titlebar").win.getmaxyx()[0])
         if size == 1:
             self.dirs[0].resize(y, x, 1, 0)
             self.all_reload()
@@ -394,8 +392,9 @@ class Workspace(object):
     def tileleft(self):
         self.layout = 'TileLeft'
         size = len(self.dirs)
-        (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
-        y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0] + ui.getcomponent("Titlebar").win.getmaxyx()[0])
+        y, x = ui.getcomponent("Stdscr").win.getmaxyx()
+        y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0]
+              + ui.getcomponent("Titlebar").win.getmaxyx()[0])
         if size == 1:
             self.dirs[0].resize(y, x, 1, 0)
             self.all_reload()
@@ -415,8 +414,9 @@ class Workspace(object):
     def tiletop(self):
         self.layout = 'TileTop'
         size = len(self.dirs)
-        (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
-        y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0] + ui.getcomponent("Titlebar").win.getmaxyx()[0])
+        y, x = ui.getcomponent("Stdscr").win.getmaxyx()
+        y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0]
+              + ui.getcomponent("Titlebar").win.getmaxy()[0])
         if size == 1:
             self.dirs[0].resize(y, x, 1, 0)
             self.all_reload()
@@ -436,8 +436,9 @@ class Workspace(object):
     def tilebottom(self):
         self.layout = 'TileBottom'
         size = len(self.dirs)
-        (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
-        y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0] + ui.getcomponent("Titlebar").win.getmaxyx()[0])
+        y, x = ui.getcomponent("Stdscr").win.getmaxyx()
+        y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0] +
+              ui.getcomponent("Titlebar").win.getmaxyx()[0])
         if size == 1:
             self.dirs[0].resize(y, x, 1, 0)
             self.all_reload()
@@ -456,8 +457,9 @@ class Workspace(object):
 
     def oneline(self):
         self.layout = 'Oneline'
-        (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
-        height = y - (ui.getcomponent("Cmdscr").win.getmaxyx()[0] + ui.getcomponent("Titlebar").win.getmaxyx()[0])
+        y, x = ui.getcomponent("Stdscr").win.getmaxyx()
+        height = y - (ui.getcomponent("Cmdscr").win.getmaxyx()[0]
+                      + ui.getcomponent("Titlebar").win.getmaxyx()[0])
         k = len(self.dirs)
         width = x // k
         odd = x % k
@@ -468,8 +470,9 @@ class Workspace(object):
 
     def onecolumn(self):
         self.layout = 'Onecolumn'
-        (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
-        y -= ui.getcomponent("Cmdscr").win.getmaxyx()[0] + ui.getcomponent("Titlebar").win.getmaxyx()[0]
+        y, x = ui.getcomponent("Stdscr").win.getmaxyx()
+        y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0]
+              + ui.getcomponent("Titlebar").win.getmaxyx()[0])
         k = len(self.dirs)
         odd = y % k
         height = y // k
@@ -481,8 +484,9 @@ class Workspace(object):
 
     def magnifier(self):
         self.layout = 'Magnifier'
-        (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
-        y -= ui.getcomponent("Cmdscr").win.getmaxyx()[0] + ui.getcomponent("Titlebar").win.getmaxyx()[0]
+        y, x = ui.getcomponent("Stdscr").win.getmaxyx()
+        y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0]
+              + ui.getcomponent("Titlebar").win.getmaxyx()[0])
         if len(self.dirs) == 1:
             self.dirs[0].resize(y, x, 1, 0)
             self.all_reload()
@@ -493,7 +497,8 @@ class Workspace(object):
         width = x
         ratio = 0.8
         focusdir = self.dirs.pop(self.cursor)
-        focusdir.resize(int(y*ratio), int(x*ratio), (y-(int(y*ratio)))//2, (x-(int(x*ratio)))//2)
+        focusdir.resize(int(y*ratio), int(x*ratio),
+                        (y-(int(y*ratio)))//2, (x-(int(x*ratio)))//2)
         for i, d in enumerate(self.dirs[:-1]):
             d.resize(height, width, height*i+1, 0)
         self.dirs[-1].resize(height+odd, width, height*(k-1)+1, 0)
@@ -502,8 +507,9 @@ class Workspace(object):
 
     def fullscreen(self):
         self.layout = 'Fullscreen'
-        (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
-        height = y - (ui.getcomponent("Cmdscr").win.getmaxyx()[0] + ui.getcomponent("Titlebar").win.getmaxyx()[0])
+        y, x = ui.getcomponent("Stdscr").win.getmaxyx()
+        height = y - (ui.getcomponent("Cmdscr").win.getmaxyx()[0]
+                      + ui.getcomponent("Titlebar").win.getmaxyx()[0])
         width = x
         for d in self.dirs:
             d.resize(height, width, 1, 0)
@@ -714,7 +720,7 @@ class Directory(object):
                 self.files.append(FileStat(f))
             except InvalidEncodingError:
                 continue
-        self.mark_update([f for f in self.files if f.name in marks])
+        self.mark_update((f for f in self.files if f.name in marks))
 
     def reload(self):
         try:
@@ -756,7 +762,7 @@ class Directory(object):
 
     def mark(self, pattern):
         self.mark_clear()
-        self.mark_update([f for f in self.files if pattern.search(f.name)])
+        self.mark_update((f for f in self.files if pattern.search(f.name)))
 
     def mark_toggle(self):
         self.mark_update([self.file], toggle=True)
@@ -770,23 +776,23 @@ class Directory(object):
 
     def mark_all(self, filetype="all", start=0):
         if filetype == "file":
-            files = [f for f in self.files[start:] if not f.isdir()]
+            files = (f for f in self.files[start:] if not f.isdir())
         elif filetype == "directory":
-            files = [f for f in self.files[start:] if f.isdir()]
+            files = (f for f in self.files[start:] if f.isdir())
         elif filetype == "symlink":
-            files = [f for f in self.files[start:] if f.islink()]
+            files = (f for f in self.files[start:] if f.islink())
         elif filetype == "executable":
-            files = [f for f in self.files[start:] if f.isexec() and not f.isdir() and not f.islink()]
+            files = (f for f in self.files[start:] if f.isexec() and not f.isdir() and not f.islink())
         elif filetype == "socket":
-            files = [f for f in self.files[start:] if f.issocket()]
+            files = (f for f in self.files[start:] if f.issocket())
         elif filetype == "fifo":
-            files = [f for f in self.files[start:] if f.isfifo()]
+            files = (f for f in self.files[start:] if f.isfifo())
         elif filetype == "chr":
-            files = [f for f in self.files[start:] if f.ischr()]
+            files = (f for f in self.files[start:] if f.ischr())
         elif filetype == "block":
-            files = [f for f in self.files[start:] if f.isblock()]
+            files = (f for f in self.files[start:] if f.isblock())
         else:
-            files = [f for f in self.files[start:]]
+            files = (f for f in self.files[start:])
         self.mark_clear()
         self.mark_update(files)
 
