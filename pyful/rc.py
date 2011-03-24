@@ -128,11 +128,13 @@ FileStat.view_size = True
 # Display the change time of file?
 FileStat.view_mtime = True
 
-# Set box character.
-# Smooth box:
-ui.setbox()
-# Classical box:
-# ui.setbox('|', '|', '-', '-', '+', '+', '+', '+')
+# Set borders.
+# Smooth borders:
+ui.StandardScreen.borders = []
+ui.InfoBox.borders = []
+# Classical borders:
+# ui.StandardScreen.borders = ['|', '|', '-', '-', '+', '+', '+', '+']
+# ui.InfoBox.borders = ['|', '|', '-', '-', '+', '+', '+', '+']
 
 # Set zoom attribute of infobox.
 # Infobox is an area displaying information of cmdline and message.
@@ -349,10 +351,10 @@ myclipboardkeymap = {
     }
 
 mycompletionkeymap = {
-    (0, KEY_CTRL_N): lambda: cmdline.completion.mvcursor(+cmdline.completion.maxrow),
-    (0, KEY_DOWN  ): lambda: cmdline.completion.mvcursor(+cmdline.completion.maxrow),
-    (0, KEY_CTRL_P): lambda: cmdline.completion.mvcursor(-cmdline.completion.maxrow),
-    (0, KEY_UP    ): lambda: cmdline.completion.mvcursor(-cmdline.completion.maxrow),
+    (0, KEY_CTRL_N): lambda: cmdline.completion.cursordown(),
+    (0, KEY_DOWN  ): lambda: cmdline.completion.cursordown(),
+    (0, KEY_CTRL_P): lambda: cmdline.completion.cursorup(),
+    (0, KEY_UP    ): lambda: cmdline.completion.cursorup(),
     (0, KEY_CTRL_I): lambda: cmdline.completion.mvcursor(+1),
     (0, KEY_CTRL_F): lambda: cmdline.completion.mvcursor(+1),
     (0, KEY_RIGHT ): lambda: cmdline.completion.mvcursor(+1),
