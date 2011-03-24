@@ -205,6 +205,10 @@ class Completion(ui.InfoBox):
             self.hide()
         else:
             self.cmdline.history.hide()
+            common = os.path.commonprefix(candidate)
+            if common:
+                self.insert(common)
+                self.parser.part[1] = common
             info = [ui.InfoBoxContext(c, histr=self.parser.part[1]) for c in candidate]
             self.show(info)
             self.maxrow = self.get_maxrow()
