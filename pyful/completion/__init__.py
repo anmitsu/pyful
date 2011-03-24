@@ -129,26 +129,16 @@ class Completion(ui.InfoBox):
     def comp_files(self):
         self.parser.part[0] += self._dirname(self.parser.part[1])
         path = os.path.expanduser(self.parser.part[1])
-
-        files = []
-        for f in glob.glob(path+"*"):
-            if os.path.isdir(f):
-                f = util.unix_basename(f) + os.sep
-            else:
-                f = util.unix_basename(f)
-            files.append(f)
-        return sorted(files)
+        func = lambda f: (util.unix_basename(f)+os.sep if os.path.isdir(f)
+                          else util.unix_basename(f))
+        return sorted([func(f) for f in glob.glob(path+"*")])
 
     def comp_dirs(self):
         self.parser.part[0] += self._dirname(self.parser.part[1])
         path = os.path.expanduser(self.parser.part[1])
-
-        dirs = []
-        for f in glob.glob(path+"*"):
-            if os.path.isdir(f):
-                f = util.unix_basename(f) + os.sep
-                dirs.append(f)
-        return sorted(dirs)
+        return sorted(
+            [util.unix_basename(f)+os.sep for f in glob.glob(path+"*")
+             if os.path.isdir(f)])
 
     def comp_username(self):
         return sorted([usrname for usrname in [p[0] for p in pwd.getpwall()]
@@ -164,11 +154,11 @@ class Completion(ui.InfoBox):
 
     def comp_pyful_commands(self):
         from pyful.command import commands
-        return sorted([cmd for cmd in list(commands.keys())
+        return sorted([cmd for cmd in commands.keys()
                        if cmd.startswith(self.parser.part[1])])
 
     def comp_python_builtin_functions(self):
-        return sorted([func for func in list(__builtins__.keys())
+        return sorted([func for func in __builtins__.keys()
                        if func.startswith(self.parser.part[1])])
 
     def comp_program_options(self):
@@ -257,10 +247,10 @@ class CompletionFunction(object):
         return self.options()
 
     def options(self):
-        ret = [opt for opt in self.arguments.keys()
-               if opt.startswith(self.comp.parser.part[1])
-               and not opt in self.comp.parser.options]
-        return sorted(ret)
+        return sorted(
+            [opt for opt in self.arguments.keys()
+             if opt.startswith(self.comp.parser.part[1])
+             and not opt in self.comp.parser.options])
 
     def complete(self):
         if self.comp.parser.part[1].startswith("-"):
