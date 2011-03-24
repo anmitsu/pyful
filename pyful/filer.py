@@ -309,7 +309,7 @@ class Workspace(object):
         self.mvfocus()
 
     def setcursor(self, dist):
-        if 0 < dist <= len(self.dirs):
+        if 0 <= dist < len(self.dirs):
             self.cursor = dist
             self.mvfocus()
 
