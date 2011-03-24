@@ -157,9 +157,45 @@ class Cmdline(ui.Component):
         self.cursor = 0
         self.history.restart()
 
+    def _get_current_line(self, win):
+        maxy, maxx = win.getmaxyx()
+        prompt = " {0} ".format(self.mode.prompt)
+        promptlen = util.termwidth(prompt)
+        self.string = util.U(self.string)
+        realcurpos = util.termwidth(self.string[:self.cursor])
+        if maxx <= util.termwidth(self.string)+promptlen:
+            if maxx <= realcurpos+promptlen:
+                width = promptlen
+                start = 0
+                pages = []
+                for i, c in enumerate(self.string):
+                    if unicodedata.east_asian_width(c) in "WF":
+                        add = 2
+                    else:
+                        add = 1
+                    width += add
+                    if maxx <= width:
+                        pages.append(self.string[start:i])
+                        start = i
+                        width = add
+                pages.append(self.string[start:])
+
+                string = ""
+                for i, s in enumerate(pages):
+                    curpos = realcurpos-util.termwidth(string)
+                    string = "".join([string, s])
+                    if self.cursor <= util.mbslen(string):
+                        return ("", pages[i], curpos)
+            else:
+                cmd = util.mbs_ljust(self.string, maxx-promptlen+1, pad="")
+                curpos = realcurpos+promptlen
+                return (prompt, cmd, curpos)
+        else:
+            return (prompt, self.string, realcurpos+promptlen)
+
     def view(self):
         if self.completion.active:
-            self.completion.view(maxrow=self.completion.maxrow)
+            self.completion.view()
         elif self.clipboard.active:
             self.clipboard.view()
         elif self.output.active:
@@ -175,43 +211,7 @@ class Cmdline(ui.Component):
         cmdscr = ui.getcomponent("Cmdscr").win
         cmdscr.erase()
         cmdscr.move(0, 0)
-        prompt = " {0} ".format(self.mode.prompt)
-        promptlen = util.termwidth(prompt)
-
-        (maxy, maxx) = cmdscr.getmaxyx()
-        self.string = util.U(self.string)
-        realcurpos = util.termwidth(self.string[:self.cursor])
-        if maxx <= util.termwidth(prompt+self.string):
-            if maxx <= realcurpos+promptlen:
-                width = promptlen
-                start = 0
-                pages = []
-                for i, c in enumerate(util.U(self.string)):
-                    if unicodedata.east_asian_width(c) in "WF":
-                        add = 2
-                    else:
-                        add = 1
-                    width += add
-                    if maxx <= width:
-                        pages.append(self.string[start:i])
-                        start = i
-                        width = add
-                pages.append(self.string[start:])
-
-                string = ""
-                for i, s in enumerate(pages):
-                    curpos = realcurpos-util.termwidth(string)
-                    string += s
-                    if self.cursor <= util.mbslen(string):
-                        cmd = pages[i]
-                        break
-                prompt = ""
-            else:
-                cmd = util.mbs_ljust(self.string, maxx-promptlen+1, pad="")
-                curpos = realcurpos+promptlen
-        else:
-            cmd = self.string
-            curpos = realcurpos+promptlen
+        prompt, cmd, curpos = self._get_current_line(cmdscr)
 
         cmdscr.addstr(prompt, look.colors['CmdlinePrompt'])
         try:
@@ -223,7 +223,6 @@ class Cmdline(ui.Component):
                 self.print_color_default(cmd)
         except Exception as e:
             message.error("curses error: " + str(e))
-
         cmdscr.move(0, curpos)
         cmdscr.noutrefresh()
 
@@ -367,7 +366,9 @@ class History(ui.InfoBox):
         except IOError:
             return
 
-    def gethistory(self, key):
+    def gethistory(self, key=None):
+        if key is None:
+            key = self.cmdline.mode.__class__.__name__
         if not key in self.histories:
             self.histories[key] = []
         return self.histories[key]
@@ -375,23 +376,20 @@ class History(ui.InfoBox):
     def append(self, string):
         if not string:
             return
-        li = self.gethistory(self.cmdline.mode.__class__.__name__)
-        if string in li:
-            li.remove(string)
-        if self.maxsave <= len(li):
-            li.pop(0)
-        li.append(string)
+        history = self.gethistory()
+        if string in history:
+            history.remove(string)
+        if self.maxsave <= len(history):
+            history.pop(0)
+        history.append(string)
 
     def delete(self):
-        li = self.gethistory(self.cmdline.mode.__class__.__name__)
-        if not 0 <= self.cursor < len(li):
+        history = self.gethistory()
+        if not history or not self.info or not 0 <= self.cursor < len(history):
             return
-        if not li or not self.info:
-            return
-
         item = self.cursor_item()
-        if item.string in li:
-            li.remove(item.string)
+        if item.string in history:
+            history.remove(item.string)
         x = self.cursor
         self.cmdline.string = self.source_string
         self.start()
@@ -403,16 +401,17 @@ class History(ui.InfoBox):
 
     def start(self):
         self.source_string = self.cmdline.string
-        info = []
-        for item in self.gethistory(self.cmdline.mode.__class__.__name__):
-            if self.cmdline.string in item:
-                info.insert(0, ui.InfoBoxContext(item, histr=self.cmdline.string))
+        t = self.cmdline.string
+        info = [ui.InfoBoxContext(item, histr=t) for item in self.gethistory() if t in item]
+        info.reverse()
         if info:
             self.show(info, pos=-1)
         else:
             self.hide()
 
     def mvcursor(self, x):
+        if not self.info:
+            return
         super(self.__class__, self).mvcursor(x)
         if self.cursor == -1:
             self.cmdline.string = self.source_string
@@ -457,18 +456,16 @@ class Clipboard(ui.InfoBox):
         self.cmdline.history.start()
 
     def delete(self):
-        if not self.clip:
+        if not self.clip or not 0 < self.cursor <= len(self.clip):
             return
         self.clip.remove(self.cursor_item().string)
-        c = self.cursor
+        x = self.cursor
         self.restart()
-        self.setcursor(c)
+        self.setcursor(x)
 
     def yank(self, string):
         if not string:
             return
-        string = util.U(string)
-
         if string in self.clip:
             self.clip.remove(string)
         if len(self.clip) >= self.maxsave:
@@ -490,9 +487,8 @@ class Clipboard(ui.InfoBox):
             self.cmdline.input(meta, key)
 
     def start(self):
-        info = []
-        for item in self.clip:
-            info.insert(0, ui.InfoBoxContext(item))
+        info = [ui.InfoBoxContext(item) for item in self.clip]
+        info.reverse()
         if info:
             self.cmdline.history.hide()
             self.show(info)
@@ -511,22 +507,21 @@ class Output(ui.InfoBox):
         self.cmdline = cmdline
 
     def edit(self):
+        grepoutputs = self.cursor_item().string.split(":")
+        fname = grepoutputs[0]
+        lnum = grepoutputs[1]
         try:
-            li = self.cursor_item().string.split(":")
-            fname = li[0]
-            lnum = li[1]
             process.spawn("{0} +{1} {2}".format(Pyful.environs['EDITOR'], lnum, fname))
         except Exception as e:
             message.exception(e)
 
     def infoarea(self, string=None):
-        from pyful import mode
-        if not isinstance(self.cmdline.mode, mode.Shell):
+        if self.cmdline.mode.__class__.__name__ != "Shell":
             return
         if string is None:
             string = self.cmdline.string
         cmd = util.expandmacro(string)
-        (out, err) = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).communicate()
+        out, err = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).communicate()
 
         outputs = str(out + err)
         if outputs:
