@@ -140,6 +140,14 @@ ui.InfoBox.borders = []
 # Infobox is an area displaying information of cmdline and message.
 ui.InfoBox.zoom = 0
 
+# Set scroll type in infobox.
+#
+#     "HalfScroll"
+#     "PageScroll"
+#     "ContinuousScroll"
+#
+ui.InfoBox.scroll_type = "HalfScroll"
+
 # Registration of program initialization.
 #
 # The first argument of `atinit' is the function object
