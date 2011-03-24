@@ -73,53 +73,43 @@ class Completion(ui.InfoBox):
                         self.programs.append(name)
         self.programs = sorted(self.programs)
 
-    def get_maxrow(self):
-        length = 1
-        for item in self.info:
-            width = util.termwidth(item.string)
-            if width > length:
-                length = width
-        maxrow = ui.getcomponent("Stdscr").win.getmaxyx()[1] // (length+4)
+    def _get_maxrow(self):
+        maxlen = max(util.termwidth(item.string) for item in self.info)
+        y, x = ui.getcomponent("Stdscr").win.getmaxyx()
+        maxrow = x // (maxlen+2)
         if maxrow:
             return maxrow
         else:
             return 1
 
+    def _insert_string_to_safe(self, string):
+        if not self.cmdline.mode.__class__.__name__ == "Shell":
+            return string
+        psquote = pdquote = False
+        for c in self.parser.part[0]:
+            if c == "'":
+                if not pdquote:
+                    psquote = not psquote
+            elif c == '"':
+                if not psquote:
+                    pdquote = not pdquote
+        fsquote = fdquote = False
+        for c in self.parser.part[2]:
+            if c == "'":
+                if not fdquote and not pdquote:
+                    fsquote = not fsquote
+            elif c == '"':
+                if not fsquote and not psquote:
+                    fdquote = not fdquote
+        if (psquote and fsquote) or (pdquote and fdquote):
+            return string
+        else:
+            return util.string_to_safe(string)
+
     def insert(self, string=None):
         if string is None:
             string = self.cursor_item().string
-
-        try:
-            util.U(string)
-        except UnicodeError:
-            return self.finish()
-
-        from pyful.mode import Shell
-        if isinstance(self.cmdline.mode, Shell):
-            psquote = False
-            pdquote = False
-            for c in self.parser.part[0]:
-                if c == "'":
-                    if not pdquote:
-                        psquote = not psquote
-                elif c == '"':
-                    if not psquote:
-                        pdquote = not pdquote
-            fsquote = False
-            fdquote = False
-            for c in self.parser.part[2]:
-                if c == "'":
-                    if not fdquote and not pdquote:
-                        fsquote = not fsquote
-                elif c == '"':
-                    if not fsquote and not psquote:
-                        fdquote = not fdquote
-
-            if (psquote and fsquote) or (pdquote and fdquote):
-                pass
-            else:
-                string = util.string_to_safe(string)
-
+        string = self._insert_string_to_safe(string)
         self.cmdline.string = self.parser.part[0] + string + self.parser.part[2]
         self.cmdline.cursor = util.mbslen(self.parser.part[0]+string)
         self.finish()
@@ -211,7 +201,7 @@ class Completion(ui.InfoBox):
                 self.parser.part[1] = common
             info = [ui.InfoBoxContext(c, histr=self.parser.part[1]) for c in candidate]
             self.show(info)
-            self.maxrow = self.get_maxrow()
+            self.maxrow = self._get_maxrow()
 
     def finish(self):
         self.hide()
