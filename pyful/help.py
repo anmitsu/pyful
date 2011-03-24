@@ -26,10 +26,12 @@ from pyful import ui
 from pyful import util
 
 class Help(ui.InfoBox):
-    re_underline = re.compile(r"((?:[^+\\]|\\.)*)(?:\s|^)(\+(?:[^+\\]|\\.)*\+)(?:\s|$)")
-    re_bold = re.compile(r"((?:[^*\\]|\\.)*)(?:\s|^)(\*(?:[^*\\]|\\.)*\*)(?:\s|$)")
-    re_reverse = re.compile(r"((?:[^@\\]|\\.)*)(?:\s|^)(@(?:[^@\\]|\\.)*@)(?:\s|$)")
-    re_prompt = re.compile(r"((?:[^$\\]|\\.)*)(?:\s|^)(\$(?:[^$\\]|\\.)*\$)(?:\s|$)")
+    regexs = {
+        "underline": re.compile(r"((?:[^+\\]|\\.)*)(?:\s|^)(\+(?:[^+\\]|\\.)*\+)(?:\s|$)"),
+        "bold": re.compile(r"((?:[^*\\]|\\.)*)(?:\s|^)(\*(?:[^*\\]|\\.)*\*)(?:\s|$)"),
+        "reverse": re.compile(r"((?:[^@\\]|\\.)*)(?:\s|^)(@(?:[^@\\]|\\.)*@)(?:\s|$)"),
+        "prompt": re.compile(r"((?:[^$\\]|\\.)*)(?:\s|^)(\$(?:[^$\\]|\\.)*\$)(?:\s|$)"),
+        }
 
     def __init__(self):
         ui.InfoBox.__init__(self, "Help")
@@ -73,13 +75,13 @@ class Help(ui.InfoBox):
                 indent = level*self.indent
                 attr = 0
 
-            if self.re_underline.search(line):
+            if self.regexs["underline"].search(line):
                 info.append(AttributeContext(line, indent, attr=attr, attrtype='underline'))
-            elif self.re_bold.search(line):
+            elif self.regexs["bold"].search(line):
                 info.append(AttributeContext(line, indent, attr=attr, attrtype='bold'))
-            elif self.re_reverse.search(line):
+            elif self.regexs["reverse"].search(line):
                 info.append(AttributeContext(line, indent, attr=attr, attrtype='reverse'))
-            elif self.re_prompt.search(line):
+            elif self.regexs["prompt"].search(line):
                 info.append(AttributeContext(line, indent, attr=attr, attrtype='prompt'))
             else:
                 info.append(ui.InfoBoxContext(indent+line, attr=attr))
@@ -165,19 +167,19 @@ class AttributeContext(ui.InfoBoxContext):
         self.indent = indent
         if attrtype == 'bold':
             self.hiattr = curses.A_BOLD
-            self.rematch = Help.re_bold
+            self.rematch = Help.regexs["bold"]
             self.symbol = '*'
         elif attrtype == 'underline':
             self.hiattr = curses.A_UNDERLINE
-            self.rematch = Help.re_underline
+            self.rematch = Help.regexs["underline"]
             self.symbol = '+'
         elif attrtype == 'reverse':
             self.hiattr = curses.A_REVERSE
-            self.rematch = Help.re_reverse
+            self.rematch = Help.regexs["reverse"]
             self.symbol = '@'
         elif attrtype == 'prompt':
             self.hiattr = look.colors['CmdlinePrompt']
-            self.rematch = Help.re_prompt
+            self.rematch = Help.regexs["prompt"]
             self.symbol = '$'
 
     def addstr(self, win, width):
