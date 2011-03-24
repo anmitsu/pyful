@@ -32,17 +32,10 @@ class Completion(ui.InfoBox):
     def __init__(self, cmdline):
         ui.InfoBox.__init__(self, "Completion")
         self.cmdline = cmdline
-        self.maxrow = 1
         self.parser = None
         self.programs = []
         self.loadprograms()
         self.loadoptions()
-
-    def pagedown(self):
-        self.mvcursor(self.maxrow * self.win.getmaxyx()[0] - self.maxrow*2)
-
-    def pageup(self):
-        self.mvcursor(- (self.maxrow * self.win.getmaxyx()[0] - self.maxrow*2))
 
     def input(self, meta, key):
         if (meta, key) in self.keymap:
