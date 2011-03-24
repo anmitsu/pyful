@@ -207,7 +207,7 @@ class Subloop(object):
         self.menu = ui.getcomponent("Menu")
         self.message = ui.getcomponent("Message")
         self.help = ui.getcomponent("Help")
-        self.stdscr = ui.getcomponent("Stdscr").win
+        self.stdscr = ui.StandardScreen.stdscr
 
     def subthreads_view(self):
         cmdscr = ui.getcomponent("Cmdscr").win

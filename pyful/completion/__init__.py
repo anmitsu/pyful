@@ -68,7 +68,7 @@ class Completion(ui.InfoBox):
 
     def _get_maxrow(self):
         maxlen = max(util.termwidth(item.string) for item in self.info)
-        y, x = ui.getcomponent("Stdscr").win.getmaxyx()
+        y, x = self.stdscr.getmaxyx()
         maxrow = x // (maxlen+2)
         if maxrow:
             return maxrow

@@ -24,7 +24,6 @@ from pyful import util
 from pyful.keymap import *
 
 _components = {}
-_boxtable = []
 
 def getcomponent(name):
     return _components[name]
@@ -32,7 +31,7 @@ def getcomponent(name):
 def getch():
     meta = False
     while True:
-        key = getcomponent("Stdscr").win.getch()
+        key = StandardScreen.stdscr.getch()
         if meta:
             if key == 27:
                 return (False, key)
@@ -47,11 +46,7 @@ def zoom_infobox(zoom):
     InfoBox.resize()
 
 def setbox(*boxtable):
-    global _boxtable
-    _boxtable = boxtable
-
-def box(win):
-    win.border(*_boxtable)
+    pass
 
 def resize():
     getcomponent("Cmdscr").resize()
@@ -62,7 +57,7 @@ def resize():
 
 def refresh():
     curses.endwin()
-    getcomponent("Stdscr").win.refresh()
+    StandardScreen.stdscr.refresh()
     resize()
 
 def start_curses():
@@ -76,12 +71,36 @@ def start_curses():
         InfoBox.resize()
         getcomponent("MessageBox").resize()
         getcomponent("Filer").default_init()
-        getcomponent("Stdscr").win.refresh()
+        StandardScreen.stdscr.refresh()
 
 class ComponentDuplication(Exception):
     pass
 
-class Component(object):
+class StandardScreen(object):
+    stdscr = None
+    borders = []
+
+    def __init__(self):
+        if not self.stdscr:
+            self.__class__.stdscr = curses.initscr()
+            self.stdscr.keypad(1)
+            self.stdscr.notimeout(0)
+            curses.noecho()
+            curses.cbreak()
+            curses.raw()
+            if curses.has_colors():
+                curses.start_color()
+                curses.use_default_colors()
+
+    @classmethod
+    def destroy(cls):
+        if cls.stdscr:
+            cls.stdscr.keypad(0)
+            curses.echo()
+            curses.nocbreak()
+            curses.endwin()
+
+class Component(StandardScreen):
     def __init__(self, name):
         self.active = False
         if not name in _components:
@@ -93,46 +112,27 @@ class Component(object):
     def is_active(self):
         return self.active
 
-class StandardScreen(Component):
-    def __init__(self):
-        Component.__init__(self, "Stdscr")
-        self.win = curses.initscr()
-        self.win.keypad(1)
-        self.win.notimeout(0)
-        curses.noecho()
-        curses.cbreak()
-        curses.raw()
-        if curses.has_colors():
-            curses.start_color()
-            curses.use_default_colors()
-
-    def destroy(self):
-        self.win.keypad(0)
-        curses.echo()
-        curses.nocbreak()
-        curses.endwin()
-
 class CmdlineScreen(Component):
     def __init__(self):
         Component.__init__(self, "Cmdscr")
-        (y, x) = getcomponent("Stdscr").win.getmaxyx()
+        y, x = self.stdscr.getmaxyx()
         self.win = curses.newwin(2, x, y-2, 0)
         self.win.bkgd(look.colors['CmdlineWindow'])
 
     def resize(self):
-        (y, x) = getcomponent("Stdscr").win.getmaxyx()
+        (y, x) = self.stdscr.getmaxyx()
         self.win = curses.newwin(2, x, y-2, 0)
         self.win.bkgd(look.colors['CmdlineWindow'])
 
 class Titlebar(Component):
     def __init__(self):
         Component.__init__(self, "Titlebar")
-        (y, x) = getcomponent("Stdscr").win.getmaxyx()
+        (y, x) = self.stdscr.getmaxyx()
         self.win = curses.newwin(1, x, 0, 0)
         self.win.bkgd(look.colors['Titlebar'])
 
     def resize(self):
-        (y, x) = getcomponent("Stdscr").win.getmaxyx()
+        (y, x) = self.stdscr.getmaxyx()
         self.win = curses.newwin(1, x, 0, 0)
         self.win.bkgd(look.colors['Titlebar'])
 
@@ -169,7 +169,7 @@ class InfoBox(Component):
 
     @classmethod
     def resize(cls):
-        y, x = getcomponent("Stdscr").win.getmaxyx()
+        y, x = cls.stdscr.getmaxyx()
         odd = y % 2
         base = y//2 + odd
         height = base + cls.zoom
@@ -299,7 +299,7 @@ class InfoBox(Component):
         self._revise_position(size, height, infocount)
 
         self.win.erase()
-        box(self.win)
+        self.win.border(*self.borders)
         self._view_titlebar(size, infocount)
 
         line = row = 0

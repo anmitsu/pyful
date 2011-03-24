@@ -111,7 +111,7 @@ class MessageBox(ui.InfoBox):
         self.win = None
 
     def resize(self):
-        (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
+        y, x = self.stdscr.getmaxyx()
         self.win = curses.newwin(self.height+2, x, y-self.height-4, 0)
         self.win.bkgd(look.colors['MessageWindow'])
 

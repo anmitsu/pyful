@@ -142,7 +142,7 @@ class Filer(ui.Component):
         titlebar.erase()
         titlebar.move(0, 0)
         length = sum([util.termwidth(w.title)+2 for w in self.workspaces])
-        y, x = ui.getcomponent("Stdscr").win.getmaxyx()
+        y, x = self.stdscr.getmaxyx()
         if x-length < 5:
             return message.error('terminal size very small')
 
@@ -262,7 +262,7 @@ class Filer(ui.Component):
             self.default_init()
         self.workspace.resize()
 
-class Workspace(object):
+class Workspace(ui.StandardScreen):
     default_path = '~/'
     layout = 'Tile'
 
@@ -318,7 +318,7 @@ class Workspace(object):
             path = self.default_path
         path = os.path.expanduser(path)
         size = len(self.dirs)
-        (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
+        y, x = self.stdscr.getmaxyx()
         height = y - 3
         width = x // (size+1)
         begy = 1
@@ -367,7 +367,7 @@ class Workspace(object):
     def tile(self):
         self.layout = 'Tile'
         size = len(self.dirs)
-        y, x = ui.getcomponent("Stdscr").win.getmaxyx()
+        y, x = self.stdscr.getmaxyx()
         y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0]
               + ui.getcomponent("Titlebar").win.getmaxyx()[0])
         if size == 1:
@@ -389,7 +389,7 @@ class Workspace(object):
     def tileleft(self):
         self.layout = 'TileLeft'
         size = len(self.dirs)
-        y, x = ui.getcomponent("Stdscr").win.getmaxyx()
+        y, x = self.stdscr.getmaxyx()
         y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0]
               + ui.getcomponent("Titlebar").win.getmaxyx()[0])
         if size == 1:
@@ -411,7 +411,7 @@ class Workspace(object):
     def tiletop(self):
         self.layout = 'TileTop'
         size = len(self.dirs)
-        y, x = ui.getcomponent("Stdscr").win.getmaxyx()
+        y, x = self.stdscr.getmaxyx()
         y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0]
               + ui.getcomponent("Titlebar").win.getmaxy()[0])
         if size == 1:
@@ -433,7 +433,7 @@ class Workspace(object):
     def tilebottom(self):
         self.layout = 'TileBottom'
         size = len(self.dirs)
-        y, x = ui.getcomponent("Stdscr").win.getmaxyx()
+        y, x = self.stdscr.getmaxyx()
         y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0] +
               ui.getcomponent("Titlebar").win.getmaxyx()[0])
         if size == 1:
@@ -454,7 +454,7 @@ class Workspace(object):
 
     def oneline(self):
         self.layout = 'Oneline'
-        y, x = ui.getcomponent("Stdscr").win.getmaxyx()
+        y, x = self.stdscr.getmaxyx()
         height = y - (ui.getcomponent("Cmdscr").win.getmaxyx()[0]
                       + ui.getcomponent("Titlebar").win.getmaxyx()[0])
         k = len(self.dirs)
@@ -467,7 +467,7 @@ class Workspace(object):
 
     def onecolumn(self):
         self.layout = 'Onecolumn'
-        y, x = ui.getcomponent("Stdscr").win.getmaxyx()
+        y, x = self.stdscr.getmaxyx()
         y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0]
               + ui.getcomponent("Titlebar").win.getmaxyx()[0])
         k = len(self.dirs)
@@ -481,7 +481,7 @@ class Workspace(object):
 
     def magnifier(self):
         self.layout = 'Magnifier'
-        y, x = ui.getcomponent("Stdscr").win.getmaxyx()
+        y, x = self.stdscr.getmaxyx()
         y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0]
               + ui.getcomponent("Titlebar").win.getmaxyx()[0])
         if len(self.dirs) == 1:
@@ -504,7 +504,7 @@ class Workspace(object):
 
     def fullscreen(self):
         self.layout = 'Fullscreen'
-        y, x = ui.getcomponent("Stdscr").win.getmaxyx()
+        y, x = self.stdscr.getmaxyx()
         height = y - (ui.getcomponent("Cmdscr").win.getmaxyx()[0]
                       + ui.getcomponent("Titlebar").win.getmaxyx()[0])
         width = x
@@ -556,7 +556,7 @@ class Workspace(object):
                     d.view(False)
             self.dir.view(True)
 
-class Directory(object):
+class Directory(ui.StandardScreen):
     sort_kind = 'Name[^]'
     scroll_type = 'HalfScroll'
     statusbar_format = " [{MARK}/{FILE}] {MARKSIZE}bytes {SCROLL}({CURSOR}) {SORT} "
@@ -1065,7 +1065,7 @@ class Directory(object):
     def _view_statusbar(self, focus, size, height):
         self.statwin.erase()
         if not self.finder.active:
-            ui.box(self.statwin)
+            self.statwin.border(*self.borders)
         self.statwin.move(0, 1)
 
         if self.finder.active:
@@ -1106,7 +1106,7 @@ class Directory(object):
             return
 
         self.win.erase()
-        ui.box(self.win)
+        self.win.border(*self.borders)
         self._view_titlebar(width)
         self._revise_position(size, height)
 
@@ -1526,7 +1526,7 @@ class FileStat(object):
         name = self.name
 
         fstat = '{0} {1} {2} {3} {4} {5} {6}'.format(perm, nlink, user, group, size, mtime, name)
-        fstat = util.mbs_ljust(fstat, ui.getcomponent("Stdscr").win.getmaxyx()[1]-1)
+        fstat = util.mbs_ljust(fstat, ui.StandardScreen.stdscr.getmaxyx()[1]-1)
         cmdscr.move(1, 0)
         cmdscr.addstr(fstat)
         cmdscr.noutrefresh()
