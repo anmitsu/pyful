@@ -148,7 +148,7 @@ looks = {
 
 def _init_color_table():
     for (name, v) in looks['default'].items():
-        colors.update({name: v[2]})
+        colors[name] = v[2]
 _init_color_table()
 
 def init_colors():
@@ -156,7 +156,7 @@ def init_colors():
     if curses.has_colors():
         for i, (name, v) in enumerate(Pyful.environs['LOOKS'].items()):
             curses.init_pair(i+1, v[0], v[1])
-            colors.update({name: curses.color_pair(i+1) | v[2]})
+            colors[name] = curses.color_pair(i+1) | v[2]
     else:
         for (name, v) in Pyful.environs['LOOKS'].items():
-            colors.update({name: v[2]})
+            colors[name] = v[2]
