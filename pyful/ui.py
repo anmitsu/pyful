@@ -137,16 +137,17 @@ class Titlebar(Component):
         self.win.bkgd(look.colors['Titlebar'])
 
 class InfoBox(Component):
-    win = None
+    scroll_type = "HalfScroll"
     zoom = 0
+    win = None
 
     def __init__(self, title):
         Component.__init__(self, title)
-        self._title = title
-        self._info = None
-
-        self._cursor = 0
-        self._scrolltop = 0
+        self.info = []
+        self.title = title
+        self.cursor = 0
+        self.scrolltop = 0
+        self.maxrow = 1
         self.keymap = {
             (0, KEY_CTRL_N): lambda: self.mvcursor(1),
             (0, KEY_DOWN  ): lambda: self.mvcursor(1),
@@ -161,14 +162,14 @@ class InfoBox(Component):
             (0, KEY_CTRL_G): lambda: self.hide(),
             (0, KEY_CTRL_C): lambda: self.hide(),
             (0, KEY_ESCAPE): lambda: self.hide(),
-            (1, KEY_PLUS     ): lambda: zoom_infobox(InfoBox.zoom+5),
-            (1, KEY_MINUS    ): lambda: zoom_infobox(InfoBox.zoom-5),
-            (1, KEY_EQUAL    ): lambda: zoom_infobox(0),
+            (1, KEY_PLUS  ): lambda: zoom_infobox(InfoBox.zoom+5),
+            (1, KEY_MINUS ): lambda: zoom_infobox(InfoBox.zoom-5),
+            (1, KEY_EQUAL ): lambda: zoom_infobox(0),
             }
 
     @classmethod
     def resize(cls):
-        (y, x) = getcomponent("Stdscr").win.getmaxyx()
+        y, x = getcomponent("Stdscr").win.getmaxyx()
         odd = y % 2
         base = y//2 + odd
         height = base + cls.zoom
@@ -181,133 +182,148 @@ class InfoBox(Component):
         cls.win = curses.newwin(height, x, y-height-2, 0)
         cls.win.bkgd(look.colors['InfoBoxWindow'])
 
-    @property
-    def info(self):
-        return self._info
-
-    @property
-    def cursor(self):
-        return self._cursor
-
     def show(self, info, pos=0):
-        self.win.erase()
         self.active = True
-        self._cursor = pos
-        self._scrolltop = 0
-        self._info = info
+        self.cursor = pos
+        self.scrolltop = 0
+        self.info = info
 
     def hide(self):
+        self.win.erase()
         self.active = False
-        self._cursor = 0
-        self._scrolltop = 0
-        self._info = None
+        self.cursor = 0
+        self.scrolltop = 0
+        self.info = []
 
-    def mvscroll(self, x):
-        (h, w) = self.win.getmaxyx()
-        self._scrolltop += x
-        if self._scrolltop > self._cursor:
-            self._cursor = self._scrolltop
-        elif self._scrolltop+h-3 < self._cursor:
-            self._cursor = self._scrolltop+h-3
+    def mvscroll(self, amount):
+        y, x = self.win.getmaxyx()
+        self.scrolltop += amount
+        self.cursor += amount
 
-    def mvcursor(self, x):
-        if not self._info:
-            return
-        self._cursor += x
+    def mvcursor(self, amount):
+        self.cursor += amount
+        if self.cursor < -1:
+            self.cursor = len(self.info) - 1
+        elif self.cursor >= len(self.info):
+            self.cursor = 0
 
-        size = len(self._info)
-        if self._cursor >= size:
-            self._cursor = 0
-        elif self._cursor < -1:
-            self._cursor = size - 1
+    def cursordown(self):
+        self.mvcursor(self.maxrow)
 
-    def setcursor(self, x):
-        if not self._info:
-            return
-        self._cursor = x
+    def cursorup(self):
+        self.mvcursor(-self.maxrow)
 
-        size = len(self._info)
-        if self._cursor >= size:
-            self._cursor = 0
-        elif self._cursor < -1:
-            self._cursor = size - 1
+    def setcursor(self, dist):
+        if -1 <= dist < len(self.info):
+            self.cursor = dist
 
     def settop(self):
-        self._cursor = 0
+        self.cursor = 0
 
     def setbottom(self):
-        if self._info:
-            self._cursor = len(self._info) - 1
+        self.cursor = len(self.info) - 1
 
     def pagedown(self):
-        self._cursor += self.win.getmaxyx()[0] - 2
+        height = (self.win.getmaxyx()[0]-2) * self.maxrow
+        if self.scrolltop+height >= len(self.info):
+            return
+        self.scrolltop += height
+        self.cursor += height
 
     def pageup(self):
-        self._cursor -= self.win.getmaxyx()[0] - 2
+        if self.scrolltop == 0:
+            return
+        height = (self.win.getmaxyx()[0]-2) * self.maxrow
+        self.scrolltop -= height
+        self.cursor -= height
 
     def cursor_item(self):
-        if self._info:
-            return self._info[self._cursor]
+        if 0 <= self.cursor < len(self.info):
+            return self.info[self.cursor]
+        else:
+            return InfoBoxContext("")
 
     def input(self, meta, key):
         if (meta, key) in self.keymap:
             self.keymap[(meta, key)]()
 
-    def view(self, maxrow=1):
-        if not self._info:
-            return self.hide()
+    def _revise_position(self, size, height, infocount):
+        if self.cursor >= size:
+            self.cursor = 0
+        elif self.cursor < -1:
+            self.cursor = size - 1
 
-        size = len(self._info)
-        maxxy = self.win.getmaxyx()
-        height = maxxy[0] - 2
-        width = maxxy[1] - 2
-        row = 0
+        if self.cursor < self.scrolltop or \
+                self.cursor >= self.scrolltop+infocount:
+            if self.scroll_type == "HalfScroll":
+                self.scrolltop = (self.cursor//self.maxrow*self.maxrow
+                                  - height//2*self.maxrow)
+            elif self.scroll_type == "PageScroll":
+                self.scrolltop = self.cursor//infocount * infocount
+            elif self.scroll_type == "ContinuousScroll":
+                if self.cursor >= self.scrolltop+infocount:
+                    self.scrolltop = (self.cursor//self.maxrow*self.maxrow
+                                      + self.maxrow - infocount)
+                else:
+                    self.scrolltop = self.cursor//self.maxrow*self.maxrow
+            else:
+                self.scrolltop = self.cursor - height//2*self.maxrow
 
-        if self._cursor >= size:
-            self._cursor = 0
-        elif self._cursor < -1:
-            self._cursor = size - 1
+        if self.scrolltop < 0 or size < height:
+            self.scrolltop = 0
+        elif self.scrolltop >= size:
+            self.scrolltop = size//height * height
 
-        if (self._cursor < self._scrolltop or self._cursor > self._scrolltop + ((height-1)*maxrow)):
-            self._scrolltop = (self._cursor//(height*maxrow)) * (height*maxrow)
-            if self._scrolltop < 0:
-                self._scrolltop = 0
-        self.win.erase()
-
-        box(self.win)
+    def _view_titlebar(self, size, infocount):
         self.win.move(0, 2)
-        if self._cursor <= -1:
-            current_page = 1
+        if self.cursor < 0:
+            cpage = 1
         else:
-            current_page = self._cursor//(height*maxrow)+1
-        max_page = (size-1)//(height*maxrow)+1
+            cpage = (self.cursor)//infocount+1
+        maxpage = size//infocount+1
         self.win.addstr("{0}({1}) [{2}/{3}]".format
-                        (self._title, size, current_page, max_page),
+                        (self.title, size, cpage, maxpage),
                         look.colors['InfoBoxTitle'])
 
-        line = 0
-        for i in range(self._scrolltop, size):
-            if row >= maxrow:
+    def view(self):
+        if not self.info:
+            return self.hide()
+
+        size = len(self.info)
+        y, x = self.win.getmaxyx()
+        height = y - 2
+        width = x - 3
+        infowidth = width // self.maxrow
+        infocount = height * self.maxrow
+
+        self._revise_position(size, height, infocount)
+
+        self.win.erase()
+        box(self.win)
+        self._view_titlebar(size, infocount)
+
+        line = row = 0
+        for i in range(self.scrolltop, size):
+            if row >= self.maxrow:
                 row = 0
                 line += 1
-            if line >= height:
-                break
-
-            self.win.move(line+1, row * (width//maxrow) + 2)
-
-            info = self._info[i]
-            if self._cursor == i:
+                if line >= height:
+                    break
+            self.win.move(line+1, row*infowidth+2)
+            info = self.info[i]
+            if self.cursor == i:
                 info.attr += curses.A_REVERSE
-                info.addstr(self.win, width//maxrow-1)
+                info.addstr(self.win, infowidth)
                 info.attr -= curses.A_REVERSE
             else:
-                info.addstr(self.win, width//maxrow-1)
-
+                info.addstr(self.win, infowidth)
             row += 1
         self.win.noutrefresh()
 
 class InfoBoxContext(object):
-    def __init__(self, string, histr=None, attr=0, hiattr=look.colors['CandidateHighlight']):
+    def __init__(self, string, histr=None, attr=0, hiattr=None):
+        if hiattr is None:
+            hiattr = look.colors["CandidateHighlight"]
         self.string = string
         self.histr = histr
         self.attr = attr
