@@ -1022,44 +1022,33 @@ class Directory(object):
         self.win.bkgd(look.colors['Window'])
         self.statwin.bkgd(look.colors['Window'])
 
-    def scroll(self):
-        height = self.win.getmaxyx()[0] - self.statwin.getmaxyx()[0] - 1
-        for f in self.files[self.scrolltop:self.scrolltop+height]:
-            f.cache_clear()
-        if self.scroll_type == 'HalfScroll':
-            self.scrolltop = self.cursor - (height//2)
-        elif self.scroll_type == 'PageScroll':
-            self.scrolltop = (self.cursor//height) * height
-        elif self.scroll_type == 'ContinuousScroll':
-            if self.cursor >= self.scrolltop+height:
-                self.scrolltop = self.cursor - height + 1
-            elif self.cursor < self.scrolltop:
-                self.scrolltop = self.cursor
-        else:
-            self.scrolltop = self.cursor - (height//2)
-
-    def view(self, focus):
-        size = len(self.files)
-        height = self.win.getmaxyx()[0] - self.statwin.getmaxyx()[0] - 1
-        width = self.win.getmaxyx()[1] - 3
-
-        if not height: return
-
+    def _revise_position(self, size, height):
         if self.cursor < 0:
             self.cursor = 0
         elif self.cursor >= size:
             self.cursor = size - 1
 
         if self.cursor >= self.scrolltop+height or self.cursor < self.scrolltop:
-            self.scroll()
+            for f in self.files[self.scrolltop:self.scrolltop+height]:
+                f.cache_clear()
+            if self.scroll_type == 'HalfScroll':
+                self.scrolltop = self.cursor - (height//2)
+            elif self.scroll_type == 'PageScroll':
+                self.scrolltop = (self.cursor//height) * height
+            elif self.scroll_type == 'ContinuousScroll':
+                if self.cursor >= self.scrolltop+height:
+                    self.scrolltop = self.cursor - height + 1
+                elif self.cursor < self.scrolltop:
+                    self.scrolltop = self.cursor
+            else:
+                self.scrolltop = self.cursor - (height//2)
 
         if self.scrolltop < 0 or size < height:
             self.scrolltop = 0
         elif self.scrolltop >= size:
             self.scrolltop = (size//height) * height
 
-        self.win.erase()
-        ui.box(self.win)
+    def _view_titlebar(self, width):
         title = ""
         titlewidth = width
         if not self.path.endswith(os.sep):
@@ -1068,31 +1057,12 @@ class Directory(object):
         if self.maskreg:
             title += "{{{0}}}".format(self.maskreg.pattern)
             titlewidth -= util.termwidth(self.maskreg.pattern)
-        title = util.path_omission(self.path.replace(os.environ['HOME'], '~', 1), titlewidth) + title
+        path = util.path_omission(
+            self.path.replace(os.environ['HOME'], '~', 1), titlewidth)
         self.win.move(0, 2)
-        self.win.addstr(title, look.colors['DirectoryPath'])
+        self.win.addstr("".join([path, title]), look.colors['DirectoryPath'])
 
-        if width < 30:
-            return message.error('terminal size very small')
-
-        line = 0
-        for i in range(self.scrolltop, size):
-            line += 1
-            if line > height:
-                break
-
-            f = self.files[i]
-            fstr = f.get_view_file_string(self.path, width)
-            attr = f.get_attr()
-            if self.cursor == i and focus:
-                attr += curses.A_REVERSE
-            self.win.move(line, 1)
-            if f.marked:
-                self.win.addstr('*' + fstr, attr)
-            else:
-                self.win.addstr(' ' + fstr, attr)
-        self.win.noutrefresh()
-
+    def _view_statusbar(self, focus, size, height):
         self.statwin.erase()
         if not self.finder.active:
             ui.box(self.statwin)
@@ -1113,22 +1083,53 @@ class Directory(object):
                 p = 'Bot'
             else:
                 p = str(int(p)) + '%'
-
             status = self.statusbar_format.format(
                 MARK=len(self.mark_files), FILE=size-1,
                 MARKSIZE=self.mark_size, SCROLL=p,
                 CURSOR=self.cursor, SORT=self.sort_kind)
-
             if self.list_title is not None:
                 status += self.list_title
 
-            (sy, sx) = self.statwin.getmaxyx()
+            sy, sx = self.statwin.getmaxyx()
             if util.termwidth(status) > sx-2:
                 status = util.mbs_ljust(status, sx-2)
             self.statwin.addstr(status)
             self.statwin.noutrefresh()
             if focus:
                 self.file.view()
+
+    def view(self, focus):
+        size = len(self.files)
+        height = self.win.getmaxyx()[0] - self.statwin.getmaxyx()[0] - 1
+        width = self.win.getmaxyx()[1] - 3
+        if not height:
+            return
+
+        self.win.erase()
+        ui.box(self.win)
+        self._view_titlebar(width)
+        self._revise_position(size, height)
+
+        if width < 30:
+            return message.error('terminal size very small')
+        line = 0
+        for i in range(self.scrolltop, size):
+            line += 1
+            if line > height:
+                break
+
+            f = self.files[i]
+            fstr = f.get_view_file_string(self.path, width)
+            attr = f.get_attr()
+            if self.cursor == i and focus:
+                attr += curses.A_REVERSE
+            self.win.move(line, 1)
+            if f.marked:
+                self.win.addstr('*' + fstr, attr)
+            else:
+                self.win.addstr(' ' + fstr, attr)
+        self.win.noutrefresh()
+        self._view_statusbar(focus, size, height)
 
 class PathHistory(object):
     maxsave = 20
