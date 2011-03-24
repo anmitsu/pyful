@@ -65,7 +65,6 @@ def start_curses():
         curses.beep()
     except curses.error:
         StandardScreen()
-        look.init_colors()
         CmdlineScreen()
         Titlebar()
         InfoBox.resize()
@@ -91,6 +90,7 @@ class StandardScreen(object):
             if curses.has_colors():
                 curses.start_color()
                 curses.use_default_colors()
+            look.init_colors()
 
     @classmethod
     def destroy(cls):
