@@ -114,7 +114,7 @@ class Completion(ui.InfoBox):
         self.cmdline.cursor = util.mbslen(self.parser.part[0]+string)
         self.finish()
 
-    def dirname(self, path):
+    def _dirname(self, path):
         if path.endswith(os.sep):
             return path
         else:
@@ -127,7 +127,7 @@ class Completion(ui.InfoBox):
                 return dirname
 
     def comp_files(self):
-        self.parser.part[0] += self.dirname(self.parser.part[1])
+        self.parser.part[0] += self._dirname(self.parser.part[1])
         path = os.path.expanduser(self.parser.part[1])
 
         files = []
@@ -140,7 +140,7 @@ class Completion(ui.InfoBox):
         return sorted(files)
 
     def comp_dirs(self):
-        self.parser.part[0] += self.dirname(self.parser.part[1])
+        self.parser.part[0] += self._dirname(self.parser.part[1])
         path = os.path.expanduser(self.parser.part[1])
 
         dirs = []
