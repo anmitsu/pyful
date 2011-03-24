@@ -67,18 +67,18 @@ class Filer(ui.Component):
     def create_workspace(self, title=None):
         if title is None:
             title = str(len(self.workspaces)+1)
-        self.workspaces.append(Workspace(title))
-        self.workspaces[-1].create_dir(os.environ['HOME']).create_dir(os.environ['HOME'])
+        ws = Workspace(title)
+        ws.create_dir(os.environ['HOME'])
+        ws.create_dir(os.environ['HOME'])
+        self.workspaces.append(ws)
         self.focus_workspace(len(self.workspaces) - 1)
         self.workspace.resize()
-        return self
 
     def close_workspace(self, x=None):
         if x is None:
             x = self.cursor
         if len(self.workspaces) <= 1:
             return
-
         self.workspaces[x].clear()
         ws = self.workspaces[x]
         self.workspaces.remove(ws)
@@ -141,18 +141,16 @@ class Filer(ui.Component):
         titlebar = ui.getcomponent("Titlebar").win
         titlebar.erase()
         titlebar.move(0, 0)
-
         length = sum([util.termwidth(w.title)+2 for w in self.workspaces])
-
-        (y, x) = ui.getcomponent("Stdscr").win.getmaxyx()
+        y, x = ui.getcomponent("Stdscr").win.getmaxyx()
         if x-length < 5:
             return message.error('terminal size very small')
 
         for i, ws in enumerate(self.workspaces):
             if self.cursor == i:
-                titlebar.addstr(' '+ws.title+' ', look.colors['WorkspaceFocus'])
+                titlebar.addstr(' {0} '.format(ws.title), look.colors['WorkspaceFocus'])
             else:
-                titlebar.addstr(' '+ws.title+' ')
+                titlebar.addstr(' {0} '.format(ws.title))
         titlebar.addstr(' | ', curses.A_BOLD)
 
         dirlen = len(self.workspace.dirs)
@@ -211,9 +209,10 @@ class Filer(ui.Component):
 
     def default_init(self):
         for i in range(0, 5):
-            self.workspaces.append(Workspace(str(i+1)))
-            self.workspaces[-1].dirs.append(Directory(os.environ['HOME'], 10, 10, 1, 0))
-            self.workspaces[-1].dirs.append(Directory(os.environ['HOME'], 10, 10, 1, 0))
+            ws = Workspace(str(i+1))
+            ws.dirs.append(Directory(os.environ['HOME'], 10, 10, 1, 0))
+            ws.dirs.append(Directory(os.environ['HOME'], 10, 10, 1, 0))
+            self.workspaces.append(ws)
 
     def savefile(self, path):
         path = os.path.expanduser(path)
@@ -245,24 +244,22 @@ class Filer(ui.Component):
             for i in range(0, ws_i):
                 f.readline()
                 title = f.readline().rstrip(os.linesep)
-                self.workspaces.append(Workspace(title))
-
+                ws = Workspace(title)
                 f.readline()
                 d_i = int(f.readline().rstrip(os.linesep))
                 for j in range(0, d_i):
                     f.readline()
                     path = f.readline().rstrip(os.linesep)
-                    self.workspaces[-1].dirs.append(Directory(path, 10, 10, 1, 0))
+                    d = Directory(path, 10, 10, 1, 0)
                     f.readline()
-                    self.workspaces[-1].dirs[-1].sort_kind = f.readline().rstrip(os.linesep)
+                    d.sort_kind = f.readline().rstrip(os.linesep)
+                    ws.dirs.append(d)
+                self.workspaces.append(ws)
             f.close()
-        except:
+        except Exception:
             pass
         if len(self.workspaces) == 0:
-            for i in range(0, 5):
-                self.workspaces.append(Workspace(str(i+1)))
-                self.workspaces[-1].dirs.append(Directory(os.environ['HOME'], 10, 10, 1, 0))
-                self.workspaces[-1].dirs.append(Directory(os.environ['HOME'], 10, 10, 1, 0))
+            self.default_init()
         self.workspace.resize()
 
 class Workspace(object):
@@ -568,7 +565,9 @@ class Directory(object):
     def __init__(self, path, height, width, begy, begx):
         self.win = curses.newwin(height, width, begy, begx)
         self.win.bkgd(look.colors['Window'])
-        self.statwin = curses.newwin(1, self.win.getmaxyx()[0], self.win.getmaxyx()[1], self.win.getbegyx()[1])
+        y, x = self.win.getmaxyx()
+        by, bx = self.win.getbegyx()
+        self.statwin = curses.newwin(1, y, x, bx)
         self.statwin.bkgd(look.colors['Window'])
         self.path = util.abspath(path)
         self.files = [FileStat(os.pardir)]
@@ -627,7 +626,8 @@ class Directory(object):
         size = len(self.files)
         if self.scrolltop+height >= size:
             return
-        [f.cache_clear() for f in self.files[self.scrolltop:self.scrolltop+height]]
+        for f in self.files[self.scrolltop:self.scrolltop+height]:
+            f.cache_clear()
         self.scrolltop += height
         self.cursor += height
 
@@ -635,7 +635,8 @@ class Directory(object):
         if self.scrolltop == 0:
             return
         height = self.win.getmaxyx()[0] - self.statwin.getmaxyx()[0] - 1
-        [f.cache_clear() for f in self.files[self.scrolltop:self.scrolltop+height]]
+        for f in self.files[self.scrolltop:self.scrolltop+height]:
+            f.cache_clear()
         self.scrolltop -= height
         self.cursor -= height
 
@@ -720,7 +721,7 @@ class Directory(object):
                 self.files.append(FileStat(f))
             except InvalidEncodingError:
                 continue
-        self.mark_update((f for f in self.files if f.name in marks))
+        self.mark_update([f for f in self.files if f.name in marks])
 
     def reload(self):
         try:
@@ -762,7 +763,7 @@ class Directory(object):
 
     def mark(self, pattern):
         self.mark_clear()
-        self.mark_update((f for f in self.files if pattern.search(f.name)))
+        self.mark_update([f for f in self.files if pattern.search(f.name)])
 
     def mark_toggle(self):
         self.mark_update([self.file], toggle=True)
@@ -776,23 +777,23 @@ class Directory(object):
 
     def mark_all(self, filetype="all", start=0):
         if filetype == "file":
-            files = (f for f in self.files[start:] if not f.isdir())
+            files = [f for f in self.files[start:] if not f.isdir()]
         elif filetype == "directory":
-            files = (f for f in self.files[start:] if f.isdir())
+            files = [f for f in self.files[start:] if f.isdir()]
         elif filetype == "symlink":
-            files = (f for f in self.files[start:] if f.islink())
+            files = [f for f in self.files[start:] if f.islink()]
         elif filetype == "executable":
-            files = (f for f in self.files[start:] if f.isexec() and not f.isdir() and not f.islink())
+            files = [f for f in self.files[start:] if f.isexec() and not f.isdir() and not f.islink()]
         elif filetype == "socket":
-            files = (f for f in self.files[start:] if f.issocket())
+            files = [f for f in self.files[start:] if f.issocket()]
         elif filetype == "fifo":
-            files = (f for f in self.files[start:] if f.isfifo())
+            files = [f for f in self.files[start:] if f.isfifo()]
         elif filetype == "chr":
-            files = (f for f in self.files[start:] if f.ischr())
+            files = [f for f in self.files[start:] if f.ischr()]
         elif filetype == "block":
-            files = (f for f in self.files[start:] if f.isblock())
+            files = [f for f in self.files[start:] if f.isblock()]
         else:
-            files = (f for f in self.files[start:])
+            files = [f for f in self.files[start:]]
         self.mark_clear()
         self.mark_update(files)
 
@@ -1023,7 +1024,8 @@ class Directory(object):
 
     def scroll(self):
         height = self.win.getmaxyx()[0] - self.statwin.getmaxyx()[0] - 1
-        [f.cache_clear() for f in self.files[self.scrolltop:self.scrolltop+height]]
+        for f in self.files[self.scrolltop:self.scrolltop+height]:
+            f.cache_clear()
         if self.scroll_type == 'HalfScroll':
             self.scrolltop = self.cursor - (height//2)
         elif self.scroll_type == 'PageScroll':
@@ -1194,8 +1196,8 @@ class Finder(object):
                 self.pos = len(self.history) - 1
             return self.history[self.pos]
 
-    def __init__(self, dir):
-        self.dir = dir
+    def __init__(self, directory):
+        self.dir = directory
         self.results = []
         self.cache = []
         self.string = ""
@@ -1371,7 +1373,7 @@ class FileStat(object):
         if self.islink():
             try:
                 link = os.readlink(os.path.join(path, self.name))
-            except:
+            except OSError:
                 link = ''
             fname += '@ -> ' + link
             if self.isdir() and not link.endswith(os.sep):
@@ -1492,14 +1494,14 @@ class FileStat(object):
         user = self.get_user_name()
         group = self.get_group_name()
         size = '{0} ({1})'.format(self.get_file_size(), self.stat.st_size)
-        time = self.get_mtime()
+        mtime = self.get_mtime()
         ret = message.confirm(
             'Invalid encoding error. What do you do?',
             ['ignore', 'delete'],
             ["The file of invalid encoding status", '-'*100,
              "Permission: {0}".format(perm), "Link: {0}".format(nlink),
              "User: {0}".format(user), "Group: {0}".format(group),
-             "Size: {0}".format(size), "Time: {0}".format(time)])
+             "Size: {0}".format(size), "Time: {0}".format(mtime)])
         if ret == 'delete':
             import shutil
             if self.isdir():
