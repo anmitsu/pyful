@@ -186,7 +186,7 @@ def kill_thread():
         if th.title == ret:
             th.kill()
 
-def _get_file_length(*paths):
+def _get_file_length(paths):
     flen = dlen = 0
     for path in paths:
         if not os.path.lexists(path):
@@ -372,10 +372,10 @@ class TarThread(JobThread):
         except Exception as e:
             return message.exception(e)
         try:
-            goal = sum(_get_file_length(*self.src))
+            goal = sum(_get_file_length(self.src))
             elapse = 1
             for path in self.src:
-                for f in self.addlist_generate(path):
+                for f in self.generate(path):
                     arcname = f.replace(os.path.commonprefix([f, self.src_dirname]), '')
                     self.view_thread("Adding({0}/{1}): {2}".format(elapse, goal, arcname))
                     self.add_file(tar, f, arcname)
@@ -400,12 +400,11 @@ class TarThread(JobThread):
         if not self.active:
             raise FilectrlCancel(self.title)
 
-    def addlist_generate(self, path):
+    def generate(self, path):
         if os.path.isdir(path):
             yield path
             for sub in os.listdir(path):
-                subpath = os.path.join(path, sub)
-                for f in self.addlist_generate(subpath):
+                for f in self.generate(os.path.join(path, sub)):
                     yield f
         else:
             yield path
@@ -567,10 +566,10 @@ class ZipThread(JobThread):
             self.error = e
             return
         try:
-            goal = sum(_get_file_length(*self.src))
+            goal = sum(_get_file_length(self.src))
             elapse = 1
             for path in self.src:
-                for f in self.writelist_generate(path):
+                for f in self.generate(path):
                     arcname = f.replace(os.path.commonprefix([f, self.src_dirname]), '')
                     self.view_thread("Adding({0}/{1}): {2}".format(elapse, goal, arcname))
                     self.write_file(myzip, f, arcname)
@@ -611,12 +610,11 @@ class ZipThread(JobThread):
         if not self.active:
             raise FilectrlCancel(self.title)
 
-    def writelist_generate(self, path):
+    def generate(self, path):
         if os.path.isdir(path):
             yield path
             for sub in os.listdir(path):
-                subpath = os.path.join(path, sub)
-                for f in self.writelist_generate(subpath):
+                for f in self.generate(os.path.join(path, sub)):
                     yield f
         else:
             yield path
@@ -633,11 +631,11 @@ class DeleteThread(JobThread):
         self.dirlist = []
 
     def run(self):
-        goal = _get_file_length(*self.path)[0]
+        goal = _get_file_length(self.path)[0]
         elapse = 1
         try:
             for path in self.path:
-                for f in self.deletelist_generate(path):
+                for f in self.generate(path):
                     self.view_thread("Deleting({0}/{1}): {2}".format(elapse, goal, util.unix_basename(f)))
                     self.delete_file(f)
                     elapse += 1
@@ -663,7 +661,7 @@ class DeleteThread(JobThread):
                     message.exception(e)
                     raise FilectrlCancel("Exception occurred while directory deleting")
 
-    def deletelist_generate(self, path):
+    def generate(self, path):
         if os.path.islink(path) or not os.path.isdir(path):
             yield path
         else:
@@ -671,8 +669,7 @@ class DeleteThread(JobThread):
             for root, dirs, files in os.walk(path):
                 for f in files:
                     yield os.path.join(root, f)
-                for d in dirs:
-                    self.dirlist.append(os.path.join(root, d))
+                self.dirlist.extend(os.path.join(root, d) for d in dirs)
 
 class CopyThread(JobThread):
     def __init__(self, src, dst):
@@ -690,7 +687,7 @@ class CopyThread(JobThread):
             self.dst = util.abspath(dst)
 
     def run(self):
-        goal = _get_file_length(*self.src)[0]
+        goal = _get_file_length(self.src)[0]
         fjg = FileJobGenerator()
         elapse = 1
         try:
@@ -722,7 +719,7 @@ class MoveThread(JobThread):
             self.dst = util.abspath(dst)
 
     def run(self):
-        goal = _get_file_length(*self.src)[0]
+        goal = _get_file_length(self.src)[0]
         fjg = FileJobGenerator()
         elapse = 1
         try:
@@ -776,9 +773,8 @@ class FileJobGenerator(object):
             yield _checkfile(src, dst)
 
     def check_override(self, src, dst):
-        if not os.path.lexists(dst):
-            return "Yes"
-        if not util.unix_basename(src) == util.unix_basename(dst):
+        if not os.path.lexists(dst) or \
+                util.unix_basename(src) != util.unix_basename(dst):
             return "Yes"
         if "Yes(all)" == self.confirm:
             return "Yes"
