@@ -68,8 +68,8 @@ class Filer(ui.Component):
         if title is None:
             title = str(len(self.workspaces)+1)
         ws = Workspace(title)
-        ws.create_dir(os.environ['HOME'])
-        ws.create_dir(os.environ['HOME'])
+        ws.create_dir(os.getenv("HOME"))
+        ws.create_dir(os.getenv("HOME"))
         self.workspaces.append(ws)
         self.focus_workspace(len(self.workspaces) - 1)
         self.workspace.resize()
@@ -163,7 +163,7 @@ class Filer(ui.Component):
         for i, path in enumerate([d.path for d in self.workspace.dirs]):
             num = '[{0}] '.format(i+1)
             numlen = len(num)
-            homedir = os.environ['HOME']
+            homedir = os.getenv("HOME")
             if path.startswith(homedir):
                 path = path.replace(homedir, '~', 1)
             if path.endswith(os.sep):
@@ -212,8 +212,8 @@ class Filer(ui.Component):
     def default_init(self):
         for i in range(0, 5):
             ws = Workspace(str(i+1))
-            ws.dirs.append(Directory(os.environ['HOME'], 10, 10, 1, 0))
-            ws.dirs.append(Directory(os.environ['HOME'], 10, 10, 1, 0))
+            ws.dirs.append(Directory(os.getenv("HOME"), 10, 10, 1, 0))
+            ws.dirs.append(Directory(os.getenv("HOME"), 10, 10, 1, 0))
             self.workspaces.append(ws)
 
     def savefile(self, path):
@@ -1059,7 +1059,7 @@ class Directory(ui.StandardScreen):
         if self.maskreg:
             title += "{{{0}}}".format(self.maskreg.pattern)
             titlewidth -= util.termwidth(self.maskreg.pattern)
-        homedir = os.environ['HOME']
+        homedir = os.getenv("HOME")
         if self.path.startswith(homedir):
             path = self.path.replace(homedir, '~', 1)
         else:

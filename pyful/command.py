@@ -522,7 +522,7 @@ def _chdir_root():
 @defcmd
 def _chdir_home():
     """Change current directory to home directory."""
-    ui.getcomponent('Filer').dir.chdir(os.environ['HOME'])
+    ui.getcomponent('Filer').dir.chdir(os.getenv("HOME"))
 
 @defcmd
 def _chdir_neighbor():

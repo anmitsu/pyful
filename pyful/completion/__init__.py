@@ -54,7 +54,7 @@ class Completion(ui.InfoBox):
     def loadprograms(self):
         osname = sys.platform
         self.programs[:] = []
-        for path in os.environ['PATH'].split(os.pathsep):
+        for path in os.getenv("PATH").split(os.pathsep):
             try:
                 files = os.listdir(path)
             except OSError:

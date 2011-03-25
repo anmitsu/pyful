@@ -592,7 +592,7 @@ myassociation = {
 filer.keymap.update(myassociation)
 
 import os, sys
-if'screen' in os.environ['TERM']:
+if'screen' in os.getenv("TERM"):
     # Change GNU SCREEN's title.
     sys.stdout.write('\033kpyful\033\\')
 else:

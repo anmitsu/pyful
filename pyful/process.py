@@ -65,7 +65,7 @@ class Process(object):
             title = cmd
         if self.exterminal and not self.background:
             self.terminal(cmd)
-        elif "screen" in os.environ['TERM'] and not self.background:
+        elif "screen" in os.getenv("TERM") and not self.background:
             if len(cmd) > 4000:
                 self.system(cmd)
             else:
