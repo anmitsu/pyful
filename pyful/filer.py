@@ -415,7 +415,7 @@ class Workspace(ui.StandardScreen):
         size = len(self.dirs)
         y, x = self.stdscr.getmaxyx()
         y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0]
-              + ui.getcomponent("Titlebar").win.getmaxy()[0])
+              + ui.getcomponent("Titlebar").win.getmaxyx()[0])
         if size == 1:
             self.dirs[0].resize(y, x, 1, 0)
             self.all_reload()
