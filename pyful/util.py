@@ -61,25 +61,6 @@ def cmp_to_key(_cmp):
 def cmp(x, y):
     return (x > y) - (x < y)
 
-def uniq(ls):
-    out = []
-    for m in ls:
-        if not m in out:
-            out.append(m)
-    return out
-
-def flatten(ls):
-    if isinstance(ls, list):
-        for i in range(len(ls)):
-            for e in flatten(ls[i]):
-                yield e
-    else:
-        yield ls
-
-
-def shlex_unicode(string):
-    return [i.strip('"').strip("'") for i in re.split(r'(\s+|(?<!\\)".*?(?<!\\)"|(?<!\\)\'.*?(?<!\\)\')', string) if i.strip()]
-
 def string_to_safe(string):
     return re.sub(r"([^A-Za-z0-9_\-.,:\/@\n])", r"\\\1", string)
 
