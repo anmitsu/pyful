@@ -197,6 +197,7 @@ class InfoBox(Component):
 
     def mvscroll(self, amount):
         y, x = self.win.getmaxyx()
+        amount *= self.maxrow
         self.scrolltop += amount
         self.cursor += amount
 
