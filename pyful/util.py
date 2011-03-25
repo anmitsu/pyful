@@ -81,14 +81,17 @@ def shlex_unicode(string):
     return [i.strip('"').strip("'") for i in re.split(r'(\s+|(?<!\\)".*?(?<!\\)"|(?<!\\)\'.*?(?<!\\)\')', string) if i.strip()]
 
 def string_to_safe(string):
-    return re.sub("([\s!\"#\$&'\(\)~\|\[\]\{\}\*;\?<>])", r"\\\1", string)
+    return re.sub(r"([^A-Za-z0-9_\-.,:\/@\n])", r"\\\1", string)
+
+def string_to_norm(string):
+    return re.sub(r"\\([^A-Za-z0-9_\-.,:\/@\n])", r"\1", string)
 
 def quote(string):
     if re.search("[']", string):
         return '"{0}"'.format(string)
     elif re.search("[\"]", string):
         return "'{0}'".format(string)
-    elif re.search("[\s!\#\$&\(\)~\|\[\]\{\}\*;\?<>]", string):
+    elif re.search(r"[^A-Za-z0-9_\-.,:\/@\n]", string):
         return '"{0}"'.format(string)
     else:
         return string
