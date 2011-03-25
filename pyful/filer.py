@@ -1459,35 +1459,23 @@ class FileStat(object):
             return self.time_yore_flag + tstr
 
     def get_permission(self):
-        perm = ''
-        if stat.S_ISDIR(self.lstat.st_mode): perm += 'd'
-        elif stat.S_ISLNK(self.lstat.st_mode): perm += 'l'
-        elif stat.S_ISSOCK(self.lstat.st_mode): perm += 's'
-        elif stat.S_ISFIFO(self.lstat.st_mode): perm += 'p'
-        elif stat.S_ISCHR(self.lstat.st_mode): perm += 'c'
-        elif stat.S_ISBLK(self.lstat.st_mode): perm += 'b'
-        else: perm += '-'
-
-        if self.lstat.st_mode & stat.S_IRUSR: perm += 'r'
-        else: perm += '-'
-        if self.lstat.st_mode & stat.S_IWUSR: perm += 'w'
-        else: perm += '-'
-        if self.lstat.st_mode & stat.S_IXUSR: perm += 'x'
-        else: perm += '-'
-        if self.lstat.st_mode & stat.S_IRGRP: perm += 'r'
-        else: perm += '-'
-        if self.lstat.st_mode & stat.S_IWGRP: perm += 'w'
-        else: perm += '-'
-        if self.lstat.st_mode & stat.S_IXGRP: perm += 'x'
-        else: perm += '-'
-        if self.lstat.st_mode & stat.S_IROTH: perm += 'r'
-        else: perm += '-'
-        if self.lstat.st_mode & stat.S_IWOTH: perm += 'w'
-        else: perm += '-'
-        if self.lstat.st_mode & stat.S_IXOTH: perm += 'x'
-        else: perm += '-'
-
-        return perm
+        perm = ["-"] * 10
+        if stat.S_ISDIR(self.lstat.st_mode): perm[0] = 'd'
+        elif stat.S_ISLNK(self.lstat.st_mode): perm[0] = 'l'
+        elif stat.S_ISSOCK(self.lstat.st_mode): perm[0] = 's'
+        elif stat.S_ISFIFO(self.lstat.st_mode): perm[0] = 'p'
+        elif stat.S_ISCHR(self.lstat.st_mode): perm[0] = 'c'
+        elif stat.S_ISBLK(self.lstat.st_mode): perm[0] = 'b'
+        if self.stat.st_mode & stat.S_IRUSR: perm[1] = 'r'
+        if self.stat.st_mode & stat.S_IWUSR: perm[2] = 'w'
+        if self.stat.st_mode & stat.S_IXUSR: perm[3] = 'x'
+        if self.stat.st_mode & stat.S_IRGRP: perm[4] = 'r'
+        if self.stat.st_mode & stat.S_IWGRP: perm[5] = 'w'
+        if self.stat.st_mode & stat.S_IXGRP: perm[6] = 'x'
+        if self.stat.st_mode & stat.S_IROTH: perm[7] = 'r'
+        if self.stat.st_mode & stat.S_IWOTH: perm[8] = 'w'
+        if self.stat.st_mode & stat.S_IXOTH: perm[9] = 'x'
+        return "".join(perm)
 
     def invalid_encoding_error(self):
         perm = self.get_permission()
