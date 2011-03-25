@@ -20,6 +20,8 @@ import os
 import re
 import unicodedata
 
+# ----------------------------------------------------------------------
+# Functions for interchangeability:
 try:
     unicode
     def U(string):
@@ -61,6 +63,8 @@ def cmp_to_key(_cmp):
 def cmp(x, y):
     return (x > y) - (x < y)
 
+# ----------------------------------------------------------------------
+# Functions for shell:
 def string_to_safe(string):
     return re.sub(r"([^A-Za-z0-9_\-.,:\/@\n])", r"\\\1", string)
 
@@ -77,6 +81,8 @@ def quote(string):
     else:
         return string
 
+# ----------------------------------------------------------------------
+# Functions for macro:
 def escapemacro(string):
     return re.sub(r"((?<!\\)%[mMdDfFxX])", r"\\\1", string)
 
@@ -141,16 +147,8 @@ def expandmacro(string, shell=False):
         string = _replace(m["%X"].re, path, string)
     return re.sub(r"\\(%[mMdDfFxX])", r"\1", string)
 
-def wait_restore():
-    while 1:
-        try:
-            input("\nHIT ENTER KEY\n")
-        except:
-            pass
-        break
-    os.system("clear")
-
-
+# ----------------------------------------------------------------------
+# Functions for string:
 def mbslen(string):
     return len(U(string))
 
@@ -172,7 +170,8 @@ def slicestr(string, start, end):
     b = string[end:]
     return f + b
 
-
+# ----------------------------------------------------------------------
+# Functions for path:
 def abspath(path, basedir=None):
     if basedir:
         return os.path.normpath(os.path.join(os.path.abspath(basedir), expanduser(path)))
@@ -204,6 +203,8 @@ def path_omission(path, width):
                 break
     return path
 
+# ----------------------------------------------------------------------
+# Functions for multibyte string on terminal:
 def termwidth(string, length=None):
     string = U(string)
     if length is None:
@@ -217,7 +218,6 @@ def termwidth(string, length=None):
 
 def mbs_ljust(string, length, pad=" "):
     string = U(string)
-
     width = 0
     cut = False
     for i, c in enumerate(string):
@@ -257,3 +257,17 @@ def mbs_rjust(string, length, pad=" "):
     if space > 0:
         string += pad * space
     return string
+
+# ----------------------------------------------------------------------
+# Other function:
+def wait_restore():
+    while True:
+        try:
+            input("\nHIT ENTER KEY\n")
+        except:
+            pass
+        break
+    try:
+        os.system("clear")
+    except OSError:
+        pass
