@@ -55,15 +55,18 @@ class Completion(ui.InfoBox):
         osname = sys.platform
         self.programs[:] = []
         for path in os.environ['PATH'].split(os.pathsep):
-            if os.path.exists(path):
-                for name in os.listdir(path):
-                    if osname == 'cygwin':
-                        ext = util.extname(name)
-                        if ext == '.exe':
-                            self.programs.append(name.replace(ext, ""))
-                    else:
-                        self.programs.append(name)
-        self.programs = sorted(self.programs)
+            try:
+                files = os.listdir(path)
+            except OSError:
+                continue
+            for f in files:
+                if osname == 'cygwin':
+                    ext = util.extname(f)
+                    if ext != '.exe':
+                        continue
+                    f = f.replace(ext, "")
+                self.programs.append(f)
+        self.programs.sort()
 
     def _get_maxrow(self):
         maxlen = max(util.termwidth(item.string) for item in self.info)
