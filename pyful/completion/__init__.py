@@ -76,7 +76,7 @@ class Completion(ui.InfoBox):
             return 1
 
     def _insert_string_to_safe(self, string):
-        if not self.cmdline.mode.__class__.__name__ == "Shell":
+        if self.cmdline.mode.__class__.__name__ != "Shell":
             return string
         psquote = pdquote = False
         for c in self.parser.part[0]:
@@ -107,31 +107,46 @@ class Completion(ui.InfoBox):
         self.cmdline.cursor = util.mbslen(self.parser.part[0]+string)
         self.finish()
 
-    def _dirname(self, path):
-        if path.endswith(os.sep):
-            return path
-        else:
-            dirname =  util.unix_dirname(path)
-            if dirname == "":
-                return dirname
-            elif not dirname.endswith(os.sep):
-                return dirname + os.sep
+    def _update_completion_path(self):
+        def _dirname(path_):
+            if path_.endswith(os.sep):
+                return path_
             else:
-                return dirname
+                dname = os.path.dirname(path_)
+                if dname.endswith(os.sep) or not dname:
+                    return dname
+                else:
+                    return dname + os.sep
+        path = self.parser.part[1]
+        if self.cmdline.mode.__class__.__name__ == "Shell":
+            self.parser.part[0] += _dirname(util.string_to_safe(path))
+        else:
+            self.parser.part[0] += _dirname(path)
+        bname = os.path.basename(path)
+        dpath = os.path.expanduser(util.abspath(os.path.dirname(path)))
+        return (bname, dpath)
 
     def comp_files(self):
-        self.parser.part[0] += self._dirname(self.parser.part[1])
-        path = os.path.expanduser(self.parser.part[1])
-        func = lambda f: (util.unix_basename(f)+os.sep if os.path.isdir(f)
-                          else util.unix_basename(f))
-        return sorted([func(f) for f in glob.glob(path+"*")])
+        bname, dpath = self._update_completion_path()
+        try:
+            files = os.listdir(dpath)
+        except OSError:
+            return []
+        def func(f):
+            if os.path.isdir(os.path.join(dpath, f)):
+                return f + os.sep
+            else:
+                return f
+        return sorted([func(f) for f in files if f.startswith(bname)])
 
     def comp_dirs(self):
-        self.parser.part[0] += self._dirname(self.parser.part[1])
-        path = os.path.expanduser(self.parser.part[1])
-        return sorted(
-            [util.unix_basename(f)+os.sep for f in glob.glob(path+"*")
-             if os.path.isdir(f)])
+        bname, dpath = self._update_completion_path()
+        try:
+            files = os.listdir(dpath)
+        except OSError:
+            return []
+        return sorted([f+os.sep for f in files if f.startswith(bname) and
+                       os.path.isdir(os.path.join(dpath, f))])
 
     def comp_username(self):
         return sorted([usrname for usrname in [p[0] for p in pwd.getpwall()]
@@ -165,12 +180,15 @@ class Completion(ui.InfoBox):
 
     def start(self):
         self.parser = Parser(self.cmdline.string, self.cmdline.cursor)
+        if self.cmdline.mode.__class__.__name__ == "Shell":
+            self.parser.parse()
+        else:
+            self.parser.parse_nonshell()
 
         candidate = self.cmdline.mode.complete(self)
 
         if not isinstance(candidate, list) or len(candidate) == 0:
             return
-
         if len(candidate) == 1:
             if candidate[0] == self.parser.part[1]:
                 return
@@ -191,45 +209,49 @@ class Completion(ui.InfoBox):
         self.cmdline.history.start()
 
 class Parser(object):
-    current_cmdline = None
-    options = None
-    prgname = None
-
     def __init__(self, string, pos):
-        self.part = self.parse(string, pos)
-
-        past_sepetes = re.split("[;|]", self.part[0])
-        futures_seperates = re.split("[;|]", self.part[2])
-        if len(futures_seperates) > 1:
-            self.current_cmdline = past_sepetes[-1] + futures_seperates[0]
-        else:
-            self.current_cmdline = past_sepetes[-1]
-
-        # self.current_option = re.split("[\s=;|]", self.current_cmdline)[-1]
+        self.string = string
+        self.pos = pos
+        self.current_cmdline = []
         self.current_option = ""
-        if not len(self.current_cmdline.split()) == 0:
-            self.current_option = self.current_cmdline.split()[-1]
-        # self.current_option = ""
-        # for arg in reversed(re.split("[\s=;|]", past_sepetes[-1])):
-        #     if arg.startswith("-"):
-        #         self.current_option = arg
-        #         break
+        self.options = []
+        self.longoptions = []
+        self.prgname = ""
 
-        self.options = [arg for arg in re.split("[\s=;|]", self.current_cmdline) if arg.startswith('-')]
-        self.prgname = re.split("([\s])", self.current_cmdline.strip())[0]
+    def parse_nonshell(self):
+        string = util.U(self.string)
+        self.part = ["", string[:self.pos], string[self.pos:]]
+        self.current_cmdline = self.string
 
-    def parse(self, string, pos):
-        ps = ""
-        ns = ""
-        fs = ""
-        string = util.U(string)
-        for c in string[:pos]:
+    def parse(self):
+        ps = ns = fs = ""
+        string = util.U(self.string)
+        for c in re.split(r"((?<!\\)[\s;|,=\"'])", string[:self.pos]):
             ns += c
-            if re.search("[\s;|,=\"']", c):
+            if re.match(r"(?<!\\)[\s;|,=\"']", c):
                 ps += ns
                 ns = ""
-        fs = string[pos:]
-        return [ps, ns, fs]
+        fs = string[self.pos:]
+        ns = util.string_to_norm(ns)
+        self.part = [ps, ns, fs]
+
+        pseps = re.split("[;|]", self.part[0])
+        fseps = re.split("[;|]", self.part[2])
+        if len(fseps) > 1:
+            self.current_cmdline = pseps[-1] + fseps[0]
+        else:
+            self.current_cmdline = pseps[-1]
+
+        self.current_option = ""
+        if len(self.current_cmdline.split()):
+            self.current_option = self.current_cmdline.split()[-1]
+        self.longoptions = [arg for arg in
+                            re.split("[\s=;|]", self.current_cmdline)
+                            if arg.startswith('--')]
+        self.options = [arg for arg in
+                        re.split("[\s=;|]", self.current_cmdline)
+                        if arg.startswith('-')]
+        self.prgname = re.split("([\s])", self.current_cmdline.strip())[0]
 
 class CompletionFunction(object):
     def __init__(self, comp, arguments):
