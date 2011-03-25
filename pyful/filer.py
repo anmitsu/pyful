@@ -163,7 +163,9 @@ class Filer(ui.Component):
         for i, path in enumerate([d.path for d in self.workspace.dirs]):
             num = '[{0}] '.format(i+1)
             numlen = len(num)
-            path = path.replace(os.environ['HOME'], "~", 1)
+            homedir = os.environ['HOME']
+            if path.startswith(homedir):
+                path = path.replace(homedir, '~', 1)
             if path.endswith(os.sep):
                 path = util.path_omission(path, width-numlen-1)
             else:
@@ -1057,8 +1059,12 @@ class Directory(ui.StandardScreen):
         if self.maskreg:
             title += "{{{0}}}".format(self.maskreg.pattern)
             titlewidth -= util.termwidth(self.maskreg.pattern)
-        path = util.path_omission(
-            self.path.replace(os.environ['HOME'], '~', 1), titlewidth)
+        homedir = os.environ['HOME']
+        if self.path.startswith(homedir):
+            path = self.path.replace(homedir, '~', 1)
+        else:
+            path = self.path
+        path = util.path_omission(path, titlewidth)
         self.win.move(0, 2)
         self.win.addstr("".join([path, title]), look.colors['DirectoryPath'])
 
