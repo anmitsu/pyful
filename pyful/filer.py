@@ -1504,17 +1504,15 @@ class FileStat(object):
     def view(self):
         cmdscr = ui.getcomponent("Cmdscr").win
         cmdscr.erase()
-
         perm = self.get_permission()
         user = self.get_user_name()
         group = self.get_group_name()
         nlink = self.stat.st_nlink
         size = self.stat.st_size
-        mtime = time.strftime(self.time_format, time.localtime(self.stat.st_mtime))
+        mtime = self.get_mtime()
         name = self.name
-
         fstat = '{0} {1} {2} {3} {4} {5} {6}'.format(perm, nlink, user, group, size, mtime, name)
-        fstat = util.mbs_ljust(fstat, ui.StandardScreen.stdscr.getmaxyx()[1]-1)
+        fstat = util.mbs_ljust(fstat, cmdscr.getmaxyx()[1]-1)
         cmdscr.move(1, 0)
         cmdscr.addstr(fstat)
         cmdscr.noutrefresh()
