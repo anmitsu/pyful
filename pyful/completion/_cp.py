@@ -14,10 +14,9 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from pyful.completion import CompletionFunction
-from pyful.completion import optionsdict
+from pyful import completion
 
-class Cp(CompletionFunction):
+class Cp(completion.CompletionFunction):
     def __init__(self, comp):
         arguments = {
             '--archive': comp.comp_files,
@@ -61,9 +60,9 @@ class Cp(CompletionFunction):
             '--target-directory=': comp.comp_dirs,
             '--version': comp.comp_files,
             }
-        CompletionFunction.__init__(self, comp, arguments)
+        completion.CompletionFunction.__init__(self, comp, arguments)
 
     def default(self):
         return self.comp.comp_files()
 
-optionsdict.update({"cp": Cp})
+completion.register("cp", Cp)

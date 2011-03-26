@@ -25,7 +25,10 @@ import sys
 from pyful import ui
 from pyful import util
 
-optionsdict = {}
+compfunctions = {}
+
+def register(name, cls):
+    compfunctions[name] = cls
 
 class Completion(ui.InfoBox):
     def __init__(self, cmdline):
@@ -172,8 +175,8 @@ class Completion(ui.InfoBox):
                        if func.startswith(self.parser.part[1])])
 
     def comp_program_options(self):
-        if self.parser.prgname in optionsdict:
-            option = optionsdict[self.parser.prgname](self)
+        if self.parser.prgname in compfunctions:
+            option = compfunctions[self.parser.prgname](self)
             return option.complete()
         elif self.parser.prgname == "":
             return self.comp_programs()

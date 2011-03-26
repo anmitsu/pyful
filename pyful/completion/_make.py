@@ -16,10 +16,9 @@
 
 import os
 
-from pyful.completion import CompletionFunction
-from pyful.completion import optionsdict
+from pyful import completion
 
-class Make(CompletionFunction):
+class Make(completion.CompletionFunction):
     def __init__(self, comp):
         arguments = {
             '--directory=': lambda: self.comp.comp_dirs(),
@@ -79,7 +78,7 @@ class Make(CompletionFunction):
             '-w': [],
             '-W': lambda: self.comp.comp_files(),
             }
-        CompletionFunction.__init__(self, comp, arguments)
+        completion.CompletionFunction.__init__(self, comp, arguments)
 
     def default(self):
         fname = ""
@@ -100,4 +99,4 @@ class Make(CompletionFunction):
                         command.append(tmp[0])
         return sorted(command)
 
-optionsdict.update({"make": Make})
+completion.register("make", Make)

@@ -14,10 +14,9 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from pyful.completion import CompletionFunction
-from pyful.completion import optionsdict
+from pyful import completion
 
-class Sudo(CompletionFunction):
+class Sudo(completion.CompletionFunction):
     def __init__(self, comp):
         arguments = {
             "-E": comp.comp_programs,
@@ -39,16 +38,15 @@ class Sudo(CompletionFunction):
             "-s": comp.comp_programs,
             "-v": comp.comp_programs,
             }
-        CompletionFunction.__init__(self, comp, arguments)
+        completion.CompletionFunction.__init__(self, comp, arguments)
 
     def default(self):
         return self.comp.comp_programs()+self.comp.comp_files()
 
     def comp_other_prgs(self):
-        optlist = list(optionsdict.keys())
         for arg in reversed(self.comp.parser.current_cmdline.split()):
-            if arg != "sudo" and arg in optlist:
-                return optionsdict[arg](self.comp).complete()
+            if arg != "sudo" and arg in completion.compfunctions:
+                return completion.compfunctions[arg](self.comp).complete()
 
     def complete(self):
         candidate = self.comp_other_prgs()
@@ -64,4 +62,4 @@ class Sudo(CompletionFunction):
         else:
             return value
 
-optionsdict.update({"sudo": Sudo})
+completion.register("sudo", Sudo)

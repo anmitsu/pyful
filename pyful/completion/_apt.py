@@ -17,8 +17,7 @@
 import os
 import subprocess
 
-from pyful.completion import CompletionFunction
-from pyful.completion import optionsdict
+from pyful import completion
 
 def _pkgnames(s):
     try:
@@ -41,7 +40,7 @@ def _dpkglist(s):
     return [line.split()[1] for line in out.split(os.linesep)[5:]
             if len(line) > 2 and line[1].startswith(s)]
 
-class AptGet(CompletionFunction):
+class AptGet(completion.CompletionFunction):
     def __init__(self, comp):
         arguments = {
             'autoclean'      : [],
@@ -59,9 +58,9 @@ class AptGet(CompletionFunction):
             'upgrade'        : [],
             'help'           : [],
             }
-        CompletionFunction.__init__(self, comp, arguments)
+        completion.CompletionFunction.__init__(self, comp, arguments)
 
-class AptCache(CompletionFunction):
+class AptCache(completion.CompletionFunction):
     def __init__(self, comp):
         arguments = {
             'add'      : [],
@@ -83,8 +82,7 @@ class AptCache(CompletionFunction):
             'unmet'    : [],
             'xvcg'     : lambda: _pkgnames(self.comp.parser.part[1]),
             }
-        CompletionFunction.__init__(self, comp, arguments)
+        completion.CompletionFunction.__init__(self, comp, arguments)
 
-optionsdict.update({"apt-get": AptGet,
-                    "apt-cache": AptCache,
-                    })
+completion.register("apt-get", AptGet)
+completion.register("apt-cache", AptCache)
