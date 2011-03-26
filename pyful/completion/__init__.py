@@ -211,11 +211,19 @@ class Parser(object):
     def parse(self):
         ps = ns = fs = ""
         string = util.U(self.string)
+        sq = dq = 0
         for c in re.split(r"((?<!\\)[\s;|,=\"'])", string[:self.pos]):
             ns += c
             if re.match(r"(?<!\\)[\s;|,=\"']", c):
-                ps += ns
-                ns = ""
+                if not (dq % 2 or sq % 2):
+                    ps += ns
+                    ns = ""
+                if c == "'":
+                    if dq % 2 == 0:
+                        sq += 1
+                elif c == '"':
+                    if sq % 2 == 0:
+                        dq += 1
         fs = string[self.pos:]
         ns = util.string_to_norm(ns)
         self.part = [ps, ns, fs]
