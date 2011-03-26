@@ -80,34 +80,13 @@ class Completion(ui.InfoBox):
         else:
             return 1
 
-    def _insert_string_to_safe(self, string):
-        if self.cmdline.mode.__class__.__name__ != "Shell":
-            return string
-        psquote = pdquote = False
-        for c in self.parser.part[0]:
-            if c == "'":
-                if not pdquote:
-                    psquote = not psquote
-            elif c == '"':
-                if not psquote:
-                    pdquote = not pdquote
-        fsquote = fdquote = False
-        for c in self.parser.part[2]:
-            if c == "'":
-                if not fdquote and not pdquote:
-                    fsquote = not fsquote
-            elif c == '"':
-                if not fsquote and not psquote:
-                    fdquote = not fdquote
-        if (psquote and fsquote) or (pdquote and fdquote):
-            return string
-        else:
-            return util.string_to_safe(string)
-
     def insert(self, string=None):
         if string is None:
             string = self.cursor_item().string
-        string = self._insert_string_to_safe(string)
+        if self.cmdline.mode.__class__.__name__ == "Shell" and \
+                not self.parser.now_in_quote():
+            string = util.string_to_safe(string)
+
         self.cmdline.string = self.parser.part[0] + string + self.parser.part[2]
         self.cmdline.cursor = util.mbslen(self.parser.part[0]+string)
         self.finish()
@@ -123,7 +102,8 @@ class Completion(ui.InfoBox):
                 else:
                     return dname + os.sep
         path = self.parser.part[1]
-        if self.cmdline.mode.__class__.__name__ == "Shell":
+        if self.cmdline.mode.__class__.__name__ == "Shell" and \
+                not self.parser.now_in_quote():
             self.parser.part[0] += _dirname(util.string_to_safe(path))
         else:
             self.parser.part[0] += _dirname(path)
@@ -257,6 +237,24 @@ class Parser(object):
                         re.split("[\s=;|]", self.current_cmdline)
                         if arg.startswith('-')]
         self.prgname = re.split("([\s])", self.current_cmdline.strip())[0]
+
+    def now_in_quote(self):
+        psq = pdq = fsq = fdq = False
+        for c in re.split(r"((?<!\\)[\"'])", self.part[0]):
+            if c == "'":
+                if not pdq:
+                    psq = not psq
+            elif c == '"':
+                if not psq:
+                    pdq = not pdq
+        for c in re.split(r"((?<!\\)[\"'])", self.part[2]):
+            if c == "'":
+                if not fdq and not pdq:
+                    fsq = not fsq
+            elif c == '"':
+                if not fsq and not psq:
+                    fdq = not fdq
+        return (psq and fsq) or (pdq and fdq)
 
 class CompletionFunction(object):
     def __init__(self, comp, arguments):
