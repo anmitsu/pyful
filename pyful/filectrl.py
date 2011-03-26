@@ -425,9 +425,12 @@ class UntarThread(JobThread):
         self.dirlist = []
 
     def run(self):
-        if not os.access(self.dstdir, os.W_OK):
-            self.error = OSError("No permission: {0}".format(self.dstdir))
-            return
+        if not os.path.exists(self.dstdir):
+            try:
+                os.makedirs(self.dstdir)
+            except OSError:
+                self.error = e
+                return
         try:
             for tarpath in self.src:
                 self.extract(tarpath)
@@ -471,9 +474,12 @@ class UnzipThread(JobThread):
         self.dirlist = []
 
     def run(self):
-        if not os.access(self.dstdir, os.W_OK):
-            self.error = OSError("No permission: {0}".format(self.dstdir))
-            return
+        if not os.path.exists(self.dstdir):
+            try:
+                os.makedirs(self.dstdir)
+            except OSError:
+                self.error = e
+                return
         try:
             for zippath in self.src:
                 self.extract(zippath)
