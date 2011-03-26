@@ -27,6 +27,10 @@ def _pkgnames(s):
             ).communicate()
     except Exception as e:
         return []
+    try:
+        out = out.decode()
+    except UnicodeError:
+        return []
     return [item for item in out.split(os.linesep) if item.startswith(s)]
 
 def _dpkglist(s):
@@ -36,6 +40,10 @@ def _dpkglist(s):
             stdout=subprocess.PIPE, stderr=subprocess.PIPE
             ).communicate()
     except Exception as e:
+        return []
+    try:
+        out = out.decode()
+    except UnicodeError:
         return []
     return [line.split()[1] for line in out.split(os.linesep)[5:]
             if len(line) > 2 and line[1].startswith(s)]
