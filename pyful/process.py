@@ -124,13 +124,13 @@ class Process(object):
 
     def parsemacro(self, string):
         ret = string
-        if re.search('(?!\\\\)%&', string):
+        if re.search(r"(?!\\)%&", string):
             self.background = True
-            ret = re.sub('(?!\\\\)%&', '', ret)
-        if re.search('(?!\\\\)%q', string):
+            ret = re.sub(r"(?!\\)%&", "", ret)
+        if re.search(r"(?!\\)%q", string):
             self.quick = True
-            ret = re.sub('(?!\\\\)%q', '', ret)
-        if re.search('(?!\\\\)%T', string):
+            ret = re.sub(r"(?!\\)%q", "", ret)
+        if re.search(r"(?!\\)%T", string):
             self.exterminal = True
-            ret = re.sub('(?!\\\\)%T', '', ret)
+            ret = re.sub(r"(?!\\)%T", "", ret)
         return ret
