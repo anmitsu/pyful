@@ -205,9 +205,22 @@ class InfoBox(Component):
 
     def mvscroll(self, amount):
         y, x = self.win.getmaxyx()
+        height = (y-2)*self.maxrow
         amount *= self.maxrow
-        self.scrolltop += amount
-        self.cursor += amount
+        bottom = self.scrolltop+height
+        if amount > 0:
+            if bottom >= len(self.info):
+                return
+            self.scrolltop += amount
+            if self.cursor < self.scrolltop:
+                self.cursor = self.scrolltop
+        else:
+            if self.scrolltop == 0:
+                return
+            self.scrolltop += amount
+            bottom += amount
+            if self.cursor >= bottom:
+                self.cursor = bottom - 1
 
     def mvcursor(self, amount):
         self.cursor += amount
