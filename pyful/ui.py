@@ -64,7 +64,9 @@ def refresh(*args):
 def start_curses():
     signal.signal(signal.SIGWINCH, refresh)
     try:
-        curses.beep()
+        curses.noecho()
+        curses.cbreak()
+        curses.raw()
     except curses.error:
         StandardScreen()
         CmdlineScreen()
@@ -88,7 +90,6 @@ class StandardScreen(object):
     def __init__(self):
         if not self.stdscr:
             self.__class__.stdscr = curses.initscr()
-            self.stdscr.keypad(1)
             self.stdscr.notimeout(0)
             curses.noecho()
             curses.cbreak()
@@ -101,9 +102,9 @@ class StandardScreen(object):
     @classmethod
     def destroy(cls):
         if cls.stdscr:
-            cls.stdscr.keypad(0)
             curses.echo()
             curses.nocbreak()
+            curses.noraw()
             curses.endwin()
 
 class Component(StandardScreen):
