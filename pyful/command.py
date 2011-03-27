@@ -682,6 +682,16 @@ def _filer_cursor_up():
     ui.getcomponent('Filer').dir.mvcursor(-1)
 
 @defcmd
+def _filer_scroll_down():
+    """Scroll down in focused directory."""
+    ui.getcomponent('Filer').dir.mvscroll(+1)
+
+@defcmd
+def _filer_scroll_up():
+    """Scroll up in focused directory."""
+    ui.getcomponent('Filer').dir.mvscroll(-1)
+
+@defcmd
 def _filer_pagedown():
     """Page down in focused directory."""
     ui.getcomponent('Filer').dir.pagedown()
