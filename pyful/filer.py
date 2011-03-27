@@ -623,6 +623,28 @@ class Directory(ui.StandardScreen):
     def setcursor(self, x):
         self.cursor = x
 
+    def mvscroll(self, amount):
+        y, x = self.win.getmaxyx()
+        height = y - 2
+        bottom = self.scrolltop+height
+        if amount > 0:
+            if bottom >= len(self.files):
+                return
+            for f in self.files[self.scrolltop:self.scrolltop+amount]:
+                f.cache_clear()
+            self.scrolltop += amount
+            if self.cursor < self.scrolltop:
+                self.cursor = self.scrolltop
+        else:
+            if self.scrolltop == 0:
+                return
+            for f in self.files[bottom+amount:bottom]:
+                f.cache_clear()
+            self.scrolltop += amount
+            bottom += amount
+            if self.cursor >= bottom:
+                self.cursor = bottom - 1
+
     def pagedown(self):
         height = self.win.getmaxyx()[0] - self.statwin.getmaxyx()[0] - 1
         size = len(self.files)
