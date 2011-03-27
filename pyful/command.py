@@ -21,7 +21,7 @@ import os
 import re
 import sys
 
-from pyful import Pyful, loadrcfile
+from pyful import Pyful
 from pyful import filectrl
 from pyful import message
 from pyful import mode
@@ -45,12 +45,14 @@ _source_filter = re.compile('\.(py|rb|hs|el|js|lua|java|c|cc|cpp|cs|pl|php)$')
 # Utility commands:
 @defcmd
 def _reload_rcfile():
-    """Reload Pyful.environs['RCFILE']"""
-    error = loadrcfile(started=False)
-    if error:
-        message.exception(error)
-    else:
-        message.puts("Reloaded: {0}".format(Pyful.environs['RCFILE']))
+    """Reload Pyful.environs["RCFILE"]"""
+    try:
+        path = Pyful.environs["RCFILE"]
+        with open(path, "r") as rc:
+            exec(rc.read(), locals())
+        message.puts("Reloaded: {0}".format(path))
+    except Exception as e:
+        message.exception(e)
 
 @defcmd
 def _refresh_window():
