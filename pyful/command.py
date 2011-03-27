@@ -142,7 +142,7 @@ def _change_looks():
     * midnight
     * dark
     * light\n
-    Present looks is preserved in Pyful.environs['LOOKS'].
+    Present looks is preserved in look.Look.mylook.
     The setting concerning looks consults the pyful.look module.
     """
     ui.getcomponent('Cmdline').start(mode.ChangeLooks())

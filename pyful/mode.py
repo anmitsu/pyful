@@ -64,11 +64,12 @@ class ChangeLooks(object):
     prompt = "Change looks:"
 
     def complete(self, comp):
-        return sorted([l for l in look.looks.keys() if l.startswith(comp.parser.part[1])])
+        return sorted([l for l in look.looks.keys()
+                       if l.startswith(comp.parser.part[1])])
 
     def execute(self, name):
         if name in look.looks:
-            Pyful.environs['LOOKS'] = look.looks[name]
+            look.Look.mylook = name
             look.init_colors()
             ui.refresh()
         else:

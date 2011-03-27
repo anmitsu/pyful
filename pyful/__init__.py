@@ -30,7 +30,6 @@ import curses
 import os
 import shutil
 
-from pyful import look
 from pyful import ui
 
 class Pyful(object):
@@ -41,7 +40,6 @@ class Pyful(object):
         'PAGER': 'less',
         'TRASHBOX': '~/.pyful/trashbox',
         'RCFILE': '~/.pyful/rc.py',
-        'LOOKS': look.looks['default'],
         'SCRIPT': '',
         }
     initfuncs = []

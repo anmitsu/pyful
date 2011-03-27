@@ -146,17 +146,22 @@ looks = {
         },
     }
 
+class Look(object):
+    pass
+
+Look.mylook = "default"
+
 def _init_color_table():
     for (name, v) in looks['default'].items():
         colors[name] = v[2]
 _init_color_table()
 
 def init_colors():
-    from pyful import Pyful
+    mylook = looks.get(Look.mylook, looks["default"])
     if curses.has_colors():
-        for i, (name, v) in enumerate(Pyful.environs['LOOKS'].items()):
+        for i, (name, v) in enumerate(mylook.items()):
             curses.init_pair(i+1, v[0], v[1])
             colors[name] = curses.color_pair(i+1) | v[2]
     else:
-        for (name, v) in Pyful.environs['LOOKS'].items():
+        for (name, v) in mylook.items():
             colors[name] = v[2]

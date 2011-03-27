@@ -23,8 +23,6 @@ menu = ui.getcomponent("Menu")
 Pyful.environs['EDITOR'] = 'vim'
 Pyful.environs['PAGER'] = 'less'
 Pyful.environs['TRASHBOX'] = '~/.pyful/trashbox'
-Pyful.environs['LOOKS'] = look.looks['default']
-# Pyful.environs['LOOKS'] = look.looks['midnight']
 
 # Set proc attributes.
 process.Process.shell = ('/bin/bash', '-c')
@@ -127,6 +125,15 @@ FileStat.view_group = False
 FileStat.view_size = True
 # Display the change time of file?
 FileStat.view_mtime = True
+
+# Set my look.
+#
+#     "default"
+#     "midnight"
+#     "dark"
+#     "light"
+#
+look.Look.mylook = "default"
 
 # Set borders.
 # Smooth borders:
