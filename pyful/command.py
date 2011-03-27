@@ -32,7 +32,7 @@ from pyful import util
 commands = {}
 
 def defcmd(func):
-    commands.update({func.__name__.strip('_'): func})
+    commands[func.__name__.strip("_")] = func
     return func
 
 _image_filter = re.compile('\.(jpe?g|gif|png|bmp|tiff|jp2|j2c|svg|eps)$')
