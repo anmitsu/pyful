@@ -21,7 +21,7 @@ import os
 import re
 from subprocess import Popen, PIPE
 
-from pyful import Pyful, setsignal, resetsignal
+from pyful import Pyful
 from pyful import message
 from pyful import ui
 from pyful import util
@@ -95,10 +95,9 @@ class Process(object):
             except Exception as e:
                 message.exception(e)
         else:
-            curses.endwin()
+            ui.end_curses()
             os.system("clear")
             try:
-                resetsignal()
                 proc = Popen(cmd, shell=True, executable=self.shell[0],
                              close_fds=True, preexec_fn=os.setsid)
                 proc.wait()
@@ -108,7 +107,7 @@ class Process(object):
             except Exception as e:
                 message.exception(e)
             finally:
-                setsignal()
+                ui.start_curses()
 
     def screen(self, cmd, title):
         if self.quick:
