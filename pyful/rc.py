@@ -4,7 +4,7 @@
 # This file is executed in the local namespace and not generate module.
 #
 
-from pyful import Pyful, atinit, atexit
+from pyful import Pyful
 from pyful import look
 from pyful import message
 from pyful import mode
@@ -158,12 +158,12 @@ ui.InfoBox.scroll_type = "HalfScroll"
 # you load the history of `replace' in cmdline:
 # >>> atinit(cmdline.history.loadfile, '~/.pyful/history/replace', 'Replace')
 #
-atinit(filer.loadfile, '~/.pyful/info')
-atinit(cmdline.clipboard.loadfile, '~/.pyful/clipboard')
-atinit(cmdline.history.loadfile, '~/.pyful/history/shell', 'Shell')
-atinit(cmdline.history.loadfile, '~/.pyful/history/eval', 'Eval')
-atinit(cmdline.history.loadfile, '~/.pyful/history/replace', 'Replace')
-atinit(cmdline.history.loadfile, '~/.pyful/history/mx', 'Mx')
+Pyful.atinit(filer.loadfile, '~/.pyful/info')
+Pyful.atinit(cmdline.clipboard.loadfile, '~/.pyful/clipboard')
+Pyful.atinit(cmdline.history.loadfile, '~/.pyful/history/shell', 'Shell')
+Pyful.atinit(cmdline.history.loadfile, '~/.pyful/history/eval', 'Eval')
+Pyful.atinit(cmdline.history.loadfile, '~/.pyful/history/replace', 'Replace')
+Pyful.atinit(cmdline.history.loadfile, '~/.pyful/history/mx', 'Mx')
 
 # Registration of program termination.
 #
@@ -173,12 +173,12 @@ atinit(cmdline.history.loadfile, '~/.pyful/history/mx', 'Mx')
 # you preserve the history of `replace' in cmdline:
 # >>> atexit(cmdline.history.savefile, '~/.pyful/history/replace', 'Replace')
 #
-atexit(filer.savefile, '~/.pyful/info')
-atexit(cmdline.clipboard.savefile, '~/.pyful/clipboard')
-atexit(cmdline.history.savefile, '~/.pyful/history/shell', 'Shell')
-atexit(cmdline.history.savefile, '~/.pyful/history/eval', 'Eval')
-atexit(cmdline.history.savefile, '~/.pyful/history/mx', 'Mx')
-atexit(cmdline.history.savefile, '~/.pyful/history/replace', 'Replace')
+Pyful.atexit(filer.savefile, '~/.pyful/info')
+Pyful.atexit(cmdline.clipboard.savefile, '~/.pyful/clipboard')
+Pyful.atexit(cmdline.history.savefile, '~/.pyful/history/shell', 'Shell')
+Pyful.atexit(cmdline.history.savefile, '~/.pyful/history/eval', 'Eval')
+Pyful.atexit(cmdline.history.savefile, '~/.pyful/history/mx', 'Mx')
+Pyful.atexit(cmdline.history.savefile, '~/.pyful/history/replace', 'Replace')
 
 # Define the keymap of pyful.
 #

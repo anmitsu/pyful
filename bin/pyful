@@ -62,7 +62,7 @@ locale.setlocale(locale.LC_ALL, "")
 imp.reload(sys)
 sys.setdefaultencoding("utf-8")
 
-from pyful import Pyful, loadrcfile, createconf, setsignal
+from pyful import Pyful
 from pyful import message
 from pyful import ui
 
@@ -70,11 +70,10 @@ def run():
     options = option_parse()
 
     pyful = Pyful(os.path.abspath(__file__))
-    error = loadrcfile(options.config)
+    error = pyful.loadrcfile(options.config)
+
     ui.start_curses()
     pyful.init_function()
-    setsignal()
-
     message.puts("Python {0}".format(sys.version))
     if error:
         message.exception(error)
@@ -85,11 +84,11 @@ def run():
         pyful.view()
         pyful.main_loop()
     except SystemExit:
-        createconf()
+        pyful.savercfile()
         pyful.exit_function()
 
 if __name__ == '__main__':
     try:
         run()
     finally:
-        ui.StandardScreen.destroy()
+        ui.end_curses()

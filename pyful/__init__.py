@@ -16,59 +16,19 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-"""Python file management utility.
-This application is CUI filer of the keyboard operation for Linux."""
+"""pyful - Python file management utility.
+
+This application is CUI filer of the keyboard operation for Linux.
+"""
 
 __version__ = "0.2.2"
 
 import curses
 import os
-import signal
 import shutil
 
 from pyful import look
 from pyful import ui
-
-def loadrcfile(path=None, started=True):
-    if path is None:
-        defpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'rc.py')
-        path = os.path.expanduser(Pyful.environs['RCFILE'])
-        if not os.path.exists(path):
-            path = defpath
-    try:
-        with open(path, 'r') as rc:
-            exec(rc.read(), locals())
-        Pyful.environs['RCFILE'] = path
-    except Exception as e:
-        if started:
-            with open(defpath, 'r') as rc:
-                exec(rc.read(), locals())
-            Pyful.environs['RCFILE'] = defpath
-        return e
-
-def createconf():
-    confdir = os.path.expanduser('~/.pyful')
-    if not os.path.exists(confdir):
-        os.makedirs(confdir, 0o700)
-
-    rcfile = os.path.join(confdir, 'rc.py')
-    if not os.path.exists(rcfile):
-        default = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'rc.py')
-        shutil.copy(default, rcfile)
-
-def setsignal():
-    def _signal(signalnum, stackframe):
-        ui.refresh()
-    signal.signal(signal.SIGWINCH, _signal)
-
-def resetsignal():
-    signal.signal(signal.SIGWINCH, signal.SIG_DFL)
-
-def atinit(func, *args, **kwargs):
-    Pyful.initfuncs.append(lambda: func(*args, **kwargs))
-
-def atexit(func, *args, **kwargs):
-    Pyful.exitfuncs.append(lambda: func(*args, **kwargs))
 
 class Pyful(object):
     """PYthon File management UtiLity"""
@@ -83,6 +43,14 @@ class Pyful(object):
         }
     initfuncs = []
     exitfuncs = []
+
+    @classmethod
+    def atinit(cls, func, *args, **kwargs):
+        cls.initfuncs.append(lambda: func(*args, **kwargs))
+
+    @classmethod
+    def atexit(cls, func, *args, **kwargs):
+        cls.exitfuncs.append(lambda: func(*args, **kwargs))
 
     def __init__(self, binpath):
         self.environs['SCRIPT'] = binpath
@@ -107,6 +75,33 @@ class Pyful(object):
 
     def exit_function(self):
         for func in self.exitfuncs: func()
+
+    def loadrcfile(self, path=None):
+        if path is None:
+            libpath = os.path.dirname(os.path.abspath(__file__))
+            defpath = os.path.join(libpath, "rc.py")
+            path = os.path.expanduser(self.environs["RCFILE"])
+            if not os.path.exists(path):
+                path = defpath
+        try:
+            with open(path, "r") as rc:
+                exec(rc.read(), locals())
+            self.environs["RCFILE"] = path
+        except Exception as e:
+            with open(defpath, "r") as rc:
+                exec(rc.read(), locals())
+            self.environs["RCFILE"] = defpath
+            return e
+
+    def savercfile(self):
+        confdir = os.path.join(os.getenv("HOME"), ".pyful")
+        if not os.path.exists(confdir):
+            os.makedirs(confdir, 0o700)
+        rcfile = os.path.join(confdir, "rc.py")
+        if not os.path.exists(rcfile):
+            libdir = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+            default = os.path.join(libdir, "rc.py")
+            shutil.copy(default, rcfile)
 
     def view(self):
         self.filer.view()
