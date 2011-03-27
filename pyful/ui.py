@@ -18,6 +18,7 @@
 
 import curses
 import re
+import signal
 
 from pyful import look
 from pyful import util
@@ -55,12 +56,13 @@ def resize():
     getcomponent("MessageBox").resize()
     InfoBox.resize()
 
-def refresh():
+def refresh(*args):
     curses.endwin()
     StandardScreen.stdscr.refresh()
     resize()
 
 def start_curses():
+    signal.signal(signal.SIGWINCH, refresh)
     try:
         curses.beep()
     except curses.error:
@@ -71,6 +73,10 @@ def start_curses():
         getcomponent("MessageBox").resize()
         getcomponent("Filer").default_init()
         StandardScreen.stdscr.refresh()
+
+def end_curses():
+    signal.signal(signal.SIGWINCH, signal.SIG_DFL)
+    StandardScreen.destroy()
 
 class ComponentDuplication(Exception):
     pass
