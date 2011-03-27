@@ -37,10 +37,6 @@ def exception(except_cls):
 def confirm(msg, options, msglist=None, position=0):
     return ui.getcomponent("Message").confirm(msg, options, msglist, position)
 
-def timerkill():
-    t = ui.getcomponent("Message").timer
-    if t: t.cancel()
-
 def viewhistroy():
     ui.getcomponent("Message").view_histroy()
 
@@ -57,6 +53,7 @@ class Message(ui.Component):
         if self.timer:
             self.timer.cancel()
         self.timer = Timer(timex, self.hide)
+        self.timer.setDaemon(True)
         self.timer.start()
 
     def puts(self, string, timex=3):
