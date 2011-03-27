@@ -107,7 +107,6 @@ def _spawn_terminal():
 def _exit():
     """Termination of application."""
     if 'Yes' == message.confirm('Exit?', ['Yes', 'No']):
-        message.timerkill()
         sys.exit(0)
 
 @defcmd
