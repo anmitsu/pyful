@@ -75,15 +75,19 @@ class Process(object):
 
     def python(self, cmd):
         cmd = self.parsemacro(cmd)
-        curses.endwin()
-        os.system("clear")
         try:
+            ui.end_curses()
+            os.system("clear")
             exec(cmd)
             message.puts("Eval: {0}".format(cmd))
             if not self.quick:
                 util.wait_restore()
+        except KeyboardInterrupt as e:
+            message.error("KeyboardInterrupt: {0}".format(cmd))
         except Exception as e:
             message.exception(e)
+        finally:
+            ui.start_curses()
 
     def system(self, cmd):
         if self.background:
@@ -95,15 +99,17 @@ class Process(object):
             except Exception as e:
                 message.exception(e)
         else:
-            ui.end_curses()
-            os.system("clear")
             try:
+                ui.end_curses()
+                os.system("clear")
                 proc = Popen(cmd, shell=True, executable=self.shell[0],
                              close_fds=True, preexec_fn=os.setsid)
                 proc.wait()
                 if not self.quick:
                     util.wait_restore()
                 message.puts("Spawn: {0} ({1})".format(cmd.strip(), proc.pid))
+            except KeyboardInterrupt as e:
+                message.error("KeyboardInterrupt: {0}".format(cmd))
             except Exception as e:
                 message.exception(e)
             finally:
