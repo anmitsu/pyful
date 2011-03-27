@@ -79,9 +79,9 @@ class Process(object):
             ui.end_curses()
             os.system("clear")
             exec(cmd)
-            message.puts("Eval: {0}".format(cmd))
             if not self.quick:
                 util.wait_restore()
+            message.puts("Eval: {0}".format(cmd))
         except KeyboardInterrupt as e:
             message.error("KeyboardInterrupt: {0}".format(cmd))
         except Exception as e:
