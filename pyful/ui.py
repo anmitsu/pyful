@@ -91,6 +91,7 @@ class StandardScreen(object):
         if not self.stdscr:
             self.__class__.stdscr = curses.initscr()
             self.stdscr.notimeout(0)
+            self.stdscr.keypad(1)
             curses.noecho()
             curses.cbreak()
             curses.raw()
