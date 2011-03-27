@@ -38,7 +38,6 @@ class Pyful(object):
     environs = {
         'EDITOR': 'vim',
         'PAGER': 'less',
-        'TRASHBOX': '~/.pyful/trashbox',
         'RCFILE': '~/.pyful/rc.py',
         'SCRIPT': '',
         }

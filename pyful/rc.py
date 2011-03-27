@@ -22,7 +22,6 @@ menu = ui.getcomponent("Menu")
 # Set environments of pyful.
 Pyful.environs['EDITOR'] = 'vim'
 Pyful.environs['PAGER'] = 'less'
-Pyful.environs['TRASHBOX'] = '~/.pyful/trashbox'
 
 # Set proc attributes.
 process.Process.shell = ('/bin/bash', '-c')
@@ -35,6 +34,7 @@ cmdline.clipboard.maxsave = 100
 # Set the mode of mkdir and newfile in octal number.
 mode.Mkdir.dirmode = 0o755
 mode.Newfile.filemode = 0o644
+mode.TrashBox.path = "~/.pyful/trashbox"
 
 # Set the prompt of shell mode.
 mode.Shell.prompt = '$'

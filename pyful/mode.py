@@ -21,7 +21,6 @@ import os
 import re
 import time
 
-from pyful import Pyful
 from pyful import filectrl
 from pyful import look
 from pyful import message
@@ -546,6 +545,7 @@ class Symlink(object):
             filer.workspace.all_reload()
 
 class TrashBox(object):
+    path = os.path.join(os.getenv("HOME"), ".pyful", "trashbox")
     prompt = "Trashbox:"
 
     def complete(self, comp):
@@ -553,7 +553,7 @@ class TrashBox(object):
 
     def execute(self, path):
         filer = ui.getcomponent("Filer")
-        trashbox = os.path.expanduser(Pyful.environs['TRASHBOX'])
+        trashbox = os.path.expanduser(self.path)
         msg = path.replace(filer.dir.path, "")
         ret = message.confirm("Move `{0}' to trashbox? ".format(msg), ["No", "Yes"])
         if ret == "Yes":

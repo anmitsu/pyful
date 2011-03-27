@@ -1044,7 +1044,7 @@ def _trashbox():
     """Invoke command line of trashbox mode."""
     filer = ui.getcomponent('Filer')
     cmdline = ui.getcomponent('Cmdline')
-    trashbox = os.path.expanduser(Pyful.environs['TRASHBOX'])
+    trashbox = os.path.expanduser(mode.TrashBox.path)
     if not os.path.exists(trashbox):
         if "Yes" == message.confirm("Trashbox doesn't exist. Make trashbox? ({0}):".format(trashbox), ["No", "Yes"]):
             try:
