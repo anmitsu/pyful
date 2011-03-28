@@ -346,8 +346,9 @@ class History(ui.InfoBox):
         self.source_string = self.cmdline.string
 
     def loadfile(self, path, key):
+        path = os.path.expanduser(path)
         try:
-            with open(os.path.expanduser(path), "r") as f:
+            with open(path, "r") as f:
                 for i, line in enumerate(f):
                     if self.maxsave <= i:
                         break
@@ -356,14 +357,16 @@ class History(ui.InfoBox):
             return
 
     def savefile(self, path, key):
+        path = os.path.expanduser(path)
+        dirname = util.unix_dirname(path)
         try:
-            dirname = util.unix_dirname(os.path.expanduser(path))
-            if not os.path.exists(dirname):
-                os.makedirs(dirname)
-            with open(os.path.expanduser(path), "w") as f:
-                for cmd in self.gethistory(key):
-                    f.write(cmd+os.linesep)
-        except IOError:
+            os.makedirs(dirname)
+        except OSError as e:
+            return
+        try:
+            with open(path, "w") as f:
+                f.write("\n".join(self.gethistory(key)))
+        except IOError as e:
             return
 
     def gethistory(self, key=None):
@@ -431,20 +434,26 @@ class Clipboard(ui.InfoBox):
         self.cmdline = cmdline
 
     def loadfile(self, path):
+        path = os.path.expanduser(path)
         try:
-            with open(os.path.expanduser(path), "r") as f:
+            with open(path, "r") as f:
                 for i, line in enumerate(f):
                     if self.maxsave <= i:
                         break
                     self.clip.append(line.strip(os.linesep))
-        except IOError:
+        except IOError as e:
             return
 
     def savefile(self, path):
+        path = os.path.expanduser(path)
+        dirname = util.unix_dirname(path)
         try:
-            with open(os.path.expanduser(path), "w") as f:
-                for c in self.clip:
-                    f.write(c+os.linesep)
+            os.makedirs(dirname)
+        except OSError as e:
+            return
+        try:
+            with open(path, "w") as f:
+                f.write("\n".join(self.clip))
         except IOError:
             return
 
