@@ -16,6 +16,8 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+__all__ = []
+
 import grp
 import os
 import pwd
@@ -30,6 +32,16 @@ compfunctions = {}
 def register(name, cls):
     compfunctions[name] = cls
 
+def _extendcompfunctions():
+    libdir = os.path.dirname(os.path.abspath(__file__))
+    try:
+        __all__.extend(set(os.path.splitext(f)[0] for f in os.listdir(libdir)))
+    except OSError:
+        return
+    __all__.remove("__init__")
+    __all__.sort()
+_extendcompfunctions()
+
 class Completion(ui.InfoBox):
     def __init__(self, cmdline):
         ui.InfoBox.__init__(self, "Completion")
@@ -37,7 +49,6 @@ class Completion(ui.InfoBox):
         self.parser = None
         self.programs = []
         self.loadprograms()
-        self.loadoptions()
 
     def input(self, meta, key):
         if (meta, key) in self.keymap:
@@ -45,14 +56,6 @@ class Completion(ui.InfoBox):
         else:
             self.finish()
             self.cmdline.input(meta, key)
-
-    def loadoptions(self):
-        readdir = os.path.dirname(util.abspath(__file__))
-        for f in os.listdir(readdir):
-            path = os.path.join(readdir, f)
-            if util.extname(path) == ".py" and f.startswith('_') and f != "__init__.py":
-                with open(path, 'r') as opt:
-                    exec(opt.read(), locals())
 
     def loadprograms(self):
         osname = sys.platform
