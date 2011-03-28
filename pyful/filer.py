@@ -738,13 +738,14 @@ class Directory(ui.StandardScreen):
         for f in filelist:
             if not os.path.lexists(f):
                 continue
-            if self.maskreg:
-                if not os.path.isdir(f) and not self.maskreg.search(f):
-                    continue
             try:
-                self.files.append(FileStat(f))
+                fs = FileStat(f)
             except InvalidEncodingError:
                 continue
+            if self.maskreg:
+                if not (fs.isdir() or self.maskreg.search(fs.name)):
+                    continue
+            self.files.append(fs)
         self.mark_update([f for f in self.files if f.name in marks])
 
     def reload(self):
