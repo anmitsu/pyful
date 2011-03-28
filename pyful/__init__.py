@@ -45,12 +45,14 @@ class Pyful(object):
     exitfuncs = []
 
     @classmethod
-    def atinit(cls, func, *args, **kwargs):
-        cls.initfuncs.append(lambda: func(*args, **kwargs))
+    def atinit(cls, func):
+        cls.initfuncs.append(func)
+        return func
 
     @classmethod
-    def atexit(cls, func, *args, **kwargs):
-        cls.exitfuncs.append(lambda: func(*args, **kwargs))
+    def atexit(cls, func):
+        cls.exitfuncs.append(func)
+        return func
 
     def __init__(self, binpath):
         self.environs["SCRIPT"] = binpath

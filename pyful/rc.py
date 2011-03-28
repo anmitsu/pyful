@@ -156,36 +156,28 @@ ui.InfoBox.zoom = 0
 ui.InfoBox.scroll_type = "HalfScroll"
 
 # Registration of program initialization.
+# Pyful.atinit() wraps the initialization functions.
 #
-# The first argument of `atinit' is the function object
-# called when initializing pyful.
-# And the other arguments of `atinit' are a arguments of it.
-#
-# For example, add the following command when
-# you load the history of `replace' in cmdline:
-# >>> atinit(cmdline.history.loadfile, "~/.pyful/history/replace", "Replace")
-#
-Pyful.atinit(filer.loadfile, "~/.pyful/info")
-Pyful.atinit(cmdline.clipboard.loadfile, "~/.pyful/clipboard")
-Pyful.atinit(cmdline.history.loadfile, "~/.pyful/history/shell", "Shell")
-Pyful.atinit(cmdline.history.loadfile, "~/.pyful/history/eval", "Eval")
-Pyful.atinit(cmdline.history.loadfile, "~/.pyful/history/replace", "Replace")
-Pyful.atinit(cmdline.history.loadfile, "~/.pyful/history/mx", "Mx")
+@Pyful.atinit
+def myatinit():
+    filer.loadfile("~/.pyful/info")
+    cmdline.clipboard.loadfile("~/.pyful/clipboard")
+    cmdline.history.loadfile("~/.pyful/history/shell", "Shell")
+    cmdline.history.loadfile("~/.pyful/history/eval", "Eval")
+    cmdline.history.loadfile("~/.pyful/history/mx", "Mx")
+    cmdline.history.loadfile("~/.pyful/history/replace", "Replace")
 
 # Registration of program termination.
+# Pyful.atexit() wraps the termination functions.
 #
-# The first argument and other arguments of `atexit' are similar to `atinit'
-#
-# For example, add the following command when
-# you preserve the history of `replace' in cmdline:
-# >>> atexit(cmdline.history.savefile, "~/.pyful/history/replace", "Replace")
-#
-Pyful.atexit(filer.savefile, "~/.pyful/info")
-Pyful.atexit(cmdline.clipboard.savefile, "~/.pyful/clipboard")
-Pyful.atexit(cmdline.history.savefile, "~/.pyful/history/shell", "Shell")
-Pyful.atexit(cmdline.history.savefile, "~/.pyful/history/eval", "Eval")
-Pyful.atexit(cmdline.history.savefile, "~/.pyful/history/mx", "Mx")
-Pyful.atexit(cmdline.history.savefile, "~/.pyful/history/replace", "Replace")
+@Pyful.atexit
+def myatexit():
+    filer.savefile("~/.pyful/info")
+    cmdline.clipboard.savefile("~/.pyful/clipboard")
+    cmdline.history.savefile("~/.pyful/history/shell", "Shell")
+    cmdline.history.savefile("~/.pyful/history/eval", "Eval")
+    cmdline.history.savefile("~/.pyful/history/mx", "Mx")
+    cmdline.history.savefile("~/.pyful/history/replace", "Replace")
 
 # Define the keymap of pyful.
 #
