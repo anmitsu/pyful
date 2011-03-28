@@ -190,15 +190,21 @@ def _kill_thread():
 @defcmd
 def _drivejump():
     """Display the menu of an external disk where mount was done."""
+    def _wrap(path):
+        return lambda: ui.getcomponent("Filer").dir.chdir(path)
     menu = ui.getcomponent("Menu")
-    menu.items['Drives'] = {}
-    li = []
-    for i, f in enumerate(glob.glob('/media/*')+glob.glob('/mnt/*')):
-        def _wrap(path):
-            return lambda: ui.getcomponent('Filer').dir.chdir(path)
-        num = str(i+1)
-        li.append(('({0}) {1}'.format(num, f), ord(num), _wrap(f)))
-    menu.items['Drives'] = li
+    menu.items['Drives'] = []
+    exdevs = ["/media", "/mnt", "/cygdrive"]
+    for path in exdevs:
+        try:
+            files = [os.path.join(path, f) for f in os.listdir(path)
+                     if os.path.isdir(os.path.join(path, f))]
+        except OSError:
+            continue
+        for i, f in enumerate(files):
+            num = str(i+1)
+            title = "({0}) {1}".format(num, f)
+            menu.items["Drives"].append([title, ord(num), _wrap(f)])
     menu.show('Drives')
 
 @defcmd
