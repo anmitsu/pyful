@@ -24,10 +24,8 @@ from pyful import look
 from pyful import util
 from pyful.keymap import *
 
-_components = {}
-
 def getcomponent(name):
-    return _components[name]
+    return Component.components[name]
 
 def getch():
     meta = False
@@ -109,10 +107,12 @@ class StandardScreen(object):
             curses.endwin()
 
 class Component(StandardScreen):
+    components = {}
+
     def __init__(self, name):
         self.active = False
-        if not name in _components:
-            _components[name] = self
+        if not name in self.components:
+            self.components[name] = self
         else:
             raise ComponentDuplication("`{0}' overlap for components".format(name))
 
