@@ -265,7 +265,7 @@ class Filer(ui.Component):
         self.workspace.resize()
 
 class Workspace(ui.StandardScreen):
-    default_path = "~/"
+    default_path = os.getenv("HOME")
     layout = "Tile"
 
     def __init__(self, title):
