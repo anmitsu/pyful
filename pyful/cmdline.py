@@ -441,7 +441,7 @@ class Clipboard(ui.InfoBox):
                     if self.maxsave <= i:
                         break
                     self.clip.append(line.strip(os.linesep))
-        except IOError as e:
+        except IOError:
             return
 
     def savefile(self, path):
