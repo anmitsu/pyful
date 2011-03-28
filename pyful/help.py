@@ -35,7 +35,7 @@ class Help(ui.InfoBox):
 
     def __init__(self):
         ui.InfoBox.__init__(self, "Help")
-        self.indent = ' ' * 4
+        self.indent = " " * 4
 
     def parse_docstring(self, doc):
         info = []
@@ -46,28 +46,28 @@ class Help(ui.InfoBox):
             line = line.strip()
             linebreak = False
 
-            if line.startswith('*'):
+            if line.startswith("*"):
                 count = re.match(r"^\*+", line).end()
                 if count > 1:
-                    line = re.sub(r"^\*+", '-', line, 1)
+                    line = re.sub(r"^\*+", "-", line, 1)
                 indent = (count-1+level)*self.indent
                 attr = 0
-            elif line.startswith('='):
+            elif line.startswith("="):
                 count = re.match(r"^=+", line).end()
-                line = re.sub(r"^=+", '', line, 1).strip()
+                line = re.sub(r"^=+", "", line, 1).strip()
                 indent = (count-1)*self.indent
                 attr = curses.A_BOLD
-                info.append(ui.InfoBoxContext(''))
+                info.append(ui.InfoBoxContext(""))
                 level = count
-            elif line.startswith('#'):
-                line = line.replace('#', '', 1).strip()
-                line = '{0}. {1}'.format(number, line)
+            elif line.startswith("#"):
+                line = line.replace("#", "", 1).strip()
+                line = "{0}. {1}".format(number, line)
                 indent = level*self.indent
                 attr = 0
                 number += 1
-            elif line.startswith('$'):
-                info.append(ui.InfoBoxContext(''))
-                line = line.replace('$', '', 1).strip()
+            elif line.startswith("$"):
+                info.append(ui.InfoBoxContext(""))
+                line = line.replace("$", "", 1).strip()
                 indent = (level+1)*self.indent
                 attr = 0
                 linebreak = True
@@ -76,18 +76,18 @@ class Help(ui.InfoBox):
                 attr = 0
 
             if self.regexs["underline"].search(line):
-                info.append(AttributeContext(line, indent, attr=attr, attrtype='underline'))
+                info.append(AttributeContext(line, indent, attr=attr, attrtype="underline"))
             elif self.regexs["bold"].search(line):
-                info.append(AttributeContext(line, indent, attr=attr, attrtype='bold'))
+                info.append(AttributeContext(line, indent, attr=attr, attrtype="bold"))
             elif self.regexs["reverse"].search(line):
-                info.append(AttributeContext(line, indent, attr=attr, attrtype='reverse'))
+                info.append(AttributeContext(line, indent, attr=attr, attrtype="reverse"))
             elif self.regexs["prompt"].search(line):
-                info.append(AttributeContext(line, indent, attr=attr, attrtype='prompt'))
+                info.append(AttributeContext(line, indent, attr=attr, attrtype="prompt"))
             else:
                 info.append(ui.InfoBoxContext(indent+line, attr=attr))
 
             if linebreak:
-                info.append(ui.InfoBoxContext(''))
+                info.append(ui.InfoBoxContext(""))
         return info
 
     def find_keybind(self, cmd):
@@ -97,20 +97,20 @@ class Help(ui.InfoBox):
         for k, v in Directory.keymap.items():
             if v == cmd:
                 if k[1] == 0:
-                    key.append(ui.InfoBoxContext(self.indent+'Control + KEY_SPACE'))
+                    key.append(ui.InfoBoxContext(self.indent+"Control + KEY_SPACE"))
                     continue
                 keybind = curses.keyname(k[1])
                 if keybind.isupper() and len(keybind) == 1:
-                    keybind = 'Shift + {0}'.format(keybind.lower())
-                elif keybind.startswith('^'):
-                    keybind = 'Control + {0}'.format(keybind.lower().replace('^', ''))
-                elif keybind == ' ':
-                    keybind = 'KEY_SPACE'
+                    keybind = "Shift + {0}".format(keybind.lower())
+                elif keybind.startswith("^"):
+                    keybind = "Control + {0}".format(keybind.lower().replace("^", ""))
+                elif keybind == " ":
+                    keybind = "KEY_SPACE"
 
                 if k[0]:
-                    keybind = 'Meta + {0}'.format(keybind)
+                    keybind = "Meta + {0}".format(keybind)
                 if len(k) == 3:
-                    keybind += ' ({0})'.format(k[2])
+                    keybind += " ({0})".format(k[2])
                 key.append(ui.InfoBoxContext(self.indent+keybind))
         return key
 
@@ -128,13 +128,13 @@ class Help(ui.InfoBox):
         info = []
         info.append(ui.InfoBoxContext("Name:", attr=curses.A_BOLD))
         info.append(ui.InfoBoxContext(self.indent+name))
-        info.append(ui.InfoBoxContext(''))
+        info.append(ui.InfoBoxContext(""))
 
         key = self.find_keybind(commands[name])
         if key:
             info.append(ui.InfoBoxContext("Keybinds:", attr=curses.A_BOLD))
             info += key
-            info.append(ui.InfoBoxContext(''))
+            info.append(ui.InfoBoxContext(""))
 
         info += self.parse_docstring(doc)
         self.show(info, -1)
@@ -149,38 +149,38 @@ class Help(ui.InfoBox):
                 continue
             info.append(ui.InfoBoxContext("Name:", attr=curses.A_BOLD))
             info.append(ui.InfoBoxContext(self.indent+name))
-            info.append(ui.InfoBoxContext(''))
+            info.append(ui.InfoBoxContext(""))
 
             key = self.find_keybind(commands[name])
             if key:
                 info.append(ui.InfoBoxContext("Keybinds:", attr=curses.A_BOLD))
                 info += key
-                info.append(ui.InfoBoxContext(''))
+                info.append(ui.InfoBoxContext(""))
 
             info += self.parse_docstring(doc)
-            info.append(ui.InfoBoxContext('-'*100))
+            info.append(ui.InfoBoxContext("-"*100))
         self.show(info, -1)
 
 class AttributeContext(ui.InfoBoxContext):
-    def __init__(self, string, indent, attr=0, attrtype='bold'):
+    def __init__(self, string, indent, attr=0, attrtype="bold"):
         ui.InfoBoxContext.__init__(self, string, attr=attr)
         self.indent = indent
-        if attrtype == 'bold':
+        if attrtype == "bold":
             self.hiattr = curses.A_BOLD
             self.rematch = Help.regexs["bold"]
-            self.symbol = '*'
-        elif attrtype == 'underline':
+            self.symbol = "*"
+        elif attrtype == "underline":
             self.hiattr = curses.A_UNDERLINE
             self.rematch = Help.regexs["underline"]
-            self.symbol = '+'
-        elif attrtype == 'reverse':
+            self.symbol = "+"
+        elif attrtype == "reverse":
             self.hiattr = curses.A_REVERSE
             self.rematch = Help.regexs["reverse"]
-            self.symbol = '@'
-        elif attrtype == 'prompt':
-            self.hiattr = look.colors['CmdlinePrompt']
+            self.symbol = "@"
+        elif attrtype == "prompt":
+            self.hiattr = look.colors["CmdlinePrompt"]
             self.rematch = Help.regexs["prompt"]
-            self.symbol = '$'
+            self.symbol = "$"
 
     def addstr(self, win, width):
         string = util.mbs_ljust(self.string, width-len(self.indent))
@@ -188,7 +188,7 @@ class AttributeContext(ui.InfoBoxContext):
         win.addstr(self.indent, self.attr)
         for s in self.rematch.split(string):
             if s.startswith(symbol) and s.endswith(symbol):
-                s = s.replace('\{0}'.format(symbol), symbol)
+                s = s.replace("\{0}".format(symbol), symbol)
                 win.addstr(s.strip(symbol), self.attr | self.hiattr)
             else:
                 win.addstr(s, self.attr)

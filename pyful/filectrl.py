@@ -118,7 +118,7 @@ def replace(pattern, repstr):
     if "Start" != message.confirm("Replace:", ["Start", "Cancel"], msg):
         return
 
-    ret = ''
+    ret = ""
     for member in matched:
         src, dst = member
         if os.path.exists(os.path.join(filer.dir.path, dst)):
@@ -150,10 +150,10 @@ def symlink(src, dst):
     except Exception as e:
         message.exception(e)
 
-def tar(src, dst, tarmode='gzip', wrap=''):
+def tar(src, dst, tarmode="gzip", wrap=""):
     Filectrl().tar(src, dst, tarmode, wrap)
 
-def tareach(src, dst, tarmode='gzip', wrap=''):
+def tareach(src, dst, tarmode="gzip", wrap=""):
     if not isinstance(src, list):
         return message.error("source must present `list'")
     Filectrl().tareach(src, dst, tarmode, wrap)
@@ -168,10 +168,10 @@ def unzip(src, dstdir):
         dstdir = os.curdir + os.sep
     Filectrl().unzip(src, dstdir)
 
-def zip(src, dst, wrap=''):
+def zip(src, dst, wrap=""):
     Filectrl().zip(src, dst, wrap)
 
-def zipeach(src, dst, wrap=''):
+def zipeach(src, dst, wrap=""):
     if not isinstance(src, list):
         return message.error("source must present `list'")
     Filectrl().zipeach(src, dst, wrap)
@@ -283,11 +283,11 @@ class Filectrl(object):
         thread = MoveThread(src, dst)
         self.thread_loop(thread)
 
-    def tar(self, src, dst, tarmode='gzip', wrap=''):
+    def tar(self, src, dst, tarmode="gzip", wrap=""):
         thread = TarThread(src, dst, tarmode, wrap)
         self.thread_loop(thread)
 
-    def tareach(self, src, dst, tarmode='gzip', wrap=''):
+    def tareach(self, src, dst, tarmode="gzip", wrap=""):
         threadlist = []
         for f in src:
             path = os.path.join(dst, util.unix_basename(f))
@@ -296,7 +296,7 @@ class Filectrl(object):
             self.thread_loop(t)
         message.puts("Finished 'tareach'")
 
-    def untar(self, src, dstdir='.'):
+    def untar(self, src, dstdir="."):
         thread = UntarThread(src, dstdir)
         self.thread_loop(thread)
 
@@ -336,10 +336,10 @@ class JobThread(threading.Thread):
         message.puts(status, 0)
 
 class TarThread(JobThread):
-    tarmodes = {'tar': '', 'gzip': 'gz', 'bzip2': 'bz2'}
-    tarexts = {'tar': '.tar', 'gzip': '.tgz', 'bzip2': '.bz2'}
+    tarmodes = {"tar": "", "gzip": "gz", "bzip2": "bz2"}
+    tarexts = {"tar": ".tar", "gzip": ".tgz", "bzip2": ".bz2"}
 
-    def __init__(self, src, dst, tarmode='gzip', wrap=''):
+    def __init__(self, src, dst, tarmode="gzip", wrap=""):
         JobThread.__init__(self)
         self.view_thread("Reading...")
         ext = self.tarexts[tarmode]
@@ -366,7 +366,7 @@ class TarThread(JobThread):
         try:
             import tarfile
             mode = self.tarmodes[self.tarmode]
-            tar = tarfile.open(self.dst, 'w|'+mode)
+            tar = tarfile.open(self.dst, "w|"+mode)
         except Exception as e:
             return message.exception(e)
         try:
@@ -374,7 +374,7 @@ class TarThread(JobThread):
             elapse = 1
             for path in self.src:
                 for f in self.generate(path):
-                    arcname = f.replace(os.path.commonprefix([f, self.src_dirname]), '')
+                    arcname = f.replace(os.path.commonprefix([f, self.src_dirname]), "")
                     self.view_thread("Adding({0}/{1}): {2}".format(elapse, goal, arcname))
                     self.add_file(tar, f, arcname)
                     elapse += 1
@@ -408,9 +408,9 @@ class TarThread(JobThread):
             yield path
 
 class UntarThread(JobThread):
-    tarmodes = {'.tar': '', '.tgz': 'gz', '.gz': 'gz', '.bz2': 'bz2',}
+    tarmodes = {".tar": "", ".tgz": "gz", ".gz": "gz", ".bz2": "bz2",}
 
-    def __init__(self, src, dstdir='.'):
+    def __init__(self, src, dstdir="."):
         JobThread.__init__(self)
         self.view_thread("Reading...")
         if isinstance(src, list):
@@ -436,10 +436,10 @@ class UntarThread(JobThread):
             self.error = e
 
     def extract(self, source):
-        mode = self.tarmodes.get(util.extname(source), 'gz')
+        mode = self.tarmodes.get(util.extname(source), "gz")
         try:
             import tarfile
-            tar = tarfile.open(source, 'r:'+mode)
+            tar = tarfile.open(source, "r:"+mode)
         except Exception as e:
             message.exception(e)
             raise FilectrlCancel("Exception occurred while `untar'")
@@ -461,7 +461,7 @@ class UntarThread(JobThread):
 class UnzipThread(JobThread):
     def __init__(self, src, dstdir):
         JobThread.__init__(self)
-        self.view_thread('Reading...')
+        self.view_thread("Reading...")
         if isinstance(src, list):
             self.title = "Unzip: mark files -> {0}".format(dstdir)
             self.src = [util.abspath(f) for f in src]
@@ -487,7 +487,7 @@ class UnzipThread(JobThread):
     def extract(self, zippath):
         try:
             import zipfile
-            myzip = zipfile.ZipFile(zippath, 'r')
+            myzip = zipfile.ZipFile(zippath, "r")
         except Exception as e:
             return message.exception(e)
         try:
@@ -520,8 +520,8 @@ class UnzipThread(JobThread):
             if not os.path.exists(dirpath):
                 os.makedirs(dirpath)
             source = myzip.open(fname)
-            target = open(path, 'wb')
-            self.view_thread('Inflating: {0}'.format(ufname))
+            target = open(path, "wb")
+            self.view_thread("Inflating: {0}".format(ufname))
             shutil.copyfileobj(source, target)
             source.close()
             target.close()
@@ -545,11 +545,11 @@ class UnzipThread(JobThread):
             message.exception(e)
 
 class ZipThread(JobThread):
-    def __init__(self, src, dst, wrap=''):
+    def __init__(self, src, dst, wrap=""):
         JobThread.__init__(self)
-        self.view_thread('Reading...')
-        if not dst.endswith('.zip'):
-            dst += '.zip'
+        self.view_thread("Reading...")
+        if not dst.endswith(".zip"):
+            dst += ".zip"
         self.dst = util.abspath(dst)
         if isinstance(src, list):
             self.title = "Zip: mark files -> {0}".format(dst)
@@ -574,7 +574,7 @@ class ZipThread(JobThread):
             elapse = 1
             for path in self.src:
                 for f in self.generate(path):
-                    arcname = f.replace(os.path.commonprefix([f, self.src_dirname]), '')
+                    arcname = f.replace(os.path.commonprefix([f, self.src_dirname]), "")
                     self.view_thread("Adding({0}/{1}): {2}".format(elapse, goal, arcname))
                     self.write_file(myzip, f, arcname)
                     elapse += 1
@@ -594,16 +594,16 @@ class ZipThread(JobThread):
         if os.path.exists(self.dst):
             Filectrl.event.clear()
             ret = message.confirm("Zip file exist - {0}:".format(self.dst),
-                                  ['Add', 'Override', 'Cancel'])
+                                  ["Add", "Override", "Cancel"])
             Filectrl.event.set()
-            if ret == 'Add':
-                return 'a'
-            elif ret == 'Override':
-                return 'w'
+            if ret == "Add":
+                return "a"
+            elif ret == "Override":
+                return "w"
             else:
-                raise FilectrlCancel('Zip canceled')
+                raise FilectrlCancel("Zip canceled")
         else:
-            return 'w'
+            return "w"
 
     def write_file(self, myzip, source, arcname):
         try:
@@ -808,7 +808,7 @@ class FileJobGenerator(object):
                     return "Yes"
             elif ret == "Yes(all)" or ret == "No(all)" or ret == "Newer(all)":
                 self.confirm = ret
-                return ret.replace("(all)", '')
+                return ret.replace("(all)", "")
             else:
                 return "Cancel"
 

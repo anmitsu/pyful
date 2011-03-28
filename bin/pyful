@@ -22,7 +22,7 @@
 import os
 import sys
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     libdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     if os.path.exists(os.path.join(libdir, "pyful")):
         sys.path.insert(0, libdir)
@@ -33,16 +33,16 @@ from pyful import __version__
 def option_parse():
     usage = "usage: %prog [options]"
     parser = OptionParser(usage)
-    parser.add_option('-v', '--version', action='store_true', dest='version',
-                      help='display program version')
-    parser.add_option('-c', '--config', dest='config',
-                      help='load configure file')
-    parser.add_option('-e', action='store_true', dest='enter',
-                      help='wait of the user input')
+    parser.add_option("-v", "--version", action="store_true", dest="version",
+                      help="display program version")
+    parser.add_option("-c", "--config", dest="config",
+                      help="load configure file")
+    parser.add_option("-e", action="store_true", dest="enter",
+                      help="wait of the user input")
     (options, args) = parser.parse_args()
 
     if options.version:
-        print('{0} v{1}'.format('pyful', __version__))
+        print("{0} v{1}".format("pyful", __version__))
         sys.exit(0)
     if options.enter:
         from pyful import util
@@ -50,7 +50,7 @@ def option_parse():
         sys.exit(0)
     if options.config is not None:
         if not os.path.exists(options.config):
-            print('No such rcfile ({0})'.format(options.config))
+            print("No such rcfile ({0})".format(options.config))
             sys.exit(1)
     return options
 
@@ -80,7 +80,7 @@ def run():
     message.puts("Python {0}".format(sys.version))
     if error:
         message.exception(error)
-    message.puts("Loaded {0}".format(Pyful.environs['RCFILE']))
+    message.puts("Loaded {0}".format(Pyful.environs["RCFILE"]))
     message.puts("Welcome to pyful v{0}".format(__version__))
 
     try:
@@ -90,7 +90,7 @@ def run():
         pyful.savercfile()
         pyful.exit_function()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     try:
         run()
     finally:

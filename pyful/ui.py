@@ -125,24 +125,24 @@ class CmdlineScreen(Component):
         Component.__init__(self, "Cmdscr")
         y, x = self.stdscr.getmaxyx()
         self.win = curses.newwin(2, x, y-2, 0)
-        self.win.bkgd(look.colors['CmdlineWindow'])
+        self.win.bkgd(look.colors["CmdlineWindow"])
 
     def resize(self):
         (y, x) = self.stdscr.getmaxyx()
         self.win = curses.newwin(2, x, y-2, 0)
-        self.win.bkgd(look.colors['CmdlineWindow'])
+        self.win.bkgd(look.colors["CmdlineWindow"])
 
 class Titlebar(Component):
     def __init__(self):
         Component.__init__(self, "Titlebar")
         (y, x) = self.stdscr.getmaxyx()
         self.win = curses.newwin(1, x, 0, 0)
-        self.win.bkgd(look.colors['Titlebar'])
+        self.win.bkgd(look.colors["Titlebar"])
 
     def resize(self):
         (y, x) = self.stdscr.getmaxyx()
         self.win = curses.newwin(1, x, 0, 0)
-        self.win.bkgd(look.colors['Titlebar'])
+        self.win.bkgd(look.colors["Titlebar"])
 
 class InfoBox(Component):
     scroll_type = "HalfScroll"
@@ -188,7 +188,7 @@ class InfoBox(Component):
             height = 3
             cls.zoom = height - base - 2
         cls.win = curses.newwin(height, x, y-height-2, 0)
-        cls.win.bkgd(look.colors['InfoBoxWindow'])
+        cls.win.bkgd(look.colors["InfoBoxWindow"])
 
     def show(self, info, pos=0):
         self.active = True
@@ -305,7 +305,7 @@ class InfoBox(Component):
         maxpage = size//infocount+1
         self.win.addstr("{0}({1}) [{2}/{3}]".format
                         (self.title, size, cpage, maxpage),
-                        look.colors['InfoBoxTitle'])
+                        look.colors["InfoBoxTitle"])
 
     def view(self):
         if not self.info:

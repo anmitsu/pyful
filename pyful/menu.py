@@ -45,7 +45,7 @@ class Menu(ui.Component):
         self.title = name
         self.active = self.items[name]
         self.win = curses.newwin(len(self.active)+2, 50, 1, 0)
-        self.win.bkgd(look.colors['MenuWindow'])
+        self.win.bkgd(look.colors["MenuWindow"])
 
     def hide(self):
         self.win.erase()

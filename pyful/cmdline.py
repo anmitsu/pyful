@@ -47,7 +47,7 @@ class Cmdline(ui.Component):
 
     def execute(self):
         string = self.string
-        if self.mode.__class__.__name__ == 'Shell':
+        if self.mode.__class__.__name__ == "Shell":
             expand_string = util.expandmacro(self.string, shell=True)
         else:
             expand_string = util.expandmacro(self.string, shell=False)
@@ -56,7 +56,7 @@ class Cmdline(ui.Component):
         self.mode.execute(expand_string)
 
     def expandmacro(self):
-        if self.mode.__class__.__name__ == 'Shell':
+        if self.mode.__class__.__name__ == "Shell":
             self.string = util.expandmacro(self.string, shell=True)
         else:
             self.string = util.expandmacro(self.string, shell=False)
@@ -213,7 +213,7 @@ class Cmdline(ui.Component):
         cmdscr.move(0, 0)
         prompt, cmd, curpos = self._get_current_line(cmdscr)
 
-        cmdscr.addstr(prompt, look.colors['CmdlinePrompt'])
+        cmdscr.addstr(prompt, look.colors["CmdlinePrompt"])
         try:
             if self.mode.__class__.__name__ == "Shell":
                 self.print_color_shell(cmd)
@@ -244,7 +244,7 @@ class Cmdline(ui.Component):
         self.cursor = 0
         self.active = False
 
-    def start(self, mode, string='', pos=0):
+    def start(self, mode, string="", pos=0):
         self.mode = mode
         self.string = string
         if pos > 0:
@@ -254,18 +254,18 @@ class Cmdline(ui.Component):
         self.active = True
         self.history.start()
 
-    def restart(self, string='', pos=0):
+    def restart(self, string="", pos=0):
         self.start(self.mode, string, pos)
 
-    def shell(self, string='', pos=0):
+    def shell(self, string="", pos=0):
         from pyful import mode
         self.start(mode.Shell(), string, pos)
 
-    def eval(self, string='', pos=0):
+    def eval(self, string="", pos=0):
         from pyful import mode
         self.start(mode.Eval(), string, pos)
 
-    def mx(self, string='', pos=0):
+    def mx(self, string="", pos=0):
         from pyful import mode
         self.start(mode.Mx(), string, pos)
 
@@ -275,7 +275,7 @@ class Cmdline(ui.Component):
         for s in reg.split(string):
             attr = 0
             if re.search("^%[mMdDfFxX]$", s):
-                attr = look.colors['CmdlineMacro']
+                attr = look.colors["CmdlineMacro"]
             cmdscr.addstr(s, attr)
 
     def print_color_shell(self, string):
@@ -285,18 +285,18 @@ class Cmdline(ui.Component):
         for s in reg.split(string):
             attr = 0
             if re.search("^%[&TqmMdDfFxX]$", s):
-                attr = look.colors['CmdlineMacro']
+                attr = look.colors["CmdlineMacro"]
             elif re.search("^[;|>&]$", s):
-                attr = look.colors['CmdlineSeparator']
+                attr = look.colors["CmdlineSeparator"]
                 prg = False
             elif s.startswith("-") and prg:
-                attr = look.colors['CmdlineOptions']
+                attr = look.colors["CmdlineOptions"]
             elif not s == "\s" and not prg:
                 if s in self.completion.programs:
-                    attr = look.colors['CmdlineProgram']
+                    attr = look.colors["CmdlineProgram"]
                     prg = True
                 else:
-                    attr = look.colors['CmdlineNoProgram']
+                    attr = look.colors["CmdlineNoProgram"]
             cmdscr.addstr(s, attr)
 
     def print_color_eval(self, string):
@@ -305,11 +305,11 @@ class Cmdline(ui.Component):
         for s in reg.split(string):
             attr = 0
             if re.search("^%[&TqmMdDfFxX]$", s):
-                attr = look.colors['CmdlineMacro']
+                attr = look.colors["CmdlineMacro"]
             elif re.search("^[;]$", s):
-                attr = look.colors['CmdlineSeparator']
+                attr = look.colors["CmdlineSeparator"]
             elif s in __builtins__.keys():
-                attr = look.colors['CmdlinePythonFunction']
+                attr = look.colors["CmdlinePythonFunction"]
             cmdscr.addstr(s, attr)
 
     def cmdline_input(self, meta, key):
@@ -520,7 +520,7 @@ class Output(ui.InfoBox):
         fname = grepoutputs[0]
         lnum = grepoutputs[1]
         try:
-            process.spawn("{0} +{1} {2}".format(Pyful.environs['EDITOR'], lnum, fname))
+            process.spawn("{0} +{1} {2}".format(Pyful.environs["EDITOR"], lnum, fname))
         except Exception as e:
             message.exception(e)
 

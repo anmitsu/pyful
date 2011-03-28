@@ -36,10 +36,10 @@ class Pyful(object):
     """PYthon File management UtiLity"""
 
     environs = {
-        'EDITOR': 'vim',
-        'PAGER': 'less',
-        'RCFILE': '~/.pyful/rc.py',
-        'SCRIPT': '',
+        "EDITOR": "vim",
+        "PAGER": "less",
+        "RCFILE": "~/.pyful/rc.py",
+        "SCRIPT": "",
         }
     initfuncs = []
     exitfuncs = []
@@ -53,7 +53,7 @@ class Pyful(object):
         cls.exitfuncs.append(lambda: func(*args, **kwargs))
 
     def __init__(self, binpath):
-        self.environs['SCRIPT'] = binpath
+        self.environs["SCRIPT"] = binpath
 
         from pyful.cmdline import Cmdline
         from pyful.filer import Filer

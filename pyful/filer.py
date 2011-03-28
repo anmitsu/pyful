@@ -144,28 +144,28 @@ class Filer(ui.Component):
         length = sum([util.termwidth(w.title)+2 for w in self.workspaces])
         y, x = self.stdscr.getmaxyx()
         if x-length < 5:
-            return message.error('terminal size very small')
+            return message.error("terminal size very small")
 
         for i, ws in enumerate(self.workspaces):
             if self.cursor == i:
-                titlebar.addstr(' {0} '.format(ws.title), look.colors['WorkspaceFocus'])
+                titlebar.addstr(" {0} ".format(ws.title), look.colors["WorkspaceFocus"])
             else:
-                titlebar.addstr(' {0} '.format(ws.title))
-        titlebar.addstr(' | ', curses.A_BOLD)
+                titlebar.addstr(" {0} ".format(ws.title))
+        titlebar.addstr(" | ", curses.A_BOLD)
 
         dirlen = len(self.workspace.dirs)
         width = (x-length-4) // dirlen
         odd = (x-length-4) % dirlen
         if width < 5:
             titlebar.noutrefresh()
-            return message.error('terminal size very small')
+            return message.error("terminal size very small")
 
         for i, path in enumerate([d.path for d in self.workspace.dirs]):
-            num = '[{0}] '.format(i+1)
+            num = "[{0}] ".format(i+1)
             numlen = len(num)
             homedir = os.getenv("HOME")
             if path.startswith(homedir):
-                path = path.replace(homedir, '~', 1)
+                path = path.replace(homedir, "~", 1)
             if path.endswith(os.sep):
                 path = util.path_omission(path, width-numlen-1)
             else:
@@ -176,7 +176,7 @@ class Filer(ui.Component):
                 w = width-numlen
             string = num + util.mbs_rjust(path, w)
             if i == self.workspace.cursor:
-                titlebar.addstr(string, look.colors['TitlebarFocus'])
+                titlebar.addstr(string, look.colors["TitlebarFocus"])
             else:
                 titlebar.addstr(string)
         titlebar.noutrefresh()
@@ -239,7 +239,7 @@ class Filer(ui.Component):
 
     def loadfile(self, path):
         try:
-            f = open(os.path.expanduser(path), 'r')
+            f = open(os.path.expanduser(path), "r")
             f.readline()
             self.workspaces = []
             ws_i = int(f.readline().rstrip(os.linesep))
@@ -265,8 +265,8 @@ class Filer(ui.Component):
         self.workspace.resize()
 
 class Workspace(ui.StandardScreen):
-    default_path = '~/'
-    layout = 'Tile'
+    default_path = "~/"
+    layout = "Tile"
 
     def __init__(self, title):
         self.title = title
@@ -299,7 +299,7 @@ class Workspace(ui.StandardScreen):
         except Exception as e:
             message.exception(e)
             self.dir.chdir(self.default_path)
-        if self.layout == 'Magnifier':
+        if self.layout == "Magnifier":
             self.magnifier()
 
     def mvcursor(self, amount):
@@ -349,25 +349,25 @@ class Workspace(ui.StandardScreen):
         self.title = title
 
     def resize(self):
-        if self.layout == 'Tile':
+        if self.layout == "Tile":
             self.tile()
-        elif self.layout == 'TileLeft':
+        elif self.layout == "TileLeft":
             self.tileleft()
-        elif self.layout == 'TileTop':
+        elif self.layout == "TileTop":
             self.tiletop()
-        elif self.layout == 'TileBottom':
+        elif self.layout == "TileBottom":
             self.tilebottom()
-        elif self.layout == 'Oneline':
+        elif self.layout == "Oneline":
             self.oneline()
-        elif self.layout == 'Onecolumn':
+        elif self.layout == "Onecolumn":
             self.onecolumn()
-        elif self.layout == 'Magnifier':
+        elif self.layout == "Magnifier":
             self.magnifier()
-        elif self.layout == 'Fullscreen':
+        elif self.layout == "Fullscreen":
             self.fullscreen()
 
     def tile(self):
-        self.layout = 'Tile'
+        self.layout = "Tile"
         size = len(self.dirs)
         y, x = self.stdscr.getmaxyx()
         y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0]
@@ -389,7 +389,7 @@ class Workspace(ui.StandardScreen):
         self.all_reload()
 
     def tileleft(self):
-        self.layout = 'TileLeft'
+        self.layout = "TileLeft"
         size = len(self.dirs)
         y, x = self.stdscr.getmaxyx()
         y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0]
@@ -411,7 +411,7 @@ class Workspace(ui.StandardScreen):
         self.all_reload()
 
     def tiletop(self):
-        self.layout = 'TileTop'
+        self.layout = "TileTop"
         size = len(self.dirs)
         y, x = self.stdscr.getmaxyx()
         y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0]
@@ -433,7 +433,7 @@ class Workspace(ui.StandardScreen):
         self.all_reload()
 
     def tilebottom(self):
-        self.layout = 'TileBottom'
+        self.layout = "TileBottom"
         size = len(self.dirs)
         y, x = self.stdscr.getmaxyx()
         y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0] +
@@ -455,7 +455,7 @@ class Workspace(ui.StandardScreen):
         self.all_reload()
 
     def oneline(self):
-        self.layout = 'Oneline'
+        self.layout = "Oneline"
         y, x = self.stdscr.getmaxyx()
         height = y - (ui.getcomponent("Cmdscr").win.getmaxyx()[0]
                       + ui.getcomponent("Titlebar").win.getmaxyx()[0])
@@ -468,7 +468,7 @@ class Workspace(ui.StandardScreen):
         self.all_reload()
 
     def onecolumn(self):
-        self.layout = 'Onecolumn'
+        self.layout = "Onecolumn"
         y, x = self.stdscr.getmaxyx()
         y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0]
               + ui.getcomponent("Titlebar").win.getmaxyx()[0])
@@ -482,7 +482,7 @@ class Workspace(ui.StandardScreen):
         self.all_reload()
 
     def magnifier(self):
-        self.layout = 'Magnifier'
+        self.layout = "Magnifier"
         y, x = self.stdscr.getmaxyx()
         y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0]
               + ui.getcomponent("Titlebar").win.getmaxyx()[0])
@@ -505,7 +505,7 @@ class Workspace(ui.StandardScreen):
         self.all_reload()
 
     def fullscreen(self):
-        self.layout = 'Fullscreen'
+        self.layout = "Fullscreen"
         y, x = self.stdscr.getmaxyx()
         height = y - (ui.getcomponent("Cmdscr").win.getmaxyx()[0]
                       + ui.getcomponent("Titlebar").win.getmaxyx()[0])
@@ -550,7 +550,7 @@ class Workspace(ui.StandardScreen):
             d.files[:] = []
 
     def view(self):
-        if self.layout == 'Fullscreen':
+        if self.layout == "Fullscreen":
             self.dir.view(True)
         else:
             for i, d in enumerate(self.dirs):
@@ -559,22 +559,22 @@ class Workspace(ui.StandardScreen):
             self.dir.view(True)
 
 class Directory(ui.StandardScreen):
-    sort_kind = 'Name[^]'
-    scroll_type = 'HalfScroll'
+    sort_kind = "Name[^]"
+    scroll_type = "HalfScroll"
     statusbar_format = " [{MARK}/{FILE}] {MARKSIZE}bytes {SCROLL}({CURSOR}) {SORT} "
     keymap = {}
 
     def __init__(self, path, height, width, begy, begx):
         self.win = curses.newwin(height, width, begy, begx)
-        self.win.bkgd(look.colors['Window'])
+        self.win.bkgd(look.colors["Window"])
         y, x = self.win.getmaxyx()
         by, bx = self.win.getbegyx()
         self.statwin = curses.newwin(1, y, x, bx)
-        self.statwin.bkgd(look.colors['Window'])
+        self.statwin.bkgd(look.colors["Window"])
         self.path = util.abspath(path)
         self.files = [FileStat(os.pardir)]
         self.mark_files = {}
-        self.mark_size = '0'
+        self.mark_size = "0"
         self.cursor = 0
         self.scrolltop = 0
         self.maskreg = None
@@ -597,16 +597,16 @@ class Directory(ui.StandardScreen):
         keymap = self.keymap
         f = self.file
         ext  = util.extname(f.name)
-        if ext != '' and (meta, key, ext) in keymap:
+        if ext != "" and (meta, key, ext) in keymap:
             keymap[(meta, key, ext)]()
-        elif f.marked and (meta, key, '.mark') in keymap:
-            keymap[(meta, key, '.mark')]()
-        elif f.islink() and (meta, key, '.link') in keymap:
-            keymap[(meta, key, '.link')]()
-        elif f.isdir() and (meta, key, '.dir') in keymap:
-            keymap[(meta, key, '.dir')]()
-        elif f.isexec() and (meta, key, '.exec') in keymap:
-            keymap[(meta, key, '.exec')]()
+        elif f.marked and (meta, key, ".mark") in keymap:
+            keymap[(meta, key, ".mark")]()
+        elif f.islink() and (meta, key, ".link") in keymap:
+            keymap[(meta, key, ".link")]()
+        elif f.isdir() and (meta, key, ".dir") in keymap:
+            keymap[(meta, key, ".dir")]()
+        elif f.isexec() and (meta, key, ".exec") in keymap:
+            keymap[(meta, key, ".exec")]()
         else:
             if (meta, key) in keymap:
                 keymap[(meta, key)]()
@@ -676,12 +676,12 @@ class Directory(ui.StandardScreen):
         self.reload()
 
     def glob(self, pattern):
-        self.list_title = 'Grob:({0})'.format(pattern)
+        self.list_title = "Grob:({0})".format(pattern)
         self.list = list(glob.iglob(pattern))
         self.reload()
 
     def globdir(self, pattern):
-        self.list_title = 'Grobdir:({0})'.format(pattern)
+        self.list_title = "Grobdir:({0})".format(pattern)
 
         def _globdir(dirname, patternname):
             try:
@@ -707,7 +707,7 @@ class Directory(ui.StandardScreen):
                 for line in f:
                     line = line.strip(os.linesep)
                     if os.path.exists(line):
-                        line = re.sub("{0}?{1}".format(self.path, os.sep), '', line)
+                        line = re.sub("{0}?{1}".format(self.path, os.sep), "", line)
                         self.list.append(line)
         except Exception as e:
             message.exception(e)
@@ -843,17 +843,17 @@ class Directory(ui.StandardScreen):
         for f in self.mark_files.values():
             f.markoff()
         self.mark_files.clear()
-        self.mark_size = '0'
+        self.mark_size = "0"
 
     def get_mark_size(self):
         if not self.mark_files:
-            return '0'
+            return "0"
         ret = 0
         for f in self.mark_files.values():
             if f.isdir():
                 continue
             ret += f.stat.st_size
-        return re.sub(r'(\d)(?=(?:\d\d\d)+(?!\d))', r'\1,', str(ret))
+        return re.sub(r"(\d)(?=(?:\d\d\d)+(?!\d))", r"\1,", str(ret))
 
     def get_mark_files(self):
         if len(self.mark_files) == 0:
@@ -865,18 +865,18 @@ class Directory(ui.StandardScreen):
         return len(self.mark_files) != 0
 
     def sort(self):
-        if self.sort_kind == 'Name[^]': self.sort_name()
-        elif self.sort_kind == 'Name[$]': self.sort_name_rev()
-        elif self.sort_kind == 'Size[^]': self.sort_size()
-        elif self.sort_kind == 'Size[$]': self.sort_size_rev()
-        elif self.sort_kind == 'Time[^]': self.sort_time()
-        elif self.sort_kind == 'Time[$]': self.sort_time_rev()
-        elif self.sort_kind == 'Permission[^]': self.sort_permission()
-        elif self.sort_kind == 'Permission[$]': self.sort_permission_rev()
-        elif self.sort_kind == 'Link[^]': self.sort_nlink()
-        elif self.sort_kind == 'Link[$]': self.sort_nlink_rev()
-        elif self.sort_kind == 'Ext[^]': self.sort_ext()
-        elif self.sort_kind == 'Ext[$]': self.sort_ext_rev()
+        if self.sort_kind == "Name[^]": self.sort_name()
+        elif self.sort_kind == "Name[$]": self.sort_name_rev()
+        elif self.sort_kind == "Size[^]": self.sort_size()
+        elif self.sort_kind == "Size[$]": self.sort_size_rev()
+        elif self.sort_kind == "Time[^]": self.sort_time()
+        elif self.sort_kind == "Time[$]": self.sort_time_rev()
+        elif self.sort_kind == "Permission[^]": self.sort_permission()
+        elif self.sort_kind == "Permission[$]": self.sort_permission_rev()
+        elif self.sort_kind == "Link[^]": self.sort_nlink()
+        elif self.sort_kind == "Link[$]": self.sort_nlink_rev()
+        elif self.sort_kind == "Ext[^]": self.sort_ext()
+        elif self.sort_kind == "Ext[$]": self.sort_ext_rev()
 
     def sort_name(self):
         def _sort(x, y):
@@ -886,7 +886,7 @@ class Directory(ui.StandardScreen):
                 return 1
             return util.cmp(x.name, y.name)
         self.files.sort(key=util.cmp_to_key(_sort))
-        self.sort_kind = 'Name[^]'
+        self.sort_kind = "Name[^]"
 
     def sort_name_rev(self):
         def _sort(x, y):
@@ -896,7 +896,7 @@ class Directory(ui.StandardScreen):
                 return 1
             return util.cmp(y.name, x.name)
         self.files.sort(key=util.cmp_to_key(_sort))
-        self.sort_kind = 'Name[$]'
+        self.sort_kind = "Name[$]"
 
     def sort_size(self):
         def _sort(x, y):
@@ -910,7 +910,7 @@ class Directory(ui.StandardScreen):
             else:
                 return ret
         self.files.sort(key=util.cmp_to_key(_sort))
-        self.sort_kind = 'Size[^]'
+        self.sort_kind = "Size[^]"
 
     def sort_size_rev(self):
         def _sort(x, y):
@@ -924,7 +924,7 @@ class Directory(ui.StandardScreen):
             else:
                 return ret
         self.files.sort(key=util.cmp_to_key(_sort))
-        self.sort_kind = 'Size[$]'
+        self.sort_kind = "Size[$]"
 
     def sort_permission(self):
         def _sort(x, y):
@@ -938,7 +938,7 @@ class Directory(ui.StandardScreen):
             else:
                 return ret
         self.files.sort(key=util.cmp_to_key(_sort))
-        self.sort_kind = 'Permission[^]'
+        self.sort_kind = "Permission[^]"
 
     def sort_permission_rev(self):
         def _sort(x, y):
@@ -952,7 +952,7 @@ class Directory(ui.StandardScreen):
             else:
                 return ret
         self.files.sort(key=util.cmp_to_key(_sort))
-        self.sort_kind = 'Permission[$]'
+        self.sort_kind = "Permission[$]"
 
     def sort_time(self):
         def _sort(x, y):
@@ -966,7 +966,7 @@ class Directory(ui.StandardScreen):
             else:
                 return ret
         self.files.sort(key=util.cmp_to_key(_sort))
-        self.sort_kind = 'Time[^]'
+        self.sort_kind = "Time[^]"
 
     def sort_time_rev(self):
         def _sort(x, y):
@@ -980,7 +980,7 @@ class Directory(ui.StandardScreen):
             else:
                 return ret
         self.files.sort(key=util.cmp_to_key(_sort))
-        self.sort_kind = 'Time[$]'
+        self.sort_kind = "Time[$]"
 
     def sort_nlink(self):
         def _sort(x, y):
@@ -994,7 +994,7 @@ class Directory(ui.StandardScreen):
             else:
                 return ret
         self.files.sort(key=util.cmp_to_key(_sort))
-        self.sort_kind = 'Link[^]'
+        self.sort_kind = "Link[^]"
 
     def sort_nlink_rev(self):
         def _sort(x, y):
@@ -1008,7 +1008,7 @@ class Directory(ui.StandardScreen):
             else:
                 return ret
         self.files.sort(key=util.cmp_to_key(_sort))
-        self.sort_kind = 'Link[$]'
+        self.sort_kind = "Link[$]"
 
     def sort_ext(self):
         def _sort(x, y):
@@ -1022,7 +1022,7 @@ class Directory(ui.StandardScreen):
             else:
                 return ret
         self.files.sort(key=util.cmp_to_key(_sort))
-        self.sort_kind = 'Ext[^]'
+        self.sort_kind = "Ext[^]"
 
     def sort_ext_rev(self):
         def _sort(x, y):
@@ -1036,7 +1036,7 @@ class Directory(ui.StandardScreen):
             else:
                 return ret
         self.files.sort(key=util.cmp_to_key(_sort))
-        self.sort_kind = 'Ext[$]'
+        self.sort_kind = "Ext[$]"
 
     def resize(self, height, width, begy, begx):
         self.win.erase()
@@ -1044,8 +1044,8 @@ class Directory(ui.StandardScreen):
         self.win = curses.newwin(height, width, begy, begx)
         begy, begx = self.win.getbegyx()
         self.statwin = curses.newwin(1, width, begy+height-1, begx)
-        self.win.bkgd(look.colors['Window'])
-        self.statwin.bkgd(look.colors['Window'])
+        self.win.bkgd(look.colors["Window"])
+        self.statwin.bkgd(look.colors["Window"])
 
     def _revise_position(self, size, height):
         if self.cursor < 0:
@@ -1056,11 +1056,11 @@ class Directory(ui.StandardScreen):
         if self.cursor >= self.scrolltop+height or self.cursor < self.scrolltop:
             for f in self.files[self.scrolltop:self.scrolltop+height]:
                 f.cache_clear()
-            if self.scroll_type == 'HalfScroll':
+            if self.scroll_type == "HalfScroll":
                 self.scrolltop = self.cursor - (height//2)
-            elif self.scroll_type == 'PageScroll':
+            elif self.scroll_type == "PageScroll":
                 self.scrolltop = (self.cursor//height) * height
-            elif self.scroll_type == 'ContinuousScroll':
+            elif self.scroll_type == "ContinuousScroll":
                 if self.cursor >= self.scrolltop+height:
                     self.scrolltop = self.cursor - height + 1
                 elif self.cursor < self.scrolltop:
@@ -1084,12 +1084,12 @@ class Directory(ui.StandardScreen):
             titlewidth -= util.termwidth(self.maskreg.pattern)
         homedir = os.getenv("HOME")
         if self.path.startswith(homedir):
-            path = self.path.replace(homedir, '~', 1)
+            path = self.path.replace(homedir, "~", 1)
         else:
             path = self.path
         path = util.path_omission(path, titlewidth)
         self.win.move(0, 2)
-        self.win.addstr("".join([path, title]), look.colors['DirectoryPath'])
+        self.win.addstr("".join([path, title]), look.colors["DirectoryPath"])
 
     def _view_statusbar(self, focus, size, height):
         self.statwin.erase()
@@ -1107,11 +1107,11 @@ class Directory(ui.StandardScreen):
             except ZeroDivisionError:
                 p = float(self.scrolltop)/float(size)*100
             if p == 0:
-                p = 'Top'
+                p = "Top"
             elif p >= 100:
-                p = 'Bot'
+                p = "Bot"
             else:
-                p = str(int(p)) + '%'
+                p = str(int(p)) + "%"
             status = self.statusbar_format.format(
                 MARK=len(self.mark_files), FILE=size-1,
                 MARKSIZE=self.mark_size, SCROLL=p,
@@ -1140,7 +1140,7 @@ class Directory(ui.StandardScreen):
         self._revise_position(size, height)
 
         if width < 30:
-            return message.error('terminal size very small')
+            return message.error("terminal size very small")
         line = 0
         for i in range(self.scrolltop, size):
             line += 1
@@ -1154,9 +1154,9 @@ class Directory(ui.StandardScreen):
                 attr += curses.A_REVERSE
             self.win.move(line, 1)
             if f.marked:
-                self.win.addstr('*' + fstr, attr)
+                self.win.addstr("*" + fstr, attr)
             else:
-                self.win.addstr(' ' + fstr, attr)
+                self.win.addstr(" " + fstr, attr)
         self.win.noutrefresh()
         self._view_statusbar(focus, size, height)
 
@@ -1291,7 +1291,7 @@ class Finder(object):
     def finish(self):
         self.history.add(self.string)
         self.history.pos = 0
-        self.string = ''
+        self.string = ""
         self.results[:] = []
         self.cache[:] = []
         self.active = False
@@ -1312,13 +1312,13 @@ class Finder(object):
     def view(self):
         self.dir.statwin.move(0, 1)
         if self.migemo:
-            self.dir.statwin.addstr(' Finder(migemo): ', look.colors['Finder'])
+            self.dir.statwin.addstr(" Finder(migemo): ", look.colors["Finder"])
         else:
-            self.dir.statwin.addstr(' Finder: ', look.colors['Finder'])
+            self.dir.statwin.addstr(" Finder: ", look.colors["Finder"])
         try:
-            self.dir.statwin.addstr(' ' + self.string)
+            self.dir.statwin.addstr(" " + self.string)
         except Exception:
-            message.error('Warning: status window very small')
+            message.error("Warning: status window very small")
         self.dir.statwin.noutrefresh()
 
 class InvalidEncodingError(Exception):
@@ -1332,10 +1332,10 @@ class FileStat(object):
     view_group = False
     view_size = True
     view_mtime = True
-    time_format = '%y-%m-%d %H:%M'
-    time_24_flag = '!'
-    time_week_flag = '#'
-    time_yore_flag = ' '
+    time_format = "%y-%m-%d %H:%M"
+    time_24_flag = "!"
+    time_week_flag = "#"
+    time_yore_flag = " "
 
     def __init__(self, name):
         self.marked = False
@@ -1396,7 +1396,7 @@ class FileStat(object):
 
     def get_file_name(self, path):
         if self.view_ext and not self.isdir() and not self.islink():
-            fname = self.name.replace(util.extname(self.name), '')
+            fname = self.name.replace(util.extname(self.name), "")
         else:
             fname = self.name
 
@@ -1404,64 +1404,64 @@ class FileStat(object):
             try:
                 link = os.readlink(os.path.join(path, self.name))
             except OSError:
-                link = ''
-            fname += '@ -> ' + link
+                link = ""
+            fname += "@ -> " + link
             if self.isdir() and not link.endswith(os.sep):
                 fname += os.sep
         elif self.isdir():
             fname += os.sep
         elif self.isfifo():
-            fname += '|'
+            fname += "|"
         elif self.issocket():
-            fname += '='
+            fname += "="
         elif self.isexec():
-            fname += '*'
+            fname += "*"
         return fname
 
     def get_file_stat(self):
-        fstat = ''
+        fstat = ""
         if self.view_ext and not self.isdir() and not self.islink():
-            fstat += ' {0}'.format(util.extname(self.name))
+            fstat += " {0}".format(util.extname(self.name))
         if self.view_user:
-            fstat += ' {0}'.format(self.get_user_name())
+            fstat += " {0}".format(self.get_user_name())
         if self.view_group:
-            fstat += ' {0}'.format(self.get_group_name())
+            fstat += " {0}".format(self.get_group_name())
         if self.view_nlink:
-            fstat += ' {0:>3}'.format(self.stat.st_nlink)
+            fstat += " {0:>3}".format(self.stat.st_nlink)
         if self.view_size:
             if self.isdir():
-                fstat += ' {0:>7}'.format('<DIR>')
+                fstat += " {0:>7}".format("<DIR>")
             else:
-                fstat += ' {0:>7}'.format(self.get_file_size())
+                fstat += " {0:>7}".format(self.get_file_size())
         if self.view_permission:
-            fstat += ' {0}'.format(self.get_permission())
+            fstat += " {0}".format(self.get_permission())
         if self.view_mtime:
-            fstat += ' {0}'.format(self.get_mtime())
+            fstat += " {0}".format(self.get_mtime())
         return fstat
 
     def get_attr(self):
         if self.marked:
-            return look.colors['MarkFile']
+            return look.colors["MarkFile"]
         elif self.islink():
             if self.isdir():
-                return look.colors['LinkDir']
+                return look.colors["LinkDir"]
             else:
-                return look.colors['LinkFile']
+                return look.colors["LinkFile"]
         elif self.isdir():
-            return look.colors['Directory']
+            return look.colors["Directory"]
         elif self.isexec():
-            return look.colors['ExecutableFile']
+            return look.colors["ExecutableFile"]
         else:
             return 0
 
     def get_file_size(self):
         s = self.stat.st_size
         if s > 1024**3:
-            return '{0:.1f}G'.format(float(s) / (1024**3))
+            return "{0:.1f}G".format(float(s) / (1024**3))
         elif s > 1024**2:
-            return '{0:.1f}M'.format(float(s) / (1024**2))
+            return "{0:.1f}M".format(float(s) / (1024**2))
         elif s > 1024:
-            return '{0:.1f}k'.format(float(s) / 1024)
+            return "{0:.1f}k".format(float(s) / 1024)
         else:
             return str(s)
 
@@ -1469,13 +1469,13 @@ class FileStat(object):
         try:
             return pwd.getpwuid(self.stat.st_uid)[0]
         except KeyError:
-            return 'unknown'
+            return "unknown"
 
     def get_group_name(self):
         try:
             return grp.getgrgid(self.stat.st_gid)[0]
         except KeyError:
-            return 'unknown'
+            return "unknown"
 
     def get_mtime(self):
         tstr = time.strftime(self.time_format, time.localtime(self.stat.st_mtime))
@@ -1489,21 +1489,21 @@ class FileStat(object):
 
     def get_permission(self):
         perm = ["-"] * 10
-        if stat.S_ISDIR(self.lstat.st_mode): perm[0] = 'd'
-        elif stat.S_ISLNK(self.lstat.st_mode): perm[0] = 'l'
-        elif stat.S_ISSOCK(self.lstat.st_mode): perm[0] = 's'
-        elif stat.S_ISFIFO(self.lstat.st_mode): perm[0] = 'p'
-        elif stat.S_ISCHR(self.lstat.st_mode): perm[0] = 'c'
-        elif stat.S_ISBLK(self.lstat.st_mode): perm[0] = 'b'
-        if self.stat.st_mode & stat.S_IRUSR: perm[1] = 'r'
-        if self.stat.st_mode & stat.S_IWUSR: perm[2] = 'w'
-        if self.stat.st_mode & stat.S_IXUSR: perm[3] = 'x'
-        if self.stat.st_mode & stat.S_IRGRP: perm[4] = 'r'
-        if self.stat.st_mode & stat.S_IWGRP: perm[5] = 'w'
-        if self.stat.st_mode & stat.S_IXGRP: perm[6] = 'x'
-        if self.stat.st_mode & stat.S_IROTH: perm[7] = 'r'
-        if self.stat.st_mode & stat.S_IWOTH: perm[8] = 'w'
-        if self.stat.st_mode & stat.S_IXOTH: perm[9] = 'x'
+        if stat.S_ISDIR(self.lstat.st_mode): perm[0] = "d"
+        elif stat.S_ISLNK(self.lstat.st_mode): perm[0] = "l"
+        elif stat.S_ISSOCK(self.lstat.st_mode): perm[0] = "s"
+        elif stat.S_ISFIFO(self.lstat.st_mode): perm[0] = "p"
+        elif stat.S_ISCHR(self.lstat.st_mode): perm[0] = "c"
+        elif stat.S_ISBLK(self.lstat.st_mode): perm[0] = "b"
+        if self.stat.st_mode & stat.S_IRUSR: perm[1] = "r"
+        if self.stat.st_mode & stat.S_IWUSR: perm[2] = "w"
+        if self.stat.st_mode & stat.S_IXUSR: perm[3] = "x"
+        if self.stat.st_mode & stat.S_IRGRP: perm[4] = "r"
+        if self.stat.st_mode & stat.S_IWGRP: perm[5] = "w"
+        if self.stat.st_mode & stat.S_IXGRP: perm[6] = "x"
+        if self.stat.st_mode & stat.S_IROTH: perm[7] = "r"
+        if self.stat.st_mode & stat.S_IWOTH: perm[8] = "w"
+        if self.stat.st_mode & stat.S_IXOTH: perm[9] = "x"
         return "".join(perm)
 
     def invalid_encoding_error(self):
@@ -1511,16 +1511,16 @@ class FileStat(object):
         nlink = self.stat.st_nlink
         user = self.get_user_name()
         group = self.get_group_name()
-        size = '{0} ({1})'.format(self.get_file_size(), self.stat.st_size)
+        size = "{0} ({1})".format(self.get_file_size(), self.stat.st_size)
         mtime = self.get_mtime()
         ret = message.confirm(
-            'Invalid encoding error. What do you do?',
-            ['ignore', 'delete'],
-            ["The file of invalid encoding status", '-'*100,
+            "Invalid encoding error. What do you do?",
+            ["ignore", "delete"],
+            ["The file of invalid encoding status", "-"*100,
              "Permission: {0}".format(perm), "Link: {0}".format(nlink),
              "User: {0}".format(user), "Group: {0}".format(group),
              "Size: {0}".format(size), "Time: {0}".format(mtime)])
-        if ret == 'delete':
+        if ret == "delete":
             import shutil
             if self.isdir():
                 shutil.rmtree(self.name)
@@ -1540,7 +1540,7 @@ class FileStat(object):
         size = self.stat.st_size
         mtime = self.get_mtime()
         name = self.name
-        fstat = '{0} {1} {2} {3} {4} {5} {6}'.format(perm, nlink, user, group, size, mtime, name)
+        fstat = "{0} {1} {2} {3} {4} {5} {6}".format(perm, nlink, user, group, size, mtime, name)
         fstat = util.mbs_ljust(fstat, cmdscr.getmaxyx()[1]-1)
         cmdscr.move(1, 0)
         cmdscr.addstr(fstat)

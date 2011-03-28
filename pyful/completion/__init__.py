@@ -66,9 +66,9 @@ class Completion(ui.InfoBox):
             except OSError:
                 continue
             for f in files:
-                if osname == 'cygwin':
+                if osname == "cygwin":
                     ext = util.extname(f)
-                    if ext != '.exe':
+                    if ext != ".exe":
                         continue
                     f = f.replace(ext, "")
                 self.programs.append(f)
@@ -243,10 +243,10 @@ class Parser(object):
             self.current_option = self.current_cmdline.split()[-1]
         self.longoptions = [arg for arg in
                             re.split("[\s=;|]", self.current_cmdline)
-                            if arg.startswith('--')]
+                            if arg.startswith("--")]
         self.options = [arg for arg in
                         re.split("[\s=;|]", self.current_cmdline)
-                        if arg.startswith('-')]
+                        if arg.startswith("-")]
         self.prgname = re.split("([\s])", self.current_cmdline.strip())[0]
 
     def now_in_quote(self):

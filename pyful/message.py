@@ -59,7 +59,7 @@ class Message(ui.Component):
     def puts(self, string, timex=3):
         self.active = True
         msg = re.sub(r"[\n\r\t]", "", util.U(string))
-        self.msg.insert(0, ui.InfoBoxContext(msg, attr=look.colors['PutsMessage']))
+        self.msg.insert(0, ui.InfoBoxContext(msg, attr=look.colors["PutsMessage"]))
         if self.history < len(self.msg):
             self.msg.pop()
         self.view()
@@ -69,7 +69,7 @@ class Message(ui.Component):
     def error(self, string, timex=3):
         self.active = True
         msg = re.sub(r"[\n\r\t]", "", util.U(string))
-        self.msg.insert(0, ui.InfoBoxContext(msg, attr=look.colors['ErrorMessage']))
+        self.msg.insert(0, ui.InfoBoxContext(msg, attr=look.colors["ErrorMessage"]))
         if self.history < len(self.msg):
             self.msg.pop()
         self.view()
@@ -77,7 +77,7 @@ class Message(ui.Component):
             self.start_timer(timex)
 
     def exception(self, except_cls):
-        self.error('{0}: {1}'.format(except_cls.__class__.__name__, except_cls))
+        self.error("{0}: {1}".format(except_cls.__class__.__name__, except_cls))
 
     def confirm(self, msg, options, msglist=None, position=0):
         cnf = Confirm(msg, options, msglist)
@@ -110,7 +110,7 @@ class MessageBox(ui.InfoBox):
     def resize(self):
         y, x = self.stdscr.getmaxyx()
         self.win = curses.newwin(self.height+2, x, y-self.height-4, 0)
-        self.win.bkgd(look.colors['MessageWindow'])
+        self.win.bkgd(look.colors["MessageWindow"])
 
 class Confirm(object):
     keymap = {}
@@ -159,7 +159,7 @@ class Confirm(object):
         cmdscr.move(0, 1)
 
         size = len(self.options)
-        cmdscr.addstr(self.msg+" ", look.colors['ConfirmMessage'])
+        cmdscr.addstr(self.msg+" ", look.colors["ConfirmMessage"])
         if self.cursor < 0:
             self.cursor = 0
         elif self.cursor > size - 1:

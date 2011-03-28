@@ -25,19 +25,19 @@ import unicodedata
 try:
     unicode
     def U(string):
-        return string.decode('utf-8')
+        return string.decode("utf-8")
 
     def force_decode(string):
         try:
-            return string.decode('utf-8')
+            return string.decode("utf-8")
         except UnicodeError:
             try:
-                return string.decode('cp932')
+                return string.decode("cp932")
             except UnicodeError:
-                return string.decode('ascii')
+                return string.decode("ascii")
 except:
     def U(string):
-        string.encode('utf-8')
+        string.encode("utf-8")
         return string
     def force_decode(string):
         return string

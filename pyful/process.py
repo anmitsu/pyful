@@ -110,7 +110,7 @@ class Process(object):
             Popen(["screen", "-t", title, self.shell[0], self.shell[1], cmd])
         else:
             Popen(["screen", "-t", title, self.shell[0], self.shell[1],
-                   "{0}; {1} -e".format(cmd, Pyful.environs['SCRIPT'])])
+                   "{0}; {1} -e".format(cmd, Pyful.environs["SCRIPT"])])
         message.puts("Spawn: {0} (screen)".format(cmd.strip()))
 
     def terminal(self, cmd):

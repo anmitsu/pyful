@@ -29,7 +29,7 @@ from pyful import ui
 from pyful import util
 
 class Shell(object):
-    prompt = '$'
+    prompt = "$"
 
     def complete(self, comp):
         return comp.comp_program_options()
@@ -38,7 +38,7 @@ class Shell(object):
         process.spawn(cmd, expandmacro=False)
 
 class Eval(object):
-    prompt = 'Eval:'
+    prompt = "Eval:"
 
     def complete(self, comp):
         return comp.comp_python_builtin_functions()
@@ -47,7 +47,7 @@ class Eval(object):
         process.python(cmd)
 
 class Mx(object):
-    prompt = 'M-x'
+    prompt = "M-x"
 
     def complete(self, comp):
         return comp.comp_pyful_commands()
@@ -75,7 +75,7 @@ class ChangeLooks(object):
             message.error("`{0}' looks doesn't exist".format(name))
 
 class ChangeWorkspaceTitle(object):
-    prompt = 'Change workspace title:'
+    prompt = "Change workspace title:"
 
     def complete(self, comp):
         return comp.comp_files()
@@ -84,7 +84,7 @@ class ChangeWorkspaceTitle(object):
         ui.getcomponent("Filer").workspace.chtitle(title)
 
 class Chdir(object):
-    prompt = 'Chdir to:'
+    prompt = "Chdir to:"
 
     def complete(self, comp):
         return comp.comp_dirs()
@@ -102,7 +102,7 @@ class Chmod(object):
             return "Chmod ({0} - {1:#o}):".format(filer.file.name, filer.file.stat.st_mode)
 
     def complete(self, comp):
-        symbols = ['+r', '-r', '+w', '-w', '+x', '-x']
+        symbols = ["+r", "-r", "+w", "-w", "+x", "-x"]
         return sorted([symb for symb in symbols if symb.startswith(comp.parser.part[1])])
 
     def execute(self, mode):
@@ -117,17 +117,17 @@ class Chmod(object):
         filer.workspace.all_reload()
 
     def _getmode(self, st, mode):
-        if mode == '+r':
+        if mode == "+r":
             return "{0:#o}".format(st.st_mode | 0o400)
-        elif mode == '-r':
+        elif mode == "-r":
             return "{0:#o}".format(st.st_mode & 0o377)
-        elif mode == '+w':
+        elif mode == "+w":
             return "{0:#o}".format(st.st_mode | 0o200)
-        elif mode == '-w':
+        elif mode == "-w":
             return "{0:#o}".format(st.st_mode & 0o577)
-        elif mode == '+x':
+        elif mode == "+x":
             return "{0:#o}".format(st.st_mode | 0o111)
-        elif mode == '-x':
+        elif mode == "-x":
             return "{0:#o}".format(st.st_mode & 0o666)
         else:
             return mode
@@ -271,7 +271,7 @@ class GlobDir(object):
             filer.dir.globdir(pattern)
 
 class Help(object):
-    prompt = 'Help:'
+    prompt = "Help:"
 
     def complete(self, comp):
         return comp.comp_pyful_commands()
@@ -366,7 +366,7 @@ class Mask(object):
             filer.dir.mask(r)
 
 class Menu(object):
-    prompt = 'Menu name:'
+    prompt = "Menu name:"
 
     def complete(self, comp):
         return sorted([item for item in ui.getcomponent("Menu").items.keys()
@@ -434,7 +434,7 @@ class Newfile(object):
         filer.dir.setcursor(filer.dir.get_index(path))
 
 class OpenListfile(object):
-    prompt = 'Open list file:'
+    prompt = "Open list file:"
 
     def complete(self, comp):
         return comp.comp_files()
@@ -444,7 +444,7 @@ class OpenListfile(object):
         if os.path.exists(path):
             filer.dir.open_listfile(path)
         else:
-            message.error('No such list file: ' + path)
+            message.error("No such list file: " + path)
 
 class Rename(object):
     def __init__(self, path=None):
@@ -675,16 +675,16 @@ class Tar(object):
         filer = ui.getcomponent("Filer")
         if filer.dir.ismark() or self.each:
             if self.wrap is None:
-                return 'Mark files wrap is:'
+                return "Mark files wrap is:"
             else:
                 if self.each:
-                    return 'Mark files {0} each to:'.format(self.tarmode)
+                    return "Mark files {0} each to:".format(self.tarmode)
                 else:
-                    return 'Mark files {0} to:'.format(self.tarmode)
+                    return "Mark files {0} to:".format(self.tarmode)
         elif self.src is None:
-            return '{0} from:'.format(self.tarmode)
+            return "{0} from:".format(self.tarmode)
         else:
-            return '{0} from {1} to:'.format(self.tarmode, self.src)
+            return "{0} from {1} to:".format(self.tarmode, self.src)
 
     def complete(self, comp):
         return comp.comp_files()
@@ -726,11 +726,11 @@ class UnTar(object):
     def prompt(self):
         filer = ui.getcomponent("Filer")
         if filer.dir.ismark():
-            return 'Mark files untar to:'
+            return "Mark files untar to:"
         elif self.src is None:
-            return 'Untar from:'
+            return "Untar from:"
         else:
-            return 'Untar from {0} to:'.format(self.src)
+            return "Untar from {0} to:".format(self.src)
 
     def complete(self, comp):
         return comp.comp_files()
@@ -750,21 +750,21 @@ class UnTar(object):
             filer.workspace.all_reload()
 
 class WebSearch(object):
-    def __init__(self, engine='Google'):
+    def __init__(self, engine="Google"):
         self.engine = engine
 
     @property
     def prompt(self):
-        return '{0} search:'.format(self.engine)
+        return "{0} search:".format(self.engine)
 
     def complete(self, comp):
         return comp.comp_files()
 
     def execute(self, word):
         import webbrowser
-        if self.engine == 'Google':
-            word = word.replace(' ', '+')
-            search = 'http://www.google.com/search?&q={0}'.format(word)
+        if self.engine == "Google":
+            word = word.replace(" ", "+")
+            search = "http://www.google.com/search?&q={0}".format(word)
         else:
             pass
         try:
@@ -783,16 +783,16 @@ class Zip(object):
         filer = ui.getcomponent("Filer")
         if filer.dir.ismark() or self.each:
             if self.wrap is None:
-                return 'Mark files wrap is:'
+                return "Mark files wrap is:"
             else:
                 if self.each:
-                    return 'Mark files zip each to:'
+                    return "Mark files zip each to:"
                 else:
-                    return 'Mark files zip to:'
+                    return "Mark files zip to:"
         elif self.src is None:
-            return 'Zip from:'
+            return "Zip from:"
         else:
-            return 'Zip from {0} to:'.format(self.src)
+            return "Zip from {0} to:".format(self.src)
 
     def complete(self, comp):
         return comp.comp_files()
@@ -806,7 +806,7 @@ class Zip(object):
                 if self.each:
                     cmdline.restart(filer.workspace.nextdir.path)
                 else:
-                    ext = '.zip'
+                    ext = ".zip"
                     zippath = os.path.join(filer.workspace.nextdir.path, self.wrap + ext)
                     cmdline.restart(zippath, -len(ext))
             else:
@@ -819,7 +819,7 @@ class Zip(object):
             if not path:
                 return
             self.src = path
-            ext = '.zip'
+            ext = ".zip"
             zippath = os.path.join(filer.workspace.nextdir.path, self.src + ext)
             cmdline.restart(zippath, -len(ext))
         else:
@@ -834,11 +834,11 @@ class UnZip(object):
     def prompt(self):
         filer = ui.getcomponent("Filer")
         if filer.dir.ismark():
-            return 'Mark files unzip to:'
+            return "Mark files unzip to:"
         elif self.src is None:
-            return 'Unzip from:'
+            return "Unzip from:"
         else:
-            return 'Unzip from {0} to:'.format(self.src)
+            return "Unzip from {0} to:".format(self.src)
 
     def complete(self, comp):
         return comp.comp_files()
@@ -858,7 +858,7 @@ class UnZip(object):
             filer.workspace.all_reload()
 
 class ZoomInfoBox(object):
-    prompt = 'Zoom infobox:'
+    prompt = "Zoom infobox:"
 
     def complete(self, comp):
         return [str(x*10) for x in range(-10, 11) if str(x*10).startswith(comp.parser.part[1])]

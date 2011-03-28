@@ -152,7 +152,7 @@ class Look(object):
 Look.mylook = "default"
 
 def _init_color_table():
-    for (name, v) in looks['default'].items():
+    for (name, v) in looks["default"].items():
         colors[name] = v[2]
 _init_color_table()
 
