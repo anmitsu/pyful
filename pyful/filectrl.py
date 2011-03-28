@@ -426,7 +426,7 @@ class UntarThread(JobThread):
         if not os.path.exists(self.dstdir):
             try:
                 os.makedirs(self.dstdir)
-            except OSError:
+            except OSError as e:
                 self.error = e
                 return
         try:
@@ -475,7 +475,7 @@ class UnzipThread(JobThread):
         if not os.path.exists(self.dstdir):
             try:
                 os.makedirs(self.dstdir)
-            except OSError:
+            except OSError as e:
                 self.error = e
                 return
         try:
