@@ -670,10 +670,9 @@ class DeleteThread(JobThread):
             yield path
         else:
             self.dirlist.append(path)
-            for root, dirs, files in os.walk(path):
-                for f in files:
-                    yield os.path.join(root, f)
-                self.dirlist.extend(os.path.join(root, d) for d in dirs)
+            for sub in os.listdir(path):
+                for f in self.generate(os.path.join(path, sub)):
+                    yield f
 
 class CopyThread(JobThread):
     def __init__(self, src, dst):
