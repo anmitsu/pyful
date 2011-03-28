@@ -67,9 +67,6 @@ class Pyful(object):
         self.menu = Menu()
         self.help = Help()
 
-        from pyful.process import view_process
-        self.view_process = view_process
-
     def init_function(self):
         for func in self.initfuncs: func()
 
@@ -113,7 +110,6 @@ class Pyful(object):
             self.help.view()
         elif self.message.is_active:
             self.message.view()
-        self.view_process()
         curses.doupdate()
 
     def input(self, meta, key):

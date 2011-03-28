@@ -17,6 +17,8 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import curses
+import threading
+import time
 import os
 import re
 from subprocess import Popen, PIPE
@@ -38,21 +40,9 @@ def python(cmd):
 def system(cmd):
     Process().system(cmd)
 
-def view_process():
-    for p in Process.procs:
-        poll = p.poll()
-        if poll == 0:
-            Process.procs.remove(p)
-        elif poll != None:
-            (out, err) = p.communicate()
-            if err:
-                message.error(err)
-            Process.procs.remove(p)
-
 class Process(object):
     shell = ("/bin/bash", "-c")
     terminal_emulator = ("x-terminal-emulator", "-e")
-    procs = []
 
     def __init__(self):
         self.quick = False
@@ -94,8 +84,8 @@ class Process(object):
             try:
                 proc = Popen(cmd, shell=True, executable=self.shell[0],
                              close_fds=True, preexec_fn=os.setsid, stdout=PIPE, stderr=PIPE)
-                self.procs.append(proc)
                 message.puts("Spawn: {0} ({1})".format(cmd.strip(), proc.pid))
+                ProcessViewThread(proc, cmd).start()
             except Exception as e:
                 message.exception(e)
         else:
@@ -139,3 +129,39 @@ class Process(object):
             self.exterminal = True
             ret = re.sub(r"(?!\\)%T", "", ret)
         return ret
+
+class ProcessViewThread(threading.Thread):
+    def __init__(self, proc, name):
+        threading.Thread.__init__(self)
+        self.setDaemon(True)
+        self.proc = proc
+        self.name = name.strip()
+
+    def run(self):
+        while self.proc.poll() is None:
+            time.sleep(1)
+        out, err = self.proc.communicate()
+        if out:
+            self.view_output(out)
+        if err:
+            self.view_error(err)
+
+    def view_output(self, out):
+        try:
+            out = out.decode()
+        except UnicodeError:
+            out = "Invalid encoding error"
+        for line in out.split(os.linesep):
+            if line:
+                message.puts("{0} - ({1})".format(line, self.name))
+        curses.doupdate()
+
+    def view_error(self, err):
+        try:
+            err = err.decode()
+        except UnicodeError:
+            err = "Invalid encoding error"
+        for line in err.split(os.linesep):
+            if line:
+                message.error("{0} - ({1})".format(line, self.name))
+        curses.doupdate()

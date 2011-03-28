@@ -27,7 +27,6 @@ import grp
 import errno
 
 from pyful import message
-from pyful import process
 from pyful import ui
 from pyful import util
 
@@ -240,7 +239,6 @@ class Subloop(object):
         else:
             self.message.view()
             self.subthreads_view()
-        process.view_process()
         curses.doupdate()
 
     def run(self):
