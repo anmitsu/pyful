@@ -213,14 +213,14 @@ class InfoBox(Component):
                 return
             self.scrolltop += amount
             if self.cursor < self.scrolltop:
-                self.cursor = self.scrolltop
+                self.cursor += amount
         else:
             if self.scrolltop == 0:
                 return
             self.scrolltop += amount
             bottom += amount
             if self.cursor >= bottom:
-                self.cursor = bottom - 1
+                self.cursor += amount
 
     def mvcursor(self, amount):
         self.cursor += amount
