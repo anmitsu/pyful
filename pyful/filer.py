@@ -219,23 +219,23 @@ class Filer(ui.Component):
     def savefile(self, path):
         path = os.path.expanduser(path)
         try:
-            f = open(path, 'w')
-        except IOError:
-            os.makedirs(util.unix_dirname(path))
-            f = open(path, 'w')
-        f.write('[workspace size]'+os.linesep)
-        f.write(str(len(self.workspaces))+os.linesep)
+            os.makedirs(os.path.dirname(path))
+        except OSError:
+            pass
+        lines = ["[workspace size]", str(len(self.workspaces))]
         for ws in self.workspaces:
-            f.write('[workspace title]'+os.linesep)
-            f.write(ws.title+os.linesep)
-            f.write('[workspace size]'+os.linesep)
-            f.write(str(len(ws.dirs))+os.linesep)
+            lines.extend(
+                ["[workspace title]", ws.title,
+                 "[directory size]", str(len(ws.dirs))])
             for d in ws.dirs:
-                f.write('[workspace path]'+os.linesep)
-                f.write(d.path+os.linesep)
-                f.write('[sort kind]'+os.linesep)
-                f.write(d.sort_kind+os.linesep)
-        f.close()
+                lines.extend(
+                    ["[directory title]", d.path,
+                     "[sort kind]", d.sort_kind])
+        try:
+            with open(path, "w") as f:
+                f.write("\n".join(lines))
+        except IOError:
+            return
 
     def loadfile(self, path):
         try:
