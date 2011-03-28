@@ -361,12 +361,12 @@ class History(ui.InfoBox):
         dirname = util.unix_dirname(path)
         try:
             os.makedirs(dirname)
-        except OSError as e:
-            return
+        except OSError:
+            pass
         try:
             with open(path, "w") as f:
                 f.write("\n".join(self.gethistory(key)))
-        except IOError as e:
+        except IOError:
             return
 
     def gethistory(self, key=None):
@@ -449,8 +449,8 @@ class Clipboard(ui.InfoBox):
         dirname = util.unix_dirname(path)
         try:
             os.makedirs(dirname)
-        except OSError as e:
-            return
+        except OSError:
+            pass
         try:
             with open(path, "w") as f:
                 f.write("\n".join(self.clip))
