@@ -38,7 +38,7 @@ class Pyful(object):
     environs = {
         "EDITOR": "vim",
         "PAGER": "less",
-        "RCFILE": "~/.pyful/rc.py",
+        "RCFILE": os.path.join(os.getenv("HOME"), ".pyful", "rc.py"),
         "SCRIPT": "",
         }
     initfuncs = []
