@@ -16,53 +16,52 @@
 
 from pyful import completion
 
-class Cp(completion.CompletionFunction):
-    def __init__(self, comp):
-        arguments = {
-            "--archive": comp.comp_files,
-            "--copy-contents": comp.comp_files,
-            "--dereference": comp.comp_files,
-            "--force": comp.comp_files,
-            "--interactive": comp.comp_files,
-            "--link": comp.comp_files,
-            "--one-file-system": comp.comp_files,
-            "--parents": comp.comp_files,
-            "--recursive": comp.comp_files,
-            "--remove-destination": comp.comp_files,
-            "--strip-trailing-slashes": comp.comp_files,
-            "--symbolic-link": comp.comp_files,
-            "--update": comp.comp_files,
-            "--verbose": comp.comp_files,
-            "-H": comp.comp_files,
-            "-L": comp.comp_files,
-            "-P": comp.comp_files,
+class Cp(completion.ShellCompletionFunction):
+    def __init__(self):
+        self.arguments = {
+            "--archive": self.comp_files,
+            "--copy-contents": self.comp_files,
+            "--dereference": self.comp_files,
+            "--force": self.comp_files,
+            "--interactive": self.comp_files,
+            "--link": self.comp_files,
+            "--one-file-system": self.comp_files,
+            "--parents": self.comp_files,
+            "--recursive": self.comp_files,
+            "--remove-destination": self.comp_files,
+            "--strip-trailing-slashes": self.comp_files,
+            "--symbolic-link": self.comp_files,
+            "--update": self.comp_files,
+            "--verbose": self.comp_files,
+            "-H": self.comp_files,
+            "-L": self.comp_files,
+            "-P": self.comp_files,
             "-S": [],
-            "-R": comp.comp_files,
-            "-b": comp.comp_files,
-            "-d": comp.comp_files,
-            "-p": comp.comp_files,
-            "-a": comp.comp_files,
-            "-f": comp.comp_files,
-            "-i": comp.comp_files,
-            "-l": comp.comp_files,
-            "-r": comp.comp_files,
-            "-s": comp.comp_files,
-            "-u": comp.comp_files,
-            "-v": comp.comp_files,
-            "-x": comp.comp_files,
+            "-R": self.comp_files,
+            "-b": self.comp_files,
+            "-d": self.comp_files,
+            "-p": self.comp_files,
+            "-a": self.comp_files,
+            "-f": self.comp_files,
+            "-i": self.comp_files,
+            "-l": self.comp_files,
+            "-r": self.comp_files,
+            "-s": self.comp_files,
+            "-u": self.comp_files,
+            "-v": self.comp_files,
+            "-x": self.comp_files,
             "--backup=": ["existing", "never", "nil", "none", "numbered", "off", "simple", "t"],
-            "--help": comp.comp_files,
+            "--help": self.comp_files,
             "--no-preserve=": ["all", "links", "mode", "ownership", "timestamps"],
             "--preserve=": ["all", "links", "mode", "ownership", "timestamps"],
             "--reply=": ["no", "query", "yes"],
             "--sparse=": ["always", "auto", "never"],
             "--suffix": [],
-            "--target-directory=": comp.comp_dirs,
-            "--version": comp.comp_files,
+            "--target-directory=": self.comp_dirs,
+            "--version": self.comp_files,
             }
-        completion.CompletionFunction.__init__(self, comp, arguments)
 
     def default(self):
-        return self.comp.comp_files()
+        return self.comp_files()
 
 completion.register("cp", Cp)

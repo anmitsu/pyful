@@ -25,7 +25,7 @@ def _pkgnames(s):
             ["apt-cache", "pkgnames"],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE
             ).communicate()
-    except Exception as e:
+    except Exception:
         return []
     try:
         out = out.decode()
@@ -39,7 +39,7 @@ def _dpkglist(s):
             ["dpkg", "-l"],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE
             ).communicate()
-    except Exception as e:
+    except Exception:
         return []
     try:
         out = out.decode()
@@ -48,49 +48,47 @@ def _dpkglist(s):
     return [line.split()[1] for line in out.split(os.linesep)[5:]
             if len(line) > 2 and line[1].startswith(s)]
 
-class AptGet(completion.CompletionFunction):
-    def __init__(self, comp):
-        arguments = {
+class AptGet(completion.ShellCompletionFunction):
+    def __init__(self):
+        self.arguments = {
             "autoclean"      : [],
-            "autoremove"     : lambda: _dpkglist(self.comp.parser.part[1]),
-            "build-dep"      : lambda: _pkgnames(self.comp.parser.part[1]),
+            "autoremove"     : lambda: _dpkglist(self.parser.part[1]),
+            "build-dep"      : lambda: _pkgnames(self.parser.part[1]),
             "check"          : [],
             "clean"          : [],
             "dist-upgrade"   : [],
             "dselect-upgrade": [],
-            "install"        : lambda: _pkgnames(self.comp.parser.part[1]),
-            "purge"          : lambda: _dpkglist(self.comp.parser.part[1]),
-            "remove"         : lambda: _dpkglist(self.comp.parser.part[1]),
-            "source"         : lambda: _pkgnames(self.comp.parser.part[1]),
+            "install"        : lambda: _pkgnames(self.parser.part[1]),
+            "purge"          : lambda: _dpkglist(self.parser.part[1]),
+            "remove"         : lambda: _dpkglist(self.parser.part[1]),
+            "source"         : lambda: _pkgnames(self.parser.part[1]),
             "update"         : [],
             "upgrade"        : [],
             "help"           : [],
             }
-        completion.CompletionFunction.__init__(self, comp, arguments)
 
-class AptCache(completion.CompletionFunction):
-    def __init__(self, comp):
-        arguments = {
+class AptCache(completion.ShellCompletionFunction):
+    def __init__(self):
+        self.arguments = {
             "add"      : [],
-            "depends"  : lambda: _pkgnames(self.comp.parser.part[1]),
-            "dotty"    : lambda: _pkgnames(self.comp.parser.part[1]),
+            "depends"  : lambda: _pkgnames(self.parser.part[1]),
+            "dotty"    : lambda: _pkgnames(self.parser.part[1]),
             "dump"     : [],
             "dumpavail": [],
             "gencaches": [],
             "help"     : [],
-            "madison"  : lambda: _pkgnames(self.comp.parser.part[1]),
+            "madison"  : lambda: _pkgnames(self.parser.part[1]),
             "pkgnames" : [],
-            "policy"   : lambda: _pkgnames(self.comp.parser.part[1]),
-            "rdepends" : lambda: _pkgnames(self.comp.parser.part[1]),
+            "policy"   : lambda: _pkgnames(self.parser.part[1]),
+            "rdepends" : lambda: _pkgnames(self.parser.part[1]),
             "search"   : [],
-            "show"     : lambda: _pkgnames(self.comp.parser.part[1]),
-            "showpkg"  : lambda: _pkgnames(self.comp.parser.part[1]),
-            "showsrc"  : lambda: _pkgnames(self.comp.parser.part[1]),
+            "show"     : lambda: _pkgnames(self.parser.part[1]),
+            "showpkg"  : lambda: _pkgnames(self.parser.part[1]),
+            "showsrc"  : lambda: _pkgnames(self.parser.part[1]),
             "stats"    : [],
             "unmet"    : [],
-            "xvcg"     : lambda: _pkgnames(self.comp.parser.part[1]),
+            "xvcg"     : lambda: _pkgnames(self.parser.part[1]),
             }
-        completion.CompletionFunction.__init__(self, comp, arguments)
 
 completion.register("apt-get", AptGet)
 completion.register("apt-cache", AptCache)

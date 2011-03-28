@@ -32,7 +32,7 @@ class Shell(object):
     prompt = "$"
 
     def complete(self, comp):
-        return comp.comp_program_options()
+        return comp.complete()
 
     def execute(self, cmd):
         process.spawn(cmd, expandmacro=False)

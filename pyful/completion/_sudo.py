@@ -16,47 +16,49 @@
 
 from pyful import completion
 
-class Sudo(completion.CompletionFunction):
-    def __init__(self, comp):
-        arguments = {
-            "-E": comp.comp_programs,
-            "-H": comp.comp_programs,
-            "-K": comp.comp_programs,
-            "-L": comp.comp_programs,
-            "-P": comp.comp_programs,
-            "-S": comp.comp_programs,
-            "-V": comp.comp_programs,
+class Sudo(completion.ShellCompletionFunction):
+    def __init__(self):
+        self.arguments = {
+            "-E": self.comp_programs,
+            "-H": self.comp_programs,
+            "-K": self.comp_programs,
+            "-L": self.comp_programs,
+            "-P": self.comp_programs,
+            "-S": self.comp_programs,
+            "-V": self.comp_programs,
             "-a": [],
-            "-b": comp.comp_programs,
+            "-b": self.comp_programs,
             "-c": [],
-            "-h": comp.comp_programs,
-            "-i": comp.comp_programs,
-            "-k": comp.comp_programs,
-            "-l": comp.comp_programs,
+            "-h": self.comp_programs,
+            "-i": self.comp_programs,
+            "-k": self.comp_programs,
+            "-l": self.comp_programs,
             "-p": [],
             "-r": [],
-            "-s": comp.comp_programs,
-            "-v": comp.comp_programs,
+            "-s": self.comp_programs,
+            "-v": self.comp_programs,
             }
-        completion.CompletionFunction.__init__(self, comp, arguments)
 
     def default(self):
-        return self.comp.comp_programs()+self.comp.comp_files()
+        progs = self.comp_programs()
+        if progs:
+            return progs
+        return self.comp_files()
 
     def comp_other_prgs(self):
-        for arg in reversed(self.comp.parser.current_cmdline.split()):
+        for arg in reversed(self.parser.current_cmdline.split()):
             if arg != "sudo" and arg in completion.compfunctions:
-                return completion.compfunctions[arg](self.comp).complete()
+                return completion.compfunctions[arg]().complete()
 
     def complete(self):
         candidate = self.comp_other_prgs()
         if candidate:
             return candidate
 
-        if self.comp.parser.part[1].startswith("-"):
+        if self.parser.part[1].startswith("-"):
             return self.options()
 
-        value = self.arguments.get(self.comp.parser.current_option, self.default)
+        value = self.arguments.get(self.parser.current_option, self.default)
         if hasattr(value, "__call__"):
             return value()
         else:

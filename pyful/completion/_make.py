@@ -18,17 +18,17 @@ import os
 
 from pyful import completion
 
-class Make(completion.CompletionFunction):
-    def __init__(self, comp):
-        arguments = {
-            "--directory=": lambda: self.comp.comp_dirs(),
+class Make(completion.ShellCompletionFunction):
+    def __init__(self):
+        self.arguments = {
+            "--directory=": self.comp_dirs,
             "--debug": [],
             "--environment-overrides": [],
-            "--file=": lambda: self.comp.comp_files(),
-            "--makefile=": lambda: self.comp.comp_files(),
+            "--file=": self.comp_files,
+            "--makefile=": self.comp_files,
             "--help": [],
             "--ignore-errors": [],
-            "--include-dir=": lambda: self.comp.comp_dirs(),
+            "--include-dir=": self.comp_dirs,
             "--jobs=": [],
             "--keep-going": [],
             "--load-average=": [],
@@ -36,8 +36,8 @@ class Make(completion.CompletionFunction):
             "--just-print": [],
             "--dry-run": [],
             "--recon": [],
-            "--old-file=": lambda: self.comp.comp_files(),
-            "--assume-old=": lambda: self.comp.comp_files(),
+            "--old-file=": self.comp_files,
+            "--assume-old=": self.comp_files,
             "--print-data-base": [],
             "--question": [],
             "--no-builtin-rules": [],
@@ -49,25 +49,24 @@ class Make(completion.CompletionFunction):
             "--version": [],
             "--print-directory": [],
             "--no-print-directory": [],
-            "--what-if=": lambda: self.comp.comp_files(),
-            "--new-file=": lambda: self.comp.comp_files(),
-            "--assume-new=": lambda: self.comp.comp_files(),
+            "--what-if=": self.comp_files,
+            "--new-file=": self.comp_files,
+            "--assume-new=": self.comp_files,
             "--warn-undefined-variables": [],
-
             "-b": [],
             "-m": [],
-            "-C": lambda: self.comp.comp_dirs(),
+            "-C": self.comp_dirs,
             "-d": [],
             "-e": [],
-            "-f": lambda: self.comp.comp_files(),
+            "-f": self.comp_files,
             "-h": [],
             "-i": [],
-            "-I": lambda: self.comp.comp_dirs(),
+            "-I": self.comp_dirs,
             "-j": [],
             "-k": [],
             "-l": [],
             "-n": [],
-            "-o": lambda: self.comp.comp_files(),
+            "-o": self.comp_files,
             "-p": [],
             "-q": [],
             "-r": [],
@@ -76,9 +75,8 @@ class Make(completion.CompletionFunction):
             "-t": [],
             "-v": [],
             "-w": [],
-            "-W": lambda: self.comp.comp_files(),
+            "-W": self.comp_files,
             }
-        completion.CompletionFunction.__init__(self, comp, arguments)
 
     def default(self):
         fname = ""
@@ -95,7 +93,7 @@ class Make(completion.CompletionFunction):
             for line in f:
                 tmp = line.split(":")
                 if len(tmp) == 2 and "$" not in tmp[0] and "\t" not in tmp[0] and not tmp[0].startswith("#"):
-                    if tmp[0].startswith(self.comp.parser.part[1]):
+                    if tmp[0].startswith(self.parser.part[1]):
                         command.append(tmp[0])
         return sorted(command)
 

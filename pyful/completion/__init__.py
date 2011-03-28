@@ -43,11 +43,12 @@ def _extendcompfunctions():
 _extendcompfunctions()
 
 class Completion(ui.InfoBox):
+    programs = []
+
     def __init__(self, cmdline):
         ui.InfoBox.__init__(self, "Completion")
         self.cmdline = cmdline
         self.parser = None
-        self.programs = []
         self.loadprograms()
 
     def input(self, meta, key):
@@ -59,7 +60,7 @@ class Completion(ui.InfoBox):
 
     def loadprograms(self):
         osname = sys.platform
-        self.programs[:] = []
+        self.__class__.programs[:] = []
         for path in os.getenv("PATH").split(os.pathsep):
             try:
                 files = os.listdir(path)
@@ -94,86 +95,17 @@ class Completion(ui.InfoBox):
         self.cmdline.cursor = util.mbslen(self.parser.part[0]+string)
         self.finish()
 
-    def _update_completion_path(self):
-        def _dirname(path_):
-            if path_.endswith(os.sep):
-                return path_
-            else:
-                dname = os.path.dirname(path_)
-                if dname.endswith(os.sep) or not dname:
-                    return dname
-                else:
-                    return dname + os.sep
-        path = self.parser.part[1]
-        if self.cmdline.mode.__class__.__name__ == "Shell" and \
-                not self.parser.now_in_quote():
-            self.parser.part[0] += _dirname(util.string_to_safe(path))
-        else:
-            self.parser.part[0] += _dirname(path)
-        bname = os.path.basename(path)
-        dpath = os.path.expanduser(util.abspath(os.path.dirname(path)))
-        return (bname, dpath)
-
-    def comp_files(self):
-        bname, dpath = self._update_completion_path()
-        try:
-            files = os.listdir(dpath)
-        except OSError:
-            return []
-        def func(f):
-            if os.path.isdir(os.path.join(dpath, f)):
-                return f + os.sep
-            else:
-                return f
-        return sorted([func(f) for f in files if f.startswith(bname)])
-
-    def comp_dirs(self):
-        bname, dpath = self._update_completion_path()
-        try:
-            files = os.listdir(dpath)
-        except OSError:
-            return []
-        return sorted([f+os.sep for f in files if f.startswith(bname) and
-                       os.path.isdir(os.path.join(dpath, f))])
-
-    def comp_username(self):
-        return sorted([usrname for usrname in [p[0] for p in pwd.getpwall()]
-                       if usrname.startswith(self.parser.part[1])])
-
-    def comp_groupname(self):
-        return sorted([grpname for grpname in [g[0] for g in grp.getgrall()]
-                       if grpname.startswith(self.parser.part[1])])
-
-    def comp_programs(self):
-        return sorted([item for item in self.programs
-                       if item.startswith(self.parser.part[1])])
-
-    def comp_pyful_commands(self):
-        from pyful.command import commands
-        return sorted([cmd for cmd in commands.keys()
-                       if cmd.startswith(self.parser.part[1])])
-
-    def comp_python_builtin_functions(self):
-        return sorted([func for func in __builtins__.keys()
-                       if func.startswith(self.parser.part[1])])
-
-    def comp_program_options(self):
-        if self.parser.prgname in compfunctions:
-            option = compfunctions[self.parser.prgname](self)
-            return option.complete()
-        elif self.parser.prgname == "":
-            return self.comp_programs()
-        else:
-            return self.comp_files()
-
     def start(self):
         self.parser = Parser(self.cmdline.string, self.cmdline.cursor)
+        CompletionFunction.parser = self.parser
         if self.cmdline.mode.__class__.__name__ == "Shell":
             self.parser.parse()
+            compfunc = compfunctions.get(self.parser.prgname, ShellCompletionFunction)()
         else:
             self.parser.parse_nonshell()
+            compfunc = CompletionFunction()
 
-        candidate = self.cmdline.mode.complete(self)
+        candidate = self.cmdline.mode.complete(compfunc)
 
         if not isinstance(candidate, list) or len(candidate) == 0:
             return
@@ -268,9 +200,73 @@ class Parser(object):
         return (psq and fsq) or (pdq and fdq)
 
 class CompletionFunction(object):
-    def __init__(self, comp, arguments):
-        self.comp = comp
-        self.arguments = arguments
+    parser = None
+
+    def _update_completion_path(self):
+        def _dirname(path_):
+            if path_.endswith(os.sep):
+                return path_
+            else:
+                dname = os.path.dirname(path_)
+                if dname.endswith(os.sep) or not dname:
+                    return dname
+                else:
+                    return dname + os.sep
+        path = self.parser.part[1]
+        if issubclass(self.__class__, ShellCompletionFunction) and \
+                not self.parser.now_in_quote():
+            self.parser.part[0] += _dirname(util.string_to_safe(path))
+        else:
+            self.parser.part[0] += _dirname(path)
+        bname = os.path.basename(path)
+        dpath = os.path.expanduser(util.abspath(os.path.dirname(path)))
+        return (bname, dpath)
+
+    def comp_files(self):
+        bname, dpath = self._update_completion_path()
+        try:
+            files = os.listdir(dpath)
+        except OSError:
+            return []
+        def func(f):
+            if os.path.isdir(os.path.join(dpath, f)):
+                return f + os.sep
+            else:
+                return f
+        return sorted([func(f) for f in files if f.startswith(bname)])
+
+    def comp_dirs(self):
+        bname, dpath = self._update_completion_path()
+        try:
+            files = os.listdir(dpath)
+        except OSError:
+            return []
+        return sorted([f+os.sep for f in files if f.startswith(bname) and
+                       os.path.isdir(os.path.join(dpath, f))])
+
+    def comp_username(self):
+        return sorted([usrname for usrname in [p[0] for p in pwd.getpwall()]
+                       if usrname.startswith(self.parser.part[1])])
+
+    def comp_groupname(self):
+        return sorted([grpname for grpname in [g[0] for g in grp.getgrall()]
+                       if grpname.startswith(self.parser.part[1])])
+
+    def comp_programs(self):
+        return sorted([item for item in Completion.programs
+                       if item.startswith(self.parser.part[1])])
+
+    def comp_pyful_commands(self):
+        from pyful.command import commands
+        return sorted([cmd for cmd in commands.keys()
+                       if cmd.startswith(self.parser.part[1])])
+
+    def comp_python_builtin_functions(self):
+        return sorted([func for func in __builtins__.keys()
+                       if func.startswith(self.parser.part[1])])
+
+class ShellCompletionFunction(CompletionFunction):
+    arguments = None
 
     def default(self):
         return self.options()
@@ -278,15 +274,20 @@ class CompletionFunction(object):
     def options(self):
         return sorted(
             [opt for opt in self.arguments.keys()
-             if opt.startswith(self.comp.parser.part[1])
-             and not opt in self.comp.parser.options])
+             if opt.startswith(self.parser.part[1])
+             and not opt in self.parser.options])
 
     def complete(self):
-        if self.comp.parser.part[1].startswith("-"):
-            return self.options()
-
-        value = self.arguments.get(self.comp.parser.current_option, self.default)
-        if hasattr(value, "__call__"):
-            return value()
+        if self.arguments:
+            if self.parser.part[1].startswith("-"):
+                return self.options()
+            value = self.arguments.get(self.parser.current_option, self.default)
+            if hasattr(value, "__call__"):
+                return value()
+            else:
+                return value
         else:
-            return value
+            if self.parser.prgname == "":
+                return self.comp_programs()
+            else:
+                return self.comp_files()
