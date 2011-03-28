@@ -66,6 +66,9 @@ from pyful import Pyful
 from pyful import message
 from pyful import ui
 
+# Load completion functions
+from pyful.completion import *
+
 def run():
     options = option_parse()
 
