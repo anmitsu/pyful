@@ -24,7 +24,7 @@ This application is CUI filer of the keyboard operation for Linux.
 __version__ = "0.2.2"
 
 __all__ = ["cmdline", "command", "filectrl", "filer", "help", "keymap", "look",
-           "menu", "message", "mode", "process", "ui", "util"]
+           "menu", "message", "mode", "process", "ui", "util", "completion"]
 
 import curses
 import os
