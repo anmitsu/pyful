@@ -36,6 +36,7 @@ class Sudo(completion.ShellCompletionFunction):
             "-p": [],
             "-r": [],
             "-s": self.comp_programs,
+            "-u": self.comp_username,
             "-v": self.comp_programs,
             }
 
