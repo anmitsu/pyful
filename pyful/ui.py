@@ -186,7 +186,7 @@ class InfoBox(Component):
             cls.zoom = height - base
         elif height < 3:
             height = 3
-            cls.zoom = height - base - 2
+            cls.zoom = height - base
         cls.win = curses.newwin(height, x, y-height-2, 0)
         cls.win.bkgd(look.colors["InfoBoxWindow"])
 
