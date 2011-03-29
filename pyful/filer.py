@@ -1047,7 +1047,7 @@ class Directory(ui.StandardScreen):
         self.win.bkgd(look.colors["Window"])
         self.statwin.bkgd(look.colors["Window"])
 
-    def _revise_position(self, size, height):
+    def _fix_position(self, size, height):
         if self.cursor < 0:
             self.cursor = 0
         elif self.cursor >= size:
@@ -1137,7 +1137,7 @@ class Directory(ui.StandardScreen):
         self.win.erase()
         self.win.border(*self.borders)
         self._view_titlebar(width)
-        self._revise_position(size, height)
+        self._fix_position(size, height)
 
         if width < 30:
             return message.error("terminal size very small")
