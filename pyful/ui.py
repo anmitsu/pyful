@@ -269,7 +269,7 @@ class InfoBox(Component):
         if (meta, key) in self.keymap:
             self.keymap[(meta, key)]()
 
-    def _revise_position(self, size, height, infocount):
+    def _fix_position(self, size, height, infocount):
         if self.cursor >= size:
             self.cursor = 0
         elif self.cursor < -1:
@@ -318,7 +318,7 @@ class InfoBox(Component):
         infowidth = width // self.maxrow
         infocount = height * self.maxrow
 
-        self._revise_position(size, height, infocount)
+        self._fix_position(size, height, infocount)
 
         self.win.erase()
         self.win.border(*self.borders)
