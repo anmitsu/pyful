@@ -203,7 +203,7 @@ def _drivejump():
         for i, f in enumerate(files):
             num = str(i+1)
             title = "({0}) {1}".format(num, f)
-            menu.items["Drives"].append([title, ord(num), _wrap(f)])
+            menu.items["Drives"].append([title, num, _wrap(f)])
     menu.show("Drives")
 
 @defcmd
