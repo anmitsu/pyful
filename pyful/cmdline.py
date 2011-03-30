@@ -219,7 +219,7 @@ class Cmdline(ui.Component):
                 self.print_color_eval(cmd)
             else:
                 self.print_color_default(cmd)
-        except Exception as e:
+        except curses.error as e:
             message.error("curses error: " + str(e))
         cmdscr.move(0, curpos)
         cmdscr.noutrefresh()
