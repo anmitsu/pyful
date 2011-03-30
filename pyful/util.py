@@ -195,11 +195,17 @@ def unix_dirname(path):
     return os.path.dirname(path.rstrip(os.path.sep))
 
 def path_omission(path, width):
-    if termwidth(path) > width:
-        for name in U(path).split(os.sep)[:-1]:
-            if name:
-                path = path.replace(name, name[0], 1)
-            if termwidth(path) <= width:
+    pathwidth = termwidth(path)
+    if pathwidth <= width:
+        return path
+    for name in U(path).split(os.sep)[:-1]:
+        if not name:
+            continue
+        nlen = mbslen(name)
+        if nlen > 1:
+            path = path.replace(name, name[0], 1)
+            pathwidth -= nlen - 1
+            if pathwidth <= width:
                 break
     return path
 
