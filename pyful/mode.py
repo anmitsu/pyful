@@ -465,11 +465,7 @@ class Rename(Mode):
 
     @property
     def prompt(self):
-        try:
-            util.U(self.path)
-            return "Rename: {0} ->".format(self.path)
-        except UnicodeError:
-            return "Rename invalid encoding to:"
+        return "Rename: {0} ->".format(self.path)
 
     def complete(self, comp):
         return comp.comp_files()
