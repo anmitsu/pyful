@@ -34,11 +34,13 @@ def defcmd(func):
     commands[func.__name__.strip("_")] = func
     return func
 
-_image_filter = re.compile("\.(jpe?g|gif|png|bmp|tiff|jp2|j2c|svg|eps)$")
-_music_filter = re.compile("\.(ogg|mp3|flac|ape|tta|tak|mid|wma|wav)$")
-_video_filter = re.compile("\.(avi|mkv|mp4|mpe?g|wmv|asf|rm|ram|ra)$")
-_archive_filter = re.compile("\.(zip|rar|lzh|cab|tar|7z|gz|bz2|xz|taz|tgz|tbz|txz|yz2)$")
-_source_filter = re.compile("\.(py|rb|hs|el|js|lua|java|c|cc|cpp|cs|pl|php)$")
+_filters = {
+    "image": re.compile(r"\.(jpe?g|gif|png|bmp|tiff|jp2|j2c|svg|eps)$", re.I),
+    "music": re.compile(r"\.(ogg|mp3|flac|ape|tta|tak|mid|wma|wav)$", re.I),
+    "video": re.compile(r"\.(avi|mkv|mp4|mpe?g|wmv|asf|rm|ram|ra)$", re.I),
+    "archive": re.compile(r"\.(zip|rar|lzh|cab|tar|7z|gz|bz2|xz|taz|tgz|tbz|txz|yz2)$", re.I),
+    "source": re.compile(r"\.(py|rb|hs|el|js|lua|java|c|cc|cpp|cs|pl|php)$", re.I),
+    }
 
 # ----------------------------------------------------------------------
 # Utility commands:
@@ -831,27 +833,27 @@ def _mark_clear():
 @defcmd
 def _mark_source():
     """Mark source files in current directory."""
-    ui.getcomponent("Filer").dir.mark(_source_filter)
+    ui.getcomponent("Filer").dir.mark(_filters["source"])
 
 @defcmd
 def _mark_archive():
     """Mark archive files in current directory."""
-    ui.getcomponent("Filer").dir.mark(_archive_filter)
+    ui.getcomponent("Filer").dir.mark(_filters["archive"])
 
 @defcmd
 def _mark_image():
     """Mark image files in current directory. """
-    ui.getcomponent("Filer").dir.mark(_image_filter)
+    ui.getcomponent("Filer").dir.mark(_filters["image"])
 
 @defcmd
 def _mark_music():
     """Mark music files in current directory."""
-    ui.getcomponent("Filer").dir.mark(_music_filter)
+    ui.getcomponent("Filer").dir.mark(_filters["music"])
 
 @defcmd
 def _mark_video():
     """Mark video files in current directory."""
-    ui.getcomponent("Filer").dir.mark(_video_filter)
+    ui.getcomponent("Filer").dir.mark(_filters["video"])
 
 # ----------------------------------------------------------------------
 # Mask commands:
@@ -863,27 +865,27 @@ def _mask_clear():
 @defcmd
 def _mask_source():
     """Filter source files."""
-    ui.getcomponent("Filer").dir.mask(_source_filter)
+    ui.getcomponent("Filer").dir.mask(_filters["source"])
 
 @defcmd
 def _mask_archive():
     """Filter archive files."""
-    ui.getcomponent("Filer").dir.mask(_archive_filter)
+    ui.getcomponent("Filer").dir.mask(_filters["archive"])
 
 @defcmd
 def _mask_image():
     """Filter image files."""
-    ui.getcomponent("Filer").dir.mask(_image_filter)
+    ui.getcomponent("Filer").dir.mask(_filters["image"])
 
 @defcmd
 def _mask_music():
     """Filter music files."""
-    ui.getcomponent("Filer").dir.mask(_music_filter)
+    ui.getcomponent("Filer").dir.mask(_filters["music"])
 
 @defcmd
 def _mask_video():
     """Filter video files."""
-    ui.getcomponent("Filer").dir.mask(_video_filter)
+    ui.getcomponent("Filer").dir.mask(_filters["video"])
 
 # ----------------------------------------------------------------------
 # File control  commands:
