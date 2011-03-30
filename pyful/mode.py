@@ -28,7 +28,16 @@ from pyful import process
 from pyful import ui
 from pyful import util
 
-class Shell(object):
+class Mode(object):
+    prompt = ""
+
+    def complete(self, comp):
+        return comp.comp_files()
+
+    def execute(self, cmdstring):
+        pass
+
+class Shell(Mode):
     prompt = "$"
 
     def complete(self, comp):
@@ -37,7 +46,7 @@ class Shell(object):
     def execute(self, cmd):
         process.spawn(cmd, expandmacro=False)
 
-class Eval(object):
+class Eval(Mode):
     prompt = "Eval:"
 
     def complete(self, comp):
@@ -46,7 +55,7 @@ class Eval(object):
     def execute(self, cmd):
         process.python(cmd)
 
-class Mx(object):
+class Mx(Mode):
     prompt = "M-x"
 
     def complete(self, comp):
@@ -59,7 +68,7 @@ class Mx(object):
         except KeyError:
             message.error("Undefined command `{0}'".format(cmd))
 
-class ChangeLooks(object):
+class ChangeLooks(Mode):
     prompt = "Change looks:"
 
     def complete(self, comp):
@@ -74,7 +83,7 @@ class ChangeLooks(object):
         else:
             message.error("`{0}' looks doesn't exist".format(name))
 
-class ChangeWorkspaceTitle(object):
+class ChangeWorkspaceTitle(Mode):
     prompt = "Change workspace title:"
 
     def complete(self, comp):
@@ -83,7 +92,7 @@ class ChangeWorkspaceTitle(object):
     def execute(self, title):
         ui.getcomponent("Filer").workspace.chtitle(title)
 
-class Chdir(object):
+class Chdir(Mode):
     prompt = "Chdir to:"
 
     def complete(self, comp):
@@ -92,7 +101,7 @@ class Chdir(object):
     def execute(self, path):
         ui.getcomponent("Filer").dir.chdir(path)
 
-class Chmod(object):
+class Chmod(Mode):
     @property
     def prompt(self):
         filer = ui.getcomponent("Filer")
@@ -132,7 +141,7 @@ class Chmod(object):
         else:
             return mode
 
-class Chown(object):
+class Chown(Mode):
     def __init__(self):
         self.user = None
         self.group = None
@@ -166,7 +175,7 @@ class Chown(object):
                 self.group = string
             filectrl.chown(ui.getcomponent("Filer").file.name, self.user, self.group)
 
-class Copy(object):
+class Copy(Mode):
     def __init__(self):
         self.src = None
 
@@ -198,7 +207,7 @@ class Copy(object):
         else:
             filectrl.copy(self.src, path)
 
-class CreateWorkspace(object):
+class CreateWorkspace(Mode):
     prompt = "Create workspace (title):"
 
     def complete(self, comp):
@@ -207,7 +216,7 @@ class CreateWorkspace(object):
     def execute(self, title):
         ui.getcomponent("Filer").create_workspace(title)
 
-class Delete(object):
+class Delete(Mode):
     @property
     def prompt(self):
         return "Delete:"
@@ -224,7 +233,7 @@ class Delete(object):
         if ret == "Yes":
             filectrl.delete(path)
 
-class Glob(object):
+class Glob(Mode):
     default = ""
 
     @property
@@ -247,7 +256,7 @@ class Glob(object):
             Glob.default = pattern
             filer.dir.glob(pattern)
 
-class GlobDir(object):
+class GlobDir(Mode):
     default = ""
 
     @property
@@ -270,7 +279,7 @@ class GlobDir(object):
             GlobDir.default = pattern
             filer.dir.globdir(pattern)
 
-class Help(object):
+class Help(Mode):
     prompt = "Help:"
 
     def complete(self, comp):
@@ -279,7 +288,7 @@ class Help(object):
     def execute(self, cmd):
         ui.getcomponent("Help").show_command(cmd)
 
-class Link(object):
+class Link(Mode):
     def __init__(self):
         self.src = None
 
@@ -315,7 +324,7 @@ class Link(object):
             filectrl.link(self.src, path)
             filer.workspace.all_reload()
 
-class Mark(object):
+class Mark(Mode):
     default = None
 
     @property
@@ -340,7 +349,7 @@ class Mark(object):
             self.__class__.default = reg
             filer.dir.mark(reg)
 
-class Mask(object):
+class Mask(Mode):
     default = None
 
     @property
@@ -365,7 +374,7 @@ class Mask(object):
             self.__class__.default = r
             filer.dir.mask(r)
 
-class Menu(object):
+class Menu(Mode):
     prompt = "Menu name:"
 
     def complete(self, comp):
@@ -375,7 +384,7 @@ class Menu(object):
     def execute(self, name):
         ui.getcomponent("Menu").show(name)
 
-class Mkdir(object):
+class Mkdir(Mode):
     dirmode = 0o755
     prompt = "Make directory:"
 
@@ -388,7 +397,7 @@ class Mkdir(object):
         filer.workspace.all_reload()
         filer.dir.setcursor(filer.dir.get_index(util.unix_basename(path)))
 
-class Move(object):
+class Move(Mode):
     def __init__(self):
         self.src = None
 
@@ -420,7 +429,7 @@ class Move(object):
         else:
             filectrl.move(self.src, path)
 
-class Newfile(object):
+class Newfile(Mode):
     filemode = 0o644
     prompt = "New file:"
 
@@ -433,7 +442,7 @@ class Newfile(object):
         filer.workspace.all_reload()
         filer.dir.setcursor(filer.dir.get_index(path))
 
-class OpenListfile(object):
+class OpenListfile(Mode):
     prompt = "Open list file:"
 
     def complete(self, comp):
@@ -446,7 +455,7 @@ class OpenListfile(object):
         else:
             message.error("No such list file: " + path)
 
-class Rename(object):
+class Rename(Mode):
     def __init__(self, path=None):
         filer = ui.getcomponent("Filer")
         if path is None:
@@ -469,7 +478,7 @@ class Rename(object):
         filectrl.rename(self.path, path)
         ui.getcomponent("Filer").workspace.all_reload()
 
-class Replace(object):
+class Replace(Mode):
     default = []
     pattern = None
 
@@ -505,7 +514,7 @@ class Replace(object):
             filer.dir.mark_clear()
             filer.workspace.all_reload()
 
-class Symlink(object):
+class Symlink(Mode):
     def __init__(self):
         self.src = None
 
@@ -544,7 +553,7 @@ class Symlink(object):
             filectrl.symlink(self.src, path)
             filer.workspace.all_reload()
 
-class TrashBox(object):
+class TrashBox(Mode):
     path = os.path.join(os.getenv("HOME"), ".pyful", "trashbox")
     prompt = "Trashbox:"
 
@@ -560,7 +569,7 @@ class TrashBox(object):
             filectrl.move(path, trashbox)
             filer.workspace.all_reload()
 
-class Utime(object):
+class Utime(Mode):
     def __init__(self):
         self.sttime = []
         self.path = None
@@ -663,7 +672,7 @@ class Utime(object):
                 message.exception(e)
             ui.getcomponent("Filer").workspace.all_reload()
 
-class Tar(object):
+class Tar(Mode):
     def __init__(self, tarmode, each=False):
         self.src = None
         self.wrap = None
@@ -718,7 +727,7 @@ class Tar(object):
             filectrl.tar(self.src, path, self.tarmode)
             filer.workspace.all_reload()
 
-class UnTar(object):
+class UnTar(Mode):
     def __init__(self):
         self.src = None
 
@@ -749,7 +758,7 @@ class UnTar(object):
             filectrl.untar(self.src, path)
             filer.workspace.all_reload()
 
-class WebSearch(object):
+class WebSearch(Mode):
     def __init__(self, engine="Google"):
         self.engine = engine
 
@@ -772,7 +781,7 @@ class WebSearch(object):
         except Exception as e:
             message.exception(e)
 
-class Zip(object):
+class Zip(Mode):
     def __init__(self, each=False):
         self.src = None
         self.wrap = None
@@ -826,7 +835,7 @@ class Zip(object):
             filectrl.zip(self.src, path)
             filer.workspace.all_reload()
 
-class UnZip(object):
+class UnZip(Mode):
     def __init__(self):
         self.src = None
 
@@ -857,7 +866,7 @@ class UnZip(object):
             filectrl.unzip(self.src, path)
             filer.workspace.all_reload()
 
-class ZoomInfoBox(object):
+class ZoomInfoBox(Mode):
     prompt = "Zoom infobox:"
 
     def complete(self, comp):
