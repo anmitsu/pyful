@@ -848,12 +848,8 @@ class Directory(ui.StandardScreen):
     def get_mark_size(self):
         if not self.mark_files:
             return "0"
-        ret = 0
-        for f in self.mark_files.values():
-            if f.isdir():
-                continue
-            ret += f.stat.st_size
-        return re.sub(r"(\d)(?=(?:\d\d\d)+(?!\d))", r"\1,", str(ret))
+        size = sum(f.stat.st_size for f in self.mark_files.values() if not f.isdir())
+        return re.sub(r"(\d)(?=(?:\d\d\d)+(?!\d))", r"\1,", str(size))
 
     def get_mark_files(self):
         if len(self.mark_files) == 0:
