@@ -52,9 +52,9 @@ class Sudo(completion.ShellCompletionFunction):
                 return completion.compfunctions[arg]().complete()
 
     def complete(self):
-        candidate = self.comp_other_prgs()
-        if candidate:
-            return candidate
+        candidates = self.comp_other_prgs()
+        if candidates:
+            return candidates
 
         if self.parser.part[1].startswith("-"):
             return self.options()

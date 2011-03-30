@@ -105,22 +105,22 @@ class Completion(ui.InfoBox):
             self.parser.parse_nonshell()
             compfunc = CompletionFunction()
 
-        candidate = self.cmdline.mode.complete(compfunc)
+        candidates = self.cmdline.mode.complete(compfunc)
 
-        if not isinstance(candidate, list) or len(candidate) == 0:
+        if not isinstance(candidates, list) or len(candidates) == 0:
             return
-        if len(candidate) == 1:
-            if candidate[0] == self.parser.part[1]:
+        if len(candidates) == 1:
+            if candidates[0] == self.parser.part[1]:
                 return
-            self.insert(candidate[0])
+            self.insert(candidates[0])
             self.hide()
         else:
             self.cmdline.history.hide()
-            common = os.path.commonprefix(candidate)
+            common = os.path.commonprefix(candidates)
             if common:
                 self.insert(common)
                 self.parser.part[1] = common
-            info = [ui.InfoBoxContext(c, histr=self.parser.part[1]) for c in candidate]
+            info = [ui.InfoBoxContext(c, histr=self.parser.part[1]) for c in candidates]
             self.show(info)
             self.maxrow = self._get_maxrow()
 
