@@ -681,22 +681,20 @@ class Directory(ui.StandardScreen):
         self.reload()
 
     def globdir(self, pattern):
-        self.list_title = "Grobdir:({0})".format(pattern)
-
-        def _globdir(dirname, patternname):
+        def _globdir(dirname):
             try:
-                li = os.listdir(dirname)
+                files = os.listdir(util.U(dirname))
             except OSError:
                 return
-            for e in li:
-                entrypath = os.path.join(dirname, e)
-                if os.path.isdir(entrypath):
-                    for ep in _globdir(entrypath, patternname):
-                        yield ep
-                if fnmatch.fnmatch(util.U(e), patternname):
-                    yield os.path.normpath(entrypath)
-
-        self.list = list(_globdir(os.curdir, pattern))
+            for f in files:
+                path = os.path.join(dirname, f)
+                if os.path.isdir(path):
+                    for sub in _globdir(path):
+                        yield sub
+                if fnmatch.fnmatch(f, pattern):
+                    yield os.path.normpath(path)
+        self.list_title = "Grobdir:({0})".format(pattern)
+        self.list = list(_globdir(os.curdir))
         self.reload()
 
     def open_listfile(self, path):
