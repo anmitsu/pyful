@@ -159,6 +159,9 @@ class Cmdline(ui.Component):
         maxy, maxx = win.getmaxyx()
         prompt = " {0} ".format(self.mode.prompt)
         promptlen = util.termwidth(prompt)
+        if promptlen > maxx:
+            prompt = util.mbs_ljust(prompt, maxx-2)
+            promptlen = util.termwidth(prompt)
         self.string = util.U(self.string)
         realcurpos = util.termwidth(self.string[:self.cursor])
         if maxx <= util.termwidth(self.string)+promptlen:
