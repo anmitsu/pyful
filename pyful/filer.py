@@ -117,25 +117,24 @@ class Filer(ui.Component):
     def prev_workspace(self):
         self.mvfocus(-1)
 
-    def swap_workspace_inc(self):
+    def swap_workspace(self, amount):
+        new = self.cursor + amount
+        if amount > 0:
+            if new >= len(self.workspaces):
+                new = 0
+        else:
+            if new < 0:
+                new = len(self.workspaces) - 1
         ws = self.workspace
         self.workspaces.remove(ws)
-        if self.cursor < len(self.workspaces):
-            self.workspaces.insert(self.cursor+1, ws)
-            self.cursor += 1
-        else:
-            self.workspaces.insert(0, ws)
-            self.cursor = 0
+        self.workspaces.insert(new, ws)
+        self.cursor = new
+
+    def swap_workspace_inc(self):
+        self.swap_workspace(1)
 
     def swap_workspace_dec(self):
-        ws = self.workspace
-        self.workspaces.remove(ws)
-        if self.cursor > 0:
-            self.workspaces.insert(self.cursor-1, ws)
-            self.cursor -= 1
-        else:
-            self.workspaces.insert(len(self.workspaces), ws)
-            self.cursor = len(self.workspaces) - 1
+        self.swap_workspace(-1)
 
     def titlebar_view(self):
         titlebar = ui.getcomponent("Titlebar").win
