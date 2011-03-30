@@ -61,8 +61,8 @@ class Filer(ui.Component):
         self.titlebar_view()
         self.workspace.view()
 
-    def input(self, meta, key):
-        self.dir.input(meta, key)
+    def input(self, key):
+        self.dir.input(key)
 
     def create_workspace(self, title=None):
         if title is None:
@@ -590,26 +590,26 @@ class Directory(ui.StandardScreen):
         except IndexError:
             return self.files[0]
 
-    def input(self, meta, key):
+    def input(self, key):
         if self.finder.active:
-            if not self.finder.input(meta, key):
+            if not self.finder.input(key):
                 return
         keymap = self.keymap
         f = self.file
         ext  = util.extname(f.name)
-        if ext != "" and (meta, key, ext) in keymap:
-            keymap[(meta, key, ext)]()
-        elif f.marked and (meta, key, ".mark") in keymap:
-            keymap[(meta, key, ".mark")]()
-        elif f.islink() and (meta, key, ".link") in keymap:
-            keymap[(meta, key, ".link")]()
-        elif f.isdir() and (meta, key, ".dir") in keymap:
-            keymap[(meta, key, ".dir")]()
-        elif f.isexec() and (meta, key, ".exec") in keymap:
-            keymap[(meta, key, ".exec")]()
+        if ext != "" and (key, ext) in keymap:
+            keymap[(key, ext)]()
+        elif f.marked and (key, ".mark") in keymap:
+            keymap[(key, ".mark")]()
+        elif f.islink() and (key, ".link") in keymap:
+            keymap[(key, ".link")]()
+        elif f.isdir() and (key, ".dir") in keymap:
+            keymap[(key, ".dir")]()
+        elif f.isexec() and (key, ".exec") in keymap:
+            keymap[(key, ".exec")]()
         else:
-            if (meta, key) in keymap:
-                keymap[(meta, key)]()
+            if key in keymap:
+                keymap[key]()
 
     def settop(self):
         self.cursor = 0
@@ -1234,7 +1234,6 @@ class Finder(object):
         self.startfname = ""
         self.history = self.History()
         self.active = False
-        self._stringcue = []
 
     def find(self, pattern):
         try:
@@ -1252,19 +1251,10 @@ class Finder(object):
         self.dir.reload()
         self.dir.setcursor(1)
 
-    def insert(self, c):
+    def insert(self, ch):
         if len(self.results) <= 1:
             return
-        try:
-            s = util.U(c)
-        except UnicodeError:
-            self._stringcue.append(c)
-            try:
-                s = util.U("".join(self._stringcue))
-                self._stringcue[:] = []
-            except UnicodeError:
-                return
-        self.string += s
+        self.string += ch
         self.find(self.string)
 
     def delete_backward_char(self):
@@ -1297,15 +1287,11 @@ class Finder(object):
         self.active = False
         self.select_result()
 
-    def input(self, meta, key):
-        try:
-            c = chr(key)
-        except ValueError:
-            return
-        if (meta, key) in self.keymap:
-            self.keymap[(meta, key)]()
-        elif c > " " and not meta:
-            self.insert(c)
+    def input(self, key):
+        if key in self.keymap:
+            self.keymap[key]()
+        elif util.mbslen(key) == 1:
+            self.insert(key)
         else:
             return True
 
@@ -1317,7 +1303,7 @@ class Finder(object):
             self.dir.statwin.addstr(" Finder: ", look.colors["Finder"])
         try:
             self.dir.statwin.addstr(" " + self.string)
-        except Exception:
+        except curses.error:
             message.error("Warning: status window very small")
         self.dir.statwin.noutrefresh()
 

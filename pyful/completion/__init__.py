@@ -51,12 +51,12 @@ class Completion(ui.InfoBox):
         self.parser = None
         self.loadprograms()
 
-    def input(self, meta, key):
-        if (meta, key) in self.keymap:
-            self.keymap[(meta, key)]()
+    def input(self, key):
+        if key in self.keymap:
+            self.keymap[key]()
         else:
             self.finish()
-            self.cmdline.input(meta, key)
+            self.cmdline.input(key)
 
     def loadprograms(self):
         osname = sys.platform

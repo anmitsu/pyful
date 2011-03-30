@@ -28,7 +28,6 @@ from pyful import message
 from pyful import process
 from pyful import ui
 from pyful import util
-from pyful.keymap import *
 
 class Cmdline(ui.Component):
     keymap = {}
@@ -38,7 +37,6 @@ class Cmdline(ui.Component):
         ui.Component.__init__(self, "Cmdline")
         self.string = ""
         self.cursor = 0
-        self._stringcue = []
         self.mode = None
         self.history = History(self)
         self.clipboard = Clipboard(self)
@@ -226,15 +224,15 @@ class Cmdline(ui.Component):
         cmdscr.move(0, curpos)
         cmdscr.noutrefresh()
 
-    def input(self, meta, key):
+    def input(self, key):
         if self.completion.active:
-            self.completion.input(meta, key)
+            self.completion.input(key)
         elif self.clipboard.active:
-            self.clipboard.input(meta, key)
+            self.clipboard.input(key)
         elif self.output.active:
-            self.output.input(meta, key)
+            self.output.input(key)
         else:
-            self.cmdline_input(meta, key)
+            self.cmdline_input(key)
 
     def finish(self):
         cmdscr = ui.getcomponent("Cmdscr").win
@@ -279,7 +277,7 @@ class Cmdline(ui.Component):
             cmdscr.addstr(s, attr)
 
     def print_color_shell(self, string):
-        cmdscr = ui.getcomponent("Cmdscr").win        
+        cmdscr = ui.getcomponent("Cmdscr").win
         prg = False
         reg = re.compile("([\s;|>]|[^%]&|(?<!\\\\)%[mMdDfFxX])")
         for s in reg.split(string):
@@ -312,29 +310,16 @@ class Cmdline(ui.Component):
                 attr = look.colors["CmdlinePythonFunction"]
             cmdscr.addstr(s, attr)
 
-    def cmdline_input(self, meta, key):
-        if (meta, key) in self.keymap:
-            self.keymap[(meta, key)]()
+    def cmdline_input(self, key):
+        if key in self.keymap:
+            self.keymap[key]()
         else:
-            try:
-                c = chr(key)
-            except ValueError:
-                return
-            if c < " ":
-                return
-            try:
-                s = util.U(c)
-            except UnicodeError:
-                self._stringcue.append(c)
-                try:
-                    s = util.U("".join(self._stringcue))
-                    self._stringcue[:] = []
-                except UnicodeError:
-                    return
-            length = util.mbslen(self.string)
-            self.string = util.insertstr(self.string, s, self.cursor)
-            self.cursor += util.mbslen(self.string) - length
-            self.history.restart()
+            if key == "SPC":
+                key = " "
+            if util.mbslen(key) == 1:
+                self.string = util.insertstr(self.string, key, self.cursor)
+                self.cursor += 1
+                self.history.restart()
 
 class History(ui.InfoBox):
     maxsave = 10000
@@ -488,12 +473,12 @@ class Clipboard(ui.InfoBox):
         self.cmdline.string = util.insertstr(self.cmdline.string, item, self.cmdline.cursor)
         self.cmdline.cursor += util.mbslen(item)
 
-    def input(self, meta, key):
-        if (meta, key) in self.keymap:
-            self.keymap[(meta, key)]()
+    def input(self, key):
+        if key in self.keymap:
+            self.keymap[key]()
         else:
             self.finish()
-            self.cmdline.input(meta, key)
+            self.cmdline.input(key)
 
     def start(self):
         info = [ui.InfoBoxContext(item) for item in self.clip]
@@ -549,4 +534,3 @@ class Output(ui.InfoBox):
     def finish(self):
         self.hide()
         self.cmdline.history.start()
-

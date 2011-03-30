@@ -16,29 +16,16 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import array
 import curses
 import re
 import signal
 
 from pyful import look
 from pyful import util
-from pyful.keymap import *
 
 def getcomponent(name):
     return Component.components[name]
-
-def getch():
-    meta = False
-    while True:
-        key = StandardScreen.stdscr.getch()
-        if meta:
-            if key == 27:
-                return (False, key)
-            return (True, key)
-        if key == 27:
-            meta = True
-        else:
-            return (False, key)
 
 def zoom_infobox(zoom):
     InfoBox.zoom = zoom
@@ -128,19 +115,19 @@ class CmdlineScreen(Component):
         self.win.bkgd(look.colors["CmdlineWindow"])
 
     def resize(self):
-        (y, x) = self.stdscr.getmaxyx()
+        y, x = self.stdscr.getmaxyx()
         self.win = curses.newwin(2, x, y-2, 0)
         self.win.bkgd(look.colors["CmdlineWindow"])
 
 class Titlebar(Component):
     def __init__(self):
         Component.__init__(self, "Titlebar")
-        (y, x) = self.stdscr.getmaxyx()
+        y, x = self.stdscr.getmaxyx()
         self.win = curses.newwin(1, x, 0, 0)
         self.win.bkgd(look.colors["Titlebar"])
 
     def resize(self):
-        (y, x) = self.stdscr.getmaxyx()
+        y, x = self.stdscr.getmaxyx()
         self.win = curses.newwin(1, x, 0, 0)
         self.win.bkgd(look.colors["Titlebar"])
 
@@ -157,22 +144,22 @@ class InfoBox(Component):
         self.scrolltop = 0
         self.maxrow = 1
         self.keymap = {
-            (0, KEY_CTRL_N): lambda: self.mvcursor(1),
-            (0, KEY_DOWN  ): lambda: self.mvcursor(1),
-            (0, KEY_CTRL_V): lambda: self.pagedown(),
-            (0, KEY_CTRL_D): lambda: self.pagedown(),
-            (0, KEY_CTRL_P): lambda: self.mvcursor(-1),
-            (0, KEY_UP    ): lambda: self.mvcursor(-1),
-            (1, KEY_n     ): lambda: self.mvscroll(1),
-            (1, KEY_p     ): lambda: self.mvscroll(-1),
-            (1, KEY_v     ): lambda: self.pageup(),
-            (0, KEY_CTRL_U): lambda: self.pageup(),
-            (0, KEY_CTRL_G): lambda: self.hide(),
-            (0, KEY_CTRL_C): lambda: self.hide(),
-            (0, KEY_ESCAPE): lambda: self.hide(),
-            (1, KEY_PLUS  ): lambda: zoom_infobox(InfoBox.zoom+5),
-            (1, KEY_MINUS ): lambda: zoom_infobox(InfoBox.zoom-5),
-            (1, KEY_EQUAL ): lambda: zoom_infobox(0),
+            "C-n"   : lambda: self.mvcursor(1),
+            "<down>": lambda: self.mvcursor(1),
+            "C-v"   : lambda: self.pagedown(),
+            "C-d"   : lambda: self.pagedown(),
+            "C-p"   : lambda: self.mvcursor(-1),
+            "<up>"  : lambda: self.mvcursor(-1),
+            "M-n"   : lambda: self.mvscroll(1),
+            "M-p"   : lambda: self.mvscroll(-1),
+            "M-v"   : lambda: self.pageup(),
+            "C-u"   : lambda: self.pageup(),
+            "C-g"   : lambda: self.hide(),
+            "C-c"   : lambda: self.hide(),
+            "ESC"   : lambda: self.hide(),
+            "M-+"   : lambda: zoom_infobox(InfoBox.zoom+5),
+            "M--"   : lambda: zoom_infobox(InfoBox.zoom-5),
+            "M-="   : lambda: zoom_infobox(0),
             }
 
     @classmethod
@@ -265,9 +252,9 @@ class InfoBox(Component):
         else:
             return InfoBoxContext("")
 
-    def input(self, meta, key):
-        if (meta, key) in self.keymap:
-            self.keymap[(meta, key)]()
+    def input(self, key):
+        if key in self.keymap:
+            self.keymap[key]()
 
     def _fix_position(self, size, height, infocount):
         if self.cursor >= size:
@@ -362,3 +349,63 @@ class InfoBoxContext(object):
                     win.addstr(s, self.attr)
         else:
             win.addstr(string, self.attr)
+
+class KeyHandler(object):
+    special_keys = {}
+    utf8_skip_data = [1]*192 + [2]*32 + [3]*16 + [4]*8 + [5]*4 + [6]*2 + [1]*2
+
+    def __init__(self, screen=None):
+        if screen is None:
+            screen = StandardScreen.stdscr
+        self.screen = screen
+
+    def getkey(self):
+        ch = self.screen.getch()
+        if ch == -1:
+            return -1
+        elif self._is_utf8_multibyte_chr(ch):
+            buf = array.array("B", [ch])
+            buf.extend(self.screen.getch() for i in range(1, self.utf8_skip_data[ch]))
+            key = buf.tostring().decode()
+        else:
+            key = self._get_key_for(ch)
+        return key
+
+    def _is_utf8_multibyte_chr(self, ch):
+        return ch & 0xc0 == 0xc0
+
+    def _get_key_for(self, ch, escaped=False):
+        key = -1
+        if ch == 27:
+            if escaped:
+                key = "ESC"
+            else:
+                key = self._get_key_for(self.screen.getch(), escaped=True)
+                if key == "ESC":
+                    pass
+                else:
+                    key = "M-" + key
+        elif ch == 10:
+            key = "RET"
+        elif ch == 32:
+            key = "SPC"
+        elif 32 < ch <= 126:
+            key = chr(ch)
+        elif ch in self.special_keys:
+            key = self.special_keys[ch]
+        elif 0 <= ch < 32:
+            if ch == 0:
+                key = "C-SPC"
+            elif 0 < ch < 27:
+                key = "C-" + chr(ch + 96)
+            else:
+                key = "UNKNOWN ({0:d} :: 0x{0:x})".format(ch)
+        return key
+
+def _init_special_keys():
+    for name in dir(curses):
+        if name.startswith("KEY_"):
+            keyname = "<{0}>".format(name[4:].lower())
+            KeyHandler.special_keys[curses.__dict__[name]] = keyname
+
+_init_special_keys()

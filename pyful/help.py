@@ -93,26 +93,15 @@ class Help(ui.InfoBox):
     def find_keybind(self, cmd):
         from pyful.filer import Directory
 
-        key = []
+        keys = []
         for k, v in Directory.keymap.items():
             if v == cmd:
-                if k[1] == 0:
-                    key.append(ui.InfoBoxContext(self.indent+"Control + KEY_SPACE"))
-                    continue
-                keybind = curses.keyname(k[1])
-                if keybind.isupper() and len(keybind) == 1:
-                    keybind = "Shift + {0}".format(keybind.lower())
-                elif keybind.startswith("^"):
-                    keybind = "Control + {0}".format(keybind.lower().replace("^", ""))
-                elif keybind == " ":
-                    keybind = "KEY_SPACE"
-
-                if k[0]:
-                    keybind = "Meta + {0}".format(keybind)
-                if len(k) == 3:
-                    keybind += " ({0})".format(k[2])
-                key.append(ui.InfoBoxContext(self.indent+keybind))
-        return key
+                if isinstance(k, list) or isinstance(k, tuple):
+                    keybind = "{0} ({1})".format(*k)
+                else:
+                    keybind = k
+                keys.append(ui.InfoBoxContext(self.indent+keybind))
+        return keys
 
     def show_command(self, name):
         from pyful.command import commands

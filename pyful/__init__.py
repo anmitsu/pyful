@@ -23,8 +23,8 @@ This application is CUI filer of the keyboard operation for Linux.
 
 __version__ = "0.2.2"
 
-__all__ = ["cmdline", "command", "filectrl", "filer", "help", "keymap", "look",
-           "menu", "message", "mode", "process", "ui", "util", "completion"]
+__all__ = ["cmdline", "command", "filectrl", "filer", "help", "look", "menu",
+           "message", "mode", "process", "ui", "util", "completion"]
 
 import curses
 import os
@@ -114,19 +114,20 @@ class Pyful(object):
             self.message.view()
         curses.doupdate()
 
-    def input(self, meta, key):
+    def input(self, key):
         if self.cmdline.is_active:
-            self.cmdline.input(meta, key)
+            self.cmdline.input(key)
         elif self.menu.is_active:
-            self.menu.input(meta, key)
+            self.menu.input(key)
         elif self.help.is_active:
-            self.help.input(meta, key)
+            self.help.input(key)
         else:
-            self.filer.input(meta, key)
+            self.filer.input(key)
 
     def main_loop(self):
+        keyhandler = ui.KeyHandler()
         while True:
             self.view()
-            (meta, key) = ui.getch()
+            key = keyhandler.getkey()
             if key != -1:
-                self.input(meta, key)
+                self.input(key)

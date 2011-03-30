@@ -207,6 +207,7 @@ class Subloop(object):
         self.message = ui.getcomponent("Message")
         self.help = ui.getcomponent("Help")
         self.stdscr = ui.StandardScreen.stdscr
+        self.keyhandler = ui.KeyHandler()
 
     def subthreads_view(self):
         cmdscr = ui.getcomponent("Cmdscr").win
@@ -218,15 +219,15 @@ class Subloop(object):
         cmdscr.addstr(util.mbs_ljust(string, x-2), curses.A_BOLD)
         cmdscr.noutrefresh()
 
-    def input(self, meta, key):
+    def input(self, key):
         if self.cmdline.is_active:
-            self.cmdline.input(meta, key)
+            self.cmdline.input(key)
         elif self.menu.is_active:
-            self.menu.input(meta, key)
+            self.menu.input(key)
         elif self.help.is_active:
-            self.help.input(meta, key)
+            self.help.input(key)
         else:
-            self.filer.input(meta, key)
+            self.filer.input(key)
 
     def view(self):
         self.filer.view()
@@ -244,9 +245,9 @@ class Subloop(object):
     def run(self):
         self.stdscr.timeout(100)
         self.view()
-        (meta, key) = ui.getch()
+        key = self.keyhandler.getkey()
         if key != -1:
-            self.input(meta, key)
+            self.input(key)
         self.stdscr.timeout(-1)
 
 class FilectrlCancel(Exception):
@@ -453,7 +454,7 @@ class UntarThread(JobThread):
                     self.dirlist.append(info)
         finally:
             for dinfo in reversed(sorted(self.dirlist, key=lambda a: a.name)):
-                dirpath = os.path.join(self.dstdir, dinfo.name) 
+                dirpath = os.path.join(self.dstdir, dinfo.name)
                 os.utime(dirpath, (dinfo.mtime, dinfo.mtime))
             self.dirlist[:] = []
             tar.close()

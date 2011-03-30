@@ -23,7 +23,6 @@ from threading import Timer
 from pyful import look
 from pyful import ui
 from pyful import util
-from pyful.keymap import *
 
 def puts(string, timex=3):
     ui.getcomponent("Message").puts(string, timex)
@@ -82,10 +81,11 @@ class Message(ui.Component):
     def confirm(self, msg, options, msglist=None, position=0):
         cnf = Confirm(msg, options, msglist)
         cnf.setcursor(position)
+        keyhandler = ui.KeyHandler(self.stdscr)
         while cnf.active:
             cnf.view()
-            (meta, key) = ui.getch()
-            cnf.input(meta, key)
+            key = keyhandler.getkey()
+            cnf.input(key)
         return cnf.result
 
     def view_histroy(self):
@@ -125,14 +125,14 @@ class Confirm(object):
             self.box.show([ui.InfoBoxContext(msg) for msg in msglist], -1)
         self.active = True
         Confirm.keymap = {
-            (0, KEY_CTRL_F): lambda: self.mvcursor(1),
-            (0, KEY_RIGHT ): lambda: self.mvcursor(1),
-            (0, KEY_CTRL_B): lambda: self.mvcursor(-1),
-            (0, KEY_LEFT  ): lambda: self.mvcursor(-1),
-            (0, KEY_CTRL_G): lambda: self.hide(),
-            (0, KEY_CTRL_C): lambda: self.hide(),
-            (0, KEY_ESCAPE): lambda: self.hide(),
-            (0, KEY_RETURN): lambda: self.get_cursor_item(),
+            "C-f"    : lambda: self.mvcursor(1),
+            "<right>": lambda: self.mvcursor(1),
+            "C-b"    : lambda: self.mvcursor(-1),
+            "<left>" : lambda: self.mvcursor(-1),
+            "C-g"    : lambda: self.hide(),
+            "C-c"    : lambda: self.hide(),
+            "ESC"    : lambda: self.hide(),
+            "RET"    : lambda: self.get_cursor_item(),
             }
 
     def setcursor(self, x):
@@ -176,14 +176,13 @@ class Confirm(object):
                     cmdscr.addstr(s+" ", 0)
                 except Exception:
                     pass
-        (y, x) = cmdscr.getmaxyx()
+        y, x = cmdscr.getmaxyx()
         cmdscr.move(y-1, x-1)
         cmdscr.noutrefresh()
         curses.doupdate()
 
-    def input(self, meta, key):
+    def input(self, key):
         if self.box:
-            self.box.input(meta, key)
-        if (meta, key) in self.keymap:
-            self.keymap[(meta, key)]()
-
+            self.box.input(key)
+        if key in self.keymap:
+            self.keymap[key]()

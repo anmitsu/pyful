@@ -60,9 +60,9 @@ class Menu(ui.Component):
         if self.active is swap:
             self.hide()
 
-    def input(self, meta, key):
-        if (meta, key) in self.keymap:
-            self.keymap[(meta, key)]()
+    def input(self, key):
+        if key in self.keymap:
+            self.keymap[key]()
         else:
             for name, keynum, func in self.active:
                 if keynum != key:
