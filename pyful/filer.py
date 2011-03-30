@@ -514,27 +514,25 @@ class Workspace(ui.StandardScreen):
             d.resize(height, width, 1, 0)
         self.all_reload()
 
-    def swap_dir_inc(self):
+    def swap_dir(self, amount):
+        new = self.cursor + amount
+        if amount > 0:
+            if new >= len(self.dirs):
+                new = 0
+        else:
+            if new < 0:
+                new = len(self.dirs) - 1
         d = self.dir
         self.dirs.remove(d)
-        if self.cursor < len(self.dirs):
-            self.dirs.insert(self.cursor+1, d)
-            self.mvcursor(1)
-        else:
-            self.dirs.insert(0, d)
-            self.setcursor(0)
+        self.dirs.insert(new, d)
+        self.setcursor(new)
         self.resize()
 
+    def swap_dir_inc(self):
+        self.swap_dir(1)
+
     def swap_dir_dec(self):
-        d = self.dir
-        self.dirs.remove(d)
-        if self.cursor > 0:
-            self.dirs.insert(self.cursor-1, d)
-            self.mvcursor(-1)
-        else:
-            self.dirs.insert(len(self.dirs), d)
-            self.setcursor(len(self.dirs)-1)
-        self.resize()
+        self.swap_dir(-1)
 
     def focus_reload(self):
         self.dir.reload()
