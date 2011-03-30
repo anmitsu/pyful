@@ -1382,7 +1382,7 @@ class FileStat(object):
 
     def get_file_name(self, path):
         if self.view_ext and not self.isdir() and not self.islink():
-            fname = self.name.replace(util.extname(self.name), "")
+            fname = os.path.splitext(self.name)[0]
         else:
             fname = self.name
 
