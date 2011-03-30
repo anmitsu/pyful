@@ -78,9 +78,12 @@ def run():
     ui.start_curses()
     pyful.init_function()
     message.puts("Python {0}".format(sys.version))
+    rcpath = Pyful.environs["RCFILE"]
     if error:
         message.exception(error)
-    message.puts("Loaded {0}".format(Pyful.environs["RCFILE"]))
+        message.error("rc error: instead loaded `{0}'".format(rcpath))
+    else:
+        message.puts("Loaded {0}".format(rcpath))
     message.puts("Welcome to pyful v{0}".format(__version__))
 
     try:
