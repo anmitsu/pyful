@@ -593,10 +593,8 @@ class Directory(ui.StandardScreen):
                 return
         keymap = self.keymap
         f = self.file
-        ext  = util.extname(f.name)
-        if ext != "" and (key, ext) in keymap:
-            keymap[(key, ext)]()
-        elif f.marked and (key, ".mark") in keymap:
+        ext = util.extname(f.name)
+        if f.marked and (key, ".mark") in keymap:
             keymap[(key, ".mark")]()
         elif f.islink() and (key, ".link") in keymap:
             keymap[(key, ".link")]()
@@ -604,6 +602,8 @@ class Directory(ui.StandardScreen):
             keymap[(key, ".dir")]()
         elif f.isexec() and (key, ".exec") in keymap:
             keymap[(key, ".exec")]()
+        elif ext and (key, ext) in keymap:
+            keymap[(key, ext)]()
         else:
             if key in keymap:
                 keymap[key]()
