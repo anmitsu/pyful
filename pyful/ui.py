@@ -31,9 +31,6 @@ def zoom_infobox(zoom):
     InfoBox.zoom = zoom
     InfoBox.resize()
 
-def setbox(*boxtable):
-    pass
-
 def resize():
     getcomponent("Cmdscr").resize()
     getcomponent("Titlebar").resize()
