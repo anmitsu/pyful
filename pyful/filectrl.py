@@ -212,9 +212,7 @@ class Subloop(object):
     def subthreads_view(self):
         cmdscr = ui.getcomponent("Cmdscr").win
         y, x = cmdscr.getmaxyx()
-        string = ""
-        for i, t in enumerate(Filectrl.threads):
-            string += "[{0}] {1} ".format(i+1, t.title)
+        string = " | ".join("[{0}] {1}".format(i+1, t.title) for i, t in enumerate(Filectrl.threads))
         cmdscr.move(0, 1)
         cmdscr.addstr(util.mbs_ljust(string, x-2), curses.A_BOLD)
         cmdscr.noutrefresh()
