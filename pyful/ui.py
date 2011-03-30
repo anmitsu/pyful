@@ -360,16 +360,13 @@ class KeyHandler(object):
         ch = self.screen.getch()
         if ch == -1:
             return -1
-        elif self._is_utf8_multibyte_chr(ch):
+        elif ch & 0xc0 == 0xc0: # Is ch utf8 muliti byte character?
             buf = array.array("B", [ch])
             buf.extend(self.screen.getch() for i in range(1, self.utf8_skip_data[ch]))
             key = buf.tostring().decode()
         else:
             key = self._get_key_for(ch)
         return key
-
-    def _is_utf8_multibyte_chr(self, ch):
-        return ch & 0xc0 == 0xc0
 
     def _get_key_for(self, ch, escaped=False):
         key = -1
