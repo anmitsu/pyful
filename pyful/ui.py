@@ -375,9 +375,7 @@ class KeyHandler(object):
                 key = "ESC"
             else:
                 key = self._get_key_for(self.screen.getch(), escaped=True)
-                if key == "ESC":
-                    pass
-                else:
+                if key != "ESC":
                     key = "M-" + key
         elif ch == 13:
             key = "RET"
