@@ -44,7 +44,6 @@ def refresh(*args):
     resize()
 
 def start_curses():
-    signal.signal(signal.SIGWINCH, refresh)
     try:
         curses.noecho()
         curses.cbreak()
@@ -57,6 +56,7 @@ def start_curses():
         getcomponent("MessageBox").resize()
         getcomponent("Filer").default_init()
         StandardScreen.stdscr.refresh()
+    signal.signal(signal.SIGWINCH, refresh)
 
 def end_curses():
     signal.signal(signal.SIGWINCH, signal.SIG_DFL)
