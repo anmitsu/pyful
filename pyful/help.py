@@ -96,7 +96,7 @@ class Help(ui.InfoBox):
         keys = []
         for k, v in Directory.keymap.items():
             if v == cmd:
-                if isinstance(k, list) or isinstance(k, tuple):
+                if isinstance(k, tuple):
                     keybind = "{0} ({1})".format(*k)
                 else:
                     keybind = k
