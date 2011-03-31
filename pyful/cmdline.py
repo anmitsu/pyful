@@ -275,7 +275,7 @@ class Cmdline(ui.Component):
         cmdscr = ui.getcomponent("Cmdscr").win
         for s in re.split(r"(?<!\\)(%(?:[mMfFxX]|[dD]2?))", string):
             attr = 0
-            if re.search("^%[mMfFxX]|[dD]2?$", s):
+            if re.search("^%(?:[mMfFxX]|[dD]2?)$", s):
                 attr = look.colors["CmdlineMacro"]
             cmdscr.addstr(s, attr)
 
@@ -284,7 +284,7 @@ class Cmdline(ui.Component):
         prg = False
         for s in re.split(r"(?<!\\)([\s;|>&]|%(?:[&TqmMfFxX]|[dD]2?))", string):
             attr = 0
-            if re.search("^%[&TqmMfFxX]|[dD]2?$", s):
+            if re.search("^%(?:[&TqmMfFxX]|[dD]2?)$", s):
                 attr = look.colors["CmdlineMacro"]
             elif re.search("^[;|>&]$", s):
                 attr = look.colors["CmdlineSeparator"]
@@ -303,7 +303,7 @@ class Cmdline(ui.Component):
         cmdscr = ui.getcomponent("Cmdscr").win
         for s in re.split(r"(?<!\\)([\s;.()]|%(?:[&TqmMfFxX]|[dD]2?))", string):
             attr = 0
-            if re.search("^%[&TqmMfFxX]|[dD]2?$", s):
+            if re.search("^%(?:[&TqmMfFxX]|[dD]2?)$", s):
                 attr = look.colors["CmdlineMacro"]
             elif re.search("^;$", s):
                 attr = look.colors["CmdlineSeparator"]
