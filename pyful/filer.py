@@ -1379,7 +1379,7 @@ class FileStat(object):
             except OSError:
                 link = ""
             fname += "@ -> " + link
-            if self.isdir() and not link.endswith(os.sep):
+            if self.isdir():
                 fname += os.sep
         elif self.isdir():
             fname += os.sep
