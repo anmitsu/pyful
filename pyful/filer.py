@@ -1142,7 +1142,7 @@ class Directory(ui.StandardScreen):
             if self.cursor == i and focus:
                 attr += curses.A_REVERSE
             if f.marked:
-                self.win.addstr(lien, 1, "*"+fstr, attr)
+                self.win.addstr(line, 1, "*"+fstr, attr)
             else:
                 self.win.addstr(line, 1, " "+fstr, attr)
         self.win.noutrefresh()
