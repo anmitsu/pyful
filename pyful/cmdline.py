@@ -272,20 +272,20 @@ class Cmdline(ui.Component):
 
     def print_color_default(self, string):
         cmdscr = ui.getcomponent("Cmdscr").win
-        reg = re.compile("([\s;.()]|(?<!\\\\)%[mMdDfFxX])")
+        reg = re.compile(r"([\s;.()]|(?<!\\)%(?:[mMfFxX]|[dD]2?))")
         for s in reg.split(string):
             attr = 0
-            if re.search("^%[mMdDfFxX]$", s):
+            if re.search("^%[&TqmMfFxX]|[dD]2?$", s):
                 attr = look.colors["CmdlineMacro"]
             cmdscr.addstr(s, attr)
 
     def print_color_shell(self, string):
         cmdscr = ui.getcomponent("Cmdscr").win
         prg = False
-        reg = re.compile("([\s;|>]|[^%]&|(?<!\\\\)%[mMdDfFxX])")
+        reg = re.compile(r"([\s;|>]|[^%]&|(?<!\\)%(?:[mMfFxX]|[dD]2?))")
         for s in reg.split(string):
             attr = 0
-            if re.search("^%[&TqmMdDfFxX]$", s):
+            if re.search("^%[&TqmMfFxX]|[dD]2?$", s):
                 attr = look.colors["CmdlineMacro"]
             elif re.search("^[;|>&]$", s):
                 attr = look.colors["CmdlineSeparator"]
@@ -302,10 +302,10 @@ class Cmdline(ui.Component):
 
     def print_color_eval(self, string):
         cmdscr = ui.getcomponent("Cmdscr").win
-        reg = re.compile("([\s;.()]|(?<!\\\\)%[mMdDfFxX])")
+        reg = re.compile(r"([\s;.()]|(?<!\\)%(?:[mMfFxX]|[dD]2?))")
         for s in reg.split(string):
             attr = 0
-            if re.search("^%[&TqmMdDfFxX]$", s):
+            if re.search("^%[&TqmMfFxX]|[dD]2?$", s):
                 attr = look.colors["CmdlineMacro"]
             elif re.search("^[;]$", s):
                 attr = look.colors["CmdlineSeparator"]
