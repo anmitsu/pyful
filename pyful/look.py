@@ -22,127 +22,127 @@ colors = {}
 
 looks = {
     "default": {
-        "Window": (-1, -1, 0),
-        "Titlebar": (-1, -1, 0),
-        "TitlebarFocus": (-1, -1, curses.A_REVERSE),
-        "CmdlineWindow": (-1, -1, 0),
-        "MenuWindow": (-1, -1, 0),
-        "InfoBoxWindow": (-1, -1, 0),
-        "InfoBoxTitle": (-1, -1, curses.A_BOLD | curses.A_UNDERLINE),
-        "DirectoryPath": (-1, -1, curses.A_BOLD),
-        "MarkFile": (curses.COLOR_YELLOW, -1, curses.A_BOLD),
-        "LinkFile": (curses.COLOR_MAGENTA, -1, 0),
-        "LinkDir": (curses.COLOR_MAGENTA, -1, curses.A_BOLD),
-        "Directory": (curses.COLOR_CYAN, -1, curses.A_BOLD),
-        "ExecutableFile": (curses.COLOR_RED, -1, curses.A_BOLD),
-        "MessageWindow": (-1, -1, 0),
-        "PutsMessage": (-1, -1, 0),
-        "ErrorMessage": (curses.COLOR_RED, -1, curses.A_BOLD),
-        "ConfirmMessage": (curses.COLOR_CYAN, -1, curses.A_BOLD),
-        "Finder": (curses.COLOR_BLACK, curses.COLOR_CYAN, 0),
-        "Workspace": (-1, -1, 0),
-        "WorkspaceFocus": (curses.COLOR_BLACK, curses.COLOR_CYAN, 0),
-        "CmdlineOptions": (curses.COLOR_YELLOW, -1, 0),
-        "CmdlineSeparator": (curses.COLOR_BLUE, -1, 0),
-        "CmdlinePythonFunction": (curses.COLOR_CYAN, -1, curses.A_BOLD),
-        "CmdlineMacro": (curses.COLOR_MAGENTA, -1, 0),
-        "CmdlineProgram": (curses.COLOR_GREEN, -1, curses.A_BOLD),
-        "CmdlineNoProgram": (curses.COLOR_RED, -1, 0),
-        "CmdlinePrompt": (curses.COLOR_CYAN, -1, curses.A_BOLD),
-        "CandidateHighlight": (-1, -1, curses.A_BOLD)
+        "Window"                : ("default" ,  "default" ,  "normal"),
+        "Titlebar"              : ("default" ,  "default" ,  "normal"),
+        "TitlebarFocus"         : ("default" ,  "default" ,  "reverse"),
+        "CmdlineWindow"         : ("default" ,  "default" ,  "normal"),
+        "MenuWindow"            : ("default" ,  "default" ,  "normal"),
+        "InfoBoxWindow"         : ("default" ,  "default" ,  "normal"),
+        "InfoBoxTitle"          : ("default" ,  "default" ,  "bold | underline"),
+        "DirectoryPath"         : ("default" ,  "default" ,  "bold"),
+        "MarkFile"              : ("yellow"  ,  "default" ,  "bold"),
+        "LinkFile"              : ("magenta" ,  "default" ,  "normal"),
+        "LinkDir"               : ("magenta" ,  "default" ,  "bold"),
+        "Directory"             : ("cyan"    ,  "default" ,  "bold"),
+        "ExecutableFile"        : ("red"     ,  "default" ,  "bold"),
+        "MessageWindow"         : ("default" ,  "default" ,  "normal"),
+        "PutsMessage"           : ("default" ,  "default" ,  "normal"),
+        "ErrorMessage"          : ("red"     ,  "default" ,  "bold"),
+        "ConfirmMessage"        : ("cyan"    ,  "default" ,  "bold"),
+        "Finder"                : ("black"   ,  "cyan"    ,  "normal"),
+        "Workspace"             : ("default" ,  "default" ,  "normal"),
+        "WorkspaceFocus"        : ("black"   ,  "cyan"    ,  "normal"),
+        "CmdlineOptions"        : ("yellow"  ,  "default" ,  "normal"),
+        "CmdlineSeparator"      : ("blue"    ,  "default" ,  "normal"),
+        "CmdlinePythonFunction" : ("cyan"    ,  "default" ,  "bold"),
+        "CmdlineMacro"          : ("magenta" ,  "default" ,  "normal"),
+        "CmdlineProgram"        : ("green"   ,  "default" ,  "bold"),
+        "CmdlineNoProgram"      : ("red"     ,  "default" ,  "normal"),
+        "CmdlinePrompt"         : ("cyan"    ,  "default" ,  "bold"),
+        "CandidateHighlight"    : ("default" ,  "default" ,  "bold"),
         },
 
     "midnight": {
-        "Window": (curses.COLOR_WHITE, curses.COLOR_BLUE, 0),
-        "Titlebar": (curses.COLOR_BLACK, curses.COLOR_CYAN, 0),
-        "TitlebarFocus": (curses.COLOR_WHITE, curses.COLOR_BLACK, curses.A_BOLD),
-        "MenuWindow": (curses.COLOR_WHITE, curses.COLOR_BLUE, 0),
-        "InfoBoxWindow": (curses.COLOR_WHITE, curses.COLOR_BLUE, 0),
-        "InfoBoxTitle": (curses.COLOR_BLACK, curses.COLOR_WHITE, 0),
-        "DirectoryPath": (curses.COLOR_BLACK, curses.COLOR_WHITE, 0),
-        "MarkFile": (curses.COLOR_YELLOW, curses.COLOR_BLUE, curses.A_BOLD),
-        "LinkFile": (curses.COLOR_WHITE, curses.COLOR_BLUE, 0),
-        "LinkDir": (curses.COLOR_WHITE, curses.COLOR_BLUE, curses.A_BOLD),
-        "Directory": (curses.COLOR_WHITE, curses.COLOR_BLUE, curses.A_BOLD),
-        "ExecutableFile": (curses.COLOR_GREEN, curses.COLOR_BLUE, curses.A_BOLD),
-        "MessageWindow": (curses.COLOR_WHITE, curses.COLOR_BLUE, 0),
-        "PutsMessage": (curses.COLOR_WHITE, curses.COLOR_BLUE, 0),
-        "ErrorMessage": (curses.COLOR_RED, curses.COLOR_BLUE, 0),
-        "ConfirmMessage": (curses.COLOR_WHITE, -1, curses.A_BOLD),
-        "Finder": (curses.COLOR_BLACK, curses.COLOR_CYAN, 0),
-        "Workspace": (curses.COLOR_WHITE, curses.COLOR_BLUE, 0),
-        "WorkspaceFocus": (curses.COLOR_WHITE, curses.COLOR_BLACK, curses.A_BOLD),
-        "CmdlineWindow": (-1, -1, 0),
-        "CmdlineOptions": (curses.COLOR_YELLOW, -1, 0),
-        "CmdlineSeparator": (curses.COLOR_BLUE, -1, 0),
-        "CmdlinePythonFunction": (curses.COLOR_CYAN, -1, curses.A_BOLD),
-        "CmdlineMacro": (curses.COLOR_MAGENTA, -1, 0),
-        "CmdlineProgram": (curses.COLOR_GREEN, -1, curses.A_BOLD),
-        "CmdlineNoProgram": (curses.COLOR_RED, -1, 0),
-        "CmdlinePrompt": (curses.COLOR_WHITE, -1, curses.A_BOLD),
-        "CandidateHighlight": (curses.COLOR_WHITE, curses.COLOR_BLUE, curses.A_BOLD)
+        "Window"                : ("white"   ,  "blue"    ,  "normal"),
+        "Titlebar"              : ("black"   ,  "cyan"    ,  "normal"),
+        "TitlebarFocus"         : ("white"   ,  "black"   ,  "bold"),
+        "MenuWindow"            : ("white"   ,  "blue"    ,  "normal"),
+        "InfoBoxWindow"         : ("white"   ,  "blue"    ,  "normal"),
+        "InfoBoxTitle"          : ("black"   ,  "white"   ,  "normal"),
+        "DirectoryPath"         : ("black"   ,  "white"   ,  "normal"),
+        "MarkFile"              : ("yellow"  ,  "blue"    ,  "bold"),
+        "LinkFile"              : ("white"   ,  "blue"    ,  "normal"),
+        "LinkDir"               : ("white"   ,  "blue"    ,  "bold"),
+        "Directory"             : ("white"   ,  "blue"    ,  "bold"),
+        "ExecutableFile"        : ("green"   ,  "blue"    ,  "bold"),
+        "MessageWindow"         : ("white"   ,  "blue"    ,  "normal"),
+        "PutsMessage"           : ("white"   ,  "blue"    ,  "normal"),
+        "ErrorMessage"          : ("red"     ,  "blue"    ,  "normal"),
+        "ConfirmMessage"        : ("white"   ,  "default" ,  "bold"),
+        "Finder"                : ("black"   ,  "cyan"    ,  "normal"),
+        "Workspace"             : ("white"   ,  "blue"    ,  "normal"),
+        "WorkspaceFocus"        : ("white"   ,  "black"   ,  "bold"),
+        "CmdlineWindow"         : ("default" ,  "default" ,  "normal"),
+        "CmdlineOptions"        : ("yellow"  ,  "default" ,  "normal"),
+        "CmdlineSeparator"      : ("blue"    ,  "default" ,  "normal"),
+        "CmdlinePythonFunction" : ("cyan"    ,  "default" ,  "bold"),
+        "CmdlineMacro"          : ("magenta" ,  "default" ,  "normal"),
+        "CmdlineProgram"        : ("green"   ,  "default" ,  "bold"),
+        "CmdlineNoProgram"      : ("red"     ,  "default" ,  "normal"),
+        "CmdlinePrompt"         : ("white"   ,  "default" ,  "bold"),
+        "CandidateHighlight"    : ("white"   ,  "blue"    ,  "bold"),
         },
 
     "dark": {
-        "Window": (curses.COLOR_WHITE, curses.COLOR_BLACK, 0),
-        "Titlebar": (curses.COLOR_WHITE, curses.COLOR_BLACK, 0),
-        "TitlebarFocus": (curses.COLOR_WHITE, curses.COLOR_BLACK, curses.A_REVERSE),
-        "MenuWindow": (curses.COLOR_WHITE, curses.COLOR_BLACK, 0),
-        "InfoBoxWindow": (curses.COLOR_WHITE, curses.COLOR_BLACK, 0),
-        "InfoBoxTitle": (curses.COLOR_WHITE, curses.COLOR_BLACK, curses.A_BOLD | curses.A_UNDERLINE),
-        "DirectoryPath": (curses.COLOR_WHITE, curses.COLOR_BLACK, curses.A_BOLD),
-        "MarkFile": (curses.COLOR_YELLOW, curses.COLOR_BLACK, curses.A_BOLD),
-        "LinkFile": (curses.COLOR_MAGENTA, curses.COLOR_BLACK, 0),
-        "LinkDir": (curses.COLOR_MAGENTA, curses.COLOR_BLACK, curses.A_BOLD),
-        "Directory": (curses.COLOR_CYAN, curses.COLOR_BLACK, curses.A_BOLD),
-        "ExecutableFile": (curses.COLOR_RED, curses.COLOR_BLACK, curses.A_BOLD),
-        "MessageWindow": (curses.COLOR_WHITE, curses.COLOR_BLACK, 0),
-        "PutsMessage": (curses.COLOR_WHITE, curses.COLOR_BLACK, 0),
-        "ErrorMessage": (curses.COLOR_RED, curses.COLOR_BLACK, 0),
-        "ConfirmMessage": (curses.COLOR_CYAN, curses.COLOR_BLACK, curses.A_BOLD),
-        "Finder": (curses.COLOR_BLACK, curses.COLOR_CYAN, 0),
-        "Workspace": (curses.COLOR_WHITE, curses.COLOR_BLACK, 0),
-        "WorkspaceFocus": (curses.COLOR_BLACK, curses.COLOR_CYAN, curses.A_BOLD),
-        "CmdlineWindow": (curses.COLOR_WHITE, curses.COLOR_BLACK, 0),
-        "CmdlineOptions": (curses.COLOR_YELLOW, curses.COLOR_BLACK, 0),
-        "CmdlineSeparator": (curses.COLOR_BLUE, curses.COLOR_BLACK, 0),
-        "CmdlinePythonFunction": (curses.COLOR_CYAN, curses.COLOR_BLACK, curses.A_BOLD),
-        "CmdlineMacro": (curses.COLOR_MAGENTA, curses.COLOR_BLACK, 0),
-        "CmdlineProgram": (curses.COLOR_GREEN, curses.COLOR_BLACK, curses.A_BOLD),
-        "CmdlineNoProgram": (curses.COLOR_RED, curses.COLOR_BLACK, 0),
-        "CmdlinePrompt": (curses.COLOR_WHITE, curses.COLOR_BLACK, curses.A_BOLD),
-        "CandidateHighlight": (curses.COLOR_WHITE, curses.COLOR_BLACK, curses.A_BOLD)
+        "Window"                : ("white"   ,  "black" ,  "normal"),
+        "Titlebar"              : ("white"   ,  "black" ,  "normal"),
+        "TitlebarFocus"         : ("white"   ,  "black" ,  "reverse"),
+        "MenuWindow"            : ("white"   ,  "black" ,  "normal"),
+        "InfoBoxWindow"         : ("white"   ,  "black" ,  "normal"),
+        "InfoBoxTitle"          : ("white"   ,  "black" ,  "bold | underline"),
+        "DirectoryPath"         : ("white"   ,  "black" ,  "bold"),
+        "MarkFile"              : ("yellow"  ,  "black" ,  "bold"),
+        "LinkFile"              : ("magenta" ,  "black" ,  "normal"),
+        "LinkDir"               : ("magenta" ,  "black" ,  "bold"),
+        "Directory"             : ("cyan"    ,  "black" ,  "bold"),
+        "ExecutableFile"        : ("red"     ,  "black" ,  "bold"),
+        "MessageWindow"         : ("white"   ,  "black" ,  "normal"),
+        "PutsMessage"           : ("white"   ,  "black" ,  "normal"),
+        "ErrorMessage"          : ("red"     ,  "black" ,  "normal"),
+        "ConfirmMessage"        : ("cyan"    ,  "black" ,  "bold"),
+        "Finder"                : ("black"   ,  "cyan"  ,  "normal"),
+        "Workspace"             : ("white"   ,  "black" ,  "normal"),
+        "WorkspaceFocus"        : ("black"   ,  "cyan"  ,  "bold"),
+        "CmdlineWindow"         : ("white"   ,  "black" ,  "normal"),
+        "CmdlineOptions"        : ("yellow"  ,  "black" ,  "normal"),
+        "CmdlineSeparator"      : ("blue"    ,  "black" ,  "normal"),
+        "CmdlinePythonFunction" : ("cyan"    ,  "black" ,  "bold"),
+        "CmdlineMacro"          : ("magenta" ,  "black" ,  "normal"),
+        "CmdlineProgram"        : ("green"   ,  "black" ,  "bold"),
+        "CmdlineNoProgram"      : ("red"     ,  "black" ,  "normal"),
+        "CmdlinePrompt"         : ("white"   ,  "black" ,  "bold"),
+        "CandidateHighlight"    : ("white"   ,  "black" ,  "bold"),
         },
 
     "light": {
-        "Window": (curses.COLOR_BLACK, curses.COLOR_WHITE, 0),
-        "Titlebar": (curses.COLOR_BLACK, curses.COLOR_WHITE, 0),
-        "TitlebarFocus": (curses.COLOR_BLACK, curses.COLOR_WHITE, curses.A_REVERSE),
-        "MenuWindow": (curses.COLOR_BLACK, curses.COLOR_WHITE, 0),
-        "InfoBoxWindow": (curses.COLOR_BLACK, curses.COLOR_WHITE, 0),
-        "InfoBoxTitle": (curses.COLOR_BLACK, curses.COLOR_WHITE, curses.A_BOLD | curses.A_UNDERLINE),
-        "DirectoryPath": (curses.COLOR_BLACK, curses.COLOR_WHITE, curses.A_BOLD),
-        "MarkFile": (curses.COLOR_BLACK, curses.COLOR_YELLOW, curses.A_BOLD),
-        "LinkFile": (curses.COLOR_MAGENTA, curses.COLOR_WHITE, 0),
-        "LinkDir": (curses.COLOR_MAGENTA, curses.COLOR_WHITE, curses.A_BOLD),
-        "Directory": (curses.COLOR_BLUE, curses.COLOR_WHITE, curses.A_BOLD),
-        "ExecutableFile": (curses.COLOR_RED, curses.COLOR_WHITE, curses.A_BOLD),
-        "MessageWindow": (curses.COLOR_BLACK, curses.COLOR_WHITE, 0),
-        "PutsMessage": (curses.COLOR_BLACK, curses.COLOR_WHITE, 0),
-        "ErrorMessage": (curses.COLOR_RED, curses.COLOR_WHITE, 0),
-        "ConfirmMessage": (curses.COLOR_BLACK, curses.COLOR_WHITE, curses.A_BOLD),
-        "Finder": (curses.COLOR_BLACK, curses.COLOR_CYAN, 0),
-        "Workspace": (curses.COLOR_BLACK, curses.COLOR_WHITE, 0),
-        "WorkspaceFocus": (curses.COLOR_WHITE, curses.COLOR_BLUE, curses.A_BOLD),
-        "CmdlineWindow": (curses.COLOR_BLACK, curses.COLOR_WHITE, 0),
-        "CmdlineOptions": (curses.COLOR_BLACK, curses.COLOR_YELLOW, 0),
-        "CmdlineSeparator": (curses.COLOR_BLUE, curses.COLOR_WHITE, 0),
-        "CmdlinePythonFunction": (curses.COLOR_BLACK, curses.COLOR_GREEN, curses.A_BOLD),
-        "CmdlineMacro": (curses.COLOR_MAGENTA, curses.COLOR_WHITE, 0),
-        "CmdlineProgram": (curses.COLOR_BLACK, curses.COLOR_GREEN, 0),
-        "CmdlineNoProgram": (curses.COLOR_RED, curses.COLOR_WHITE, 0),
-        "CmdlinePrompt": (curses.COLOR_BLACK, curses.COLOR_WHITE, 0),
-        "CandidateHighlight": (curses.COLOR_BLUE, curses.COLOR_WHITE, curses.A_BOLD)
+        "Window"                : ("black"   ,  "white"  ,  "normal"),
+        "Titlebar"              : ("black"   ,  "white"  ,  "normal"),
+        "TitlebarFocus"         : ("black"   ,  "white"  ,  "reverse"),
+        "MenuWindow"            : ("black"   ,  "white"  ,  "normal"),
+        "InfoBoxWindow"         : ("black"   ,  "white"  ,  "normal"),
+        "InfoBoxTitle"          : ("black"   ,  "white"  ,  "bold | underline"),
+        "DirectoryPath"         : ("black"   ,  "white"  ,  "bold"),
+        "MarkFile"              : ("black"   ,  "yellow" ,  "bold"),
+        "LinkFile"              : ("magenta" ,  "white"  ,  "normal"),
+        "LinkDir"               : ("magenta" ,  "white"  ,  "bold"),
+        "Directory"             : ("blue"    ,  "white"  ,  "bold"),
+        "ExecutableFile"        : ("red"     ,  "white"  ,  "bold"),
+        "MessageWindow"         : ("black"   ,  "white"  ,  "normal"),
+        "PutsMessage"           : ("black"   ,  "white"  ,  "normal"),
+        "ErrorMessage"          : ("red"     ,  "white"  ,  "normal"),
+        "ConfirmMessage"        : ("black"   ,  "white"  ,  "bold"),
+        "Finder"                : ("black"   ,  "cyan"   ,  "normal"),
+        "Workspace"             : ("black"   ,  "white"  ,  "normal"),
+        "WorkspaceFocus"        : ("white"   ,  "blue"   ,  "bold"),
+        "CmdlineWindow"         : ("black"   ,  "white"  ,  "normal"),
+        "CmdlineOptions"        : ("black"   ,  "yellow" ,  "normal"),
+        "CmdlineSeparator"      : ("blue"    ,  "white"  ,  "normal"),
+        "CmdlinePythonFunction" : ("black"   ,  "green"  ,  "bold"),
+        "CmdlineMacro"          : ("magenta" ,  "white"  ,  "normal"),
+        "CmdlineProgram"        : ("black"   ,  "green"  ,  "normal"),
+        "CmdlineNoProgram"      : ("red"     ,  "white"  ,  "normal"),
+        "CmdlinePrompt"         : ("black"   ,  "white"  ,  "normal"),
+        "CandidateHighlight"    : ("blue"    ,  "white"  ,  "bold"),
         },
     }
 
@@ -152,16 +152,34 @@ class Look(object):
 Look.mylook = "default"
 
 def _init_color_table():
-    for (name, v) in looks["default"].items():
-        colors[name] = v[2]
+    for name in looks["default"].keys():
+        colors[name] = 0
 _init_color_table()
 
 def init_colors():
     mylook = looks.get(Look.mylook, looks["default"])
+    cols = {}
+    attrs = {}
+    for m in dir(curses):
+        if m.startswith("COLOR_"):
+            cols[m[6:].lower()] = curses.__dict__[m]
+        elif m.startswith("A_"):
+            attrs[m[2:].lower()] = curses.__dict__[m]
+
     if curses.has_colors():
         for i, (name, v) in enumerate(mylook.items()):
-            curses.init_pair(i+1, v[0], v[1])
-            colors[name] = curses.color_pair(i+1) | v[2]
+            fg, bg, attr = v
+            myfg = cols.get(fg, -1)
+            mybg = cols.get(bg, -1)
+            myattr = 0
+            for a in attr.split("|"):
+                myattr |= attrs.get(a.strip(), 0)
+            curses.init_pair(i+1, myfg, mybg)
+            colors[name] = curses.color_pair(i+1) | myattr
     else:
         for (name, v) in mylook.items():
-            colors[name] = v[2]
+            fg, bg, attr = v
+            myattr = 0
+            for a in attr.split("|"):
+                myattr |= attrs.get(a.strip(), 0)
+            colors[name] = myattr
