@@ -83,15 +83,12 @@ class Menu(ui.Component):
             self.cursor = 0
 
         self.win.border(*self.borders)
-        self.win.move(0, 2)
-        self.win.addstr(self.title, curses.A_BOLD)
+        self.win.addstr(0, 2, self.title, curses.A_BOLD)
 
         for i, item in enumerate(items):
             name = util.mbs_ljust(item[0], self.win.getmaxyx()[1]-4)
             if self.cursor == i:
-                self.win.move(i+1, 2)
-                self.win.addstr(name, curses.A_REVERSE)
+                self.win.addstr(i+1, 2, name, curses.A_REVERSE)
             else:
-                self.win.move(i+1, 2)
-                self.win.addstr(name)
+                self.win.addstr(i+1, 2, name)
         self.win.noutrefresh()

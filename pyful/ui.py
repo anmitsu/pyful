@@ -282,13 +282,12 @@ class InfoBox(Component):
             self.scrolltop = size//height * height
 
     def _view_titlebar(self, size, infocount):
-        self.win.move(0, 2)
         if self.cursor < 0:
             cpage = 1
         else:
             cpage = (self.cursor)//infocount+1
         maxpage = size//infocount+1
-        self.win.addstr("{0}({1}) [{2}/{3}]".format
+        self.win.addstr(0, 2, "{0}({1}) [{2}/{3}]".format
                         (self.title, size, cpage, maxpage),
                         look.colors["InfoBoxTitle"])
 

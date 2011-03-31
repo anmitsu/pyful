@@ -213,8 +213,7 @@ class Subloop(object):
         cmdscr = ui.getcomponent("Cmdscr").win
         y, x = cmdscr.getmaxyx()
         string = " | ".join("[{0}] {1}".format(i+1, t.title) for i, t in enumerate(Filectrl.threads))
-        cmdscr.move(0, 1)
-        cmdscr.addstr(util.mbs_ljust(string, x-2), curses.A_BOLD)
+        cmdscr.addstr(0, 1, util.mbs_ljust(string, x-2), curses.A_BOLD)
         cmdscr.noutrefresh()
 
     def input(self, key):

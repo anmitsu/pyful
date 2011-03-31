@@ -1079,14 +1079,12 @@ class Directory(ui.StandardScreen):
         else:
             path = self.path
         path = util.path_omission(path, titlewidth)
-        self.win.move(0, 2)
-        self.win.addstr("".join([path, title]), look.colors["DirectoryPath"])
+        self.win.addstr(0, 2, "".join([path, title]), look.colors["DirectoryPath"])
 
     def _view_statusbar(self, focus, size, height):
         self.statwin.erase()
         if not self.finder.active:
             self.statwin.border(*self.borders)
-        self.statwin.move(0, 1)
 
         if self.finder.active:
             if focus:
@@ -1113,7 +1111,7 @@ class Directory(ui.StandardScreen):
             sy, sx = self.statwin.getmaxyx()
             if util.termwidth(status) > sx-2:
                 status = util.mbs_ljust(status, sx-2)
-            self.statwin.addstr(status)
+            self.statwin.addstr(0, 1, status)
             self.statwin.noutrefresh()
             if focus:
                 self.file.view()
@@ -1143,11 +1141,10 @@ class Directory(ui.StandardScreen):
             attr = f.get_attr()
             if self.cursor == i and focus:
                 attr += curses.A_REVERSE
-            self.win.move(line, 1)
             if f.marked:
-                self.win.addstr("*" + fstr, attr)
+                self.win.addstr(lien, 1, "*"+fstr, attr)
             else:
-                self.win.addstr(" " + fstr, attr)
+                self.win.addstr(line, 1, " "+fstr, attr)
         self.win.noutrefresh()
         self._view_statusbar(focus, size, height)
 
@@ -1287,11 +1284,10 @@ class Finder(object):
             return True
 
     def view(self):
-        self.dir.statwin.move(0, 1)
         if self.migemo:
-            self.dir.statwin.addstr(" Finder(migemo): ", look.colors["Finder"])
+            self.dir.statwin.addstr(0, 1, " Finder(migemo): ", look.colors["Finder"])
         else:
-            self.dir.statwin.addstr(" Finder: ", look.colors["Finder"])
+            self.dir.statwin.addstr(0, 1, " Finder: ", look.colors["Finder"])
         try:
             self.dir.statwin.addstr(" " + self.string)
         except curses.error:
@@ -1519,6 +1515,5 @@ class FileStat(object):
         name = self.name
         fstat = "{0} {1} {2} {3} {4} {5} {6}".format(perm, nlink, user, group, size, mtime, name)
         fstat = util.mbs_ljust(fstat, cmdscr.getmaxyx()[1]-1)
-        cmdscr.move(1, 0)
-        cmdscr.addstr(fstat)
+        cmdscr.addstr(1, 0, fstat)
         cmdscr.noutrefresh()

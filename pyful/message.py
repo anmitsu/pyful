@@ -156,17 +156,15 @@ class Confirm(object):
 
         cmdscr = ui.getcomponent("Cmdscr").win
         cmdscr.erase()
-        cmdscr.move(0, 1)
         y, x = cmdscr.getmaxyx()
 
         size = len(self.options)
         try:
-            cmdscr.addstr(self.msg+" ", look.colors["ConfirmMessage"])
+            cmdscr.addstr(0, 1, self.msg+" ", look.colors["ConfirmMessage"])
         except curses.error:
             cmdscr.erase()
-            cmdscr.move(0, 1)
             maxwidth = x-2-util.termwidth(" ".join(self.options))
-            cmdscr.addstr(util.mbs_ljust(self.msg+" ", maxwidth),
+            cmdscr.addstr(0, 1, util.mbs_ljust(self.msg+" ", maxwidth),
                           look.colors["ConfirmMessage"])
 
         if self.cursor < 0:
