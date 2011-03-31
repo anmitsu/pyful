@@ -77,6 +77,7 @@ class StandardScreen(object):
             curses.noecho()
             curses.cbreak()
             curses.raw()
+            curses.nonl()
             if curses.has_colors():
                 curses.start_color()
                 curses.use_default_colors()
@@ -379,7 +380,7 @@ class KeyHandler(object):
                     pass
                 else:
                     key = "M-" + key
-        elif ch == 10:
+        elif ch == 13:
             key = "RET"
         elif ch == 32:
             key = "SPC"

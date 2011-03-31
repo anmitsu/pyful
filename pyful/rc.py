@@ -187,7 +187,8 @@ def myatexit():
 #     "C-a" -> Ctrl + a
 #     "M-a" -> Meta + a
 #     "M-C-a" -> Meta + Ctrl + a
-#     "RET" -> Enter
+#     "A" -> Shift + a
+#     "RET" -> Enter or Ctrl + m
 #     "ESC" -> Escape
 #     "SPC" -> Space
 #     "<name>" -> Constants in curses module: KEY_name
@@ -199,7 +200,9 @@ def myatexit():
 #     ".mark" represent the mark file.
 #
 # Note:
-#     "C-j", "C-m" are interpreted as "RET" in most terminals.
+#     "C-m" key is interpreted as "RET" in most terminals.
+#     The key such as "C-A" are interpreted such as "C-a".
+#     The key such as "C-<down>" are undefine.
 #
 myfilerkeymap = {
     "M-1"           : lambda: filer.focus_workspace(0),
@@ -223,7 +226,7 @@ myfilerkeymap = {
     "<left>"        : commands["focus_prev_dir"],
     "F"             : commands["swap_dir_inc"],
     "B"             : commands["swap_dir_dec"],
-    "M-RET"         : commands["create_dir"],
+    "M-C-j"         : commands["create_dir"],
     "M-C"           : commands["close_dir"],
     "C-w"           : commands["close_dir"],
     "C-l"           : commands["all_reload"],
