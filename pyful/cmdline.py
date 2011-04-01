@@ -44,7 +44,7 @@ class Cmdline(ui.Component):
         self.output = Output(self)
         self.completion = completion.Completion(self)
 
-    def execute(self):
+    def execute(self, action=None):
         string = self.string
         if self.mode.__class__.__name__ == "Shell":
             expand_string = util.expandmacro(self.string, shell=True)
@@ -52,7 +52,9 @@ class Cmdline(ui.Component):
             expand_string = util.expandmacro(self.string, shell=False)
         self.finish()
         self.history.append(string)
-        self.mode.execute(expand_string)
+        ret = self.mode.execute(expand_string, action)
+        if isinstance(ret, (tuple, list)) and len(ret) == 2:
+            self.restart(ret[0], ret[1])
 
     def expandmacro(self):
         if self.mode.__class__.__name__ == "Shell":
@@ -61,6 +63,11 @@ class Cmdline(ui.Component):
             self.string = util.expandmacro(self.string, shell=False)
         self.cursor += util.mbslen(self.string)
         self.history.restart()
+
+    def select_action(self):
+        action = self.mode.select_action()
+        if action:
+            self.execute(action)
 
     def escape(self):
         self.history.append(self.string)
@@ -158,7 +165,7 @@ class Cmdline(ui.Component):
 
     def _get_current_line(self, win):
         maxy, maxx = win.getmaxyx()
-        prompt = " {0} ".format(self.mode.prompt)
+        prompt = "{1[0]}{0}{1[1]}".format(self.mode.prompt, self.mode.prompt_side)
         promptlen = util.termwidth(prompt)
         if promptlen > maxx:
             prompt = util.mbs_ljust(prompt, maxx-2)
@@ -246,28 +253,28 @@ class Cmdline(ui.Component):
         self.cursor = 0
         self.active = False
 
-    def start(self, mode, string="", pos=0):
+    def start(self, mode, string="", pos=-1):
         self.mode = mode
         self.string = string
-        if pos > 0:
-            self.cursor = pos - 1
+        if pos >= 0:
+            self.cursor = pos
         else:
-            self.cursor = util.mbslen(self.string) + pos
+            self.cursor = util.mbslen(self.string) + 1 + pos
         self.active = True
         self.history.start()
 
-    def restart(self, string="", pos=0):
+    def restart(self, string="", pos=-1):
         self.start(self.mode, string, pos)
 
-    def shell(self, string="", pos=0):
+    def shell(self, string="", pos=-1):
         from pyful import mode
         self.start(mode.Shell(), string, pos)
 
-    def eval(self, string="", pos=0):
+    def eval(self, string="", pos=-1):
         from pyful import mode
         self.start(mode.Eval(), string, pos)
 
-    def mx(self, string="", pos=0):
+    def mx(self, string="", pos=-1):
         from pyful import mode
         self.start(mode.Mx(), string, pos)
 

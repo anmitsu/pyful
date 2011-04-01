@@ -28,45 +28,90 @@ from pyful import process
 from pyful import ui
 from pyful import util
 
+class ActionBox(ui.InfoBox):
+    def __init__(self):
+        ui.InfoBox.__init__(self, "Action")
+        self.keymap["RET"] = self.select_action
+        self.selected = None
+
+    def select_action(self):
+        self.selected = self.cursor_item().string
+        self.hide()
+
+    def run(self, actions):
+        if not actions:
+            return
+        self.show([ui.InfoBoxContext(a) for a in actions])
+        viewer = ui.Viewer(self.view)
+        controller = ui.Controller(self.input)
+        while self.is_active:
+            viewer.view_and_update()
+            controller.control()
+        if self.selected:
+            ret = self.selected
+            self.selected = None
+            return ret
+
 class Mode(object):
+    actionbox = ActionBox()
+    actions = []
     prompt = ""
+    prompt_side = (" ", " ")
+
+    def select_action(self):
+        return self.actionbox.run(self.actions)
 
     def complete(self, comp):
         return comp.comp_files()
 
-    def execute(self, cmdstring):
+    def execute(self, cmdstring, action):
         pass
 
 class Shell(Mode):
     prompt = "$"
+    actions = ["Run background", "Run external terminal", "Run quickly",]
 
     def complete(self, comp):
         return comp.complete()
 
-    def execute(self, cmd):
+    def execute(self, cmd, action):
+        if action == self.actions[0]:
+            cmd += "%&"
+        elif action == self.actions[1]:
+            cmd += "%T"
+        elif action == self.actions[2]:
+            cmd += "%q"
         process.spawn(cmd, expandmacro=False)
 
 class Eval(Mode):
     prompt = "Eval:"
+    actions = ["Run quickly",]
 
     def complete(self, comp):
         return comp.comp_python_builtin_functions()
 
-    def execute(self, cmd):
+    def execute(self, cmd, action):
+        if action == self.actions[0]:
+            cmd += "%q"
         process.python(cmd)
 
 class Mx(Mode):
     prompt = "M-x"
+    actions = ["Show command help",]
 
     def complete(self, comp):
         return comp.comp_pyful_commands()
 
-    def execute(self, cmd):
-        from pyful.command import commands
-        try:
-            commands[cmd]()
-        except KeyError:
-            message.error("Undefined command `{0}'".format(cmd))
+    def execute(self, cmd, action):
+        if action == self.actions[0]:
+            ui.getcomponent("Help").show_command(cmd)
+            return (cmd, -1)
+        else:
+            from pyful.command import commands
+            try:
+                commands[cmd]()
+            except KeyError:
+                message.error("Undefined command `{0}'".format(cmd))
 
 class ChangeLooks(Mode):
     prompt = "Change looks:"
@@ -75,7 +120,7 @@ class ChangeLooks(Mode):
         return sorted([l for l in look.looks.keys()
                        if l.startswith(comp.parser.part[1])])
 
-    def execute(self, name):
+    def execute(self, name, action):
         if name in look.looks:
             look.Look.mylook = name
             look.init_colors()
@@ -89,7 +134,7 @@ class ChangeWorkspaceTitle(Mode):
     def complete(self, comp):
         return comp.comp_files()
 
-    def execute(self, title):
+    def execute(self, title, action):
         ui.getcomponent("Filer").workspace.chtitle(title)
 
 class Chdir(Mode):
@@ -98,7 +143,7 @@ class Chdir(Mode):
     def complete(self, comp):
         return comp.comp_dirs()
 
-    def execute(self, path):
+    def execute(self, path, action):
         ui.getcomponent("Filer").dir.chdir(path)
 
 class Chmod(Mode):
@@ -114,7 +159,7 @@ class Chmod(Mode):
         symbols = ["+r", "-r", "+w", "-w", "+x", "-x"]
         return sorted([symb for symb in symbols if symb.startswith(comp.parser.part[1])])
 
-    def execute(self, mode):
+    def execute(self, mode, action):
         filer = ui.getcomponent("Filer")
         if filer.dir.ismark():
             for f in filer.dir.get_mark_files():
@@ -161,13 +206,13 @@ class Chown(Mode):
         elif self.group is None:
             return comp.comp_groupname()
 
-    def execute(self, string):
+    def execute(self, string, action):
         if self.user is None:
             if string == "":
                 self.user = -1
             else:
                 self.user = string
-            ui.getcomponent("Cmdline").restart("")
+            return ("", 0)
         else:
             if string == "":
                 self.group = -1
@@ -193,7 +238,7 @@ class Copy(Mode):
     def complete(self, comp):
         return comp.comp_files()
 
-    def execute(self, path):
+    def execute(self, path, action):
         filer = ui.getcomponent("Filer")
         if filer.dir.ismark():
             if not path.endswith(os.sep) and not os.path.isdir(path):
@@ -203,7 +248,7 @@ class Copy(Mode):
             if not path:
                 return
             self.src = path
-            ui.getcomponent("Cmdline").restart(filer.workspace.nextdir.path)
+            return (filer.workspace.nextdir.path, -1)
         else:
             filectrl.copy(self.src, path)
 
@@ -213,7 +258,7 @@ class CreateWorkspace(Mode):
     def complete(self, comp):
         return comp.comp_files()
 
-    def execute(self, title):
+    def execute(self, title, action):
         ui.getcomponent("Filer").create_workspace(title)
 
 class Delete(Mode):
@@ -224,7 +269,7 @@ class Delete(Mode):
     def complete(self, comp):
         return comp.comp_files()
 
-    def execute(self, path):
+    def execute(self, path, action):
         if not path:
             return
         filer = ui.getcomponent("Filer")
@@ -246,7 +291,7 @@ class Glob(Mode):
     def complete(self, comp):
         return comp.comp_files()
 
-    def execute(self, pattern):
+    def execute(self, pattern, action):
         filer = ui.getcomponent("Filer")
         if not self.default == "" and pattern == "":
             filer.dir.glob(self.default)
@@ -269,7 +314,7 @@ class GlobDir(Mode):
     def complete(self, comp):
         return comp.comp_files()
 
-    def execute(self, pattern):
+    def execute(self, pattern, action):
         filer = ui.getcomponent("Filer")
         if not self.default == "" and pattern == "":
             filer.dir.globdir(self.default)
@@ -285,7 +330,7 @@ class Help(Mode):
     def complete(self, comp):
         return comp.comp_pyful_commands()
 
-    def execute(self, cmd):
+    def execute(self, cmd, action):
         ui.getcomponent("Help").show_command(cmd)
 
 class Link(Mode):
@@ -306,7 +351,7 @@ class Link(Mode):
     def complete(self, comp):
         return comp.comp_files()
 
-    def execute(self, path):
+    def execute(self, path, action):
         filer = ui.getcomponent("Filer")
         if filer.dir.ismark():
             if not path.endswith(os.sep) and not os.path.isdir(path):
@@ -319,7 +364,7 @@ class Link(Mode):
             if not path:
                 return
             self.src = path
-            ui.getcomponent("Cmdline").restart(filer.workspace.nextdir.path)
+            return (filer.workspace.nextdir.path, -1)
         else:
             filectrl.link(self.src, path)
             filer.workspace.all_reload()
@@ -337,7 +382,7 @@ class Mark(Mode):
     def complete(self, comp):
         return comp.comp_files()
 
-    def execute(self, pattern):
+    def execute(self, pattern, action):
         filer = ui.getcomponent("Filer")
         if self.default and pattern == "":
             filer.dir.mark(self.default)
@@ -362,7 +407,7 @@ class Mask(Mode):
     def complete(self, comp):
         return comp.comp_files()
 
-    def execute(self, pattern):
+    def execute(self, pattern, action):
         filer = ui.getcomponent("Filer")
         if self.default and pattern == "":
             filer.dir.mask(self.default)
@@ -381,7 +426,7 @@ class Menu(Mode):
         return sorted([item for item in ui.getcomponent("Menu").items.keys()
                        if item.startswith(comp.parser.part[1])])
 
-    def execute(self, name):
+    def execute(self, name, action):
         ui.getcomponent("Menu").show(name)
 
 class Mkdir(Mode):
@@ -391,7 +436,7 @@ class Mkdir(Mode):
     def complete(self, comp):
         return comp.comp_dirs()
 
-    def execute(self, path):
+    def execute(self, path, action):
         filer = ui.getcomponent("Filer")
         filectrl.mkdir(path, self.dirmode)
         filer.workspace.all_reload()
@@ -415,7 +460,7 @@ class Move(Mode):
     def complete(self, comp):
         return comp.comp_files()
 
-    def execute(self, path):
+    def execute(self, path, action):
         filer = ui.getcomponent("Filer")
         if filer.dir.ismark():
             if not path.endswith(os.sep) and not os.path.isdir(path):
@@ -425,7 +470,7 @@ class Move(Mode):
             if not path:
                 return
             self.src = path
-            ui.getcomponent("Cmdline").restart(filer.workspace.nextdir.path)
+            return (filer.workspace.nextdir.path, -1)
         else:
             filectrl.move(self.src, path)
 
@@ -436,7 +481,7 @@ class Newfile(Mode):
     def complete(self, comp):
         return comp.comp_files()
 
-    def execute(self, path):
+    def execute(self, path, action):
         filer = ui.getcomponent("Filer")
         filectrl.mknod(path, self.filemode)
         filer.workspace.all_reload()
@@ -448,7 +493,7 @@ class OpenListfile(Mode):
     def complete(self, comp):
         return comp.comp_files()
 
-    def execute(self, path):
+    def execute(self, path, action):
         filer = ui.getcomponent("Filer")
         if os.path.exists(path):
             filer.dir.open_listfile(path)
@@ -470,16 +515,17 @@ class Rename(Mode):
     def complete(self, comp):
         return comp.comp_files()
 
-    def execute(self, path):
+    def execute(self, path, action):
         filectrl.rename(self.path, path)
         ui.getcomponent("Filer").workspace.all_reload()
 
 class Replace(Mode):
+    form = "emacs"
     default = []
     pattern = None
+    actions = ["Replace on form of `emacs'", "Replace on form of `vim'",]
 
-    @property
-    def prompt(self):
+    def _get_emacs_prompt(self):
         if self.pattern is None and self.default:
             return "Replace regexp (default {0} -> {1}):".format(self.default[0].pattern, self.default[1])
         elif self.pattern is None:
@@ -487,10 +533,27 @@ class Replace(Mode):
         else:
             return "Replace regexp {0} with:".format(self.pattern.pattern)
 
+    def _get_vim_prompt(self):
+        self.prompt_side = (" ", "")
+        return ":%s/"
+
+    @property
+    def prompt(self):
+        if self.form == "emacs":
+            return self._get_emacs_prompt()
+        elif self.form == "vim":
+            return self._get_vim_prompt()
+        else:
+            return self._get_emacs_prompt()
+
+    def select_action(self):
+        if self.pattern is None:
+            return self.actionbox.run(self.actions)
+
     def complete(self, comp):
         return comp.comp_files()
 
-    def execute(self, pattern):
+    def _run_emacs_replace(self, pattern):
         filer = ui.getcomponent("Filer")
         if not pattern and not self.pattern and self.default:
             filectrl.replace(self.default[0], self.default[1])
@@ -501,14 +564,46 @@ class Replace(Mode):
                 self.pattern = re.compile(util.U(pattern))
             except re.error as e:
                 return message.exception(e)
-            ui.getcomponent("Cmdline").restart("")
+            return ("", 0)
         else:
             filectrl.replace(self.pattern, pattern)
             Replace.default[:] = []
             Replace.default.append(self.pattern)
             Replace.default.append(pattern)
-            filer.dir.mark_clear()
             filer.workspace.all_reload()
+
+    def _run_vim_replace(self, pattern):
+        filer = ui.getcomponent("Filer")
+        patterns = re.split(r"(?<!\\)/", pattern)
+        if len(patterns) > 1:
+            pattern = util.U(patterns[0])
+            repl = patterns[1]
+        else:
+            pattern = util.U(pattern)
+            repl = ""
+        pattern = re.sub(r"\\/", "/", pattern)
+        repl = re.sub(r"\\/", "/", repl)
+        try:
+            reg = re.compile(pattern)
+        except re.error as e:
+            return message.exception(e)
+        filectrl.replace(reg, repl)
+        filer.workspace.all_reload()
+
+    def execute(self, pattern, action):
+        if action == self.actions[0]:
+            self.form = "emacs"
+            return (pattern, -1)
+        elif action == self.actions[1]:
+            self.form = "vim"
+            return (pattern, -1)
+
+        if self.form == "emacs":
+            self._run_emacs_replace(pattern)
+        elif self.form == "vim":
+            self._run_vim_replace(pattern)
+        else:
+            self._run_emacs_replace(pattern)
 
 class Symlink(Mode):
     def __init__(self):
@@ -529,7 +624,7 @@ class Symlink(Mode):
     def complete(self, comp):
         return comp.comp_files()
 
-    def execute(self, path):
+    def execute(self, path, action):
         filer = ui.getcomponent("Filer")
         if filer.dir.ismark():
             if not os.path.exists(path):
@@ -544,7 +639,7 @@ class Symlink(Mode):
             if not path:
                 return
             self.src = path
-            ui.getcomponent("Cmdline").restart(filer.workspace.nextdir.path)
+            return (filer.workspace.nextdir.path, -1)
         else:
             filectrl.symlink(self.src, path)
             filer.workspace.all_reload()
@@ -556,7 +651,7 @@ class TrashBox(Mode):
     def complete(self, comp):
         return comp.comp_dirs()
 
-    def execute(self, path):
+    def execute(self, path, action):
         filer = ui.getcomponent("Filer")
         trashbox = os.path.expanduser(self.path)
         msg = path.replace(filer.dir.path, "")
@@ -604,13 +699,12 @@ class Utime(Mode):
         elif len(self.sttime) == 5:
             return [str(i) for i in range(0, 62)]
 
-    def execute(self, st):
-        cmdline = ui.getcomponent("Cmdline")
+    def execute(self, st, action):
         if not self.path:
             if os.path.exists(st):
                 self.path = st
                 self.timesec = time.localtime(os.stat(self.path).st_mtime)
-                cmdline.restart("")
+                return ("", 0)
             else:
                 return message.error("{0} doesn't exist.".format(st))
 
@@ -619,7 +713,7 @@ class Utime(Mode):
                 self.sttime.append(self.timesec[0])
             else:
                 self.sttime.append(int(st))
-            cmdline.restart("")
+            return ("", 0)
         elif len(self.sttime) == 1:
             if st == "":
                 self.sttime.append(self.timesec[1])
@@ -627,7 +721,7 @@ class Utime(Mode):
                 self.sttime.append(int(st))
             else:
                 self.sttime.append(self.timesec[1])
-            cmdline.restart("")
+            return ("", 0)
         elif len(self.sttime) == 2:
             if st == "":
                 self.sttime.append(self.timesec[2])
@@ -635,7 +729,7 @@ class Utime(Mode):
                 self.sttime.append(int(st))
             else:
                 self.sttime.append(self.timesec[2])
-            cmdline.restart("")
+            return ("", 0)
         elif len(self.sttime) == 3:
             if st == "":
                 self.sttime.append(self.timesec[3])
@@ -643,7 +737,7 @@ class Utime(Mode):
                 self.sttime.append(int(st))
             else:
                 self.sttime.append(self.timesec[3])
-            cmdline.restart("")
+            return ("", 0)
         elif len(self.sttime) == 4:
             if st == "":
                 self.sttime.append(self.timesec[4])
@@ -651,7 +745,7 @@ class Utime(Mode):
                 self.sttime.append(int(st))
             else:
                 self.sttime.append(self.timesec[4])
-            cmdline.restart("")
+            return ("", 0)
         elif len(self.sttime) == 5:
             if st == "":
                 self.sttime.append(self.timesec[5])
@@ -694,18 +788,17 @@ class Tar(Mode):
     def complete(self, comp):
         return comp.comp_files()
 
-    def execute(self, path):
-        cmdline = ui.getcomponent("Cmdline")
+    def execute(self, path, action):
         filer = ui.getcomponent("Filer")
         if filer.dir.ismark() or self.each:
             if self.wrap is None:
                 self.wrap = path
                 if self.each:
-                    cmdline.restart(filer.workspace.nextdir.path)
+                    return (filer.workspace.nextdir.path, -1)
                 else:
                     ext = filectrl.TarThread.tarexts[self.tarmode]
                     tarpath = os.path.join(filer.workspace.nextdir.path, self.wrap + ext)
-                    cmdline.restart(tarpath, -len(ext))
+                    return (tarpath, -len(ext)-1)
             else:
                 if self.each:
                     filectrl.tareach(filer.dir.get_mark_files(), path, self.tarmode, self.wrap)
@@ -718,7 +811,7 @@ class Tar(Mode):
             self.src = path
             ext = filectrl.TarThread.tarexts[self.tarmode]
             tarpath = os.path.join(filer.workspace.nextdir.path, self.src + ext)
-            cmdline.restart(tarpath, -len(ext))
+            return (tarpath, -len(ext)-1)
         else:
             filectrl.tar(self.src, path, self.tarmode)
             filer.workspace.all_reload()
@@ -740,7 +833,7 @@ class UnTar(Mode):
     def complete(self, comp):
         return comp.comp_files()
 
-    def execute(self, path):
+    def execute(self, path, action):
         filer = ui.getcomponent("Filer")
         if filer.dir.ismark():
             filectrl.untar(filer.dir.get_mark_files(), path)
@@ -749,7 +842,7 @@ class UnTar(Mode):
             if not path:
                 return
             self.src = path
-            ui.getcomponent("Cmdline").restart(filer.workspace.nextdir.path)
+            return (filer.workspace.nextdir.path, -1)
         else:
             filectrl.untar(self.src, path)
             filer.workspace.all_reload()
@@ -765,7 +858,7 @@ class WebSearch(Mode):
     def complete(self, comp):
         return comp.comp_files()
 
-    def execute(self, word):
+    def execute(self, word, action):
         import webbrowser
         if self.engine == "Google":
             word = word.replace(" ", "+")
@@ -802,18 +895,17 @@ class Zip(Mode):
     def complete(self, comp):
         return comp.comp_files()
 
-    def execute(self, path):
-        cmdline = ui.getcomponent("Cmdline")
+    def execute(self, path, action):
         filer = ui.getcomponent("Filer")
         if filer.dir.ismark() or self.each:
             if self.wrap is None:
                 self.wrap = path
                 if self.each:
-                    cmdline.restart(filer.workspace.nextdir.path)
+                    return (filer.workspace.nextdir.path, -1)
                 else:
                     ext = ".zip"
                     zippath = os.path.join(filer.workspace.nextdir.path, self.wrap + ext)
-                    cmdline.restart(zippath, -len(ext))
+                    return (zippath, -len(ext)-1)
             else:
                 if self.each:
                     filectrl.zipeach(filer.dir.get_mark_files(), path, self.wrap)
@@ -826,7 +918,7 @@ class Zip(Mode):
             self.src = path
             ext = ".zip"
             zippath = os.path.join(filer.workspace.nextdir.path, self.src + ext)
-            cmdline.restart(zippath, -len(ext))
+            return (zippath, -len(ext)-1)
         else:
             filectrl.zip(self.src, path)
             filer.workspace.all_reload()
@@ -848,7 +940,7 @@ class UnZip(Mode):
     def complete(self, comp):
         return comp.comp_files()
 
-    def execute(self, path):
+    def execute(self, path, action):
         filer = ui.getcomponent("Filer")
         if filer.dir.ismark():
             filectrl.unzip(filer.dir.get_mark_files(), path)
@@ -857,7 +949,7 @@ class UnZip(Mode):
             if not path:
                 return
             self.src = path
-            ui.getcomponent("Cmdline").restart(filer.workspace.nextdir.path)
+            return (filer.workspace.nextdir.path, -1)
         else:
             filectrl.unzip(self.src, path)
             filer.workspace.all_reload()
@@ -868,7 +960,7 @@ class ZoomInfoBox(Mode):
     def complete(self, comp):
         return [str(x*10) for x in range(-10, 11) if str(x*10).startswith(comp.parser.part[1])]
 
-    def execute(self, zoom):
+    def execute(self, zoom, action):
         try:
             zoom = int(zoom)
             ui.zoom_infobox(zoom)
