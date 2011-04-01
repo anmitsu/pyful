@@ -201,13 +201,34 @@ def _get_file_length(paths):
 
 class Subloop(object):
     def __init__(self):
-        self.cmdline = ui.getcomponent("Cmdline")
-        self.filer = ui.getcomponent("Filer")
-        self.menu = ui.getcomponent("Menu")
-        self.message = ui.getcomponent("Message")
-        self.help = ui.getcomponent("Help")
+        cmdline = ui.getcomponent("Cmdline")
+        filer = ui.getcomponent("Filer")
+        menu = ui.getcomponent("Menu")
+        message = ui.getcomponent("Message")
+        helper = ui.getcomponent("Help")
+        def inputf(key):
+            if cmdline.is_active:
+                cmdline.input(key)
+            elif menu.is_active:
+                menu.input(key)
+            elif helper.is_active:
+                helper.input(key)
+            else:
+                filer.input(key)
+        def viewf():
+            filer.view()
+            if menu.is_active:
+                menu.view()
+            if cmdline.is_active:
+                cmdline.view()
+            elif helper.is_active:
+                helper.view()
+            else:
+                message.view()
+                self.subthreads_view()
+        self.viewer = ui.Viewer(viewf)
+        self.controller = ui.Controller(inputf)
         self.stdscr = ui.StandardScreen.stdscr
-        self.keyhandler = ui.KeyHandler()
 
     def subthreads_view(self):
         cmdscr = ui.getcomponent("Cmdscr").win
@@ -216,35 +237,10 @@ class Subloop(object):
         cmdscr.addstr(0, 1, util.mbs_ljust(string, x-2), curses.A_BOLD)
         cmdscr.noutrefresh()
 
-    def input(self, key):
-        if self.cmdline.is_active:
-            self.cmdline.input(key)
-        elif self.menu.is_active:
-            self.menu.input(key)
-        elif self.help.is_active:
-            self.help.input(key)
-        else:
-            self.filer.input(key)
-
-    def view(self):
-        self.filer.view()
-        if self.menu.is_active:
-            self.menu.view()
-        if self.cmdline.is_active:
-            self.cmdline.view()
-        elif self.help.is_active:
-            self.help.view()
-        else:
-            self.message.view()
-            self.subthreads_view()
-        curses.doupdate()
-
     def run(self):
         self.stdscr.timeout(100)
-        self.view()
-        key = self.keyhandler.getkey()
-        if key != -1:
-            self.input(key)
+        self.viewer.view_and_update()
+        self.controller.control()
         self.stdscr.timeout(-1)
 
 class FilectrlCancel(Exception):

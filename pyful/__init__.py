@@ -26,7 +26,6 @@ __version__ = "0.2.2"
 __all__ = ["cmdline", "command", "filectrl", "filer", "help", "look", "menu",
            "message", "mode", "process", "ui", "util", "completion"]
 
-import curses
 import os
 import shutil
 
@@ -56,18 +55,7 @@ class Pyful(object):
 
     def __init__(self, binpath):
         self.environs["SCRIPT"] = binpath
-
-        from pyful.cmdline import Cmdline
-        from pyful.filer import Filer
-        from pyful.message import Message
-        from pyful.menu import Menu
-        from pyful.help import Help
-
-        self.cmdline = Cmdline()
-        self.filer = Filer()
-        self.message = Message()
-        self.menu = Menu()
-        self.help = Help()
+        ui.start_ui()
 
     def init_function(self):
         for func in self.initfuncs: func()
@@ -102,32 +90,9 @@ class Pyful(object):
             default = os.path.join(libdir, "rc.py")
             shutil.copy(default, rcfile)
 
-    def view(self):
-        self.filer.view()
-        if self.menu.is_active:
-            self.menu.view()
-        if self.cmdline.is_active:
-            self.cmdline.view()
-        elif self.help.is_active:
-            self.help.view()
-        elif self.message.is_active:
-            self.message.view()
-        curses.doupdate()
-
-    def input(self, key):
-        if self.cmdline.is_active:
-            self.cmdline.input(key)
-        elif self.menu.is_active:
-            self.menu.input(key)
-        elif self.help.is_active:
-            self.help.input(key)
-        else:
-            self.filer.input(key)
-
     def main_loop(self):
-        keyhandler = ui.KeyHandler()
+        viewer = ui.Viewer()
+        controller = ui.Controller()
         while True:
-            self.view()
-            key = keyhandler.getkey()
-            if key != -1:
-                self.input(key)
+            viewer.view_and_update()
+            controller.control()

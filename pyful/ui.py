@@ -43,6 +43,18 @@ def refresh(*args):
     StandardScreen.stdscr.refresh()
     resize()
 
+def start_ui():
+    import pyful.cmdline
+    import pyful.filer
+    import pyful.message
+    import pyful.menu
+    import pyful.help
+    pyful.cmdline.Cmdline()
+    pyful.filer.Filer()
+    pyful.message.Message()
+    pyful.menu.Menu()
+    pyful.help.Help()
+
 def start_curses():
     try:
         curses.noecho()
@@ -346,6 +358,62 @@ class InfoBoxContext(object):
                     win.addstr(s, self.attr)
         else:
             win.addstr(string, self.attr)
+
+class Viewer(object):
+    def __init__(self, viewfunc=None):
+        if viewfunc is None:
+            viewfunc = self._get_default_view_function()
+        self.view = viewfunc
+
+    def _get_default_view_function(self):
+        filer = getcomponent("Filer")
+        menu = getcomponent("Menu")
+        cmdline = getcomponent("Cmdline")
+        helper = getcomponent("Help")
+        message = getcomponent("Message")
+        def viewfunc():
+            filer.view()
+            if menu.is_active:
+                menu.view()
+            if helper.is_active:
+                helper.view()
+            elif cmdline.is_active:
+                cmdline.view()
+            elif message.is_active:
+                message.view()
+        return viewfunc
+
+    def view_and_update(self):
+        self.view()
+        curses.doupdate()
+
+class Controller(object):
+    def __init__(self, inputfunc=None):
+        if inputfunc is None:
+            inputfunc = self._get_default_input_function()
+        self.input = inputfunc
+        self.keyhandler = KeyHandler()
+
+    def _get_default_input_function(self):
+        filer = getcomponent("Filer")
+        menu = getcomponent("Menu")
+        cmdline = getcomponent("Cmdline")
+        helper = getcomponent("Help")
+        def inputfunc(key):
+            if helper.is_active:
+                helper.input(key)
+            elif cmdline.is_active:
+                cmdline.input(key)
+            elif menu.is_active:
+                menu.input(key)
+            else:
+                filer.input(key)
+        return inputfunc
+
+    def control(self):
+        key = self.keyhandler.getkey()
+        if key != -1:
+            self.input(key)
 
 class KeyHandler(object):
     special_keys = {}

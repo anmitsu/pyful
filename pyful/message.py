@@ -79,14 +79,9 @@ class Message(ui.Component):
         self.error("{0}: {1}".format(except_cls.__class__.__name__, except_cls))
 
     def confirm(self, msg, options, msglist=None, position=0):
-        cnf = Confirm(msg, options, msglist)
-        cnf.setcursor(position)
-        keyhandler = ui.KeyHandler(self.stdscr)
-        while cnf.active:
-            cnf.view()
-            key = keyhandler.getkey()
-            cnf.input(key)
-        return cnf.result
+        confirm = Confirm(msg, options, msglist)
+        confirm.setcursor(position)
+        return confirm.run()
 
     def view_histroy(self):
         self.confirm("Message history", ["Close"], [m.string for m in self.msg], -1)
@@ -134,6 +129,14 @@ class Confirm(object):
             "ESC"    : lambda: self.hide(),
             "RET"    : lambda: self.get_cursor_item(),
             }
+
+    def run(self):
+        viewer = ui.Viewer(self.view)
+        controller = ui.Controller(self.input)
+        while self.active:
+            viewer.view_and_update()
+            controller.control()
+        return self.result
 
     def setcursor(self, x):
         self.cursor = x
@@ -185,7 +188,6 @@ class Confirm(object):
                     pass
         cmdscr.move(y-1, x-1)
         cmdscr.noutrefresh()
-        curses.doupdate()
 
     def input(self, key):
         if self.box:

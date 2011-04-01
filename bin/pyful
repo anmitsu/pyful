@@ -87,7 +87,6 @@ def run():
     message.puts("Welcome to pyful v{0}".format(__version__))
 
     try:
-        pyful.view()
         pyful.main_loop()
     except SystemExit:
         pyful.savercfile()
