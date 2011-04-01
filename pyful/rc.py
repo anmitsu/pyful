@@ -34,6 +34,7 @@ cmdline.clipboard.maxsave = 100
 mode.Mkdir.dirmode = 0o755
 mode.Newfile.filemode = 0o644
 mode.TrashBox.path = "~/.pyful/trashbox"
+mode.Replace.form = "emacs" # or "vim"
 
 # Set the prompt of shell mode.
 mode.Shell.prompt = "$"
@@ -331,6 +332,7 @@ mycmdlinekeymap = {
     "C-c"         : lambda: cmdline.escape(),
     "ESC"         : lambda: cmdline.escape(),
     "RET"         : lambda: cmdline.execute(),
+    "M-i"         : lambda: cmdline.select_action(),
     "M-m"         : lambda: cmdline.expandmacro(),
     "C-y"         : lambda: cmdline.clipboard.paste(),
     "M-y"         : lambda: cmdline.clipboard.start(),
