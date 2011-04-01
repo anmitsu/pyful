@@ -114,8 +114,10 @@ class Process(object):
         message.puts("Spawn: {0} (screen)".format(cmd.strip()))
 
     def terminal(self, cmd):
-        Popen([self.terminal_emulator[0], self.terminal_emulator[1], cmd])
+        proc = Popen([self.terminal_emulator[0], self.terminal_emulator[1], cmd],
+                     stdout=PIPE, stderr=PIPE)
         message.puts("Spawn: {0} ({1})".format(cmd.strip(), self.terminal_emulator[0]))
+        ProcessViewThread(proc, cmd).start()
 
     def parsemacro(self, string):
         ret = string
