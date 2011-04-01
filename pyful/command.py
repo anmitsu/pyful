@@ -244,7 +244,7 @@ def _pack():
         else:
             cmdline.start(mode.Tar(ret), filer.file.name)
     elif ret == "rar":
-        ui.getcomponent("Cmdline").start(mode.Shell(), "rar u %D2.rar %m", -7)
+        ui.getcomponent("Cmdline").start(mode.Shell(), "rar u %D2.rar %m", -8)
 
 @defcmd
 def _unpack():
@@ -295,12 +295,12 @@ def _unpack2():
 @defcmd
 def _enter_mark():
     """Behavior of mark files."""
-    ui.getcomponent("Cmdline").start(mode.Shell(), " %m", 1)
+    ui.getcomponent("Cmdline").start(mode.Shell(), " %m", 0)
 
 @defcmd
 def _enter_exec():
     """Behavior of executable file."""
-    ui.getcomponent("Cmdline").start(mode.Shell(), " ./%f", 1)
+    ui.getcomponent("Cmdline").start(mode.Shell(), " ./%f", 0)
 
 @defcmd
 def _enter_dir():
@@ -1009,7 +1009,7 @@ def _rename():
     if filer.dir.ismark():
         cmdline.start(mode.Replace())
     else:
-        cmdline.start(mode.Rename(), filer.file.name, -len(util.extname(filer.file.name)))
+        cmdline.start(mode.Rename(), filer.file.name, -len(util.extname(filer.file.name))-1)
 
 @defcmd
 def _replace():
