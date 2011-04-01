@@ -17,6 +17,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import curses
+import keyword
 import os
 import re
 import subprocess
@@ -314,7 +315,7 @@ class Cmdline(ui.Component):
                 attr = look.colors["CmdlineMacro"]
             elif re.search("^;$", s):
                 attr = look.colors["CmdlineSeparator"]
-            elif s in __builtins__.keys():
+            elif s in __builtins__ or s in keyword.kwlist:
                 attr = look.colors["CmdlinePythonFunction"]
             cmdscr.addstr(s, attr)
 
