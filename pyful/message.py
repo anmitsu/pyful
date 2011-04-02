@@ -179,12 +179,12 @@ class Confirm(object):
                 try:
                     cmdscr.addstr(s, curses.A_REVERSE)
                     cmdscr.addstr(" ", 0)
-                except Exception:
+                except curses.error:
                     pass
             else:
                 try:
                     cmdscr.addstr(s+" ", 0)
-                except Exception:
+                except curses.error:
                     pass
         cmdscr.move(y-1, x-1)
         cmdscr.noutrefresh()
