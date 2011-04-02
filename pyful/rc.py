@@ -288,6 +288,8 @@ myfilerkeymap = {
     "d"             : commands["trashbox"],
     "t"             : commands["utime"],
     "x"             : commands["enter_exec"],
+    "*"             : commands["mark"],
+    "+"             : commands["mask"],
     "Q"             : commands["exit"],
     ("RET", ".dir" ): commands["enter_dir"],
     ("RET", ".mark"): commands["enter_mark"],
@@ -471,27 +473,6 @@ menu.items["sort"] = (
     ("(P)ermission reverse", "P", commands["sort_permission_rev"]),
     )
 
-menu.items["mark"] = (
-    ("(r)egex mark", "r", commands["mark"]),
-    ("(S)ource"    , "S", commands["mark_source"]),
-    ("(A)rchive"   , "A", commands["mark_archive"]),
-    ("(I)mage"     , "I", commands["mark_image"]),
-    ("(M)usic"     , "M", commands["mark_music"]),
-    ("(V)ideo"     , "V", commands["mark_video"]),
-    ("mark (a)ll"  , "a", commands["mark_all"]),
-    ("mark (c)lear", "c", commands["mark_clear"]),
-    )
-
-menu.items["mask"] = (
-    ("(m)ask"   , "m", commands["mask"]),
-    ("(S)ource" , "S", commands["mask_source"]),
-    ("(A)rchive", "A", commands["mask_archive"]),
-    ("(I)mage"  , "I", commands["mask_image"]),
-    ("(M)usic"  , "M", commands["mask_music"]),
-    ("(V)ideo"  , "V", commands["mask_video"]),
-    ("(c)lear"  , "c", commands["mask_clear"]),
-    )
-
 # The editor launcher example.
 menu.items["editor"] = (
     ("(e)macs"              , "e", lambda: process.spawn("emacs -nw %f")),
@@ -523,8 +504,6 @@ Directory.keymap.update({
         "V": lambda: menu.show("filer"),
         "s": lambda: menu.show("sort"),
         "L": lambda: menu.show("layout"),
-        "*": lambda: menu.show("mark"),
-        "+": lambda: menu.show("mask"),
         "E": lambda: menu.show("editor"),
         ";": lambda: menu.show("launcher"),
         })
