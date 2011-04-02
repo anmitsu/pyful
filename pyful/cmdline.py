@@ -234,11 +234,11 @@ class Cmdline(ui.Component):
         cmdscr.addstr(prompt, look.colors["CmdlinePrompt"])
         try:
             if self.mode.__class__.__name__ == "Shell":
-                self.print_color_shell(cmd)
+                self.print_color_shell(cmdscr, cmd)
             elif self.mode.__class__.__name__ == "Eval":
-                self.print_color_eval(cmd)
+                self.print_color_eval(cmdscr, cmd)
             else:
-                self.print_color_default(cmd)
+                self.print_color_default(cmdscr, cmd)
         except curses.error as e:
             message.error("curses error: " + str(e))
         cmdscr.move(0, curpos)
@@ -287,16 +287,14 @@ class Cmdline(ui.Component):
         from pyful import mode
         self.start(mode.Mx(), string, pos)
 
-    def print_color_default(self, string):
-        cmdscr = ui.getcomponent("Cmdscr").win
+    def print_color_default(self, win, string):
         for s in re.split(r"(?<!\\)(%(?:[mMfFxX]|[dD]2?))", string):
             attr = 0
             if re.search("^%(?:[mMfFxX]|[dD]2?)$", s):
                 attr = look.colors["CmdlineMacro"]
-            cmdscr.addstr(s, attr)
+            win.addstr(s, attr)
 
-    def print_color_shell(self, string):
-        cmdscr = ui.getcomponent("Cmdscr").win
+    def print_color_shell(self, win, string):
         prg = False
         for s in re.split(r"(?<!\\)([\s;|>&]|%(?:[&TqmMfFxX]|[dD]2?))", string):
             attr = 0
@@ -313,10 +311,9 @@ class Cmdline(ui.Component):
                     prg = True
                 else:
                     attr = look.colors["CmdlineNoProgram"]
-            cmdscr.addstr(s, attr)
+            win.addstr(s, attr)
 
-    def print_color_eval(self, string):
-        cmdscr = ui.getcomponent("Cmdscr").win
+    def print_color_eval(self, win, string):
         for s in re.split(r"(?<!\\)([\s;.()]|%(?:[&TqmMfFxX]|[dD]2?))", string):
             attr = 0
             if re.search("^%(?:[&TqmMfFxX]|[dD]2?)$", s):
@@ -325,7 +322,7 @@ class Cmdline(ui.Component):
                 attr = look.colors["CmdlineSeparator"]
             elif s in __builtins__ or s in keyword.kwlist:
                 attr = look.colors["CmdlinePythonFunction"]
-            cmdscr.addstr(s, attr)
+            win.addstr(s, attr)
 
     def cmdline_input(self, key):
         if key in self.keymap:
