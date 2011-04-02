@@ -370,6 +370,16 @@ class Link(Mode):
             filer.workspace.all_reload()
 
 class Mark(Mode):
+    actions = [
+        "Mark image files", "Mark music files", "Mark video files",
+        "Mark archive files", "Mark source files"]
+    filters = {
+        "image": r"\.(jpe?g|gif|png|bmp|tiff|jp2|j2c|svg|eps)$",
+        "music": r"\.(ogg|mp3|flac|ape|tta|tak|mid|wma|wav)$",
+        "video": r"\.(avi|mkv|mp4|mpe?g|wmv|asf|rm|ram|ra)$",
+        "archive": r"\.(zip|rar|lzh|cab|tar|7z|gz|bz2|xz|taz|tgz|tbz|txz|yz2)$",
+        "source": r"\.(py|rb|hs|el|js|lua|java|c|cc|cpp|cs|pl|php)$",
+        }
     default = None
 
     @property
@@ -383,6 +393,17 @@ class Mark(Mode):
         return comp.comp_files()
 
     def execute(self, pattern, action):
+        if action == self.actions[0]:
+            return (self.filters["image"], -1)
+        elif action == self.actions[1]:
+            return (self.filters["music"], -1)
+        elif action == self.actions[2]:
+            return (self.filters["video"], -1)
+        elif action == self.actions[3]:
+            return (self.filters["archive"], -1)
+        elif action == self.actions[4]:
+            return (self.filters["source"], -1)
+
         filer = ui.getcomponent("Filer")
         if self.default and pattern == "":
             filer.dir.mark(self.default)
@@ -395,6 +416,16 @@ class Mark(Mode):
             filer.dir.mark(reg)
 
 class Mask(Mode):
+    actions = [
+        "Mask image files", "Mask music files", "Mask video files",
+        "Mask archive files", "Mask source files"]
+    filters = {
+        "image": r"\.(jpe?g|gif|png|bmp|tiff|jp2|j2c|svg|eps)$",
+        "music": r"\.(ogg|mp3|flac|ape|tta|tak|mid|wma|wav)$",
+        "video": r"\.(avi|mkv|mp4|mpe?g|wmv|asf|rm|ram|ra)$",
+        "archive": r"\.(zip|rar|lzh|cab|tar|7z|gz|bz2|xz|taz|tgz|tbz|txz|yz2)$",
+        "source": r"\.(py|rb|hs|el|js|lua|java|c|cc|cpp|cs|pl|php)$",
+        }
     default = None
 
     @property
@@ -408,6 +439,17 @@ class Mask(Mode):
         return comp.comp_files()
 
     def execute(self, pattern, action):
+        if action == self.actions[0]:
+            return (self.filters["image"], -1)
+        elif action == self.actions[1]:
+            return (self.filters["music"], -1)
+        elif action == self.actions[2]:
+            return (self.filters["video"], -1)
+        elif action == self.actions[3]:
+            return (self.filters["archive"], -1)
+        elif action == self.actions[4]:
+            return (self.filters["source"], -1)
+
         filer = ui.getcomponent("Filer")
         if self.default and pattern == "":
             filer.dir.mask(self.default)
