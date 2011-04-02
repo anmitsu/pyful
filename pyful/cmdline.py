@@ -164,6 +164,14 @@ class Cmdline(ui.Component):
         self.cursor = 0
         self.history.restart()
 
+    def insert(self, string):
+        self.string = util.insertstr(self.string, string, self.cursor)
+        self.cursor += util.mbslen(string)
+
+    def setstring(self, string):
+        self.string = string
+        self.cursor = util.mbslen(string)
+
     def _get_current_line(self, win):
         maxy, maxx = win.getmaxyx()
         prompt = "{1[0]}{0}{1[1]}".format(self.mode.prompt, self.mode.prompt_side)
@@ -326,8 +334,7 @@ class Cmdline(ui.Component):
             if key == "SPC":
                 key = " "
             if util.mbslen(key) == 1:
-                self.string = util.insertstr(self.string, key, self.cursor)
-                self.cursor += 1
+                self.insert(key)
                 self.history.restart()
 
 class History(ui.InfoBox):
@@ -388,7 +395,7 @@ class History(ui.InfoBox):
         if item.string in history:
             history.remove(item.string)
         x = self.cursor
-        self.cmdline.string = self.source_string
+        self.cmdline.setstring(self.source_string)
         self.start()
         self.setcursor(x)
 
@@ -453,10 +460,8 @@ class Clipboard(ui.InfoBox):
 
     def insert(self):
         item = self.cursor_item()
-        self.cmdline.string = util.insertstr(self.cmdline.string, item.string, self.cmdline.cursor)
-        self.cmdline.cursor += util.mbslen(item.string)
-        self.hide()
-        self.cmdline.history.start()
+        self.cmdline.insert(item.string)
+        self.finish()
 
     def delete(self):
         if not self.clip or not 0 < self.cursor <= len(self.clip):
@@ -479,8 +484,8 @@ class Clipboard(ui.InfoBox):
         if not self.clip:
             return
         item = self.clip[-1]
-        self.cmdline.string = util.insertstr(self.cmdline.string, item, self.cmdline.cursor)
-        self.cmdline.cursor += util.mbslen(item)
+        self.cmdline.insert(item)
+        self.finish()
 
     def input(self, key):
         if key in self.keymap:
