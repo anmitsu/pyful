@@ -729,7 +729,7 @@ class Utime(Mode):
         if not self.path:
             return comp.comp_files()
         elif len(self.sttime) == 0:
-            return []
+            return [str(i) for i in range(1970-68, 1970+69)]
         elif len(self.sttime) == 1:
             return [str(i) for i in range(1, 13)]
         elif len(self.sttime) == 2:
