@@ -13,11 +13,6 @@ from pyful import ui
 from pyful.command import commands
 from pyful.filer import Workspace, Directory, Finder, FileStat
 
-# Get PYthon File management UtiLity.
-filer = ui.getcomponent("Filer")
-cmdline = ui.getcomponent("Cmdline")
-menu = ui.getcomponent("Menu")
-
 # Set environments of pyful.
 Pyful.environs["EDITOR"] = "vim"
 Pyful.environs["PAGER"] = "less"
@@ -25,10 +20,6 @@ Pyful.environs["PAGER"] = "less"
 # Set proc attributes.
 process.Process.shell = ("/bin/bash", "-c")
 process.Process.terminal_emulator = ("x-terminal-emulator", "-e")
-
-# Set cmdline attributes.
-cmdline.history.maxsave = 10000
-cmdline.clipboard.maxsave = 100
 
 # Set the mode of mkdir and newfile in octal number.
 mode.Mkdir.dirmode = 0o755
@@ -155,6 +146,16 @@ ui.InfoBox.zoom = 0
 #     "ContinuousScroll"
 #
 ui.InfoBox.scroll_type = "HalfScroll"
+
+
+# Get very useful components.
+filer = ui.getcomponent("Filer")
+cmdline = ui.getcomponent("Cmdline")
+menu = ui.getcomponent("Menu")
+
+# Set cmdline attributes.
+cmdline.history.maxsave = 10000
+cmdline.clipboard.maxsave = 100
 
 # Registration of program initialization.
 # Pyful.atinit() wraps the initialization functions.
