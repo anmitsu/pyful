@@ -96,7 +96,7 @@ class Message(ui.Component):
         self.messagebox.view()
 
 class MessageBox(ui.InfoBox):
-    height = 2
+    height = 4
 
     def __init__(self):
         ui.InfoBox.__init__(self, "MessageBox")
