@@ -568,6 +568,7 @@ class Replace(Mode):
     actions = ["Replace on form of `emacs'", "Replace on form of `vim'",]
 
     def _get_emacs_prompt(self):
+        self.prompt_side = (" ", " ")
         if self.pattern is None and self.default:
             return "Replace regexp (default {0} -> {1}):".format(self.default[0].pattern, self.default[1])
         elif self.pattern is None:
