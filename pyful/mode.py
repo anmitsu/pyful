@@ -132,7 +132,8 @@ class ChangeWorkspaceTitle(Mode):
     prompt = "Change workspace title:"
 
     def complete(self, comp):
-        return comp.comp_files()
+        return [ws.title for ws in ui.getcomponent("Filer").workspaces
+                if ws.title.startswith(comp.parser.part[1])]
 
     def execute(self, title, action):
         ui.getcomponent("Filer").workspace.chtitle(title)
