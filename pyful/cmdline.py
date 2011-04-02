@@ -26,6 +26,7 @@ import unicodedata
 from pyful import Pyful
 from pyful import completion
 from pyful import look
+from pyful import mode
 from pyful import message
 from pyful import process
 from pyful import ui
@@ -276,15 +277,12 @@ class Cmdline(ui.Component):
         self.start(self.mode, string, pos)
 
     def shell(self, string="", pos=-1):
-        from pyful import mode
         self.start(mode.Shell(), string, pos)
 
     def eval(self, string="", pos=-1):
-        from pyful import mode
         self.start(mode.Eval(), string, pos)
 
     def mx(self, string="", pos=-1):
-        from pyful import mode
         self.start(mode.Mx(), string, pos)
 
     def print_color_default(self, win, string):
