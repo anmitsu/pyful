@@ -140,6 +140,7 @@ def replace(pattern, repstr):
         except Exception as e:
             message.exception(e)
             break
+    filer.dir.mark_clear()
 
 def symlink(src, dst):
     try:
