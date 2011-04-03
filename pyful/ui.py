@@ -28,15 +28,11 @@ def getcomponent(name):
     return Component.components[name]
 
 def zoom_infobox(zoom):
-    InfoBox.zoom = zoom
-    InfoBox.resize()
+    pass
 
 def resize():
-    getcomponent("Cmdscr").resize()
-    getcomponent("Titlebar").resize()
-    getcomponent("Filer").workspace.resize()
-    getcomponent("MessageBox").resize()
-    InfoBox.resize()
+    for component in Component.components.values():
+        component.resize()
 
 def refresh(*args):
     curses.endwin()
@@ -64,10 +60,6 @@ def start_curses():
         StandardScreen()
         CmdlineScreen()
         Titlebar()
-        InfoBox.resize()
-        getcomponent("MessageBox").resize()
-        getcomponent("Filer").default_init()
-        StandardScreen.stdscr.refresh()
     signal.signal(signal.SIGWINCH, refresh)
 
 def end_curses():
@@ -94,6 +86,7 @@ class StandardScreen(object):
                 curses.start_color()
                 curses.use_default_colors()
             look.init_colors()
+            self.stdscr.refresh()
 
     @classmethod
     def destroy(cls):
@@ -116,6 +109,9 @@ class Component(StandardScreen):
     @property
     def is_active(self):
         return self.active
+
+    def resize(self):
+        pass
 
 class CmdlineScreen(Component):
     def __init__(self):
@@ -145,6 +141,7 @@ class InfoBox(Component):
     scroll_type = "HalfScroll"
     zoom = 0
     win = None
+    winattr = 0
 
     def __init__(self, title):
         Component.__init__(self, title)
@@ -153,6 +150,7 @@ class InfoBox(Component):
         self.cursor = 0
         self.scrolltop = 0
         self.maxrow = 1
+        self.y = self.x = self.begy = self.begx = 1
         self.keymap = {
             "C-n"   : lambda: self.mvcursor(1),
             "<down>": lambda: self.mvcursor(1),
@@ -167,25 +165,31 @@ class InfoBox(Component):
             "C-g"   : lambda: self.hide(),
             "C-c"   : lambda: self.hide(),
             "ESC"   : lambda: self.hide(),
-            "M-+"   : lambda: zoom_infobox(InfoBox.zoom+5),
-            "M--"   : lambda: zoom_infobox(InfoBox.zoom-5),
-            "M-="   : lambda: zoom_infobox(0),
+            "M-+"   : lambda: self.zoom_infobox(+5),
+            "M--"   : lambda: self.zoom_infobox(-5),
             }
 
-    @classmethod
-    def resize(cls):
-        y, x = cls.stdscr.getmaxyx()
+    def zoom_infobox(self, amount):
+        self.zoom += amount
+        self.resize()
+
+    def resize(self):
+        self.win = None
+        y, x = self.stdscr.getmaxyx()
         odd = y % 2
         base = y//2 + odd
-        height = base + cls.zoom
+        height = base + self.zoom
         if height > y-2:
             height = y - 2
-            cls.zoom = height - base
+            self.zoom = height - base
         elif height < 3:
             height = 3
-            cls.zoom = height - base
-        cls.win = curses.newwin(height, x, y-height-2, 0)
-        cls.win.bkgd(look.colors["InfoBoxWindow"])
+            self.zoom = height - base
+        self.y = height
+        self.x = x
+        self.begy = y-height-2
+        self.begx = 0
+        self.winattr = look.colors["InfoBoxWindow"]
 
     def show(self, info, pos=0):
         self.active = True
@@ -194,7 +198,7 @@ class InfoBox(Component):
         self.info = info
 
     def hide(self):
-        self.win.erase()
+        self.win = None
         self.active = False
         self.cursor = 0
         self.scrolltop = 0
@@ -303,9 +307,15 @@ class InfoBox(Component):
                         (self.title, size, cpage, maxpage),
                         look.colors["InfoBoxTitle"])
 
+    def create_window(self):
+        if not self.win:
+            self.win = curses.newwin(self.y, self.x, self.begy, self.begx)
+            self.win.bkgd(self.winattr)
+
     def view(self):
         if not self.info:
             return self.hide()
+        self.create_window()
 
         size = len(self.info)
         y, x = self.win.getmaxyx()

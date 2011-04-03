@@ -72,10 +72,11 @@ from pyful.completion import *
 def run():
     options = option_parse()
 
+    ui.start_curses()
+
     pyful = Pyful(os.path.abspath(__file__))
     error = pyful.loadrcfile(options.config)
 
-    ui.start_curses()
     pyful.init_function()
     message.puts("Python {0}".format(sys.version))
     rcpath = Pyful.environs["RCFILE"]
@@ -86,6 +87,7 @@ def run():
         message.puts("Loaded {0}".format(rcpath))
     message.puts("Welcome to pyful v{0}".format(__version__))
 
+    ui.resize()
     try:
         pyful.main_loop()
     except SystemExit:

@@ -36,6 +36,7 @@ class Filer(ui.Component):
         ui.Component.__init__(self, "Filer")
         self.workspaces = []
         self.cursor = 0
+        self.default_init()
 
     @property
     def keymap(self):
@@ -56,6 +57,9 @@ class Filer(ui.Component):
     @property
     def finder(self):
         return self.workspace.dir.finder
+
+    def resize(self):
+        self.workspace.resize()
 
     def view(self):
         self.titlebar_view()
@@ -544,6 +548,7 @@ class Workspace(ui.StandardScreen):
 
     def clear(self):
         for d in self.dirs:
+            d.win = None
             d.files[:] = []
 
     def view(self):
@@ -1030,8 +1035,6 @@ class Directory(ui.StandardScreen):
         self.sort_kind = "Ext[$]"
 
     def resize(self, height, width, begy, begx):
-        self.win.erase()
-        self.statwin.erase()
         self.win = curses.newwin(height, width, begy, begx)
         begy, begx = self.win.getbegyx()
         self.statwin = curses.newwin(1, width, begy+height-1, begx)

@@ -88,6 +88,7 @@ class Message(ui.Component):
 
     def hide(self):
         self.active = False
+        self.messagebox.hide()
 
     def view(self):
         if ui.getcomponent("Cmdline").is_active or ui.getcomponent("Filer").finder.active:
@@ -100,12 +101,20 @@ class MessageBox(ui.InfoBox):
 
     def __init__(self):
         ui.InfoBox.__init__(self, "MessageBox")
-        self.win = None
+        y, x = self.stdscr.getmaxyx()
+        self.y = self.height+2
+        self.x = x
+        self.begy = y-self.height-4
+        self.begx = 0
 
     def resize(self):
+        self.win = None
         y, x = self.stdscr.getmaxyx()
-        self.win = curses.newwin(self.height+2, x, y-self.height-4, 0)
-        self.win.bkgd(look.colors["MessageWindow"])
+        self.y = self.height+2
+        self.x = x
+        self.begy = y-self.height-4
+        self.begx = 0
+        self.winattr = look.colors["MessageWindow"]
 
 class Confirm(object):
     keymap = {}
