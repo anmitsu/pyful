@@ -164,10 +164,14 @@ class InfoBox(Component):
             "ESC"   : lambda: self.hide(),
             "M-+"   : lambda: self.zoombox(+5),
             "M--"   : lambda: self.zoombox(-5),
+            "M-="   : lambda: self.zoombox(0),
             }
 
     def zoombox(self, amount):
-        self.zoom += amount
+        if amount == 0:
+            self.zoom = 0
+        else:
+            self.zoom += amount
         self.resize()
 
     def resize(self):

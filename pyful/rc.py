@@ -354,6 +354,7 @@ mycmdlinekeymap = {
     "C-x"         : lambda: cmdline.history.delete(),
     "M-+"         : lambda: cmdline.history.zoombox(+5),
     "M--"         : lambda: cmdline.history.zoombox(-5),
+    "M-="         : lambda: cmdline.history.zoombox(0),
     }
 
 myclipboardkeymap = {
@@ -372,6 +373,7 @@ myclipboardkeymap = {
     "RET"    : lambda: cmdline.clipboard.insert(),
     "M-+"    : lambda: cmdline.clipboard.zoombox(+5),
     "M--"    : lambda: cmdline.clipboard.zoombox(-5),
+    "M-="    : lambda: cmdline.clipboard.zoombox(0),
     }
 
 mycompletionkeymap = {
@@ -390,6 +392,7 @@ mycompletionkeymap = {
     "RET"     : lambda: cmdline.completion.insert(),
     "M-+"     : lambda: cmdline.completion.zoombox(+5),
     "M--"     : lambda: cmdline.completion.zoombox(-5),
+    "M-="     : lambda: cmdline.completion.zoombox(0),
     }
 
 myoutputkeymap = {
@@ -407,6 +410,7 @@ myoutputkeymap = {
     "RET"    : lambda: cmdline.output.edit(),
     "M-+"    : lambda: cmdline.output.zoombox(+5),
     "M--"    : lambda: cmdline.output.zoombox(-5),
+    "M-="    : lambda: cmdline.output.zoombox(0),
     }
 
 mymenukeymap = {
