@@ -997,16 +997,3 @@ class UnZip(Mode):
         else:
             filectrl.unzip(self.src, path)
             filer.workspace.all_reload()
-
-class ZoomInfoBox(Mode):
-    prompt = "Zoom infobox:"
-
-    def complete(self, comp):
-        return [str(x*10) for x in range(-10, 11) if str(x*10).startswith(comp.parser.part[1])]
-
-    def execute(self, zoom, action):
-        try:
-            zoom = int(zoom)
-            ui.zoom_infobox(zoom)
-        except ValueError as e:
-            message.exception(e)

@@ -352,9 +352,8 @@ mycmdlinekeymap = {
     "M-<"         : lambda: cmdline.history.settop(),
     "M->"         : lambda: cmdline.history.setbottom(),
     "C-x"         : lambda: cmdline.history.delete(),
-    "M-+"         : commands["zoom_in_infobox"],
-    "M--"         : commands["zoom_out_infobox"],
-    "M-="         : commands["zoom_normal_infobox"],
+    "M-+"         : lambda: cmdline.history.zoom_infobox(+5),
+    "M--"         : lambda: cmdline.history.zoom_infobox(-5),
     }
 
 myclipboardkeymap = {
@@ -371,6 +370,8 @@ myclipboardkeymap = {
     "C-c"    : lambda: cmdline.clipboard.finish(),
     "ESC"    : lambda: cmdline.clipboard.finish(),
     "RET"    : lambda: cmdline.clipboard.insert(),
+    "M-+"    : lambda: cmdline.clipboard.zoom_infobox(+5),
+    "M--"    : lambda: cmdline.clipboard.zoom_infobox(-5),
     }
 
 mycompletionkeymap = {
@@ -387,6 +388,8 @@ mycompletionkeymap = {
     "C-c"     : lambda: cmdline.completion.finish(),
     "ESC"     : lambda: cmdline.completion.finish(),
     "RET"     : lambda: cmdline.completion.insert(),
+    "M-+"     : lambda: cmdline.completion.zoom_infobox(+5),
+    "M--"     : lambda: cmdline.completion.zoom_infobox(-5),
     }
 
 myoutputkeymap = {
@@ -402,6 +405,8 @@ myoutputkeymap = {
     "C-c"    : lambda: cmdline.output.finish(),
     "ESC"    : lambda: cmdline.output.finish(),
     "RET"    : lambda: cmdline.output.edit(),
+    "M-+"    : lambda: cmdline.output.zoom_infobox(+5),
+    "M--"    : lambda: cmdline.output.zoom_infobox(-5),
     }
 
 mymenukeymap = {

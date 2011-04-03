@@ -151,26 +151,6 @@ def _open_listfile():
     ui.getcomponent("Cmdline").start(mode.OpenListfile())
 
 @defcmd
-def _zoom_infobox():
-    """Invoke command line of zoom infobox mode."""
-    ui.getcomponent("Cmdline").start(mode.ZoomInfoBox())
-
-@defcmd
-def _zoom_in_infobox():
-    """Zoom in of infobox."""
-    ui.zoom_infobox(ui.InfoBox.zoom+5)
-
-@defcmd
-def _zoom_out_infobox():
-    """Zoom out of infobox."""
-    ui.zoom_infobox(ui.InfoBox.zoom-5)
-
-@defcmd
-def _zoom_normal_infobox():
-    """Set zoom to default value."""
-    ui.zoom_infobox(0)
-
-@defcmd
 def _message_history():
     """Display message history."""
     message.viewhistroy()

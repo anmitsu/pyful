@@ -27,9 +27,6 @@ from pyful import util
 def getcomponent(name):
     return Component.components[name]
 
-def zoom_infobox(zoom):
-    pass
-
 def resize():
     for component in Component.components.values():
         component.resize()
