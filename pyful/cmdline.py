@@ -395,7 +395,6 @@ class History(ui.InfoBox):
         self.setcursor(x)
 
     def restart(self):
-        self.hide()
         self.start()
 
     def start(self):
