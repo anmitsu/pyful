@@ -70,11 +70,11 @@ class Menu(ui.InfoBox):
         if key in self.keymap:
             self.keymap[key]()
         else:
-            for name, keysym, func in self.current:
-                if keysym != key:
-                    continue
-                swap = self.current
-                func()
+            swap = self.current
+            names, keys, funcs = zip(*self.current)
+            try:
+                funcs[keys.index(key)]()
                 if swap is self.current:
                     self.hide()
-                break
+            except IndexError:
+                pass
