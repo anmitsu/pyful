@@ -104,7 +104,7 @@ def rename(src, dst):
         message.exception(e)
 
 def replace(pattern, repstr):
-    filer = ui.getcomponent("Filer")
+    filer = ui.getwidget("Filer")
     files = filer.dir.get_mark_files()
     renamed = [pattern.sub(r""+repstr, f) for f in files]
     msg = []
@@ -202,11 +202,11 @@ def _get_file_length(paths):
 
 class Subloop(object):
     def __init__(self):
-        cmdline = ui.getcomponent("Cmdline")
-        filer = ui.getcomponent("Filer")
-        menu = ui.getcomponent("Menu")
-        message = ui.getcomponent("Message")
-        helper = ui.getcomponent("Help")
+        cmdline = ui.getwidget("Cmdline")
+        filer = ui.getwidget("Filer")
+        menu = ui.getwidget("Menu")
+        message = ui.getwidget("Message")
+        helper = ui.getwidget("Help")
         def inputf(key):
             if cmdline.is_active:
                 cmdline.input(key)
@@ -232,7 +232,7 @@ class Subloop(object):
         self.stdscr = ui.StandardScreen.stdscr
 
     def subthreads_view(self):
-        cmdscr = ui.getcomponent("Cmdscr").win
+        cmdscr = ui.getwidget("Cmdscr").win
         y, x = cmdscr.getmaxyx()
         string = " | ".join("[{0}] {1}".format(i+1, t.title) for i, t in enumerate(Filectrl.threads))
         cmdscr.addstr(0, 1, util.mbs_ljust(string, x-2), curses.A_BOLD)
@@ -264,7 +264,7 @@ class Filectrl(object):
         else:
             message.puts("Thread finished: {0}".format(thread.title))
         self.threads.remove(thread)
-        ui.getcomponent("Filer").workspace.all_reload()
+        ui.getwidget("Filer").workspace.all_reload()
 
     def delete(self, path):
         thread = DeleteThread(path)

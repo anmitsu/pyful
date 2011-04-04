@@ -54,7 +54,7 @@ def _refresh_window():
 @defcmd
 def _rehash_programs():
     """Rehash of programs from PATH."""
-    ui.getcomponent("Cmdline").completion.loadprograms()
+    ui.getwidget("Cmdline").completion.loadprograms()
 
 @defcmd
 def _open_at_system():
@@ -104,27 +104,27 @@ def _exit():
 @defcmd
 def _shell():
     """Invoke command line of shell mode."""
-    ui.getcomponent("Cmdline").start(mode.Shell())
+    ui.getwidget("Cmdline").start(mode.Shell())
 
 @defcmd
 def _eval():
     """Invoke command line of eval mode."""
-    ui.getcomponent("Cmdline").start(mode.Eval())
+    ui.getwidget("Cmdline").start(mode.Eval())
 
 @defcmd
 def _mx():
     """Invoke command line of mx mode."""
-    ui.getcomponent("Cmdline").start(mode.Mx())
+    ui.getwidget("Cmdline").start(mode.Mx())
 
 @defcmd
 def _help():
     """Invoke command line of help mode."""
-    ui.getcomponent("Cmdline").start(mode.Help())
+    ui.getwidget("Cmdline").start(mode.Help())
 
 @defcmd
 def _help_all():
     """Show all command's help."""
-    ui.getcomponent("Help").show_all_command()
+    ui.getwidget("Help").show_all_command()
 
 @defcmd
 def _change_looks():
@@ -137,17 +137,17 @@ def _change_looks():
     Present looks is preserved in look.Look.mylook.
     The setting concerning looks consults the pyful.look module.
     """
-    ui.getcomponent("Cmdline").start(mode.ChangeLooks())
+    ui.getwidget("Cmdline").start(mode.ChangeLooks())
 
 @defcmd
 def _google_search():
     """Search word in google on the regulated web browser."""
-    ui.getcomponent("Cmdline").start(mode.WebSearch("Google"))
+    ui.getwidget("Cmdline").start(mode.WebSearch("Google"))
 
 @defcmd
 def _open_listfile():
     """Invoke command line of open list file mode."""
-    ui.getcomponent("Cmdline").start(mode.OpenListfile())
+    ui.getwidget("Cmdline").start(mode.OpenListfile())
 
 @defcmd
 def _message_history():
@@ -163,8 +163,8 @@ def _kill_thread():
 def _drivejump():
     """Display the menu of an external disk where mount was done."""
     def _wrap(path):
-        return lambda: ui.getcomponent("Filer").dir.chdir(path)
-    menu = ui.getcomponent("Menu")
+        return lambda: ui.getwidget("Filer").dir.chdir(path)
+    menu = ui.getwidget("Menu")
     menu.items["Drives"] = []
     exdevs = ["/media", "/mnt", "/cygdrive"]
     for path in exdevs:
@@ -182,7 +182,7 @@ def _drivejump():
 @defcmd
 def _fileviewer():
     """File view by tar, zipinfo, unrar, 7z and Pyful.environs["PAGER"]."""
-    ext = util.extname(ui.getcomponent("Filer").file.name)
+    ext = util.extname(ui.getwidget("Filer").file.name)
     pager = Pyful.environs["PAGER"]
     if ".gz" == ext:
         process.spawn("tar tvfz %f | "+ pager)
@@ -208,20 +208,20 @@ def _pack():
     if "zip" == ret:
         _zip()
     elif ret == "tgz" or ret == "bz2" or ret == "tar":
-        filer = ui.getcomponent("Filer")
-        cmdline = ui.getcomponent("Cmdline")
+        filer = ui.getwidget("Filer")
+        cmdline = ui.getwidget("Cmdline")
         if filer.dir.ismark():
             cmdline.start(mode.Tar(ret))
         else:
             cmdline.start(mode.Tar(ret), filer.file.name)
     elif ret == "rar":
-        ui.getcomponent("Cmdline").start(mode.Shell(), "rar u %D2.rar %m", -8)
+        ui.getwidget("Cmdline").start(mode.Shell(), "rar u %D2.rar %m", -8)
 
 @defcmd
 def _unpack():
     """Unpack file of tar, zip and rar to neighbor directory."""
-    ext = util.extname(ui.getcomponent("Filer").file.name)
-    cmdline = ui.getcomponent("Cmdline")
+    ext = util.extname(ui.getwidget("Filer").file.name)
+    cmdline = ui.getwidget("Cmdline")
     if ext == ".gz":
         cmdline.start(mode.Shell(), "tar xvfz %f -C %D2")
     elif ext == ".tgz":
@@ -242,8 +242,8 @@ def _unpack():
 @defcmd
 def _unpack2():
     """Unpack file of tar, zip and rar to current directory."""
-    ext = util.extname(ui.getcomponent("Filer").file.name)
-    cmdline = ui.getcomponent("Cmdline")
+    ext = util.extname(ui.getwidget("Filer").file.name)
+    cmdline = ui.getwidget("Cmdline")
     if ext == ".gz" :
         cmdline.start(mode.Shell(), "tar xvfz %f -C %D")
     elif ext == ".tgz":
@@ -266,40 +266,40 @@ def _unpack2():
 @defcmd
 def _enter_mark():
     """Behavior of mark files."""
-    ui.getcomponent("Cmdline").start(mode.Shell(), " %m", 0)
+    ui.getwidget("Cmdline").start(mode.Shell(), " %m", 0)
 
 @defcmd
 def _enter_exec():
     """Behavior of executable file."""
-    ui.getcomponent("Cmdline").start(mode.Shell(), " ./%f", 0)
+    ui.getwidget("Cmdline").start(mode.Shell(), " ./%f", 0)
 
 @defcmd
 def _enter_dir():
     """Behavior of directory."""
-    ui.getcomponent("Filer").dir.enter_dir()
+    ui.getwidget("Filer").dir.enter_dir()
 
 @defcmd
 def _enter_link():
     """Behavior of symlink."""
-    ui.getcomponent("Filer").dir.enter_link()
+    ui.getwidget("Filer").dir.enter_link()
 
 @defcmd
 def _enter_listfile():
     """Behavior of list file.
     list file is a file to which the absolute path is written.
     """
-    filer = ui.getcomponent("Filer")
+    filer = ui.getwidget("Filer")
     filer.dir.open_listfile(filer.file.name)
 
 @defcmd
 def _finder_start():
     """Start finder of focused directory."""
-    ui.getcomponent("Filer").finder.start()
+    ui.getwidget("Filer").finder.start()
 
 @defcmd
 def _switch_workspace():
     """Switching workspaces."""
-    filer = ui.getcomponent("Filer")
+    filer = ui.getwidget("Filer")
     titles = [w.title for w in filer.workspaces]
     pos = filer.cursor
     ret = message.confirm("Switch workspace:", options=titles, position=pos)
@@ -311,17 +311,17 @@ def _switch_workspace():
 @defcmd
 def _create_workspace():
     """Create new workspace."""
-    ui.getcomponent("Cmdline").start(mode.CreateWorkspace())
+    ui.getwidget("Cmdline").start(mode.CreateWorkspace())
 
 @defcmd
 def _close_workspace():
     """Close current workspace."""
-    ui.getcomponent("Filer").close_workspace()
+    ui.getwidget("Filer").close_workspace()
 
 @defcmd
 def _change_workspace_title():
     """Change current workspace's title."""
-    ui.getcomponent("Cmdline").start(mode.ChangeWorkspaceTitle())
+    ui.getwidget("Cmdline").start(mode.ChangeWorkspaceTitle())
 
 @defcmd
 def _change_workspace_layout():
@@ -338,7 +338,7 @@ def _change_workspace_layout():
     """
     ret =  message.confirm(
         "Layout:", ["Tile", "TileLeft", "TileTop", "TileBottom", "Oneline", "Onecolumn", "Magnifier", "Fullscreen"])
-    filer = ui.getcomponent("Filer")
+    filer = ui.getwidget("Filer")
     if "Tile" == ret:
         filer.workspace.tile()
     elif "TileLeft" == ret:
@@ -359,22 +359,22 @@ def _change_workspace_layout():
 @defcmd
 def _view_next_workspace():
     """Switching to next workspace."""
-    ui.getcomponent("Filer").next_workspace()
+    ui.getwidget("Filer").next_workspace()
 
 @defcmd
 def _view_prev_workspace():
     """Switching to previous workspace."""
-    ui.getcomponent("Filer").prev_workspace()
+    ui.getwidget("Filer").prev_workspace()
 
 @defcmd
 def _swap_workspace_inc():
     """Swap current workspace to next workspace."""
-    ui.getcomponent("Filer").swap_workspace_inc()
+    ui.getwidget("Filer").swap_workspace_inc()
 
 @defcmd
 def _swap_workspace_dec():
     """Swap current workspace to previous workspace."""
-    ui.getcomponent("Filer").swap_workspace_dec()
+    ui.getwidget("Filer").swap_workspace_dec()
 
 @defcmd
 def _layout_tile():
@@ -388,7 +388,7 @@ def _layout_tile():
     |           |     3     |
     |___________|___________|
     """
-    ui.getcomponent("Filer").workspace.tile()
+    ui.getwidget("Filer").workspace.tile()
 
 @defcmd
 def _layout_tileleft():
@@ -402,7 +402,7 @@ def _layout_tileleft():
     |     3     |           |
     |___________|___________|
     """
-    ui.getcomponent("Filer").workspace.tileleft()
+    ui.getwidget("Filer").workspace.tileleft()
 
 @defcmd
 def _layout_tiletop():
@@ -416,7 +416,7 @@ def _layout_tiletop():
     |           1           |
     |_______________________|
     """
-    ui.getcomponent("Filer").workspace.tiletop()
+    ui.getwidget("Filer").workspace.tiletop()
 
 @defcmd
 def _layout_tilebottom():
@@ -430,7 +430,7 @@ def _layout_tilebottom():
     |     2     |     3     |
     |___________|___________|
     """
-    ui.getcomponent("Filer").workspace.tilebottom()
+    ui.getwidget("Filer").workspace.tilebottom()
 
 @defcmd
 def _layout_oneline():
@@ -444,7 +444,7 @@ def _layout_oneline():
     |       |       |       |
     |_______|_______|_______|
     """
-    ui.getcomponent("Filer").workspace.oneline()
+    ui.getwidget("Filer").workspace.oneline()
 
 @defcmd
 def _layout_onecolumn():
@@ -458,7 +458,7 @@ def _layout_onecolumn():
     |           3           |
     |_______________________|
     """
-    ui.getcomponent("Filer").workspace.onecolumn()
+    ui.getwidget("Filer").workspace.onecolumn()
 
 @defcmd
 def _layout_magnifier():
@@ -472,7 +472,7 @@ def _layout_magnifier():
     | 3  |_____________|    |
     |_______________________|
     """
-    ui.getcomponent("Filer").workspace.magnifier()
+    ui.getwidget("Filer").workspace.magnifier()
 
 @defcmd
 def _layout_fullscreen():
@@ -486,344 +486,344 @@ def _layout_fullscreen():
     |                       |
     |_______________________|
     """
-    ui.getcomponent("Filer").workspace.fullscreen()
+    ui.getwidget("Filer").workspace.fullscreen()
 
 @defcmd
 def _chdir_parent():
     """Change current directory to parent directory."""
-    ui.getcomponent("Filer").dir.chdir(os.pardir)
+    ui.getwidget("Filer").dir.chdir(os.pardir)
 
 @defcmd
 def _chdir_root():
     """Change current directory to root directory."""
-    ui.getcomponent("Filer").dir.chdir("/")
+    ui.getwidget("Filer").dir.chdir("/")
 
 @defcmd
 def _chdir_home():
     """Change current directory to home directory."""
-    ui.getcomponent("Filer").dir.chdir(os.getenv("HOME"))
+    ui.getwidget("Filer").dir.chdir(os.getenv("HOME"))
 
 @defcmd
 def _chdir_neighbor():
     """Change current directory to neighbor directory."""
-    filer = ui.getcomponent("Filer")
+    filer = ui.getwidget("Filer")
     filer.dir.chdir(filer.workspace.nextdir.path)
 
 @defcmd
 def _chdir_backward():
     """Change current directory to backward of directory history."""
-    ui.getcomponent("Filer").dir.history.backward()
+    ui.getwidget("Filer").dir.history.backward()
 
 @defcmd
 def _chdir_forward():
     """Change current directory to forward of directory history."""
-    ui.getcomponent("Filer").dir.history.forward()
+    ui.getwidget("Filer").dir.history.forward()
 
 @defcmd
 def _sort_name():
     """Sort name by ascending order."""
-    ui.getcomponent("Filer").dir.sort_name()
+    ui.getwidget("Filer").dir.sort_name()
 
 @defcmd
 def _sort_name_rev():
     """Sort name by descending order."""
-    ui.getcomponent("Filer").dir.sort_name_rev()
+    ui.getwidget("Filer").dir.sort_name_rev()
 
 @defcmd
 def _sort_ext():
     """Sort file extension by ascending order."""
-    ui.getcomponent("Filer").dir.sort_ext()
+    ui.getwidget("Filer").dir.sort_ext()
 
 @defcmd
 def _sort_ext_rev():
     """Sort file extension by descending order."""
-    ui.getcomponent("Filer").dir.sort_ext_rev()
+    ui.getwidget("Filer").dir.sort_ext_rev()
 
 @defcmd
 def _sort_size():
     """Sort file size by ascending order."""
-    ui.getcomponent("Filer").dir.sort_size()
+    ui.getwidget("Filer").dir.sort_size()
 
 @defcmd
 def _sort_size_rev():
     """Sort file size by descending order."""
-    ui.getcomponent("Filer").dir.sort_size_rev()
+    ui.getwidget("Filer").dir.sort_size_rev()
 
 @defcmd
 def _sort_time():
     """Sort time by ascending order."""
-    ui.getcomponent("Filer").dir.sort_time()
+    ui.getwidget("Filer").dir.sort_time()
 
 @defcmd
 def _sort_time_rev():
     """Sort time by descending order."""
-    ui.getcomponent("Filer").dir.sort_time_rev()
+    ui.getwidget("Filer").dir.sort_time_rev()
 
 @defcmd
 def _sort_nlink():
     """Sort link by ascending order."""
-    ui.getcomponent("Filer").dir.sort_nlink()
+    ui.getwidget("Filer").dir.sort_nlink()
 
 @defcmd
 def _sort_nlink_rev():
     """Sort link by descending order."""
-    ui.getcomponent("Filer").dir.sort_nlink_rev()
+    ui.getwidget("Filer").dir.sort_nlink_rev()
 
 @defcmd
 def _sort_permission():
     """Sort permission by ascending order."""
-    ui.getcomponent("Filer").dir.sort_permission()
+    ui.getwidget("Filer").dir.sort_permission()
 
 @defcmd
 def _sort_permission_rev():
     """Sort permission by ascending order."""
-    ui.getcomponent("Filer").dir.sort_permission_rev()
+    ui.getwidget("Filer").dir.sort_permission_rev()
 
 @defcmd
 def _toggle_view_ext():
     """Toggle the file extension display."""
-    ui.getcomponent("Filer").toggle_view_ext()
+    ui.getwidget("Filer").toggle_view_ext()
 
 @defcmd
 def _toggle_view_permission():
     """Toggle the file permission display."""
-    ui.getcomponent("Filer").toggle_view_permission()
+    ui.getwidget("Filer").toggle_view_permission()
 
 @defcmd
 def _toggle_view_nlink():
     """Toggle the nuber of link display."""
-    ui.getcomponent("Filer").toggle_view_nlink()
+    ui.getwidget("Filer").toggle_view_nlink()
 
 @defcmd
 def _toggle_view_user():
     """Toggle the user name of file display."""
-    ui.getcomponent("Filer").toggle_view_user()
+    ui.getwidget("Filer").toggle_view_user()
 
 @defcmd
 def _toggle_view_group():
     """Toggle the group name of file display."""
-    ui.getcomponent("Filer").toggle_view_group()
+    ui.getwidget("Filer").toggle_view_group()
 
 @defcmd
 def _toggle_view_size():
     """Toggle the file size display."""
-    ui.getcomponent("Filer").toggle_view_size()
+    ui.getwidget("Filer").toggle_view_size()
 
 @defcmd
 def _toggle_view_mtime():
     """Toggle the change time of file display."""
-    ui.getcomponent("Filer").toggle_view_mtime()
+    ui.getwidget("Filer").toggle_view_mtime()
 
 @defcmd
 def _create_dir():
     """Create directory in current workspace."""
-    ui.getcomponent("Filer").workspace.create_dir()
+    ui.getwidget("Filer").workspace.create_dir()
 
 @defcmd
 def _close_dir():
     """Close focus directory in current workspace."""
-    ui.getcomponent("Filer").workspace.close_dir()
+    ui.getwidget("Filer").workspace.close_dir()
 
 @defcmd
 def _all_reload():
     """Reload files of current workspace directorise."""
-    ui.getcomponent("Filer").workspace.all_reload()
+    ui.getwidget("Filer").workspace.all_reload()
 
 @defcmd
 def _swap_dir_inc():
     """Swap current directory to next directory."""
-    ui.getcomponent("Filer").workspace.swap_dir_inc()
+    ui.getwidget("Filer").workspace.swap_dir_inc()
 
 @defcmd
 def _swap_dir_dec():
     """Swap current directory to previous directory."""
-    ui.getcomponent("Filer").workspace.swap_dir_dec()
+    ui.getwidget("Filer").workspace.swap_dir_dec()
 
 @defcmd
 def _focus_next_dir():
     """Focus of cursor to next directory."""
-    ui.getcomponent("Filer").workspace.mvcursor(+1)
+    ui.getwidget("Filer").workspace.mvcursor(+1)
 
 @defcmd
 def _focus_prev_dir():
     """Focus of curosr to previous directory."""
-    ui.getcomponent("Filer").workspace.mvcursor(-1)
+    ui.getwidget("Filer").workspace.mvcursor(-1)
 
 @defcmd
 def _filer_cursor_down():
     """Cursor down in focused directory."""
-    ui.getcomponent("Filer").dir.mvcursor(+1)
+    ui.getwidget("Filer").dir.mvcursor(+1)
 
 @defcmd
 def _filer_cursor_up():
     """Cursor up in focused directory."""
-    ui.getcomponent("Filer").dir.mvcursor(-1)
+    ui.getwidget("Filer").dir.mvcursor(-1)
 
 @defcmd
 def _filer_scroll_down():
     """Scroll down in focused directory."""
-    ui.getcomponent("Filer").dir.mvscroll(+1)
+    ui.getwidget("Filer").dir.mvscroll(+1)
 
 @defcmd
 def _filer_scroll_up():
     """Scroll up in focused directory."""
-    ui.getcomponent("Filer").dir.mvscroll(-1)
+    ui.getwidget("Filer").dir.mvscroll(-1)
 
 @defcmd
 def _filer_pagedown():
     """Page down in focused directory."""
-    ui.getcomponent("Filer").dir.pagedown()
+    ui.getwidget("Filer").dir.pagedown()
 
 @defcmd
 def _filer_pageup():
     """Page up in focused directory."""
-    ui.getcomponent("Filer").dir.pageup()
+    ui.getwidget("Filer").dir.pageup()
 
 @defcmd
 def _filer_settop():
     """Set cursor to page top in focused directory."""
-    ui.getcomponent("Filer").dir.settop()
+    ui.getwidget("Filer").dir.settop()
 
 @defcmd
 def _filer_setbottom():
     """Set cursor to page bottom in focused directory."""
-    ui.getcomponent("Filer").dir.setbottom()
+    ui.getwidget("Filer").dir.setbottom()
 
 @defcmd
 def _filer_reset():
     """Reset the glob, mask and mark of focused directory."""
-    ui.getcomponent("Filer").dir.reset()
+    ui.getwidget("Filer").dir.reset()
 
 # ----------------------------------------------------------------------
 # Mark commands:
 @defcmd
 def _mark_all():
     """Mark all objects in current directory."""
-    ui.getcomponent("Filer").dir.mark_all("all")
+    ui.getwidget("Filer").dir.mark_all("all")
 
 @defcmd
 def _mark_file():
     """Mark all files in current directory."""
-    ui.getcomponent("Filer").dir.mark_all("file")
+    ui.getwidget("Filer").dir.mark_all("file")
 
 @defcmd
 def _mark_dir():
     """Mark all directories in current directory."""
-    ui.getcomponent("Filer").dir.mark_all("directory")
+    ui.getwidget("Filer").dir.mark_all("directory")
 
 @defcmd
 def _mark_symlink():
     """Mark all symlinks in current directory."""
-    ui.getcomponent("Filer").dir.mark_all("symlink")
+    ui.getwidget("Filer").dir.mark_all("symlink")
 
 @defcmd
 def _mark_exec():
     """Mark all executable files in current directory."""
-    ui.getcomponent("Filer").dir.mark_all("executable")
+    ui.getwidget("Filer").dir.mark_all("executable")
 
 @defcmd
 def _mark_socket():
     """Mark all sockets in current directory."""
-    ui.getcomponent("Filer").dir.mark_all("socket")
+    ui.getwidget("Filer").dir.mark_all("socket")
 
 @defcmd
 def _mark_fifo():
     """Mark all fifo in current directory."""
-    ui.getcomponent("Filer").dir.mark_all("fifo")
+    ui.getwidget("Filer").dir.mark_all("fifo")
 
 @defcmd
 def _mark_chr():
     """Mark all chr files in current directory."""
-    ui.getcomponent("Filer").dir.mark_all("chr")
+    ui.getwidget("Filer").dir.mark_all("chr")
 
 @defcmd
 def _mark_block():
     """Mark all block files in current directory."""
-    ui.getcomponent("Filer").dir.mark_all("block")
+    ui.getwidget("Filer").dir.mark_all("block")
 
 @defcmd
 def _mark_all_bcursor():
     """Mark all objects from cursor in current directory."""
-    ui.getcomponent("Filer").dir.mark_below_cursor("all")
+    ui.getwidget("Filer").dir.mark_below_cursor("all")
 
 @defcmd
 def _mark_file_bcursor():
     """Mark all files from cursor in current directory."""
-    ui.getcomponent("Filer").dir.mark_below_cursor("file")
+    ui.getwidget("Filer").dir.mark_below_cursor("file")
 
 @defcmd
 def _mark_dir_bcursor():
     """Mark all directries from cursor in current directory."""
-    ui.getcomponent("Filer").dir.mark_below_cursor("directory")
+    ui.getwidget("Filer").dir.mark_below_cursor("directory")
 
 @defcmd
 def _mark_symlink_bcursor():
     """Mark all symlinks from cursor in current directory."""
-    ui.getcomponent("Filer").dir.mark_below_cursor("symlink")
+    ui.getwidget("Filer").dir.mark_below_cursor("symlink")
 
 @defcmd
 def _mark_exec_bcursor():
     """Mark all executable files from cursor in current directory."""
-    ui.getcomponent("Filer").dir.mark_below_cursor("executable")
+    ui.getwidget("Filer").dir.mark_below_cursor("executable")
 
 @defcmd
 def _mark_socket_bcursor():
     """Mark all sockets from cursor in current directory."""
-    ui.getcomponent("Filer").dir.mark_below_cursor("socket")
+    ui.getwidget("Filer").dir.mark_below_cursor("socket")
 
 @defcmd
 def _mark_fifo_bcursor():
     """Mark all fifo from cursor in current directory."""
-    ui.getcomponent("Filer").dir.mark_below_cursor("fifo")
+    ui.getwidget("Filer").dir.mark_below_cursor("fifo")
 
 @defcmd
 def _mark_chr_bcursor():
     """Mark all chr files from cursor in current directory."""
-    ui.getcomponent("Filer").dir.mark_below_cursor("chr")
+    ui.getwidget("Filer").dir.mark_below_cursor("chr")
 
 @defcmd
 def _mark_block_bcursor():
     """Mark all block files from cursor in current directory."""
-    ui.getcomponent("Filer").dir.mark_below_cursor("block")
+    ui.getwidget("Filer").dir.mark_below_cursor("block")
 
 @defcmd
 def _mark_toggle():
     """Toggle mark of file under the cursor."""
-    ui.getcomponent("Filer").dir.mark_toggle()
+    ui.getwidget("Filer").dir.mark_toggle()
 
 @defcmd
 def _mark_toggle_all():
     """Toggle mark of all files in current directory."""
-    ui.getcomponent("Filer").dir.mark_toggle_all()
+    ui.getwidget("Filer").dir.mark_toggle_all()
 
 @defcmd
 def _mark_clear():
     """Clear mark of all files in current directory."""
-    ui.getcomponent("Filer").dir.mark_clear()
+    ui.getwidget("Filer").dir.mark_clear()
 
 # ----------------------------------------------------------------------
 # Mask commands:
 @defcmd
 def _mask_clear():
     """Claer of filter."""
-    ui.getcomponent("Filer").dir.mask(None)
+    ui.getwidget("Filer").dir.mask(None)
 
 # ----------------------------------------------------------------------
 # File control  commands:
 @defcmd
 def _chdir():
     """Invoke command line of chdir mode."""
-    ui.getcomponent("Cmdline").start(mode.Chdir(), ui.getcomponent("Filer").dir.path)
+    ui.getwidget("Cmdline").start(mode.Chdir(), ui.getwidget("Filer").dir.path)
 
 @defcmd
 def _chmod():
     """Invoke command line of chmod mode."""
-    ui.getcomponent("Cmdline").start(mode.Chmod())
+    ui.getwidget("Cmdline").start(mode.Chmod())
 
 @defcmd
 def _chown():
     """Invoke command line of chown mode."""
-    ui.getcomponent("Cmdline").start(mode.Chown())
+    ui.getwidget("Cmdline").start(mode.Chown())
 
 @defcmd
 def _copy():
@@ -836,8 +836,8 @@ def _copy():
     # Specify its destination:
     $  $Copy from ~/example/file.txt to:$  ~/text/file.txt
     """
-    filer = ui.getcomponent("Filer")
-    cmdline = ui.getcomponent("Cmdline")
+    filer = ui.getwidget("Filer")
+    cmdline = ui.getwidget("Cmdline")
     if filer.dir.ismark():
         cmdline.start(mode.Copy(), filer.workspace.nextdir.path)
     else:
@@ -846,8 +846,8 @@ def _copy():
 @defcmd
 def _delete():
     """Invoke command line of delete mode."""
-    filer = ui.getcomponent("Filer")
-    cmdline = ui.getcomponent("Cmdline")
+    filer = ui.getwidget("Filer")
+    cmdline = ui.getwidget("Cmdline")
     if filer.dir.ismark():
         files = filer.dir.get_mark_files()
         ret = message.confirm("Delete mark files? ", ["No", "Yes"], files)
@@ -860,18 +860,18 @@ def _delete():
 @defcmd
 def _glob():
     """Invoke command line of glob mode."""
-    ui.getcomponent("Cmdline").start(mode.Glob())
+    ui.getwidget("Cmdline").start(mode.Glob())
 
 @defcmd
 def _globdir():
     """Invoke command line of globdir mode."""
-    ui.getcomponent("Cmdline").start(mode.GlobDir())
+    ui.getwidget("Cmdline").start(mode.GlobDir())
 
 @defcmd
 def _link():
     """Invoke command line of link mode."""
-    filer = ui.getcomponent("Filer")
-    cmdline = ui.getcomponent("Cmdline")
+    filer = ui.getwidget("Filer")
+    cmdline = ui.getwidget("Cmdline")
     if filer.dir.ismark():
         cmdline.start(mode.Link(), filer.workspace.nextdir.path)
     else:
@@ -880,22 +880,22 @@ def _link():
 @defcmd
 def _mark():
     """Invoke command line of mark mode."""
-    ui.getcomponent("Cmdline").start(mode.Mark())
+    ui.getwidget("Cmdline").start(mode.Mark())
 
 @defcmd
 def _mask():
     """Invoke command line of mask mode."""
-    ui.getcomponent("Cmdline").start(mode.Mask())
+    ui.getwidget("Cmdline").start(mode.Mask())
 
 @defcmd
 def _menu():
     """Invoke command line of menu mode."""
-    ui.getcomponent("Cmdline").start(mode.Menu())
+    ui.getwidget("Cmdline").start(mode.Menu())
 
 @defcmd
 def _mkdir():
     """Invoke command line of mkdir mode."""
-    ui.getcomponent("Cmdline").start(mode.Mkdir())
+    ui.getwidget("Cmdline").start(mode.Mkdir())
 
 @defcmd
 def _move():
@@ -910,8 +910,8 @@ def _move():
     If EXDEV exception (device in move source and move destination is different)
     occur, after it copy from source to destination, Pyful delete source file.
     """
-    filer = ui.getcomponent("Filer")
-    cmdline = ui.getcomponent("Cmdline")
+    filer = ui.getwidget("Filer")
+    cmdline = ui.getwidget("Cmdline")
     if filer.dir.ismark():
         cmdline.start(mode.Move(), filer.workspace.nextdir.path)
     else:
@@ -920,13 +920,13 @@ def _move():
 @defcmd
 def _newfile():
     """Invoke command line of new file mode."""
-    ui.getcomponent("Cmdline").start(mode.Newfile())
+    ui.getwidget("Cmdline").start(mode.Newfile())
 
 @defcmd
 def _rename():
     """Invoke command line of rename mode."""
-    filer = ui.getcomponent("Filer")
-    cmdline = ui.getcomponent("Cmdline")
+    filer = ui.getwidget("Filer")
+    cmdline = ui.getwidget("Cmdline")
     if filer.dir.ismark():
         cmdline.start(mode.Replace())
     else:
@@ -944,13 +944,13 @@ def _replace():
     # Specify the replacing string:
     $  $Replace regexp \.py\$ with:$  .txt
     """
-    ui.getcomponent("Cmdline").start(mode.Replace())
+    ui.getwidget("Cmdline").start(mode.Replace())
 
 @defcmd
 def _symlink():
     """Invoke command line of symlink mode."""
-    filer = ui.getcomponent("Filer")
-    cmdline = ui.getcomponent("Cmdline")
+    filer = ui.getwidget("Filer")
+    cmdline = ui.getwidget("Cmdline")
     if filer.dir.ismark():
         cmdline.start(mode.Symlink(), filer.workspace.nextdir.path)
     else:
@@ -962,8 +962,8 @@ def _tar():
     tarmode = message.confirm("Tar mode:", ["gzip", "bzip2", "tar"])
     if tarmode is None:
         return
-    filer = ui.getcomponent("Filer")
-    cmdline = ui.getcomponent("Cmdline")
+    filer = ui.getwidget("Filer")
+    cmdline = ui.getwidget("Cmdline")
     if filer.dir.ismark():
         cmdline.start(mode.Tar(tarmode))
     else:
@@ -975,13 +975,13 @@ def _tareach():
     tarmode = message.confirm("Tar mode:", ["gzip", "bzip2", "tar"])
     if tarmode is None:
         return
-    ui.getcomponent("Cmdline").start(mode.Tar(tarmode, each=True))
+    ui.getwidget("Cmdline").start(mode.Tar(tarmode, each=True))
 
 @defcmd
 def _trashbox():
     """Invoke command line of trashbox mode."""
-    filer = ui.getcomponent("Filer")
-    cmdline = ui.getcomponent("Cmdline")
+    filer = ui.getwidget("Filer")
+    cmdline = ui.getwidget("Cmdline")
     trashbox = os.path.expanduser(mode.TrashBox.path)
     if not os.path.exists(trashbox):
         if "Yes" == message.confirm("Trashbox doesn't exist. Make trashbox? ({0}):".format(trashbox), ["No", "Yes"]):
@@ -1002,8 +1002,8 @@ def _trashbox():
 @defcmd
 def _untar():
     """Invoke command line of untar mode."""
-    filer = ui.getcomponent("Filer")
-    cmdline = ui.getcomponent("Cmdline")
+    filer = ui.getwidget("Filer")
+    cmdline = ui.getwidget("Cmdline")
     if filer.dir.ismark():
         cmdline.start(mode.UnTar(), filer.workspace.nextdir.path)
     else:
@@ -1012,13 +1012,13 @@ def _untar():
 @defcmd
 def _utime():
     """Invoke command line of utime mode."""
-    ui.getcomponent("Cmdline").start(mode.Utime(), ui.getcomponent("Filer").file.name)
+    ui.getwidget("Cmdline").start(mode.Utime(), ui.getwidget("Filer").file.name)
 
 @defcmd
 def _unzip():
     """Invoke command line of unzip mode."""
-    filer = ui.getcomponent("Filer")
-    cmdline = ui.getcomponent("Cmdline")
+    filer = ui.getwidget("Filer")
+    cmdline = ui.getwidget("Cmdline")
     if filer.dir.ismark():
         cmdline.start(mode.UnZip(), filer.workspace.nextdir.path)
     else:
@@ -1027,8 +1027,8 @@ def _unzip():
 @defcmd
 def _zip():
     """Invoke command line of zip mode."""
-    filer = ui.getcomponent("Filer")
-    cmdline = ui.getcomponent("Cmdline")
+    filer = ui.getwidget("Filer")
+    cmdline = ui.getwidget("Cmdline")
     if filer.dir.ismark():
         cmdline.start(mode.Zip())
     else:
@@ -1037,4 +1037,4 @@ def _zip():
 @defcmd
 def _zipeach():
     """Invoke command line of zipeach mode."""
-    ui.getcomponent("Cmdline").start(mode.Zip(each=True))
+    ui.getwidget("Cmdline").start(mode.Zip(each=True))

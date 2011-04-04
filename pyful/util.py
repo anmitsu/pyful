@@ -88,7 +88,7 @@ def escapemacro(string):
 
 def expandmacro(string, shell=False):
     from pyful import ui
-    filer = ui.getcomponent("Filer")
+    filer = ui.getwidget("Filer")
     m = {
         "%m": re.search(r"(?<!\\)%m", string),
         "%M": re.search(r"(?<!\\)%M", string),

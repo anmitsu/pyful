@@ -148,10 +148,10 @@ ui.InfoBox.zoom = 0
 ui.InfoBox.scroll_type = "HalfScroll"
 
 
-# Get very useful components.
-filer = ui.getcomponent("Filer")
-cmdline = ui.getcomponent("Cmdline")
-menu = ui.getcomponent("Menu")
+# Get very useful widgets.
+filer = ui.getwidget("Filer")
+cmdline = ui.getwidget("Cmdline")
+menu = ui.getwidget("Menu")
 
 # Set cmdline attributes.
 cmdline.history.maxsave = 10000

@@ -32,12 +32,12 @@ from pyful import process
 from pyful import ui
 from pyful import util
 
-class Cmdline(ui.Component):
+class Cmdline(ui.Widget):
     keymap = {}
     wordbreakchars = re.compile("[._/\s\t\n\"\\`'@$><=:|&{(]")
 
     def __init__(self):
-        ui.Component.__init__(self, "Cmdline")
+        ui.Widget.__init__(self, "Cmdline")
         self.string = ""
         self.cursor = 0
         self.mode = None
@@ -227,7 +227,7 @@ class Cmdline(ui.Component):
         elif self.cursor > util.mbslen(self.string):
             self.cursor = util.mbslen(self.string)
 
-        cmdscr = ui.getcomponent("Cmdscr").win
+        cmdscr = ui.getwidget("Cmdscr").win
         cmdscr.erase()
         cmdscr.move(0, 0)
         prompt, cmd, curpos = self._get_current_line(cmdscr)
@@ -256,7 +256,7 @@ class Cmdline(ui.Component):
             self.cmdline_input(key)
 
     def finish(self):
-        cmdscr = ui.getcomponent("Cmdscr").win
+        cmdscr = ui.getwidget("Cmdscr").win
         cmdscr.erase()
         cmdscr.noutrefresh()
         self.string = ""

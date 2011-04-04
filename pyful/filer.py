@@ -31,9 +31,9 @@ from pyful import message
 from pyful import ui
 from pyful import util
 
-class Filer(ui.Component):
+class Filer(ui.Widget):
     def __init__(self):
-        ui.Component.__init__(self, "Filer")
+        ui.Widget.__init__(self, "Filer")
         self.workspaces = []
         self.cursor = 0
         self.default_init()
@@ -141,7 +141,7 @@ class Filer(ui.Component):
         self.swap_workspace(-1)
 
     def titlebar_view(self):
-        titlebar = ui.getcomponent("Titlebar").win
+        titlebar = ui.getwidget("Titlebar").win
         titlebar.erase()
         titlebar.move(0, 0)
         length = sum([util.termwidth(w.title)+2 for w in self.workspaces])
@@ -373,8 +373,8 @@ class Workspace(ui.StandardScreen):
         self.layout = "Tile"
         size = len(self.dirs)
         y, x = self.stdscr.getmaxyx()
-        y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0]
-              + ui.getcomponent("Titlebar").win.getmaxyx()[0])
+        y -= (ui.getwidget("Cmdscr").win.getmaxyx()[0]
+              + ui.getwidget("Titlebar").win.getmaxyx()[0])
         if size == 1:
             self.dirs[0].resize(y, x, 1, 0)
             self.all_reload()
@@ -395,8 +395,8 @@ class Workspace(ui.StandardScreen):
         self.layout = "TileLeft"
         size = len(self.dirs)
         y, x = self.stdscr.getmaxyx()
-        y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0]
-              + ui.getcomponent("Titlebar").win.getmaxyx()[0])
+        y -= (ui.getwidget("Cmdscr").win.getmaxyx()[0]
+              + ui.getwidget("Titlebar").win.getmaxyx()[0])
         if size == 1:
             self.dirs[0].resize(y, x, 1, 0)
             self.all_reload()
@@ -417,8 +417,8 @@ class Workspace(ui.StandardScreen):
         self.layout = "TileTop"
         size = len(self.dirs)
         y, x = self.stdscr.getmaxyx()
-        y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0]
-              + ui.getcomponent("Titlebar").win.getmaxyx()[0])
+        y -= (ui.getwidget("Cmdscr").win.getmaxyx()[0]
+              + ui.getwidget("Titlebar").win.getmaxyx()[0])
         if size == 1:
             self.dirs[0].resize(y, x, 1, 0)
             self.all_reload()
@@ -439,8 +439,8 @@ class Workspace(ui.StandardScreen):
         self.layout = "TileBottom"
         size = len(self.dirs)
         y, x = self.stdscr.getmaxyx()
-        y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0] +
-              ui.getcomponent("Titlebar").win.getmaxyx()[0])
+        y -= (ui.getwidget("Cmdscr").win.getmaxyx()[0] +
+              ui.getwidget("Titlebar").win.getmaxyx()[0])
         if size == 1:
             self.dirs[0].resize(y, x, 1, 0)
             self.all_reload()
@@ -460,8 +460,8 @@ class Workspace(ui.StandardScreen):
     def oneline(self):
         self.layout = "Oneline"
         y, x = self.stdscr.getmaxyx()
-        height = y - (ui.getcomponent("Cmdscr").win.getmaxyx()[0]
-                      + ui.getcomponent("Titlebar").win.getmaxyx()[0])
+        height = y - (ui.getwidget("Cmdscr").win.getmaxyx()[0]
+                      + ui.getwidget("Titlebar").win.getmaxyx()[0])
         k = len(self.dirs)
         width = x // k
         odd = x % k
@@ -473,8 +473,8 @@ class Workspace(ui.StandardScreen):
     def onecolumn(self):
         self.layout = "Onecolumn"
         y, x = self.stdscr.getmaxyx()
-        y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0]
-              + ui.getcomponent("Titlebar").win.getmaxyx()[0])
+        y -= (ui.getwidget("Cmdscr").win.getmaxyx()[0]
+              + ui.getwidget("Titlebar").win.getmaxyx()[0])
         k = len(self.dirs)
         odd = y % k
         height = y // k
@@ -487,8 +487,8 @@ class Workspace(ui.StandardScreen):
     def magnifier(self):
         self.layout = "Magnifier"
         y, x = self.stdscr.getmaxyx()
-        y -= (ui.getcomponent("Cmdscr").win.getmaxyx()[0]
-              + ui.getcomponent("Titlebar").win.getmaxyx()[0])
+        y -= (ui.getwidget("Cmdscr").win.getmaxyx()[0]
+              + ui.getwidget("Titlebar").win.getmaxyx()[0])
         if len(self.dirs) == 1:
             self.dirs[0].resize(y, x, 1, 0)
             self.all_reload()
@@ -510,8 +510,8 @@ class Workspace(ui.StandardScreen):
     def fullscreen(self):
         self.layout = "Fullscreen"
         y, x = self.stdscr.getmaxyx()
-        height = y - (ui.getcomponent("Cmdscr").win.getmaxyx()[0]
-                      + ui.getcomponent("Titlebar").win.getmaxyx()[0])
+        height = y - (ui.getwidget("Cmdscr").win.getmaxyx()[0]
+                      + ui.getwidget("Titlebar").win.getmaxyx()[0])
         width = x
         for d in self.dirs:
             d.resize(height, width, 1, 0)
@@ -1510,7 +1510,7 @@ class FileStat(object):
             self.name = ""
 
     def view(self):
-        cmdscr = ui.getcomponent("Cmdscr").win
+        cmdscr = ui.getwidget("Cmdscr").win
         cmdscr.erase()
         perm = self.get_permission()
         user = self.get_user_name()

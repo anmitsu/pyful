@@ -25,12 +25,12 @@ import signal
 from pyful import look
 from pyful import util
 
-def getcomponent(name):
-    return Component.components[name]
+def getwidget(name):
+    return Widget.widgets[name]
 
 def resize():
-    for component in Component.components.values():
-        component.resize()
+    for widget in Widget.widgets.values():
+        widget.resize()
 
 def refresh(*args):
     curses.endwin()
@@ -64,7 +64,7 @@ def end_curses():
     signal.signal(signal.SIGWINCH, signal.SIG_DFL)
     StandardScreen.destroy()
 
-class ComponentDuplication(Exception):
+class WidgetAlreadyRegistered(Exception):
     pass
 
 class StandardScreen(object):
@@ -94,15 +94,15 @@ class StandardScreen(object):
             curses.noraw()
             curses.endwin()
 
-class Component(StandardScreen):
-    components = {}
+class Widget(StandardScreen):
+    widgets = {}
 
     def __init__(self, name):
         self.active = False
-        if not name in self.components:
-            self.components[name] = self
+        if not name in self.widgets:
+            self.widgets[name] = self
         else:
-            raise ComponentDuplication("`{0}' overlap for components".format(name))
+            raise WidgetAlreadyRegistered("`{0}' already registered.".format(name))
 
     @property
     def is_active(self):
@@ -111,9 +111,9 @@ class Component(StandardScreen):
     def resize(self):
         pass
 
-class CmdlineScreen(Component):
+class CmdlineScreen(Widget):
     def __init__(self):
-        Component.__init__(self, "Cmdscr")
+        Widget.__init__(self, "Cmdscr")
         y, x = self.stdscr.getmaxyx()
         self.win = curses.newwin(2, x, y-2, 0)
         self.win.bkgd(look.colors["CmdlineWindow"])
@@ -123,9 +123,9 @@ class CmdlineScreen(Component):
         self.win = curses.newwin(2, x, y-2, 0)
         self.win.bkgd(look.colors["CmdlineWindow"])
 
-class Titlebar(Component):
+class Titlebar(Widget):
     def __init__(self):
-        Component.__init__(self, "Titlebar")
+        Widget.__init__(self, "Titlebar")
         y, x = self.stdscr.getmaxyx()
         self.win = curses.newwin(1, x, 0, 0)
         self.win.bkgd(look.colors["Titlebar"])
@@ -135,14 +135,14 @@ class Titlebar(Component):
         self.win = curses.newwin(1, x, 0, 0)
         self.win.bkgd(look.colors["Titlebar"])
 
-class InfoBox(Component):
+class InfoBox(Widget):
     scroll_type = "HalfScroll"
     zoom = 0
     win = None
     winattr = 0
 
     def __init__(self, title):
-        Component.__init__(self, title)
+        Widget.__init__(self, title)
         self.info = []
         self.title = title
         self.cursor = 0
@@ -381,11 +381,11 @@ class Viewer(object):
         self.view = viewfunc
 
     def _get_default_view_function(self):
-        filer = getcomponent("Filer")
-        menu = getcomponent("Menu")
-        cmdline = getcomponent("Cmdline")
-        helper = getcomponent("Help")
-        message = getcomponent("Message")
+        filer = getwidget("Filer")
+        menu = getwidget("Menu")
+        cmdline = getwidget("Cmdline")
+        helper = getwidget("Help")
+        message = getwidget("Message")
         def viewfunc():
             filer.view()
             if menu.is_active:
@@ -410,10 +410,10 @@ class Controller(object):
         self.keyhandler = KeyHandler()
 
     def _get_default_input_function(self):
-        filer = getcomponent("Filer")
-        menu = getcomponent("Menu")
-        cmdline = getcomponent("Cmdline")
-        helper = getcomponent("Help")
+        filer = getwidget("Filer")
+        menu = getwidget("Menu")
+        cmdline = getwidget("Cmdline")
+        helper = getwidget("Help")
         def inputfunc(key):
             if helper.is_active:
                 helper.input(key)

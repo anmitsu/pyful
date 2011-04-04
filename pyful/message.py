@@ -25,25 +25,25 @@ from pyful import ui
 from pyful import util
 
 def puts(string, timex=3):
-    ui.getcomponent("Message").puts(string, timex)
+    ui.getwidget("Message").puts(string, timex)
 
 def error(string, timex=3):
-    ui.getcomponent("Message").error(string, timex)
+    ui.getwidget("Message").error(string, timex)
 
 def exception(except_cls):
-    ui.getcomponent("Message").exception(except_cls)
+    ui.getwidget("Message").exception(except_cls)
 
 def confirm(msg, options, msglist=None, position=0):
-    return ui.getcomponent("Message").confirm(msg, options, msglist, position)
+    return ui.getwidget("Message").confirm(msg, options, msglist, position)
 
 def viewhistroy():
-    ui.getcomponent("Message").view_histroy()
+    ui.getwidget("Message").view_histroy()
 
-class Message(ui.Component):
+class Message(ui.Widget):
     history = 100
 
     def __init__(self):
-        ui.Component.__init__(self, "Message")
+        ui.Widget.__init__(self, "Message")
         self.msg = []
         self.timer = None
         self.messagebox = MessageBox()
@@ -93,7 +93,7 @@ class Message(ui.Component):
         self.messagebox.hide()
 
     def view(self):
-        if ui.getcomponent("Cmdline").is_active or ui.getcomponent("Filer").finder.active:
+        if ui.getwidget("Cmdline").is_active or ui.getwidget("Filer").finder.active:
             return
         self.messagebox.show(self.msg)
         self.messagebox.view()
@@ -165,7 +165,7 @@ class Confirm(object):
         if self.box:
             self.box.view()
 
-        cmdscr = ui.getcomponent("Cmdscr").win
+        cmdscr = ui.getwidget("Cmdscr").win
         cmdscr.erase()
         y, x = cmdscr.getmaxyx()
 
