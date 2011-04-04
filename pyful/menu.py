@@ -16,79 +16,65 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import curses
-
 from pyful import look
 from pyful import message
 from pyful import ui
-from pyful import util
 
-class Menu(ui.Component):
-    keymap = {}
+class Menu(ui.InfoBox):
     items = {}
 
     def __init__(self):
-        ui.Component.__init__(self, "Menu")
-        self.cursor = 0
-        self.win = None
-        self.title = None
+        ui.InfoBox.__init__(self, "Menu")
+        self.title = ""
+        self.current = None
 
-    def mvcursor(self, x):
-        self.cursor += x
-
-    def setcursor(self, x):
-        self.cursor = x
-
-    def show(self, name):
+    def show(self, name, pos=0):
         if name not in self.items:
             return message.error("Undefined menu `{0}'".format(name))
         self.title = name
-        self.active = self.items[name]
-        self.win = curses.newwin(len(self.active)+2, 50, 1, 0)
-        self.win.bkgd(look.colors["MenuWindow"])
+        self.current = self.items[name]
+        self.resize()
+        info = [ui.InfoBoxContext(i[0]) for i in self.current]
+        super(self.__class__, self).show(info, pos)
 
     def hide(self):
-        self.win.erase()
-        self.cursor = 0
+        self.current = None
+        super(self.__class__, self).hide()
+
+    def resize(self):
+        if not self.current:
+            return
         self.win = None
-        self.active = None
+        y, x = self.stdscr.getmaxyx()
+        maxy = y // 2
+        height = len(self.current) + 2
+        if height > maxy:
+            height = maxy
+        width = 50
+        if width > x:
+            width = x
+        self.y = height
+        self.x = width
+        self.begy = 1
+        self.begx = 0
+        self.winattr = look.colors["MenuWindow"]
 
     def run(self):
-        swap = self.active
-        func = self.active[self.cursor][-1]
+        swap = self.current
+        func = self.current[self.cursor][-1]
         func()
-        if self.active is swap:
+        if self.current is swap:
             self.hide()
 
     def input(self, key):
         if key in self.keymap:
             self.keymap[key]()
         else:
-            for name, keynum, func in self.active:
-                if keynum != key:
+            for name, keysym, func in self.current:
+                if keysym != key:
                     continue
-                swap = self.active
+                swap = self.current
                 func()
-                if swap is self.active:
+                if swap is self.current:
                     self.hide()
                 break
-
-    def view(self):
-        items = self.active
-        size = len(items)
-
-        if self.cursor < 0:
-            self.cursor = size - 1
-        elif not size == 0 and self.cursor >= size:
-            self.cursor = 0
-
-        self.win.border(*self.borders)
-        self.win.addstr(0, 2, self.title, curses.A_BOLD)
-
-        for i, item in enumerate(items):
-            name = util.mbs_ljust(item[0], self.win.getmaxyx()[1]-4)
-            if self.cursor == i:
-                self.win.addstr(i+1, 2, name, curses.A_REVERSE)
-            else:
-                self.win.addstr(i+1, 2, name)
-        self.win.noutrefresh()
