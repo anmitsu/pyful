@@ -104,11 +104,7 @@ class MessageBox(ui.InfoBox):
     def __init__(self):
         ui.InfoBox.__init__(self, "MessageBox")
         self.lb = -1
-        y, x = self.stdscr.getmaxyx()
-        self.y = self.height+2
-        self.x = x
-        self.begy = y-self.height-4
-        self.begx = 0
+        self.resize()
 
     def resize(self):
         self.win = None
