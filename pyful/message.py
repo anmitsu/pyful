@@ -57,8 +57,9 @@ class Message(ui.Component):
 
     def puts(self, string, timex=3):
         self.active = True
-        msg = re.sub(r"[\n\r\t]", "", util.U(string))
-        self.msg.insert(0, ui.InfoBoxContext(msg, attr=look.colors["PutsMessage"]))
+        string = string.expandtabs()
+        string = re.sub(r"[\n\r]", "", string)
+        self.msg.insert(0, ui.InfoBoxContext(string, attr=look.colors["PutsMessage"]))
         if self.history < len(self.msg):
             self.msg.pop()
         self.view()
@@ -67,8 +68,9 @@ class Message(ui.Component):
 
     def error(self, string, timex=3):
         self.active = True
-        msg = re.sub(r"[\n\r\t]", "", util.U(string))
-        self.msg.insert(0, ui.InfoBoxContext(msg, attr=look.colors["ErrorMessage"]))
+        string = string.expandtabs()
+        string = re.sub(r"[\n\r]", "", string)
+        self.msg.insert(0, ui.InfoBoxContext(string, attr=look.colors["ErrorMessage"]))
         if self.history < len(self.msg):
             self.msg.pop()
         self.view()
