@@ -459,9 +459,9 @@ class Clipboard(ui.InfoBox):
         self.finish()
 
     def delete(self):
-        if not self.clip or not 0 < self.cursor <= len(self.clip):
-            return
-        self.clip.remove(self.cursor_item().string)
+        item = self.cursor_item()
+        if item:
+            self.clip.remove(item.string)
         x = self.cursor
         self.restart()
         self.setcursor(x)
