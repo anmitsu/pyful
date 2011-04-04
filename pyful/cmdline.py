@@ -64,7 +64,7 @@ class Cmdline(ui.Component):
         else:
             self.string = util.expandmacro(self.string, shell=False)
         self.cursor += util.mbslen(self.string)
-        self.history.restart()
+        self.history.start()
 
     def select_action(self):
         action = self.mode.select_action()
@@ -115,13 +115,13 @@ class Cmdline(ui.Component):
             return
         self.string = util.rmstr(self.string, self.cursor-1)
         self.cursor -= 1
-        self.history.restart()
+        self.history.start()
 
     def delete_char(self):
         if not self.string:
             self.finish()
         self.string = util.rmstr(self.string, self.cursor)
-        self.history.restart()
+        self.history.start()
 
     def delete_forward_word(self):
         i = self.cursor + 1
@@ -134,7 +134,7 @@ class Cmdline(ui.Component):
         delword = util.U(self.string)[self.cursor:i]
         self.clipboard.yank(delword)
         self.string = util.slicestr(self.string, self.cursor, i)
-        self.history.restart()
+        self.history.start()
 
     def delete_backward_word(self):
         if not self.cursor:
@@ -150,20 +150,20 @@ class Cmdline(ui.Component):
         self.clipboard.yank(delword)
         self.string = util.slicestr(self.string, i, self.cursor)
         self.cursor = i
-        self.history.restart()
+        self.history.start()
 
     def kill_line(self):
         self.string = util.U(self.string)
         killword = self.string[self.cursor:]
         self.clipboard.yank(killword)
         self.string = self.string[:self.cursor]
-        self.history.restart()
+        self.history.start()
 
     def kill_line_all(self):
         self.clipboard.yank(self.string)
         self.string = ""
         self.cursor = 0
-        self.history.restart()
+        self.history.start()
 
     def insert(self, string):
         self.string = util.insertstr(self.string, string, self.cursor)
@@ -330,7 +330,7 @@ class Cmdline(ui.Component):
                 key = " "
             if util.mbslen(key) == 1:
                 self.insert(key)
-                self.history.restart()
+                self.history.start()
 
 class History(ui.InfoBox):
     maxsave = 10000
@@ -394,9 +394,6 @@ class History(ui.InfoBox):
         self.cmdline.setstring(self.source_string)
         self.start()
         self.setcursor(x)
-
-    def restart(self):
-        self.start()
 
     def start(self):
         self.source_string = self.cmdline.string
@@ -463,7 +460,7 @@ class Clipboard(ui.InfoBox):
         if item:
             self.clip.remove(item.string)
         x = self.cursor
-        self.restart()
+        self.start()
         self.setcursor(x)
 
     def yank(self, string):
@@ -495,10 +492,8 @@ class Clipboard(ui.InfoBox):
         if info:
             self.cmdline.history.hide()
             self.show(info)
-
-    def restart(self):
-        self.hide()
-        self.start()
+        else:
+            self.hide()
 
     def finish(self):
         self.hide()
