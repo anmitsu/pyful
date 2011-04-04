@@ -322,7 +322,7 @@ class InfoBox(Component):
         size = len(self.info)
         y, x = self.win.getmaxyx()
         height = y - 2
-        width = x - 3
+        width = x - 4
         infowidth = width // self.maxrow
         infocount = height * self.maxrow
 
