@@ -689,8 +689,11 @@ class Directory(ui.StandardScreen):
             except OSError:
                 return
             for f in files:
-                path = os.path.join(dirname, f)
-                if os.path.isdir(path):
+                try:
+                    path = os.path.join(dirname, f)
+                except UnicodeError:
+                    continue
+                if os.path.isdir(path) and not os.path.islink(path):
                     for sub in _globdir(path):
                         yield sub
                 if fnmatch.fnmatch(f, pattern):
