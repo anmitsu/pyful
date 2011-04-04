@@ -147,6 +147,7 @@ class InfoBox(Component):
         self.title = title
         self.cursor = 0
         self.scrolltop = 0
+        self.lb = 0
         self.maxrow = 1
         self.y = self.x = self.begy = self.begx = 1
         self.keymap = {
@@ -193,7 +194,9 @@ class InfoBox(Component):
         self.begx = 0
         self.winattr = look.colors["InfoBoxWindow"]
 
-    def show(self, info, pos=0):
+    def show(self, info, pos=None):
+        if pos is None:
+            pos = self.lb
         self.active = True
         self.cursor = pos
         self.scrolltop = 0
@@ -227,7 +230,7 @@ class InfoBox(Component):
 
     def mvcursor(self, amount):
         self.cursor += amount
-        if self.cursor < -1:
+        if self.cursor < self.lb:
             self.cursor = len(self.info) - 1
         elif self.cursor >= len(self.info):
             self.cursor = 0
@@ -239,7 +242,7 @@ class InfoBox(Component):
         self.mvcursor(-self.maxrow)
 
     def setcursor(self, dist):
-        if -1 <= dist < len(self.info):
+        if self.lb <= dist < len(self.info):
             self.cursor = dist
 
     def settop(self):
@@ -275,7 +278,7 @@ class InfoBox(Component):
     def _fix_position(self, size, height, infocount):
         if self.cursor >= size:
             self.cursor = 0
-        elif self.cursor < -1:
+        elif self.cursor < self.lb:
             self.cursor = size - 1
 
         if self.cursor < self.scrolltop or \

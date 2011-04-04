@@ -340,6 +340,7 @@ class History(ui.InfoBox):
         ui.InfoBox.__init__(self, "History")
         self.cmdline = cmdline
         self.source_string = self.cmdline.string
+        self.lb = -1
 
     def loadfile(self, path, key):
         path = os.path.expanduser(path)
@@ -403,7 +404,7 @@ class History(ui.InfoBox):
         info = [ui.InfoBoxContext(item, histr=t) for item in self.gethistory() if t in item]
         info.reverse()
         if info:
-            self.show(info, pos=-1)
+            self.show(info)
         else:
             self.hide()
 
@@ -411,7 +412,7 @@ class History(ui.InfoBox):
         if not self.info:
             return
         super(self.__class__, self).mvcursor(x)
-        if self.cursor == -1:
+        if self.cursor == self.lb:
             self.cmdline.string = self.source_string
             self.cmdline.cursor = util.mbslen(self.source_string)
         else:

@@ -93,7 +93,7 @@ class Message(ui.Component):
     def view(self):
         if ui.getcomponent("Cmdline").is_active or ui.getcomponent("Filer").finder.active:
             return
-        self.messagebox.show(self.msg, -1)
+        self.messagebox.show(self.msg)
         self.messagebox.view()
 
 class MessageBox(ui.InfoBox):
@@ -101,6 +101,7 @@ class MessageBox(ui.InfoBox):
 
     def __init__(self):
         ui.InfoBox.__init__(self, "MessageBox")
+        self.lb = -1
         y, x = self.stdscr.getmaxyx()
         self.y = self.height+2
         self.x = x
