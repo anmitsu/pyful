@@ -50,7 +50,7 @@ def cmp_to_key(_cmp):
             return _cmp(self.obj, other.obj) < 0
         def __gt__(self, other):
             return _cmp(self.obj, other.obj) > 0
-        def __eq__(self, other):
+        def __hash__(self, other):
             return _cmp(self.obj, other.obj) == 0
         def __le__(self, other):
             return _cmp(self.obj, other.obj) <= 0
