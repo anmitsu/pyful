@@ -76,5 +76,5 @@ class Menu(ui.InfoBox):
                 funcs[keys.index(key)]()
                 if swap is self.current:
                     self.hide()
-            except IndexError:
+            except ValueError:
                 pass
