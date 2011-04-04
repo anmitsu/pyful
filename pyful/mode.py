@@ -38,11 +38,21 @@ class ActionBox(ui.InfoBox):
         self.selected = self.cursor_item().string
         self.hide()
 
+    def _get_view(self):
+        filer = ui.getwidget("Filer")
+        cmdline = ui.getwidget("Cmdline")
+        def viewfunc():
+            filer.view()
+            if cmdline.is_active:
+                cmdline.view()
+            self.view()
+        return viewfunc
+
     def run(self, actions):
         if not actions:
             return
         self.show([ui.InfoBoxContext(a) for a in actions])
-        viewer = ui.Viewer(self.view)
+        viewer = ui.Viewer(self._get_view())
         controller = ui.Controller(self.input)
         while self.is_active:
             viewer.view_and_update()
