@@ -18,6 +18,7 @@
 
 import array
 import curses
+import math
 import re
 import signal
 
@@ -302,8 +303,8 @@ class InfoBox(Component):
         if self.cursor < 0:
             cpage = 1
         else:
-            cpage = (self.cursor)//infocount+1
-        maxpage = size//infocount+1
+            cpage = self.cursor//infocount + 1
+        maxpage = int(math.ceil(float(size)/float(infocount)))
         self.win.addstr(0, 2, "{0}({1}) [{2}/{3}]".format
                         (self.title, size, cpage, maxpage),
                         look.colors["InfoBoxTitle"])
