@@ -57,7 +57,6 @@ def start_curses():
     except curses.error:
         StandardScreen()
         CmdlineScreen()
-        Titlebar()
     signal.signal(signal.SIGWINCH, refresh)
 
 def end_curses():
@@ -122,18 +121,6 @@ class CmdlineScreen(Widget):
         y, x = self.stdscr.getmaxyx()
         self.win = curses.newwin(2, x, y-2, 0)
         self.win.bkgd(look.colors["CmdlineWindow"])
-
-class Titlebar(Widget):
-    def __init__(self):
-        Widget.__init__(self, "Titlebar")
-        y, x = self.stdscr.getmaxyx()
-        self.win = curses.newwin(1, x, 0, 0)
-        self.win.bkgd(look.colors["Titlebar"])
-
-    def resize(self):
-        y, x = self.stdscr.getmaxyx()
-        self.win = curses.newwin(1, x, 0, 0)
-        self.win.bkgd(look.colors["Titlebar"])
 
 class InfoBox(Widget):
     scroll_type = "HalfScroll"
