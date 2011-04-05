@@ -44,11 +44,11 @@ def viewhistroy():
     ui.getwidget("Message").view_histroy()
 
 class Message(ui.Widget):
-    history = 100
+    maxsave = 100
 
     def __init__(self):
         ui.Widget.__init__(self, "Message")
-        self.msg = []
+        self.messages = []
         self.timer = None
         self.messagebox = MessageBox()
         self.confirmbox = ConfirmBox()
@@ -62,21 +62,19 @@ class Message(ui.Widget):
 
     def puts(self, string, timex=3):
         self.active = True
-        string = string.expandtabs()
-        string = re.sub(r"[\n\r]", "", string)
-        self.msg.insert(0, ui.InfoBoxContext(string, attr=look.colors["PutsMessage"]))
-        if self.history < len(self.msg):
-            self.msg.pop()
+        string = re.sub(r"[\n\r]", "", string).expandtabs()
+        self.messages.insert(0, ui.InfoBoxContext(string, attr=look.colors["PutsMessage"]))
+        if self.maxsave < len(self.messages):
+            self.messages.pop()
         if timex:
             self.start_timer(timex)
 
     def error(self, string, timex=3):
         self.active = True
-        string = string.expandtabs()
-        string = re.sub(r"[\n\r]", "", string)
-        self.msg.insert(0, ui.InfoBoxContext(string, attr=look.colors["ErrorMessage"]))
-        if self.history < len(self.msg):
-            self.msg.pop()
+        string = re.sub(r"[\n\r]", "", string).expandtabs()
+        self.messages.insert(0, ui.InfoBoxContext(string, attr=look.colors["ErrorMessage"]))
+        if self.maxsave < len(self.messages):
+            self.messages.pop()
         if timex:
             self.start_timer(timex)
 
@@ -88,14 +86,14 @@ class Message(ui.Widget):
         return self.confirmbox.run(message, options, info)
 
     def view_histroy(self):
-        self.confirm("Message history", ["Close"], self.msg)
+        self.confirm("Message history", ["Close"], self.messages)
 
     def hide(self):
         self.active = False
         self.messagebox.hide()
 
     def view(self):
-        self.messagebox.show(self.msg)
+        self.messagebox.show(self.messages)
         self.messagebox.view()
 
 class MessageBox(ui.InfoBox):
