@@ -143,23 +143,26 @@ class ProcessViewThread(threading.Thread):
             self.view_output(out)
         if err:
             self.view_error(err)
+        if out or err:
+            message.forceview()
 
     def view_output(self, out):
-        try:
-            out = out.decode()
-        except UnicodeError:
-            out = "Invalid encoding error"
         for line in out.splitlines():
-            if line:
+            if not line:
+                continue
+            try:
+                line = line.decode()
                 message.puts("{0} - ({1})".format(line, self.name))
-        message.forceview()
+            except UnicodeError:
+                line = "????? - Invalid encoding"
+                message.error("{0} - ({1})".format(line, self.name))
 
     def view_error(self, err):
-        try:
-            err = err.decode()
-        except UnicodeError:
-            err = "Invalid encoding error"
         for line in err.splitlines():
-            if line:
-                message.error("{0} - ({1})".format(line, self.name))
-        message.forceview()
+            if not line:
+                continue
+            try:
+                line = line.decode()
+            except UnicodeError:
+                line = "????? - Invalid encoding"
+            message.error("{0} - ({1})".format(line, self.name))
