@@ -36,7 +36,7 @@ def exception(except_cls):
 def confirm(message, options, info=None, position=0):
     return ui.getwidget("Message").confirm(message, options, info, position)
 
-def view():
+def forceview():
     ui.getwidget("Message").view()
     curses.doupdate()
 
