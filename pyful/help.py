@@ -126,7 +126,7 @@ class Help(ui.InfoBox):
             info.append(ui.InfoBoxContext(""))
 
         info += self.parse_docstring(doc)
-        self.show(info, -1)
+        self.show(info)
 
     def show_all_command(self):
         from pyful.command import commands
@@ -148,7 +148,7 @@ class Help(ui.InfoBox):
 
             info += self.parse_docstring(doc)
             info.append(ui.InfoBoxContext("-"*100))
-        self.show(info, -1)
+        self.show(info)
 
 class AttributeContext(ui.InfoBoxContext):
     def __init__(self, string, indent, attr=0, attrtype="bold"):
