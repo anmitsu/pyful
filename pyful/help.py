@@ -90,10 +90,10 @@ class Help(ui.InfoBox):
         return info
 
     def find_keybind(self, cmd):
-        from pyful.filer import Directory
+        filer = ui.getwidget("Filer")
 
         keys = []
-        for k, v in Directory.keymap.items():
+        for k, v in filer.keymap.items():
             if v == cmd:
                 if isinstance(k, tuple):
                     keybind = "{0} ({1})".format(*k)
