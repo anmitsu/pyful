@@ -36,6 +36,10 @@ def exception(except_cls):
 def confirm(message, options, info=None, position=0):
     return ui.getwidget("Message").confirm(message, options, info, position)
 
+def view():
+    ui.getwidget("Message").view()
+    curses.doupdate()
+
 def viewhistroy():
     ui.getwidget("Message").view_histroy()
 
@@ -63,7 +67,6 @@ class Message(ui.Widget):
         self.msg.insert(0, ui.InfoBoxContext(string, attr=look.colors["PutsMessage"]))
         if self.history < len(self.msg):
             self.msg.pop()
-        self.view()
         if timex:
             self.start_timer(timex)
 
@@ -74,7 +77,6 @@ class Message(ui.Widget):
         self.msg.insert(0, ui.InfoBoxContext(string, attr=look.colors["ErrorMessage"]))
         if self.history < len(self.msg):
             self.msg.pop()
-        self.view()
         if timex:
             self.start_timer(timex)
 
@@ -93,8 +95,6 @@ class Message(ui.Widget):
         self.messagebox.hide()
 
     def view(self):
-        if ui.getwidget("Cmdline").is_active or ui.getwidget("Filer").finder.active:
-            return
         self.messagebox.show(self.msg)
         self.messagebox.view()
 

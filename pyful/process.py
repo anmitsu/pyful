@@ -156,7 +156,7 @@ class ProcessViewThread(threading.Thread):
         for line in out.splitlines():
             if line:
                 message.puts("{0} - ({1})".format(line, self.name))
-        curses.doupdate()
+        message.view()
 
     def view_error(self, err):
         try:
@@ -166,4 +166,4 @@ class ProcessViewThread(threading.Thread):
         for line in err.splitlines():
             if line:
                 message.error("{0} - ({1})".format(line, self.name))
-        curses.doupdate()
+        message.view()

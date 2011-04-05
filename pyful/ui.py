@@ -381,7 +381,7 @@ class Viewer(object):
                 helper.view()
             elif cmdline.is_active:
                 cmdline.view()
-            elif message.is_active:
+            elif message.is_active and not filer.finder.active:
                 message.view()
         return viewfunc
 

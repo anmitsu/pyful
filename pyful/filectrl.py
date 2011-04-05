@@ -225,7 +225,8 @@ class Subloop(object):
             elif helper.is_active:
                 helper.view()
             else:
-                message.view()
+                if not filer.finder.active:
+                    message.view()
                 self.subthreads_view()
         self.viewer = ui.Viewer(viewf)
         self.controller = ui.Controller(inputf)
