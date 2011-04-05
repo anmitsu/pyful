@@ -42,7 +42,7 @@ class Help(ui.InfoBox):
         info.append(ui.InfoBoxContext("Documentation:", attr=curses.A_BOLD))
         level = 1
         number = 1
-        for line in doc.split(os.linesep):
+        for line in doc.splitlines():
             line = line.strip()
             linebreak = False
 

@@ -791,7 +791,7 @@ class FileJobGenerator(object):
             ret = message.confirm(
                 "Override?", ["Yes", "No", "Newer", "Yes(all)", "No(all)", "Newer(all)", "Cancel"],
                 "Source{0}Path: {1}{0}Size: {2}{0}Time: {3}{0}{0}Destination{0}Path: {4}{0}Size: {5}{0}Time: {6}".format(
-                    os.linesep, src, sstat.st_size, stime, dst, dstat.st_size, dtime).split(os.linesep))
+                    os.linesep, src, sstat.st_size, stime, dst, dstat.st_size, dtime).splitlines())
             Filectrl.event.set()
             if ret == "Yes" or ret == "No" or ret == "Cancel":
                 return ret

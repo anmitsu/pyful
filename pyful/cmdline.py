@@ -529,7 +529,7 @@ class Output(ui.InfoBox):
         self.cmdline.history.hide()
         info = []
         outputs = re.sub(r"[\r\t]", "", outputs)
-        info = [ui.InfoBoxContext(item) for item in outputs.split(os.linesep)]
+        info = [ui.InfoBoxContext(item) for item in outputs.splitlines()]
         self.show(info)
 
     def terminal(self):

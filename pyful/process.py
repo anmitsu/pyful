@@ -153,7 +153,7 @@ class ProcessViewThread(threading.Thread):
             out = out.decode()
         except UnicodeError:
             out = "Invalid encoding error"
-        for line in out.split(os.linesep):
+        for line in out.splitlines():
             if line:
                 message.puts("{0} - ({1})".format(line, self.name))
         curses.doupdate()
@@ -163,7 +163,7 @@ class ProcessViewThread(threading.Thread):
             err = err.decode()
         except UnicodeError:
             err = "Invalid encoding error"
-        for line in err.split(os.linesep):
+        for line in err.splitlines():
             if line:
                 message.error("{0} - ({1})".format(line, self.name))
         curses.doupdate()

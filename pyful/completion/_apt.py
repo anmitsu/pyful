@@ -31,7 +31,7 @@ def _pkgnames(s):
         out = out.decode()
     except UnicodeError:
         return []
-    return [item for item in out.split(os.linesep) if item.startswith(s)]
+    return [item for item in out.splitlines() if item.startswith(s)]
 
 def _dpkglist(s):
     try:
@@ -45,7 +45,7 @@ def _dpkglist(s):
         out = out.decode()
     except UnicodeError:
         return []
-    return [line.split()[1] for line in out.split(os.linesep)[5:]
+    return [line.split()[1] for line in out.splitlines()[5:]
             if len(line) > 2 and line[1].startswith(s)]
 
 class AptGet(completion.ShellCompletionFunction):
