@@ -33,8 +33,8 @@ def error(string, timex=3):
 def exception(except_cls):
     ui.getwidget("Message").exception(except_cls)
 
-def confirm(msg, options, msglist=None, position=0):
-    return ui.getwidget("Message").confirm(msg, options, msglist, position)
+def confirm(message, options, info=None, position=0):
+    return ui.getwidget("Message").confirm(message, options, info, position)
 
 def viewhistroy():
     ui.getwidget("Message").view_histroy()
@@ -47,6 +47,7 @@ class Message(ui.Widget):
         self.msg = []
         self.timer = None
         self.messagebox = MessageBox()
+        self.confirmbox = ConfirmBox()
 
     def start_timer(self, timex):
         if self.timer:
@@ -80,13 +81,12 @@ class Message(ui.Widget):
     def exception(self, except_cls):
         self.error("{0}: {1}".format(except_cls.__class__.__name__, except_cls))
 
-    def confirm(self, msg, options, msglist=None, position=0):
-        confirm = Confirm(msg, options, msglist)
-        confirm.setcursor(position)
-        return confirm.run()
+    def confirm(self, message, options, info=None, position=0):
+        self.confirmbox.setconfirmcursor(position)
+        return self.confirmbox.run(message, options, info)
 
     def view_histroy(self):
-        self.confirm("Message history", ["Close"], [m.string for m in self.msg], -1)
+        self.confirm("Message history", ["Close"], self.msg)
 
     def hide(self):
         self.active = False
@@ -115,75 +115,87 @@ class MessageBox(ui.InfoBox):
         self.begx = 0
         self.winattr = look.colors["MessageWindow"]
 
-class Confirm(object):
-    keymap = {}
-    box = ui.InfoBox("Confirm")
-
-    def __init__(self, msg, options, msglist=None):
-        self.msg = msg
-        self.options = options
-        self.cursor = 0
+class ConfirmBox(ui.InfoBox):
+    def __init__(self):
+        ui.InfoBox.__init__(self, "ConfirmBox")
+        self.lb = -1
+        self.options = []
+        self.message = ""
         self.result = None
-        if isinstance(msglist, list):
-            self.box.show([ui.InfoBoxContext(msg) for msg in msglist], -1)
-        self.active = True
-        Confirm.keymap = {
-            "C-f"    : lambda: self.mvcursor(1),
-            "<right>": lambda: self.mvcursor(1),
-            "C-b"    : lambda: self.mvcursor(-1),
-            "<left>" : lambda: self.mvcursor(-1),
-            "C-g"    : lambda: self.hide(),
-            "C-c"    : lambda: self.hide(),
-            "ESC"    : lambda: self.hide(),
-            "RET"    : lambda: self.get_cursor_item(),
-            }
+        self.confirmcursor = 0
+        self.keymap.update({
+            "C-f"    : lambda: self.mvconfirmcursor(1),
+            "<right>": lambda: self.mvconfirmcursor(1),
+            "C-b"    : lambda: self.mvconfirmcursor(-1),
+            "<left>" : lambda: self.mvconfirmcursor(-1),
+            "C-g"    : lambda: self.cancel(),
+            "C-c"    : lambda: self.cancel(),
+            "ESC"    : lambda: self.cancel(),
+            "RET"    : lambda: self.get_confirm_option(),
+            })
 
-    def run(self):
+    def run(self, message, options, info=None):
+        self.message = message
+        self.options = options
+        if info:
+            myinfo = []
+            for item in info:
+                if isinstance(item, ui.InfoBoxContext):
+                    myinfo.append(item)
+                else:
+                    myinfo.append(ui.InfoBoxContext(item))
+            self.show(myinfo)
         viewer = ui.Viewer(self.view)
         controller = ui.Controller(self.input)
-        while self.active:
+        while self.options:
             viewer.view_and_update()
             controller.control()
-        return self.result
+        result = self.result
+        self.result = None
+        return result
 
-    def setcursor(self, x):
-        self.cursor = x
+    def setconfirmcursor(self, x):
+        self.confirmcursor = x
 
-    def mvcursor(self, x):
-        self.cursor += x
+    def mvconfirmcursor(self, x):
+        self.confirmcursor += x
 
-    def get_cursor_item(self):
+    def get_confirm_option(self):
+        self.result = self.options[self.confirmcursor]
+        self.message = ""
+        self.options = []
+        self.confirmcursor = 0
         self.hide()
-        self.result = self.options[self.cursor]
 
-    def hide(self):
-        self.active = False
-        if self.box:
-            self.box.hide()
+    def cancel(self):
+        self.message = ""
+        self.options = []
+        self.confirmcursor = 0
+        self.hide()
 
     def view(self):
-        if self.box:
-            self.box.view()
+        super(self.__class__, self).view()
 
         cmdscr = ui.getwidget("Cmdscr").win
         cmdscr.erase()
         y, x = cmdscr.getmaxyx()
-
         size = len(self.options)
+
         try:
-            cmdscr.addstr(0, 1, self.msg+" ", look.colors["ConfirmMessage"])
+            cmdscr.addstr(0, 1, self.message+" ",
+                          look.colors["ConfirmMessage"])
         except curses.error:
             cmdscr.erase()
             maxwidth = x-2-util.termwidth(" ".join(self.options))
-            cmdscr.addstr(0, 1, util.mbs_ljust(self.msg+" ", maxwidth),
+            cmdscr.addstr(0, 1, util.mbs_ljust(self.message+" ", maxwidth),
                           look.colors["ConfirmMessage"])
 
-        if self.cursor < 0:
-            self.cursor = 0
-        elif self.cursor > size - 1:
-            self.cursor = size - 1
+        if self.confirmcursor < 0:
+            self.confirmcursor = 0
+        elif self.confirmcursor > size - 1:
+            self.confirmcursor = size - 1
         for i, s in enumerate(self.options):
-            if self.cursor == i:
+            if self.confirmcursor == i:
                 try:
                     cmdscr.addstr(s, curses.A_REVERSE)
                     cmdscr.addstr(" ", 0)
@@ -196,9 +208,3 @@ class Confirm(object):
                     pass
         cmdscr.move(y-1, x-1)
         cmdscr.noutrefresh()
-
-    def input(self, key):
-        if self.box:
-            self.box.input(key)
-        if key in self.keymap:
-            self.keymap[key]()
