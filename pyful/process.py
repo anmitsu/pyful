@@ -18,7 +18,6 @@
 
 import curses
 import threading
-import time
 import os
 import re
 from subprocess import Popen, PIPE
@@ -140,8 +139,6 @@ class ProcessViewThread(threading.Thread):
         self.name = name.strip()
 
     def run(self):
-        while self.proc.poll() is None:
-            time.sleep(1)
         out, err = self.proc.communicate()
         if out:
             self.view_output(out)
