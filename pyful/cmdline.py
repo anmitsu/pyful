@@ -520,16 +520,16 @@ class Output(ui.InfoBox):
             string = self.cmdline.string
         cmd = util.expandmacro(string)
         out, err = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).communicate()
-        try:
-            outputs = (out+err).decode()
-        except UnicodeError:
-            outputs = "Invalid encoding error: {0}".format(cmd)
-        if not outputs:
-            return
-        self.cmdline.history.hide()
         info = []
-        outputs = re.sub(r"[\r\t]", "", outputs)
-        info = [ui.InfoBoxContext(item) for item in outputs.splitlines()]
+        for line in (out + err).splitlines():
+            try:
+                line = line.decode()
+                line = re.sub(r"[\r]", "", line).expandtabs()
+                attr = 0
+            except UnicodeError:
+                line = "????? - Invalid encoding"
+                attr = look.colors["ErrorMessage"]
+            info.append(ui.InfoBoxContext(line, attr=attr))
         self.show(info)
 
     def terminal(self):
