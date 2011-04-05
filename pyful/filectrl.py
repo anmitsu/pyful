@@ -771,10 +771,10 @@ class FileJobGenerator(object):
             yield _checkfile(src, dst)
 
     def check_override(self, src, dst):
-        checked = None
         if not os.path.lexists(dst) or \
                 util.unix_basename(src) != util.unix_basename(dst):
-            checked = "Yes"
+            return "Yes"
+        checked = None
         if "Yes(all)" == self.confirm:
             checked = "Yes"
         elif "No(all)" == self.confirm:
