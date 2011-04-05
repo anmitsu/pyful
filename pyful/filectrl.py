@@ -790,8 +790,14 @@ class FileJobGenerator(object):
             dtime = time.strftime("%c", time.localtime(dstat.st_mtime))
             ret = message.confirm(
                 "Override?", ["Yes", "No", "Newer", "Yes(all)", "No(all)", "Newer(all)", "Cancel"],
-                "Source{0}Path: {1}{0}Size: {2}{0}Time: {3}{0}{0}Destination{0}Path: {4}{0}Size: {5}{0}Time: {6}".format(
-                    os.linesep, src, sstat.st_size, stime, dst, dstat.st_size, dtime).splitlines())
+                ["Source",
+                 "Path: {0}".format(src),
+                 "Size: {0}".format(sstat.st_size),
+                 "Time: {0}".format(stime),
+                 "Destination",
+                 "Path: {0}".format(dst),
+                 "Size: {0}".format(dstat.st_size),
+                 "Time: {0}".format(dtime),])
             Filectrl.event.set()
             if ret == "Yes" or ret == "No" or ret == "Cancel":
                 return ret
