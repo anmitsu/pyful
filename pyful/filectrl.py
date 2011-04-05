@@ -771,18 +771,19 @@ class FileJobGenerator(object):
             yield _checkfile(src, dst)
 
     def check_override(self, src, dst):
+        checked = None
         if not os.path.lexists(dst) or \
                 util.unix_basename(src) != util.unix_basename(dst):
-            return "Yes"
+            checked = "Yes"
         if "Yes(all)" == self.confirm:
-            return "Yes"
+            checked = "Yes"
         elif "No(all)" == self.confirm:
-            return "No"
+            checked = "No"
         elif "Newer(all)" == self.confirm:
-            if os.lstat(src).st_mtime < os.lstat(dst).st_mtime:
-                return "No"
+            if os.lstat(src).st_mtime > os.lstat(dst).st_mtime:
+                checked = "Yes"
             else:
-                return "Yes"
+                checked = "No"
         elif "Importunate" == self.confirm:
             Filectrl.event.clear()
             sstat, dstat = os.lstat(src), os.lstat(dst)
@@ -800,17 +801,18 @@ class FileJobGenerator(object):
                  "Time: {0}".format(dtime),])
             Filectrl.event.set()
             if ret == "Yes" or ret == "No" or ret == "Cancel":
-                return ret
+                checked = ret
             elif ret == "Newer":
-                if sstat.st_mtime < dstat.st_mtime:
-                    return "No"
+                if sstat.st_mtime > dstat.st_mtime:
+                    checked = "Yes"
                 else:
-                    return "Yes"
+                    checked = "No"
             elif ret == "Yes(all)" or ret == "No(all)" or ret == "Newer(all)":
                 self.confirm = ret
-                return ret.replace("(all)", "")
+                checked = ret[:-5]
             else:
-                return "Cancel"
+                checked = "Cancel"
+        return checked
 
     def copydirs(self):
         for d in reversed(sorted(self.dircopylist)):
