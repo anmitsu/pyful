@@ -77,7 +77,6 @@ def run():
     pyful = Pyful(os.path.abspath(__file__))
     error = pyful.loadrcfile(options.config)
 
-    pyful.init_function()
     message.puts("Python {0}".format(sys.version))
     rcpath = Pyful.environs["RCFILE"]
     if error:
@@ -87,6 +86,7 @@ def run():
         message.puts("Loaded {0}".format(rcpath))
     message.puts("Welcome to pyful v{0}".format(__version__))
 
+    pyful.init_function()
     ui.resize()
     try:
         pyful.main_loop()
