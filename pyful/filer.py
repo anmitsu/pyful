@@ -17,9 +17,11 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import curses
+import errno
 import fnmatch
 import glob
 import grp
+import json
 import os
 import pwd
 import re
@@ -216,10 +218,12 @@ class Filer(ui.Widget):
         self.workspace.all_reload()
 
     def default_init(self):
+        self.workspaces[:] = []
+        self.cursor = 0
         for i in range(0, 5):
             ws = Workspace(str(i+1))
-            ws.dirs.append(Directory(os.getenv("HOME"), 10, 10, 1, 0))
-            ws.dirs.append(Directory(os.getenv("HOME"), 10, 10, 1, 0))
+            ws.dirs.append(Directory(os.getenv("HOME"), 1, 1, 1, 0))
+            ws.dirs.append(Directory(os.getenv("HOME"), 1, 1, 1, 0))
             self.workspaces.append(ws)
 
     def savefile(self, path):
@@ -228,46 +232,58 @@ class Filer(ui.Widget):
             os.makedirs(os.path.dirname(path))
         except OSError:
             pass
-        lines = ["[workspace size]", str(len(self.workspaces))]
-        for ws in self.workspaces:
-            lines.extend(
-                ["[workspace title]", ws.title,
-                 "[directory size]", str(len(ws.dirs))])
-            for d in ws.dirs:
-                lines.extend(
-                    ["[directory title]", d.path,
-                     "[sort kind]", d.sort_kind])
-        try:
-            with open(path, "w") as f:
-                f.write("\n".join(lines))
-        except IOError:
-            return
+        obj = {}
+        obj["FocusWorkspace"] = self.cursor
+        obj["WorkspacesData"] = [
+            {"title": ws.title,
+             "layout": ws.layout,
+             "focus": ws.cursor,
+             "dirs": [{"path": d.path,
+                       "sort": d.sort_kind,
+                       "cursor": d.cursor,
+                       "scrolltop": d.scrolltop,
+                       } for d in ws.dirs],
+             } for ws in self.workspaces]
+        with open(path, "w") as f:
+            json.dump(obj, f, indent=2)
 
     def loadfile(self, path):
         try:
-            f = open(os.path.expanduser(path), "r")
-            f.readline()
-            self.workspaces = []
-            ws_i = int(f.readline().rstrip(os.linesep))
-            for i in range(0, ws_i):
-                f.readline()
-                title = f.readline().rstrip(os.linesep)
+            path = os.path.expanduser(path)
+            with open(path, "r") as f:
+                obj = json.load(f)
+        except Exception as e:
+            if e[0] != errno.ENOENT:
+                message.exception(e)
+                message.error("InformationLoadError: {0}".format(path))
+            return
+        self.workspaces[:] = []
+        try:
+            self.cursor = obj.get("FocusWorkspace", 0)
+            data = obj.get("WorkspacesData", [])
+            for i, wmap in enumerate(data):
+                title = wmap.get("title", str(i+1))
                 ws = Workspace(title)
-                f.readline()
-                d_i = int(f.readline().rstrip(os.linesep))
-                for j in range(0, d_i):
-                    f.readline()
-                    path = f.readline().rstrip(os.linesep)
-                    d = Directory(path, 10, 10, 1, 0)
-                    f.readline()
-                    d.sort_kind = f.readline().rstrip(os.linesep)
+                ws.layout = wmap.get("layout", "Tile")
+                ws.cursor = wmap.get("focus", 0)
+                if "dirs" not in wmap:
+                    ws.create_dir(os.getenv("HOME"))
+                    ws.create_dir(os.getenv("HOME"))
+                    self.workspaces.append(ws)
+                    continue
+                for dmap in wmap["dirs"]:
+                    path = dmap.get("path", os.getenv("HOME"))
+                    d = Directory(path, 1, 1, 1, 0)
+                    d.sort_kind = dmap.get("sort", "Name[^]")
+                    d.cursor = dmap.get("cursor", 0)
+                    d.scrolltop = dmap.get("scrolltop", 0)
                     ws.dirs.append(d)
                 self.workspaces.append(ws)
-            f.close()
-        except Exception:
-            pass
-        if len(self.workspaces) == 0:
+        except Exception as e:
+            message.exception(e)
             self.default_init()
+        if not 0 <= self.cursor < len(self.workspaces):
+            self.cursor = 0
         self.workspace.resize()
 
 class Workspace(ui.StandardScreen):
