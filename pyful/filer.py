@@ -66,7 +66,7 @@ class Filer(ui.Widget):
         self.workspace.resize()
 
     def view(self):
-        self.titlebar_view()
+        self.view_titlebar()
         self.workspace.view()
 
     def input(self, key):
@@ -144,7 +144,7 @@ class Filer(ui.Widget):
     def swap_workspace_dec(self):
         self.swap_workspace(-1)
 
-    def titlebar_view(self):
+    def view_titlebar(self):
         self.titlebar.erase()
         self.titlebar.move(0, 0)
         length = sum([util.termwidth(w.title)+2 for w in self.workspaces])
