@@ -1168,21 +1168,32 @@ class Directory(ui.StandardScreen):
 class PathHistory(object):
     maxsave = 20
 
+    class Data(object):
+        def __init__(self, path):
+            self.path = path
+            self.cursor = 0
+            self.scrolltop = 0
+
     def __init__(self, directory):
         self.dir = directory
-        self.history = [self.dir.path]
+        self.history = [self.Data(self.dir.path)]
         self.pos = 0
         self.updateflag = True
 
     def update(self, path):
-        if not self.updateflag or path == self.history[self.pos]:
+        if not self.updateflag or path == self.history[self.pos].path:
             return
+        self._cursorupdate()
         self.history = self.history[:self.pos+1]
-        self.history.append(path)
+        self.history.append(self.Data(path))
         self.pos = len(self.history) - 1
         if self.maxsave < len(self.history):
             self.history = self.history[1:]
             self.pos = len(self.history) - 1
+
+    def _cursorupdate(self):
+        self.history[self.pos].cursor = self.dir.cursor
+        self.history[self.pos].scrolltop = self.dir.scrolltop
 
     def forward(self):
         self.mvhistory(1)
@@ -1191,12 +1202,17 @@ class PathHistory(object):
         self.mvhistory(-1)
 
     def mvhistory(self, x):
+        self._cursorupdate()
         self.mvpos(x)
-        path = self.history[self.pos]
+        path = self.history[self.pos].path
+        cursor = self.history[self.pos].cursor
+        scrolltop = self.history[self.pos].scrolltop
         if self.dir.path == path:
             return
         self.updateflag = False
         self.dir.chdir(path)
+        self.dir.setcursor(cursor)
+        self.dir.scrolltop = scrolltop
         self.updateflag = True
 
     def mvpos(self, x):
