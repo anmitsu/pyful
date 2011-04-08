@@ -209,6 +209,12 @@ def path_omission(path, width):
                 break
     return path
 
+def replhome(path):
+    homedir = os.getenv("HOME")
+    if path.startswith(homedir):
+        path = path.replace(homedir, "~", 1)
+    return path
+
 # ----------------------------------------------------------------------
 # Functions for multibyte string on terminal:
 def termwidth(string, length=None):

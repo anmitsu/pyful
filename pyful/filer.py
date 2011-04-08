@@ -171,9 +171,7 @@ class Filer(ui.Widget):
         for i, path in enumerate([d.path for d in self.workspace.dirs]):
             num = "[{0}] ".format(i+1)
             numlen = len(num)
-            homedir = os.getenv("HOME")
-            if path.startswith(homedir):
-                path = path.replace(homedir, "~", 1)
+            path = util.replhome(path)
             if path.endswith(os.sep):
                 path = util.path_omission(path, width-numlen-1)
             else:
@@ -1090,13 +1088,9 @@ class Directory(ui.StandardScreen):
         if self.maskreg:
             title += "{{{0}}}".format(self.maskreg.pattern)
             titlewidth -= util.termwidth(self.maskreg.pattern)
-        homedir = os.getenv("HOME")
-        if self.path.startswith(homedir):
-            path = self.path.replace(homedir, "~", 1)
-        else:
-            path = self.path
+        path = util.replhome(self.path)
         path = util.path_omission(path, titlewidth)
-        self.win.addstr(0, 2, "".join([path, title]), look.colors["DirectoryPath"])
+        self.win.addstr(0, 2, path+title, look.colors["DirectoryPath"])
 
     def _view_statusbar(self, focus, size, height):
         self.statwin.erase()
