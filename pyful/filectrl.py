@@ -675,10 +675,7 @@ class CopyThread(JobThread):
     def __init__(self, src, dst):
         JobThread.__init__(self)
         self.view_thread("Copy starting...")
-        if dst.endswith(os.sep):
-            self.dst = util.abspath(dst) + os.sep
-        else:
-            self.dst = util.abspath(dst)
+        self.dst = util.abspath(dst)
         if isinstance(src, list):
             self.title = "Copy: mark files -> {0}".format(self.dst)
             self.src = [util.abspath(f) for f in src]
@@ -708,10 +705,7 @@ class MoveThread(JobThread):
     def __init__(self, src, dst):
         JobThread.__init__(self)
         self.view_thread("Move starting...")
-        if dst.endswith(os.sep):
-            self.dst = util.abspath(dst) + os.sep
-        else:
-            self.dst = util.abspath(dst)
+        self.dst = util.abspath(dst)
         if isinstance(src, list):
             self.title = "Move: mark files -> {0}".format(self.dst)
             self.src = [util.abspath(f) for f in src]
@@ -766,8 +760,7 @@ class FileJobGenerator(object):
                 else:
                     yield _checkfile(ssub, dsub)
 
-        if dst.endswith(os.sep) or os.path.isdir(dst):
-            dst = os.path.join(dst, util.unix_basename(src))
+        dst = os.path.join(dst, util.unix_basename(src))
         if os.path.isdir(src) and not os.path.islink(src):
             for checked in _checkdir(src, dst):
                 yield checked
