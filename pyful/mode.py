@@ -247,13 +247,14 @@ class Copy(Mode):
             return "Copy:"
 
     def complete(self, comp):
-        return comp.comp_files()
+        if ui.getwidget("Filer").dir.ismark() or self.src:
+            return comp.comp_dirs()
+        else:
+            return comp.comp_files()
 
     def execute(self, path, action):
         filer = ui.getwidget("Filer")
         if filer.dir.ismark():
-            if not path.endswith(os.sep) and not os.path.isdir(path):
-                return message.error("{0} - {1}".format(os.strerror(errno.ENOTDIR), path))
             filectrl.copy(filer.dir.get_mark_files(), path)
         elif self.src is None:
             if not path:
@@ -511,13 +512,14 @@ class Move(Mode):
             return "Move:"
 
     def complete(self, comp):
-        return comp.comp_files()
+        if ui.getwidget("Filer").dir.ismark() or self.src:
+            return comp.comp_dirs()
+        else:
+            return comp.comp_files()
 
     def execute(self, path, action):
         filer = ui.getwidget("Filer")
         if filer.dir.ismark():
-            if not path.endswith(os.sep) and not os.path.isdir(path):
-                return message.error("{0} - {1}".format(os.strerror(errno.ENOTDIR), path))
             filectrl.move(filer.dir.get_mark_files(), path)
         elif self.src is None:
             if not path:
