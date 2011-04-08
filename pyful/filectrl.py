@@ -256,15 +256,12 @@ class Filectrl(object):
         self.threads.append(thread)
         self.event.set()
         thread.start()
+        if len(self.threads) > 1:
+            return
         subloop = Subloop()
-        while thread.isAlive():
+        while len(self.threads):
             self.event.wait()
             subloop.run()
-        if thread.error:
-            message.exception(thread.error)
-        else:
-            message.puts("Thread finished: {0}".format(thread.title))
-        self.threads.remove(thread)
         ui.getwidget("Filer").workspace.all_reload()
 
     def delete(self, path):
@@ -317,12 +314,20 @@ class JobThread(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
         self.setDaemon(True)
-        self.error = 0
         self.active = True
         self.title = self.__class__.__name__
 
-    def run(self):
+    def main(self):
         pass
+
+    def run(self):
+        try:
+            self.main()
+            message.puts("Finished: {0}".format(self.title))
+        except FilectrlCancel as e:
+            message.exception(e)
+        finally:
+            Filectrl.threads.remove(self)
 
     def kill(self):
         self.view_thread("Waiting...")
@@ -353,7 +358,7 @@ class TarThread(JobThread):
         self.tarmode = tarmode
         self.wrap = wrap
 
-    def run(self):
+    def main(self):
         try:
             unicode
             self.dst = self.dst.encode()
@@ -374,12 +379,10 @@ class TarThread(JobThread):
                     self.view_thread("Adding({0}/{1}): {2}".format(elapse, goal, arcname))
                     self.add_file(tar, f, arcname)
                     elapse += 1
-        except FilectrlCancel as e:
-            self.error = e
         finally:
             tar.close()
         try:
-            if not self.error and len(self.src) == 1:
+            if len(self.src) == 1:
                 lst = os.lstat(self.src[0])
                 os.utime(self.dst, (lst.st_mtime, lst.st_mtime))
         except Exception as e:
@@ -418,18 +421,14 @@ class UntarThread(JobThread):
         self.dstdir = util.abspath(dstdir)
         self.dirlist = []
 
-    def run(self):
+    def main(self):
         if not os.path.exists(self.dstdir):
             try:
                 os.makedirs(self.dstdir)
             except OSError as e:
-                self.error = e
-                return
-        try:
-            for tarpath in self.src:
-                self.extract(tarpath)
-        except FilectrlCancel as e:
-            self.error = e
+                return message.exception(e)
+        for tarpath in self.src:
+            self.extract(tarpath)
 
     def extract(self, source):
         mode = self.tarmodes.get(util.extname(source), "gz")
@@ -467,18 +466,14 @@ class UnzipThread(JobThread):
         self.dstdir = util.abspath(dstdir)
         self.dirlist = []
 
-    def run(self):
+    def main(self):
         if not os.path.exists(self.dstdir):
             try:
                 os.makedirs(self.dstdir)
             except OSError as e:
-                self.error = e
-                return
-        try:
-            for zippath in self.src:
-                self.extract(zippath)
-        except FilectrlCancel as e:
-            self.error = e
+                return message.exception(e)
+        for zippath in self.src:
+            self.extract(zippath)
 
     def extract(self, zippath):
         try:
@@ -557,14 +552,13 @@ class ZipThread(JobThread):
             self.src_dirname = util.unix_dirname(self.src[0]) + os.sep
         self.wrap = wrap
 
-    def run(self):
+    def main(self):
         try:
             mode = self.get_mode()
             import zipfile
             myzip = zipfile.ZipFile(self.dst, mode, compression=zipfile.ZIP_DEFLATED)
         except Exception as e:
-            self.error = e
-            return
+            return message.exception(e)
         try:
             goal = sum(_get_file_length(self.src))
             elapse = 1
@@ -574,12 +568,10 @@ class ZipThread(JobThread):
                     self.view_thread("Adding({0}/{1}): {2}".format(elapse, goal, arcname))
                     self.write_file(myzip, f, arcname)
                     elapse += 1
-        except FilectrlCancel as e:
-            self.error = e
         finally:
             myzip.close()
 
-        if not self.error and len(self.src) == 1:
+        if len(self.src) == 1:
             try:
                 lst = os.lstat(self.src[0])
                 os.utime(self.dst, (lst.st_mtime, lst.st_mtime))
@@ -631,18 +623,15 @@ class DeleteThread(JobThread):
             self.path = [path]
         self.dirlist = []
 
-    def run(self):
+    def main(self):
         goal = _get_file_length(self.path)[0]
         elapse = 1
-        try:
-            for path in self.path:
-                for f in self.generate(path):
-                    self.view_thread("Deleting({0}/{1}): {2}".format(elapse, goal, util.unix_basename(f)))
-                    self.delete_file(f)
-                    elapse += 1
-            self.delete_dirs()
-        except FilectrlCancel as e:
-            self.error = e
+        for path in self.path:
+            for f in self.generate(path):
+                self.view_thread("Deleting({0}/{1}): {2}".format(elapse, goal, util.unix_basename(f)))
+                self.delete_file(f)
+                elapse += 1
+        self.delete_dirs()
 
     def delete_file(self, f):
         try:
@@ -684,7 +673,7 @@ class CopyThread(JobThread):
             self.title = "Copy: {0} -> {1}".format(src, self.dst)
             self.src = [src]
 
-    def run(self):
+    def main(self):
         goal = _get_file_length(self.src)[0]
         fjg = FileJobGenerator()
         elapse = 1
@@ -697,9 +686,8 @@ class CopyThread(JobThread):
                         self.view_thread("Coping({0}/{1}): {2}".format(elapse, goal, util.unix_basename(job.src)))
                         job.copy()
                     elapse += 1
-        except FilectrlCancel as e:
-            self.error = e
-        fjg.copydirs()
+        finally:
+            fjg.copydirs()
 
 class MoveThread(JobThread):
     def __init__(self, src, dst):
@@ -714,7 +702,7 @@ class MoveThread(JobThread):
             self.title = "Move: {0} -> {1}".format(src, self.dst)
             self.src = [src]
 
-    def run(self):
+    def main(self):
         goal = _get_file_length(self.src)[0]
         fjg = FileJobGenerator()
         elapse = 1
@@ -727,10 +715,9 @@ class MoveThread(JobThread):
                         self.view_thread("Moving({0}/{1}): {2}".format(elapse, goal, util.unix_basename(job.src)))
                         job.move()
                     elapse += 1
-        except FilectrlCancel as e:
-            self.error = e
-        fjg.copydirs()
-        fjg.removedirs()
+        finally:
+            fjg.copydirs()
+            fjg.removedirs()
 
 class FileJobGenerator(object):
     def __init__(self):
