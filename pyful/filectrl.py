@@ -626,8 +626,9 @@ class DeleteThread(JobThread):
             self.title = "Delete: mark files"
             self.path = [util.abspath(f) for f in path]
         else:
+            path = util.abspath(path)
             self.title = "Delete: {0}".format(path)
-            self.path = [util.abspath(path)]
+            self.path = [path]
         self.dirlist = []
 
     def run(self):
@@ -674,16 +675,17 @@ class CopyThread(JobThread):
     def __init__(self, src, dst):
         JobThread.__init__(self)
         self.view_thread("Copy starting...")
-        if isinstance(src, list):
-            self.title = "Copy: mark files -> {0}".format(dst)
-            self.src = [util.abspath(f) for f in src]
-        else:
-            self.title = "Copy: {0} -> {1}".format(src, dst)
-            self.src = [util.abspath(src)]
         if dst.endswith(os.sep):
             self.dst = util.abspath(dst) + os.sep
         else:
             self.dst = util.abspath(dst)
+        if isinstance(src, list):
+            self.title = "Copy: mark files -> {0}".format(self.dst)
+            self.src = [util.abspath(f) for f in src]
+        else:
+            src = util.abspath(src)
+            self.title = "Copy: {0} -> {1}".format(src, self.dst)
+            self.src = [src]
 
     def run(self):
         goal = _get_file_length(self.src)[0]
@@ -706,16 +708,17 @@ class MoveThread(JobThread):
     def __init__(self, src, dst):
         JobThread.__init__(self)
         self.view_thread("Move starting...")
-        if isinstance(src, list):
-            self.title = "Move: mark files -> {0}".format(dst)
-            self.src = [util.abspath(f) for f in src]
-        else:
-            self.title = "Move: {0} -> {1}".format(src, dst)
-            self.src = [util.abspath(src)]
         if dst.endswith(os.sep):
             self.dst = util.abspath(dst) + os.sep
         else:
             self.dst = util.abspath(dst)
+        if isinstance(src, list):
+            self.title = "Move: mark files -> {0}".format(self.dst)
+            self.src = [util.abspath(f) for f in src]
+        else:
+            src = util.abspath(src)
+            self.title = "Move: {0} -> {1}".format(src, self.dst)
+            self.src = [src]
 
     def run(self):
         goal = _get_file_length(self.src)[0]
