@@ -771,25 +771,28 @@ class Directory(ui.StandardScreen):
             self.chdir(Workspace.default_path)
 
     def chdir(self, path):
+        parpath = util.unix_dirname(self.path)
+        parfile = util.unix_basename(self.path)
+        newpath = util.abspath(util.expanduser(path), self.path)
+        if newpath == self.path:
+            return
+
         self.list = None
         self.list_title = None
         if self.finder.active:
             self.finder.finish()
         self.mark_clear()
 
-        parent_path = util.unix_dirname(self.path)
-        parent_fname = util.unix_basename(self.path)
-        path = util.abspath(util.expanduser(path), self.path)
         try:
-            os.chdir(path)
+            os.chdir(newpath)
         except Exception as e:
             return message.exception(e)
-        self.history.update(path)
-        self.path = path
+        self.history.update(newpath)
+        self.path = newpath
         self.diskread()
         self.sort()
-        if self.path == parent_path:
-            self.setcursor(self.get_index(parent_fname))
+        if self.path == parpath:
+            self.setcursor(self.get_index(parfile))
         else:
             self.setcursor(0)
 
