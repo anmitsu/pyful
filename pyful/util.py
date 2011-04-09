@@ -231,20 +231,19 @@ def termwidth(string, length=None):
 def mbs_ljust(string, length, pad=" "):
     string = U(string)
     width = 0
-    cut = False
     for i, c in enumerate(string):
-        if length-1 <= width:
-            string = string[0:i-1]
-            cut = True
+        if length <= width:
+            if length < width:
+                string = string[0:i-1]
+                width = length - 1
+            else:
+                string = string[0:i]
             break
         if unicodedata.east_asian_width(c) in "WF":
             width += 2
         else:
             width += 1
-    if cut:
-        space = length - termwidth(string)
-    else:
-        space = length - width
+    space = length - width
     if space > 0:
         string += pad * space
     return string
@@ -252,20 +251,19 @@ def mbs_ljust(string, length, pad=" "):
 def mbs_rjust(string, length, pad=" "):
     string = U(string)
     width = 0
-    cut = False
     for i, c in enumerate(reversed(string)):
-        if length-1 <= width:
-            string = string[len(string)-i:]
-            cut = True
+        if length <= width:
+            if length < width:
+                string = string[len(string)-i+1:]
+                width = length - 1
+            else:
+                string = string[len(string)-i:]
             break
         if unicodedata.east_asian_width(c) in "WF":
             width += 2
         else:
             width += 1
-    if cut:
-        space = length - termwidth(string)
-    else:
-        space = length - width
+    space = length - width
     if space > 0:
         string += pad * space
     return string
