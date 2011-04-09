@@ -1139,8 +1139,6 @@ class Directory(ui.StandardScreen):
         self._view_titlebar(width)
         self._fix_position(size, height)
 
-        if width < 30:
-            return message.error("terminal size very small")
         line = 0
         for i in range(self.scrolltop, size):
             line += 1
@@ -1390,7 +1388,11 @@ class FileStat(object):
         if self.view_file_string is None:
             fname = self.get_file_name(path)
             fstat = self.get_file_stat()
-            fname = util.mbs_ljust(fname, width-util.termwidth(fstat))
+            namewidth = width - util.termwidth(fstat)
+            if namewidth <= 0:
+                namewidth = 0
+                fstat = util.mbs_ljust(fstat, width)
+            fname = util.mbs_ljust(fname, namewidth)
             self.view_file_string = fname + fstat
         return self.view_file_string
 
