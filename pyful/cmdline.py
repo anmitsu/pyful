@@ -206,7 +206,7 @@ class Cmdline(ui.Widget):
                     if self.cursor <= util.mbslen(string):
                         return ("", pages[i], curpos)
             else:
-                cmd = util.mbs_ljust(self.string, maxx-promptlen+1, pad="")
+                cmd = util.mbs_ljust(self.string, maxx-promptlen, pad="")
                 curpos = realcurpos+promptlen
                 return (prompt, cmd, curpos)
         else:
