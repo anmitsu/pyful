@@ -68,8 +68,14 @@ class Filer(ui.Widget):
         self.workspace.resize()
 
     def view(self):
-        self.view_titlebar()
-        self.workspace.view()
+        try:
+            self.view_titlebar()
+        except curses.error:
+            self.titlebar.noutrefresh()
+        try:
+            self.workspace.view()
+        except curses.error:
+            pass
 
     def input(self, key):
         self.dir.input(key)
@@ -151,8 +157,6 @@ class Filer(ui.Widget):
         self.titlebar.move(0, 0)
         length = sum([util.termwidth(w.title)+2 for w in self.workspaces])
         y, x = self.stdscr.getmaxyx()
-        if x-length < 5:
-            return message.error("terminal size very small")
 
         for i, ws in enumerate(self.workspaces):
             if self.cursor == i:
@@ -164,9 +168,6 @@ class Filer(ui.Widget):
         dirlen = len(self.workspace.dirs)
         width = (x-length-4) // dirlen
         odd = (x-length-4) % dirlen
-        if width < 5:
-            self.titlebar.noutrefresh()
-            return message.error("terminal size very small")
 
         for i, path in enumerate([d.path for d in self.workspace.dirs]):
             num = "[{0}] ".format(i+1)
@@ -1313,10 +1314,7 @@ class Finder(object):
             self.dir.statwin.addstr(0, 1, " Finder(migemo): ", look.colors["Finder"])
         else:
             self.dir.statwin.addstr(0, 1, " Finder: ", look.colors["Finder"])
-        try:
-            self.dir.statwin.addstr(" " + self.string)
-        except curses.error:
-            message.error("Warning: status window very small")
+        self.dir.statwin.addstr(" " + self.string)
         self.dir.statwin.noutrefresh()
 
 class InvalidEncodingError(Exception):
