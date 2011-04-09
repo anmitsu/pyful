@@ -511,12 +511,16 @@ class UnzipThread(JobThread):
             if not os.path.exists(dirpath):
                 os.makedirs(dirpath)
             source = myzip.open(fname)
-            target = open(path, "wb")
-            self.view_thread("Inflating: {0}".format(ufname))
-            shutil.copyfileobj(source, target)
-            source.close()
-            target.close()
-            self.copy_external_attr(myzip, fname)
+            try:
+                target = open(path, "wb")
+                self.view_thread("Inflating: {0}".format(ufname))
+                shutil.copyfileobj(source, target)
+                source.close()
+                target.close()
+                self.copy_external_attr(myzip, fname)
+            except IOError as e:
+                if e[0] == errno.EISDIR:
+                    self.dirlist.append(fname)
 
     def copy_external_attr(self, myzip, path):
         try:
