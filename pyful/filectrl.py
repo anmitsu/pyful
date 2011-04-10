@@ -228,6 +228,7 @@ class Subloop(object):
                 if not filer.finder.active:
                     message.view()
                 self.subthreads_view()
+        self.confirmbox = ui.getwidget("ConfirmBox")
         self.viewer = ui.Viewer(viewf)
         self.controller = ui.Controller(inputf)
         self.stdscr = ui.StandardScreen.stdscr
@@ -240,27 +241,25 @@ class Subloop(object):
         cmdscr.noutrefresh()
 
     def run(self):
-        self.stdscr.timeout(100)
-        self.viewer.view_and_update()
-        self.controller.control()
-        self.stdscr.timeout(-1)
+        with self.confirmbox.rlock:
+            self.stdscr.timeout(100)
+            self.viewer.view_and_update()
+            self.controller.control()
+            self.stdscr.timeout(-1)
 
 class FilectrlCancel(Exception):
     pass
 
 class Filectrl(object):
     threads = []
-    event = threading.Event()
 
     def thread_loop(self, thread):
         self.threads.append(thread)
-        self.event.set()
         thread.start()
         if len(self.threads) > 1:
             return
         subloop = Subloop()
         while len(self.threads):
-            self.event.wait()
             subloop.run()
         ui.getwidget("Filer").workspace.all_reload()
 
@@ -584,10 +583,8 @@ class ZipThread(JobThread):
 
     def get_mode(self):
         if os.path.exists(self.dst):
-            Filectrl.event.clear()
             ret = message.confirm("Zip file exist - {0}:".format(self.dst),
                                   ["Add", "Override", "Cancel"])
-            Filectrl.event.set()
             if ret == "Add":
                 return "a"
             elif ret == "Override":
@@ -773,7 +770,6 @@ class FileJobGenerator(object):
             else:
                 checked = "No"
         elif "Importunate" == self.confirm:
-            Filectrl.event.clear()
             sstat, dstat = os.lstat(src), os.lstat(dst)
             stime = time.strftime("%c", time.localtime(sstat.st_mtime))
             dtime = time.strftime("%c", time.localtime(dstat.st_mtime))
@@ -787,7 +783,6 @@ class FileJobGenerator(object):
                  "Path: {0}".format(dst),
                  "Size: {0}".format(dstat.st_size),
                  "Time: {0}".format(dtime),])
-            Filectrl.event.set()
             if ret == "Yes" or ret == "No" or ret == "Cancel":
                 checked = ret
             elif ret == "Newer":

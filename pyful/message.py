@@ -18,7 +18,7 @@
 
 import curses
 import re
-from threading import Timer
+import threading
 
 from pyful import look
 from pyful import ui
@@ -45,6 +45,7 @@ def viewhistroy():
 
 class Message(ui.Widget):
     maxsave = 100
+    rlock = threading.RLock()
 
     def __init__(self):
         ui.Widget.__init__(self, "Message")
@@ -56,7 +57,7 @@ class Message(ui.Widget):
     def start_timer(self, timex):
         if self.timer:
             self.timer.cancel()
-        self.timer = Timer(timex, self.hide)
+        self.timer = threading.Timer(timex, self.hide)
         self.timer.setDaemon(True)
         self.timer.start()
 
@@ -82,19 +83,23 @@ class Message(ui.Widget):
         self.error("{0}: {1}".format(except_cls.__class__.__name__, except_cls))
 
     def confirm(self, message, options, info=None, position=0):
-        self.confirmbox.setconfirmcursor(position)
-        return self.confirmbox.run(message, options, info)
+        with self.confirmbox.rlock:
+            self.confirmbox.setconfirmcursor(position)
+            ret = self.confirmbox.run(message, options, info)
+        return ret
 
     def view_histroy(self):
         self.confirm("Message history", ["Close"], self.messages)
 
     def hide(self):
-        self.active = False
-        self.messagebox.hide()
+        with self.rlock:
+            self.active = False
+            self.messagebox.hide()
 
     def view(self):
-        self.messagebox.show(self.messages)
-        self.messagebox.view()
+        with self.rlock:
+            self.messagebox.show(self.messages)
+            self.messagebox.view()
 
 class MessageBox(ui.InfoBox):
     height = 4
@@ -114,6 +119,8 @@ class MessageBox(ui.InfoBox):
         self.winattr = look.colors["MessageWindow"]
 
 class ConfirmBox(ui.InfoBox):
+    rlock = threading.RLock()
+
     def __init__(self):
         ui.InfoBox.__init__(self, "ConfirmBox")
         self.lb = -1
