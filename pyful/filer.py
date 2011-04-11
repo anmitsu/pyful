@@ -1092,7 +1092,7 @@ class Directory(ui.StandardScreen):
         path = util.path_omission(path, titlewidth)
         self.win.addstr(0, 2, path+title, look.colors["DirectoryPath"])
 
-    def _view_statusbar(self, focus, size, height):
+    def _view_statusbar(self, size, height):
         try:
             p = float(self.scrolltop)/float(size-height)*100
         except ZeroDivisionError:
@@ -1144,7 +1144,7 @@ class Directory(ui.StandardScreen):
                 self.win.addstr(line, 1, "*"+fstr, attr)
             else:
                 self.win.addstr(line, 1, " "+fstr, attr)
-        self._view_statusbar(focus, size, height)
+        self._view_statusbar(size, height)
         self.win.noutrefresh()
 
         if focus:
