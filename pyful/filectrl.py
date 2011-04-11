@@ -29,6 +29,7 @@ import errno
 from pyful import message
 from pyful import ui
 from pyful import util
+from pyful import widget
 
 def chmod(path, mode):
     try:
@@ -104,7 +105,7 @@ def rename(src, dst):
         message.exception(e)
 
 def replace(pattern, repstr):
-    filer = ui.getwidget("Filer")
+    filer = widget.get("Filer")
     files = filer.dir.get_mark_files()
     renamed = [pattern.sub(r""+repstr, f) for f in files]
     msg = []
@@ -202,11 +203,11 @@ def _get_file_length(paths):
 
 class Subloop(object):
     def __init__(self):
-        cmdline = ui.getwidget("Cmdline")
-        filer = ui.getwidget("Filer")
-        menu = ui.getwidget("Menu")
-        message = ui.getwidget("Message")
-        helper = ui.getwidget("Help")
+        cmdline = widget.get("Cmdline")
+        filer = widget.get("Filer")
+        menu = widget.get("Menu")
+        message = widget.get("Message")
+        helper = widget.get("Help")
         def inputf(key):
             if cmdline.is_active:
                 cmdline.input(key)
@@ -228,13 +229,13 @@ class Subloop(object):
                 if not filer.finder.active:
                     message.view()
                 self.subthreads_view()
-        self.confirmbox = ui.getwidget("ConfirmBox")
+        self.confirmbox = widget.get("ConfirmBox")
         self.viewer = ui.Viewer(viewf)
         self.controller = ui.Controller(inputf)
-        self.stdscr = ui.StandardScreen.stdscr
+        self.stdscr = widget.base.StandardScreen.stdscr
 
     def subthreads_view(self):
-        navbar = ui.getwidget("Filer").navigationbar
+        navbar = widget.get("Filer").navigationbar
         y, x = navbar.getmaxyx()
         string = " | ".join("[{0}] {1}".format(i+1, t.title) for i, t in enumerate(Filectrl.threads))
         navbar.addstr(0, 1, util.mbs_ljust(string, x-2), curses.A_BOLD)
@@ -261,7 +262,7 @@ class Filectrl(object):
         subloop = Subloop()
         while len(self.threads):
             subloop.run()
-        ui.getwidget("Filer").workspace.all_reload()
+        widget.get("Filer").workspace.all_reload()
 
     def delete(self, path):
         thread = DeleteThread(path)

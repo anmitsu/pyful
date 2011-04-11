@@ -16,12 +16,10 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import curses
 import keyword
 import os
 import re
 import subprocess
-import unicodedata
 
 from pyful import Pyful
 from pyful import completion
@@ -29,12 +27,12 @@ from pyful import look
 from pyful import mode
 from pyful import message
 from pyful import process
-from pyful import ui
 from pyful import util
+from pyful import widget
 
-class Cmdline(ui.TextBox):
+class Cmdline(widget.textbox.TextBox):
     def __init__(self):
-        ui.TextBox.__init__(self, "Cmdline")
+        widget.textbox.TextBox.__init__(self, "Cmdline")
         self.mode = None
         self.history = History(self)
         self.clipboard = Clipboard(self)
@@ -174,12 +172,12 @@ class Cmdline(ui.TextBox):
                 attr = look.colors["CmdlinePythonFunction"]
             win.addstr(s, attr)
 
-class History(ui.InfoBox):
+class History(widget.infobox.InfoBox):
     maxsave = 10000
     histories = {}
 
     def __init__(self, cmdline):
-        ui.InfoBox.__init__(self, "History")
+        widget.infobox.InfoBox.__init__(self, "History")
         self.cmdline = cmdline
         self.source_string = self.cmdline.text
         self.lb = -1
@@ -240,7 +238,7 @@ class History(ui.InfoBox):
     def start(self):
         self.source_string = self.cmdline.text
         t = self.cmdline.text
-        info = [ui.InfoBoxContext(item, histr=t) for item in self.gethistory() if t in item]
+        info = [widget.infobox.Context(item, histr=t) for item in self.gethistory() if t in item]
         info.reverse()
         if info:
             self.show(info)
@@ -258,12 +256,12 @@ class History(ui.InfoBox):
             if item:
                 self.cmdline.settext(item.string)
 
-class Clipboard(ui.InfoBox):
+class Clipboard(widget.infobox.InfoBox):
     maxsave = 100
     clip = []
 
     def __init__(self, cmdline):
-        ui.InfoBox.__init__(self, "Clipboard")
+        widget.infobox.InfoBox.__init__(self, "Clipboard")
         self.cmdline = cmdline
 
     def loadfile(self, path):
@@ -327,7 +325,7 @@ class Clipboard(ui.InfoBox):
             self.cmdline.input(key)
 
     def start(self):
-        info = [ui.InfoBoxContext(item) for item in self.clip]
+        info = [widget.infobox.Context(item) for item in self.clip]
         info.reverse()
         if info:
             self.cmdline.history.hide()
@@ -339,9 +337,9 @@ class Clipboard(ui.InfoBox):
         self.hide()
         self.cmdline.history.start()
 
-class Output(ui.InfoBox):
+class Output(widget.infobox.InfoBox):
     def __init__(self, cmdline):
-        ui.InfoBox.__init__(self, "Output")
+        widget.infobox.InfoBox.__init__(self, "Output")
         self.cmdline = cmdline
 
     def edit(self):
@@ -369,7 +367,7 @@ class Output(ui.InfoBox):
             except UnicodeError:
                 line = "????? - Invalid encoding"
                 attr = look.colors["ErrorMessage"]
-            info.append(ui.InfoBoxContext(line, attr=attr))
+            info.append(widget.infobox.Context(line, attr=attr))
         self.show(info)
 
     def terminal(self):

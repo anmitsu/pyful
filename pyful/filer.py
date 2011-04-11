@@ -30,12 +30,12 @@ import time
 
 from pyful import look
 from pyful import message
-from pyful import ui
 from pyful import util
+from pyful import widget
 
-class Filer(ui.Widget):
+class Filer(widget.base.Widget):
     def __init__(self):
-        ui.Widget.__init__(self, "Filer")
+        widget.base.Widget.__init__(self, "Filer")
         y, x = self.stdscr.getmaxyx()
         self.titlebar = curses.newwin(1, x, 0, 0)
         self.navigationbar = curses.newwin(2, x, y-2, 0)
@@ -287,7 +287,7 @@ class Filer(ui.Widget):
             self.cursor = 0
         self.workspace.resize()
 
-class Workspace(ui.StandardScreen):
+class Workspace(widget.base.StandardScreen):
     default_path = os.getenv("HOME")
     layout = "Tile"
 
@@ -572,7 +572,7 @@ class Workspace(ui.StandardScreen):
                     d.view(False)
             self.dir.view(True)
 
-class Directory(ui.StandardScreen):
+class Directory(widget.base.StandardScreen):
     sort_kind = "Name[^]"
     scroll_type = "HalfScroll"
     statusbar_format = " [{MARK}/{FILE}] {MARKSIZE}bytes {SCROLL}({CURSOR}) {SORT} "
@@ -1211,7 +1211,7 @@ class PathHistory(object):
         elif self.pos >= len(self.history):
             self.pos = len(self.history) - 1
 
-class Finder(ui.TextBox):
+class Finder(widget.textbox.TextBox):
     keymap = {}
     smartcase = True
     migemo = None
@@ -1237,7 +1237,7 @@ class Finder(ui.TextBox):
             return self.history[self.pos]
 
     def __init__(self, directory):
-        ui.TextBox.__init__(self, "Finder", register=False)
+        widget.textbox.TextBox.__init__(self, "Finder", register=False)
         self.dir = directory
         self.results = []
         self.cache = []
@@ -1536,7 +1536,7 @@ class FileStat(object):
             self.name = ""
 
     def view(self):
-        navbar = ui.getwidget("Filer").navigationbar
+        navbar = widget.get("Filer").navigationbar
         navbar.erase()
         perm = self.get_permission()
         user = self.get_user_name()

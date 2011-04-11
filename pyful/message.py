@@ -22,33 +22,33 @@ import threading
 
 from pyful import look
 from pyful import ui
-from pyful import util
+from pyful import widget
 
 def puts(string, timex=3):
-    ui.getwidget("Message").puts(string, timex)
+    widget.get("Message").puts(string, timex)
 
 def error(string, timex=3):
-    ui.getwidget("Message").error(string, timex)
+    widget.get("Message").error(string, timex)
 
 def exception(except_cls):
-    ui.getwidget("Message").exception(except_cls)
+    widget.get("Message").exception(except_cls)
 
 def confirm(message, options, info=None, position=0):
-    return ui.getwidget("Message").confirm(message, options, info, position)
+    return widget.get("Message").confirm(message, options, info, position)
 
 def forceview():
-    ui.getwidget("Message").view()
+    widget.get("Message").view()
     curses.doupdate()
 
 def viewhistroy():
-    ui.getwidget("Message").view_histroy()
+    widget.get("Message").view_histroy()
 
-class Message(ui.Widget):
+class Message(widget.base.Widget):
     maxsave = 100
     rlock = threading.RLock()
 
     def __init__(self):
-        ui.Widget.__init__(self, "Message")
+        widget.base.Widget.__init__(self, "Message")
         self.messages = []
         self.timer = None
         self.messagebox = MessageBox()
@@ -64,7 +64,7 @@ class Message(ui.Widget):
     def puts(self, string, timex=3):
         self.active = True
         string = re.sub(r"[\n\r]", "", string).expandtabs()
-        self.messages.insert(0, ui.InfoBoxContext(string, attr=look.colors["PutsMessage"]))
+        self.messages.insert(0, widget.infobox.Context(string, attr=look.colors["PutsMessage"]))
         if self.maxsave < len(self.messages):
             self.messages.pop()
         if timex:
@@ -73,7 +73,7 @@ class Message(ui.Widget):
     def error(self, string, timex=3):
         self.active = True
         string = re.sub(r"[\n\r]", "", string).expandtabs()
-        self.messages.insert(0, ui.InfoBoxContext(string, attr=look.colors["ErrorMessage"]))
+        self.messages.insert(0, widget.infobox.Context(string, attr=look.colors["ErrorMessage"]))
         if self.maxsave < len(self.messages):
             self.messages.pop()
         if timex:
@@ -100,11 +100,11 @@ class Message(ui.Widget):
             self.messagebox.show(self.messages)
             self.messagebox.view()
 
-class MessageBox(ui.InfoBox):
+class MessageBox(widget.infobox.InfoBox):
     height = 4
 
     def __init__(self):
-        ui.InfoBox.__init__(self, "MessageBox")
+        widget.infobox.InfoBox.__init__(self, "MessageBox")
         self.lb = -1
         self.resize()
 
@@ -117,12 +117,12 @@ class MessageBox(ui.InfoBox):
         self.begx = 0
         self.winattr = look.colors["MessageWindow"]
 
-class ConfirmBox(ui.DialogBox):
+class ConfirmBox(widget.dialog.DialogBox):
     rlock = threading.RLock()
 
     def __init__(self):
-        ui.DialogBox.__init__(self, "ConfirmBox")
-        self.infobox = ui.InfoBox("ConfirmInfoBox")
+        widget.dialog.DialogBox.__init__(self, "ConfirmBox")
+        self.infobox = widget.infobox.InfoBox("ConfirmInfoBox")
         self.infobox.lb = -1
         self.keymap["RET"] = self.get_result
         self.result = None
@@ -158,10 +158,10 @@ class ConfirmBox(ui.DialogBox):
         if info:
             _info = []
             for item in info:
-                if isinstance(item, ui.InfoBoxContext):
+                if isinstance(item, widget.infobox.Context):
                     _info.append(item)
                 else:
-                    _info.append(ui.InfoBoxContext(item))
+                    _info.append(widget.infobox.Context(item))
             self.infobox.show(_info)
         viewer = ui.Viewer(self.view)
         controller = ui.Controller(self.input)

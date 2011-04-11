@@ -24,7 +24,7 @@ This application is CUI filer of the keyboard operation for Linux.
 __version__ = "0.2.2"
 
 __all__ = ["cmdline", "command", "filectrl", "filer", "help", "look", "menu",
-           "message", "mode", "process", "ui", "util", "completion"]
+           "message", "mode", "process", "ui", "util", "completion", "widget"]
 
 import os
 import shutil
@@ -55,7 +55,7 @@ class Pyful(object):
 
     def __init__(self, binpath):
         self.environs["SCRIPT"] = binpath
-        ui.start_ui()
+        ui.start_widget()
 
     def init_function(self):
         for func in self.initfuncs: func()

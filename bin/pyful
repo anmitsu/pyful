@@ -65,6 +65,7 @@ sys.setdefaultencoding("utf-8")
 from pyful import Pyful
 from pyful import message
 from pyful import ui
+from pyful import widget
 
 # Load completion functions
 from pyful.completion import *
@@ -87,7 +88,7 @@ def run():
     message.puts("Welcome to pyful v{0}".format(__version__))
 
     pyful.init_function()
-    ui.resize()
+    widget.resize()
     try:
         pyful.main_loop()
     except SystemExit:

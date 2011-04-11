@@ -9,7 +9,7 @@ from pyful import look
 from pyful import message
 from pyful import mode
 from pyful import process
-from pyful import ui
+from pyful import widget
 from pyful.command import commands
 from pyful.filer import Workspace, Directory, Finder, FileStat
 
@@ -129,15 +129,15 @@ look.Look.mylook = "default"
 
 # Set borders.
 # Smooth borders:
-ui.StandardScreen.borders = []
-ui.InfoBox.borders = []
+widget.base.StandardScreen.borders = []
+widget.infobox.InfoBox.borders = []
 # Classical borders:
-# ui.StandardScreen.borders = ["|", "|", "-", "-", "+", "+", "+", "+"]
-# ui.InfoBox.borders = ["|", "|", "-", "-", "+", "+", "+", "+"]
+# widget.base.StandardScreen.borders = ["|", "|", "-", "-", "+", "+", "+", "+"]
+# widget.infobox.InfoBox.borders = ["|", "|", "-", "-", "+", "+", "+", "+"]
 
 # Set zoom attribute of infobox.
 # Infobox is an area displaying information of cmdline and message.
-ui.InfoBox.zoom = 0
+widget.infobox.InfoBox.zoom = 0
 
 # Set scroll type in infobox.
 #
@@ -145,13 +145,13 @@ ui.InfoBox.zoom = 0
 #     "PageScroll"
 #     "ContinuousScroll"
 #
-ui.InfoBox.scroll_type = "HalfScroll"
+widget.infobox.InfoBox.scroll_type = "HalfScroll"
 
 
 # Get very useful widgets.
-filer = ui.getwidget("Filer")
-cmdline = ui.getwidget("Cmdline")
-menu = ui.getwidget("Menu")
+filer = widget.get("Filer")
+cmdline = widget.get("Cmdline")
+menu = widget.get("Menu")
 
 # Set cmdline attributes.
 cmdline.history.maxsave = 10000

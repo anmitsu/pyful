@@ -27,10 +27,11 @@ from pyful import message
 from pyful import process
 from pyful import ui
 from pyful import util
+from pyful import widget
 
-class ActionBox(ui.InfoBox):
+class ActionBox(widget.infobox.InfoBox):
     def __init__(self):
-        ui.InfoBox.__init__(self, "Action")
+        widget.infobox.InfoBox.__init__(self, "Action")
         self.keymap["RET"] = self.select_action
         self.selected = None
 
@@ -39,8 +40,8 @@ class ActionBox(ui.InfoBox):
         self.hide()
 
     def _get_view(self):
-        filer = ui.getwidget("Filer")
-        cmdline = ui.getwidget("Cmdline")
+        filer = widget.get("Filer")
+        cmdline = widget.get("Cmdline")
         def viewfunc():
             filer.view()
             if cmdline.is_active:
@@ -51,7 +52,7 @@ class ActionBox(ui.InfoBox):
     def run(self, actions):
         if not actions:
             return
-        self.show([ui.InfoBoxContext(a) for a in actions])
+        self.show([widget.infobox.Context(a) for a in actions])
         viewer = ui.Viewer(self._get_view())
         controller = ui.Controller(self.input)
         while self.is_active:
@@ -114,7 +115,7 @@ class Mx(Mode):
 
     def execute(self, cmd, action):
         if action == self.actions[0]:
-            ui.getwidget("Help").show_command(cmd)
+            widget.get("Help").show_command(cmd)
             return (cmd, -1)
         else:
             from pyful.command import commands
@@ -142,11 +143,11 @@ class ChangeWorkspaceTitle(Mode):
     prompt = "Change workspace title:"
 
     def complete(self, comp):
-        return [ws.title for ws in ui.getwidget("Filer").workspaces
+        return [ws.title for ws in widget.get("Filer").workspaces
                 if ws.title.startswith(comp.parser.part[1])]
 
     def execute(self, title, action):
-        ui.getwidget("Filer").workspace.chtitle(title)
+        widget.get("Filer").workspace.chtitle(title)
 
 class Chdir(Mode):
     prompt = "Chdir to:"
@@ -155,12 +156,12 @@ class Chdir(Mode):
         return comp.comp_dirs()
 
     def execute(self, path, action):
-        ui.getwidget("Filer").dir.chdir(path)
+        widget.get("Filer").dir.chdir(path)
 
 class Chmod(Mode):
     @property
     def prompt(self):
-        filer = ui.getwidget("Filer")
+        filer = widget.get("Filer")
         if filer.dir.ismark():
             return "Chmod mark files:"
         else:
@@ -171,7 +172,7 @@ class Chmod(Mode):
         return sorted([symb for symb in symbols if symb.startswith(comp.parser.part[1])])
 
     def execute(self, mode, action):
-        filer = ui.getwidget("Filer")
+        filer = widget.get("Filer")
         if filer.dir.ismark():
             for f in filer.dir.get_mark_files():
                 mode = self._getmode(os.stat(f), mode)
@@ -229,7 +230,7 @@ class Chown(Mode):
                 self.group = -1
             else:
                 self.group = string
-            filectrl.chown(ui.getwidget("Filer").file.name, self.user, self.group)
+            filectrl.chown(widget.get("Filer").file.name, self.user, self.group)
 
 class Copy(Mode):
     def __init__(self):
@@ -237,7 +238,7 @@ class Copy(Mode):
 
     @property
     def prompt(self):
-        if ui.getwidget("Filer").dir.ismark():
+        if widget.get("Filer").dir.ismark():
             return "Copy mark files to:"
         elif self.src:
             return "Copy from {0} to:".format(self.src)
@@ -247,13 +248,13 @@ class Copy(Mode):
             return "Copy:"
 
     def complete(self, comp):
-        if ui.getwidget("Filer").dir.ismark() or self.src:
+        if widget.get("Filer").dir.ismark() or self.src:
             return comp.comp_dirs()
         else:
             return comp.comp_files()
 
     def execute(self, path, action):
-        filer = ui.getwidget("Filer")
+        filer = widget.get("Filer")
         if filer.dir.ismark():
             filectrl.copy(filer.dir.get_mark_files(), path)
         elif self.src is None:
@@ -271,7 +272,7 @@ class CreateWorkspace(Mode):
         return comp.comp_files()
 
     def execute(self, title, action):
-        ui.getwidget("Filer").create_workspace(title)
+        widget.get("Filer").create_workspace(title)
 
 class Delete(Mode):
     @property
@@ -284,7 +285,7 @@ class Delete(Mode):
     def execute(self, path, action):
         if not path:
             return
-        filer = ui.getwidget("Filer")
+        filer = widget.get("Filer")
         msg = path.replace(filer.dir.path, "")
         ret = message.confirm("Delete? ({0}):".format(msg), ["No", "Yes"])
         if ret == "Yes":
@@ -304,7 +305,7 @@ class Glob(Mode):
         return comp.comp_files()
 
     def execute(self, pattern, action):
-        filer = ui.getwidget("Filer")
+        filer = widget.get("Filer")
         if not self.default == "" and pattern == "":
             filer.dir.glob(self.default)
         else:
@@ -327,7 +328,7 @@ class GlobDir(Mode):
         return comp.comp_files()
 
     def execute(self, pattern, action):
-        filer = ui.getwidget("Filer")
+        filer = widget.get("Filer")
         if not self.default == "" and pattern == "":
             filer.dir.globdir(self.default)
         else:
@@ -343,7 +344,7 @@ class Help(Mode):
         return comp.comp_pyful_commands()
 
     def execute(self, cmd, action):
-        ui.getwidget("Help").show_command(cmd)
+        widget.get("Help").show_command(cmd)
 
 class Link(Mode):
     def __init__(self):
@@ -351,7 +352,7 @@ class Link(Mode):
 
     @property
     def prompt(self):
-        if ui.getwidget("Filer").dir.ismark():
+        if widget.get("Filer").dir.ismark():
             return "Link mark files to:"
         elif self.src:
             return "Link from `{0}' to:".format(self.src)
@@ -364,7 +365,7 @@ class Link(Mode):
         return comp.comp_files()
 
     def execute(self, path, action):
-        filer = ui.getwidget("Filer")
+        filer = widget.get("Filer")
         if filer.dir.ismark():
             if not path.endswith(os.sep) and not os.path.isdir(path):
                 return message.error("{0} - {1}".format(os.strerror(errno.ENOTDIR), path))
@@ -416,7 +417,7 @@ class Mark(Mode):
         elif action == self.actions[4]:
             return (self.filters["source"], -1)
 
-        filer = ui.getwidget("Filer")
+        filer = widget.get("Filer")
         if self.default and pattern == "":
             filer.dir.mark(self.default)
         else:
@@ -462,7 +463,7 @@ class Mask(Mode):
         elif action == self.actions[4]:
             return (self.filters["source"], -1)
 
-        filer = ui.getwidget("Filer")
+        filer = widget.get("Filer")
         if self.default and pattern == "":
             filer.dir.mask(self.default)
         else:
@@ -477,11 +478,11 @@ class Menu(Mode):
     prompt = "Menu name:"
 
     def complete(self, comp):
-        return sorted([item for item in ui.getwidget("Menu").items.keys()
+        return sorted([item for item in widget.get("Menu").items.keys()
                        if item.startswith(comp.parser.part[1])])
 
     def execute(self, name, action):
-        ui.getwidget("Menu").show(name)
+        widget.get("Menu").show(name)
 
 class Mkdir(Mode):
     dirmode = 0o755
@@ -491,7 +492,7 @@ class Mkdir(Mode):
         return comp.comp_dirs()
 
     def execute(self, path, action):
-        filer = ui.getwidget("Filer")
+        filer = widget.get("Filer")
         filectrl.mkdir(path, self.dirmode)
         filer.workspace.all_reload()
         filer.dir.setcursor(filer.dir.get_index(util.unix_basename(path)))
@@ -502,7 +503,7 @@ class Move(Mode):
 
     @property
     def prompt(self):
-        if ui.getwidget("Filer").dir.ismark():
+        if widget.get("Filer").dir.ismark():
             return "Move mark files to:"
         elif self.src:
             return "Move from {0} to:".format(self.src)
@@ -512,13 +513,13 @@ class Move(Mode):
             return "Move:"
 
     def complete(self, comp):
-        if ui.getwidget("Filer").dir.ismark() or self.src:
+        if widget.get("Filer").dir.ismark() or self.src:
             return comp.comp_dirs()
         else:
             return comp.comp_files()
 
     def execute(self, path, action):
-        filer = ui.getwidget("Filer")
+        filer = widget.get("Filer")
         if filer.dir.ismark():
             filectrl.move(filer.dir.get_mark_files(), path)
         elif self.src is None:
@@ -537,7 +538,7 @@ class Newfile(Mode):
         return comp.comp_files()
 
     def execute(self, path, action):
-        filer = ui.getwidget("Filer")
+        filer = widget.get("Filer")
         filectrl.mknod(path, self.filemode)
         filer.workspace.all_reload()
         filer.dir.setcursor(filer.dir.get_index(path))
@@ -549,7 +550,7 @@ class OpenListfile(Mode):
         return comp.comp_files()
 
     def execute(self, path, action):
-        filer = ui.getwidget("Filer")
+        filer = widget.get("Filer")
         if os.path.exists(path):
             filer.dir.open_listfile(path)
         else:
@@ -557,7 +558,7 @@ class OpenListfile(Mode):
 
 class Rename(Mode):
     def __init__(self, path=None):
-        filer = ui.getwidget("Filer")
+        filer = widget.get("Filer")
         if path is None:
             self.path = filer.file.name
         else:
@@ -572,7 +573,7 @@ class Rename(Mode):
 
     def execute(self, path, action):
         filectrl.rename(self.path, path)
-        ui.getwidget("Filer").workspace.all_reload()
+        widget.get("Filer").workspace.all_reload()
 
 class Replace(Mode):
     form = "emacs"
@@ -610,7 +611,7 @@ class Replace(Mode):
         return comp.comp_files()
 
     def _run_emacs_replace(self, pattern):
-        filer = ui.getwidget("Filer")
+        filer = widget.get("Filer")
         if not pattern and not self.pattern and self.default:
             filectrl.replace(self.default[0], self.default[1])
             filer.dir.mark_clear()
@@ -629,7 +630,7 @@ class Replace(Mode):
             filer.workspace.all_reload()
 
     def _run_vim_replace(self, pattern):
-        filer = ui.getwidget("Filer")
+        filer = widget.get("Filer")
         patterns = re.split(r"(?<!\\)/", pattern)
         if len(patterns) > 1:
             pattern = util.U(patterns[0])
@@ -667,7 +668,7 @@ class Symlink(Mode):
 
     @property
     def prompt(self):
-        filer = ui.getwidget("Filer")
+        filer = widget.get("Filer")
         if filer.dir.ismark():
             return "Symlink mark files to:"
         elif self.src:
@@ -681,7 +682,7 @@ class Symlink(Mode):
         return comp.comp_files()
 
     def execute(self, path, action):
-        filer = ui.getwidget("Filer")
+        filer = widget.get("Filer")
         if filer.dir.ismark():
             if not os.path.exists(path):
                 return message.error("{0} - {1}".format(os.strerror(errno.ENOENT), path))
@@ -708,7 +709,7 @@ class TrashBox(Mode):
         return comp.comp_dirs()
 
     def execute(self, path, action):
-        filer = ui.getwidget("Filer")
+        filer = widget.get("Filer")
         trashbox = os.path.expanduser(self.path)
         msg = path.replace(filer.dir.path, "")
         ret = message.confirm("Move `{0}' to trashbox? ".format(msg), ["No", "Yes"])
@@ -816,7 +817,7 @@ class Utime(Mode):
                 os.utime(self.path, (atime, mtime))
             except Exception as e:
                 message.exception(e)
-            ui.getwidget("Filer").workspace.all_reload()
+            widget.get("Filer").workspace.all_reload()
 
 class Tar(Mode):
     def __init__(self, tarmode, each=False):
@@ -827,7 +828,7 @@ class Tar(Mode):
 
     @property
     def prompt(self):
-        filer = ui.getwidget("Filer")
+        filer = widget.get("Filer")
         if filer.dir.ismark() or self.each:
             if self.wrap is None:
                 return "Mark files wrap is:"
@@ -845,7 +846,7 @@ class Tar(Mode):
         return comp.comp_files()
 
     def execute(self, path, action):
-        filer = ui.getwidget("Filer")
+        filer = widget.get("Filer")
         if filer.dir.ismark() or self.each:
             if self.wrap is None:
                 self.wrap = path
@@ -878,7 +879,7 @@ class UnTar(Mode):
 
     @property
     def prompt(self):
-        filer = ui.getwidget("Filer")
+        filer = widget.get("Filer")
         if filer.dir.ismark():
             return "Mark files untar to:"
         elif self.src is None:
@@ -890,7 +891,7 @@ class UnTar(Mode):
         return comp.comp_files()
 
     def execute(self, path, action):
-        filer = ui.getwidget("Filer")
+        filer = widget.get("Filer")
         if filer.dir.ismark():
             filectrl.untar(filer.dir.get_mark_files(), path)
             filer.workspace.all_reload()
@@ -934,7 +935,7 @@ class Zip(Mode):
 
     @property
     def prompt(self):
-        filer = ui.getwidget("Filer")
+        filer = widget.get("Filer")
         if filer.dir.ismark() or self.each:
             if self.wrap is None:
                 return "Mark files wrap is:"
@@ -952,7 +953,7 @@ class Zip(Mode):
         return comp.comp_files()
 
     def execute(self, path, action):
-        filer = ui.getwidget("Filer")
+        filer = widget.get("Filer")
         if filer.dir.ismark() or self.each:
             if self.wrap is None:
                 self.wrap = path
@@ -985,7 +986,7 @@ class UnZip(Mode):
 
     @property
     def prompt(self):
-        filer = ui.getwidget("Filer")
+        filer = widget.get("Filer")
         if filer.dir.ismark():
             return "Mark files unzip to:"
         elif self.src is None:
@@ -997,7 +998,7 @@ class UnZip(Mode):
         return comp.comp_files()
 
     def execute(self, path, action):
-        filer = ui.getwidget("Filer")
+        filer = widget.get("Filer")
         if filer.dir.ismark():
             filectrl.unzip(filer.dir.get_mark_files(), path)
             filer.workspace.all_reload()
