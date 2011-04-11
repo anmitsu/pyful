@@ -97,12 +97,13 @@ class StandardScreen(object):
 class Widget(StandardScreen):
     widgets = {}
 
-    def __init__(self, name):
+    def __init__(self, name, register=True):
         self.active = False
-        if not name in self.widgets:
-            self.widgets[name] = self
-        else:
-            raise WidgetAlreadyRegistered("`{0}' already registered.".format(name))
+        if register:
+            if not name in self.widgets:
+                self.widgets[name] = self
+            else:
+                raise WidgetAlreadyRegistered("`{0}' already registered.".format(name))
 
     @property
     def is_active(self):
@@ -129,8 +130,8 @@ class TextBox(Widget):
     promptattr = 0
     wordbreakchars = re.compile("[._/\s\t\n\"\\`'@$><=:|&{(]")
 
-    def __init__(self, name):
-        Widget.__init__(self, name)
+    def __init__(self, name, register=True):
+        Widget.__init__(self, name, register)
         self.text = ""
         self.textmap = []
         self.prompt = ""
@@ -373,8 +374,8 @@ class InfoBox(Widget):
     win = None
     winattr = 0
 
-    def __init__(self, title):
-        Widget.__init__(self, title)
+    def __init__(self, title, register=True):
+        Widget.__init__(self, title, register)
         self.info = []
         self.title = title
         self.cursor = 0
