@@ -38,6 +38,7 @@ class Filer(ui.Widget):
         ui.Widget.__init__(self, "Filer")
         y, x = self.stdscr.getmaxyx()
         self.titlebar = curses.newwin(1, x, 0, 0)
+        self.navigationbar = curses.newwin(2, x, y-2, 0)
         self.workspaces = []
         self.cursor = 0
         self.default_init()
@@ -65,6 +66,7 @@ class Filer(ui.Widget):
     def resize(self):
         y, x = self.stdscr.getmaxyx()
         self.titlebar = curses.newwin(1, x, 0, 0)
+        self.navigationbar = curses.newwin(2, x, y-2, 0)
         self.workspace.resize()
 
     def view(self):
@@ -391,7 +393,7 @@ class Workspace(ui.StandardScreen):
         self.layout = "Tile"
         size = len(self.dirs)
         y, x = self.stdscr.getmaxyx()
-        y -= ui.getwidget("Cmdscr").win.getmaxyx()[0] + 1
+        y -= 3
         if size == 1:
             self.dirs[0].resize(y, x, 1, 0)
             self.all_reload()
@@ -412,7 +414,7 @@ class Workspace(ui.StandardScreen):
         self.layout = "TileLeft"
         size = len(self.dirs)
         y, x = self.stdscr.getmaxyx()
-        y -= ui.getwidget("Cmdscr").win.getmaxyx()[0] + 1
+        y -= 3
         if size == 1:
             self.dirs[0].resize(y, x, 1, 0)
             self.all_reload()
@@ -433,7 +435,7 @@ class Workspace(ui.StandardScreen):
         self.layout = "TileTop"
         size = len(self.dirs)
         y, x = self.stdscr.getmaxyx()
-        y -= ui.getwidget("Cmdscr").win.getmaxyx()[0] + 1
+        y -= 3
         if size == 1:
             self.dirs[0].resize(y, x, 1, 0)
             self.all_reload()
@@ -454,7 +456,7 @@ class Workspace(ui.StandardScreen):
         self.layout = "TileBottom"
         size = len(self.dirs)
         y, x = self.stdscr.getmaxyx()
-        y -= ui.getwidget("Cmdscr").win.getmaxyx()[0] + 1
+        y -= 3
         if size == 1:
             self.dirs[0].resize(y, x, 1, 0)
             self.all_reload()
@@ -474,7 +476,7 @@ class Workspace(ui.StandardScreen):
     def oneline(self):
         self.layout = "Oneline"
         y, x = self.stdscr.getmaxyx()
-        height = y - (ui.getwidget("Cmdscr").win.getmaxyx()[0] + 1)
+        height = y - 3
         k = len(self.dirs)
         width = x // k
         odd = x % k
@@ -486,7 +488,7 @@ class Workspace(ui.StandardScreen):
     def onecolumn(self):
         self.layout = "Onecolumn"
         y, x = self.stdscr.getmaxyx()
-        y -= ui.getwidget("Cmdscr").win.getmaxyx()[0] + 1
+        y -= 3
         k = len(self.dirs)
         odd = y % k
         height = y // k
@@ -499,7 +501,7 @@ class Workspace(ui.StandardScreen):
     def magnifier(self):
         self.layout = "Magnifier"
         y, x = self.stdscr.getmaxyx()
-        y -= ui.getwidget("Cmdscr").win.getmaxyx()[0] + 1
+        y -= 3
         if len(self.dirs) == 1:
             self.dirs[0].resize(y, x, 1, 0)
             self.all_reload()
@@ -521,7 +523,7 @@ class Workspace(ui.StandardScreen):
     def fullscreen(self):
         self.layout = "Fullscreen"
         y, x = self.stdscr.getmaxyx()
-        height = y - (ui.getwidget("Cmdscr").win.getmaxyx()[0] + 1)
+        height = y - 3
         width = x
         for d in self.dirs:
             d.resize(height, width, 1, 0)
@@ -1530,8 +1532,8 @@ class FileStat(object):
             self.name = ""
 
     def view(self):
-        cmdscr = ui.getwidget("Cmdscr").win
-        cmdscr.erase()
+        navbar = ui.getwidget("Filer").navigationbar
+        navbar.erase()
         perm = self.get_permission()
         user = self.get_user_name()
         group = self.get_group_name()
@@ -1540,6 +1542,6 @@ class FileStat(object):
         mtime = self.get_mtime()
         name = self.name
         fstat = "{0} {1} {2} {3} {4} {5} {6}".format(perm, nlink, user, group, size, mtime, name)
-        fstat = util.mbs_ljust(fstat, cmdscr.getmaxyx()[1]-1)
-        cmdscr.addstr(1, 0, fstat)
-        cmdscr.noutrefresh()
+        fstat = util.mbs_ljust(fstat, navbar.getmaxyx()[1]-1)
+        navbar.addstr(1, 0, fstat)
+        navbar.noutrefresh()

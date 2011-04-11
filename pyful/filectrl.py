@@ -234,11 +234,11 @@ class Subloop(object):
         self.stdscr = ui.StandardScreen.stdscr
 
     def subthreads_view(self):
-        cmdscr = ui.getwidget("Cmdscr").win
-        y, x = cmdscr.getmaxyx()
+        navbar = ui.getwidget("Filer").navigationbar
+        y, x = navbar.getmaxyx()
         string = " | ".join("[{0}] {1}".format(i+1, t.title) for i, t in enumerate(Filectrl.threads))
-        cmdscr.addstr(0, 1, util.mbs_ljust(string, x-2), curses.A_BOLD)
-        cmdscr.noutrefresh()
+        navbar.addstr(0, 1, util.mbs_ljust(string, x-2), curses.A_BOLD)
+        navbar.noutrefresh()
 
     def run(self):
         with self.confirmbox.rlock:

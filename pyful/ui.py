@@ -57,7 +57,6 @@ def start_curses():
         curses.raw()
     except curses.error:
         StandardScreen()
-        CmdlineScreen()
     signal.signal(signal.SIGWINCH, refresh)
 
 def end_curses():
@@ -111,18 +110,6 @@ class Widget(StandardScreen):
 
     def resize(self):
         pass
-
-class CmdlineScreen(Widget):
-    def __init__(self):
-        Widget.__init__(self, "Cmdscr")
-        y, x = self.stdscr.getmaxyx()
-        self.win = curses.newwin(2, x, y-2, 0)
-        self.win.bkgd(look.colors["CmdlineWindow"])
-
-    def resize(self):
-        y, x = self.stdscr.getmaxyx()
-        self.win = curses.newwin(2, x, y-2, 0)
-        self.win.bkgd(look.colors["CmdlineWindow"])
 
 class DialogBox(Widget):
     win = None
