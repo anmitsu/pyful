@@ -581,8 +581,6 @@ class Directory(ui.StandardScreen):
         self.win.bkgd(look.colors["Window"])
         y, x = self.win.getmaxyx()
         by, bx = self.win.getbegyx()
-        self.statwin = curses.newwin(1, y, x, bx)
-        self.statwin.bkgd(look.colors["Window"])
         self.path = util.abspath(path)
         self.files = [FileStat(os.pardir)]
         self.mark_files = {}
@@ -658,7 +656,7 @@ class Directory(ui.StandardScreen):
                 self.cursor = bottom - 1
 
     def pagedown(self):
-        height = self.win.getmaxyx()[0] - self.statwin.getmaxyx()[0] - 1
+        height = self.win.getmaxyx()[0] - 2
         size = len(self.files)
         if self.scrolltop+height >= size:
             return
@@ -670,7 +668,7 @@ class Directory(ui.StandardScreen):
     def pageup(self):
         if self.scrolltop == 0:
             return
-        height = self.win.getmaxyx()[0] - self.statwin.getmaxyx()[0] - 1
+        height = self.win.getmaxyx()[0] - 2
         for f in self.files[self.scrolltop:self.scrolltop+height]:
             f.cache_clear()
         self.scrolltop -= height
@@ -1052,10 +1050,8 @@ class Directory(ui.StandardScreen):
 
     def resize(self, height, width, begy, begx):
         self.win = curses.newwin(height, width, begy, begx)
-        begy, begx = self.win.getbegyx()
-        self.statwin = curses.newwin(1, width, begy+height-1, begx)
         self.win.bkgd(look.colors["Window"])
-        self.statwin.bkgd(look.colors["Window"])
+        self.finder.resize()
 
     def _fix_position(self, size, height):
         if self.cursor < 0:
@@ -1097,44 +1093,34 @@ class Directory(ui.StandardScreen):
         self.win.addstr(0, 2, path+title, look.colors["DirectoryPath"])
 
     def _view_statusbar(self, focus, size, height):
-        self.statwin.erase()
-        if not self.finder.active:
-            self.statwin.border(*self.borders)
-
-        if self.finder.active:
-            if focus:
-                self.file.view()
-            self.finder.view()
+        try:
+            p = float(self.scrolltop)/float(size-height)*100
+        except ZeroDivisionError:
+            p = float(self.scrolltop)/float(size)*100
+        if p == 0:
+            p = "Top"
+        elif p >= 100:
+            p = "Bot"
         else:
-            try:
-                p = float(self.scrolltop)/float(size-height)*100
-            except ZeroDivisionError:
-                p = float(self.scrolltop)/float(size)*100
-            if p == 0:
-                p = "Top"
-            elif p >= 100:
-                p = "Bot"
-            else:
-                p = str(int(p)) + "%"
-            status = self.statusbar_format.format(
-                MARK=len(self.mark_files), FILE=size-1,
-                MARKSIZE=self.mark_size, SCROLL=p,
-                CURSOR=self.cursor, SORT=self.sort_kind)
-            if self.list_title is not None:
-                status += self.list_title
+            p = str(int(p)) + "%"
+        status = self.statusbar_format.format(
+            MARK=len(self.mark_files), FILE=size-1,
+            MARKSIZE=self.mark_size, SCROLL=p,
+            CURSOR=self.cursor, SORT=self.sort_kind)
+        if self.list_title is not None:
+            status += self.list_title
 
-            sy, sx = self.statwin.getmaxyx()
-            if util.termwidth(status) > sx-2:
-                status = util.mbs_ljust(status, sx-2)
-            self.statwin.addstr(0, 1, status)
-            self.statwin.noutrefresh()
-            if focus:
-                self.file.view()
+        y, x = self.win.getmaxyx()
+        if util.termwidth(status) > x-2:
+            status = util.mbs_ljust(status, x-2)
+        self.win.addstr(y-1, 1, status)
 
     def view(self, focus):
         size = len(self.files)
-        height = self.win.getmaxyx()[0] - self.statwin.getmaxyx()[0] - 1
+        height = self.win.getmaxyx()[0] - 2
         width = self.win.getmaxyx()[1] - 3
+        if self.finder.active:
+            height -= self.finder.y
         if not height:
             return
 
@@ -1158,8 +1144,13 @@ class Directory(ui.StandardScreen):
                 self.win.addstr(line, 1, "*"+fstr, attr)
             else:
                 self.win.addstr(line, 1, " "+fstr, attr)
-        self.win.noutrefresh()
         self._view_statusbar(focus, size, height)
+        self.win.noutrefresh()
+
+        if focus:
+            self.file.view()
+        if self.finder.active:
+            self.finder.view()
 
 class PathHistory(object):
     maxsave = 20
@@ -1218,7 +1209,7 @@ class PathHistory(object):
         elif self.pos >= len(self.history):
             self.pos = len(self.history) - 1
 
-class Finder(object):
+class Finder(ui.TextBox):
     keymap = {}
     smartcase = True
     migemo = None
@@ -1244,13 +1235,28 @@ class Finder(object):
             return self.history[self.pos]
 
     def __init__(self, directory):
+        ui.TextBox.__init__(self, "Finder", register=False)
         self.dir = directory
         self.results = []
         self.cache = []
-        self.string = ""
         self.startfname = ""
         self.history = self.History()
-        self.active = False
+        self.keymap = self.__class__.keymap
+        self.resize()
+
+    def resize(self):
+        self.win = None
+        y, x = self.dir.win.getmaxyx()
+        by, bx = self.dir.win.getbegyx()
+        self.y = 1
+        self.x = x - 2
+        self.begy = by + y - 2
+        self.begx = bx + 1
+        self.winattr = look.colors["FinderWindow"]
+        self.promptattr = look.colors["FinderPrompt"]
+
+    def edithook(self):
+        self.find(self.text)
 
     def find(self, pattern):
         try:
@@ -1266,17 +1272,11 @@ class Finder(object):
             return
         self.results = [f for f in self.cache if r.search(f)]
         self.dir.reload()
-        self.dir.setcursor(1)
-
-    def insert(self, ch):
-        if len(self.results) <= 1:
-            return
-        self.string += ch
-        self.find(self.string)
-
-    def delete_backward_char(self):
-        self.string = util.U(self.string)[:-1]
-        self.find(self.string)
+        idx = self.dir.get_index(self.startfname)
+        if idx:
+            self.dir.setcursor(idx)
+        else:
+            self.dir.setcursor(1)
 
     def select_result(self):
         if len(self.dir.files) == 1:
@@ -1287,21 +1287,25 @@ class Finder(object):
         self.dir.setcursor(self.dir.get_index(n))
 
     def history_select(self, distance):
-        self.string = self.history.mvhistory(distance)
-        self.find(self.string)
+        self.settext(self.history.mvhistory(distance))
+        self.find(self.text)
 
     def start(self):
+        if self.migemo:
+            self.prompt = " Finder(migemo): "
+        else:
+            self.prompt = " Finder: "
         self.active = True
-        self.results = self.cache = [f.name for f in self.dir.files if f.name != os.pardir]
+        self.cache = [f.name for f in self.dir.files if f.name != os.pardir]
         self.startfname = self.dir.file.name
+        self.find(self.text)
 
     def finish(self):
-        self.history.add(self.string)
+        self.history.add(self.text)
         self.history.pos = 0
-        self.string = ""
         self.results[:] = []
         self.cache[:] = []
-        self.active = False
+        super(self.__class__, self).finish()
         self.select_result()
 
     def input(self, key):
@@ -1311,14 +1315,6 @@ class Finder(object):
             self.insert(key)
         else:
             return True
-
-    def view(self):
-        if self.migemo:
-            self.dir.statwin.addstr(0, 1, " Finder(migemo): ", look.colors["Finder"])
-        else:
-            self.dir.statwin.addstr(0, 1, " Finder: ", look.colors["Finder"])
-        self.dir.statwin.addstr(" " + self.string)
-        self.dir.statwin.noutrefresh()
 
 class InvalidEncodingError(Exception):
     pass
