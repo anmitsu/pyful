@@ -435,7 +435,7 @@ mymenukeymap = {
     }
 
 # Update the keymap of pyful.
-Directory.keymap.update(myfilerkeymap)
+filer.keymap.update(myfilerkeymap)
 Finder.keymap.update(myfinderkeymap)
 cmdline.keymap.update(mycmdlinekeymap)
 cmdline.clipboard.keymap.update(myclipboardkeymap)
@@ -516,7 +516,7 @@ menu.items["launcher"] = (
     )
 
 # Update the filer keymap.
-Directory.keymap.update({
+filer.keymap.update({
         "V": lambda: menu.show("filer"),
         "s": lambda: menu.show("sort"),
         "L": lambda: menu.show("layout"),
@@ -596,7 +596,7 @@ myassociation = {
     ("RET", ".flv"  ): lambda: menu.show("video"),
     }
 
-Directory.keymap.update(myassociation)
+filer.keymap.update(myassociation)
 
 import os, sys
 if "screen" in os.getenv("TERM"):
