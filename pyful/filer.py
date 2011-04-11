@@ -1261,6 +1261,10 @@ class Finder(ui.TextBox):
         self.find(self.text)
 
     def find(self, pattern):
+        if not pattern:
+            self.results = self.cache
+            self.dir.reload()
+            return
         try:
             if self.smartcase and re.match("[A-Z]", pattern) is None:
                 if self.migemo:
