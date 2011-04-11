@@ -84,9 +84,8 @@ class Message(ui.Widget):
 
     def confirm(self, message, options, info=None, position=0):
         with self.confirmbox.rlock:
-            self.confirmbox.setconfirmcursor(position)
-            ret = self.confirmbox.run(message, options, info)
-        return ret
+            self.confirmbox.setcursor(position)
+            return self.confirmbox.run(message, options, info)
 
     def view_histroy(self):
         self.confirm("Message history", ["Close"], self.messages)
@@ -118,98 +117,55 @@ class MessageBox(ui.InfoBox):
         self.begx = 0
         self.winattr = look.colors["MessageWindow"]
 
-class ConfirmBox(ui.InfoBox):
+class ConfirmBox(ui.DialogBox):
     rlock = threading.RLock()
 
     def __init__(self):
-        ui.InfoBox.__init__(self, "ConfirmBox")
-        self.lb = -1
-        self.options = []
-        self.message = ""
+        ui.DialogBox.__init__(self, "ConfirmBox")
+        self.infobox = ui.InfoBox("ConfirmInfoBox")
+        self.infobox.lb = -1
+        self.keymap["RET"] = self.get_result
         self.result = None
-        self.confirmcursor = 0
-        self.keymap.update({
-            "C-f"    : lambda: self.mvconfirmcursor(1),
-            "<right>": lambda: self.mvconfirmcursor(1),
-            "C-b"    : lambda: self.mvconfirmcursor(-1),
-            "<left>" : lambda: self.mvconfirmcursor(-1),
-            "C-g"    : lambda: self.cancel(),
-            "C-c"    : lambda: self.cancel(),
-            "ESC"    : lambda: self.cancel(),
-            "RET"    : lambda: self.get_confirm_option(),
-            })
 
-    def run(self, message, options, info=None):
-        self.message = message
-        self.options = options
-        if info:
-            myinfo = []
-            for item in info:
-                if isinstance(item, ui.InfoBoxContext):
-                    myinfo.append(item)
-                else:
-                    myinfo.append(ui.InfoBoxContext(item))
-            self.show(myinfo)
-        viewer = ui.Viewer(self.view)
-        controller = ui.Controller(self.input)
-        while self.options:
-            viewer.view_and_update()
-            controller.control()
-        result = self.result
-        self.result = None
-        return result
+    def resize(self):
+        self.win = None
+        self.winattr = 0
+        y, x = self.stdscr.getmaxyx()
+        self.y = 2
+        self.x = x
+        self.begy = y - 2
+        self.begx = 0
+        self.messageattr = look.colors["ConfirmMessage"]
 
-    def setconfirmcursor(self, x):
-        self.confirmcursor = x
-
-    def mvconfirmcursor(self, x):
-        self.confirmcursor += x
-
-    def get_confirm_option(self):
-        self.result = self.options[self.confirmcursor]
-        self.message = ""
-        self.options = []
-        self.confirmcursor = 0
+    def get_result(self):
+        self.result = self.cursor_item()
         self.hide()
-
-    def cancel(self):
-        self.message = ""
-        self.options = []
-        self.confirmcursor = 0
-        self.hide()
+        self.infobox.hide()
 
     def view(self):
+        self.infobox.view()
         super(self.__class__, self).view()
 
-        cmdscr = ui.getwidget("Cmdscr").win
-        cmdscr.erase()
-        y, x = cmdscr.getmaxyx()
-        size = len(self.options)
+    def input(self, key):
+        if key in self.keymap:
+            self.keymap[key]()
+        elif self.infobox.active and key in self.infobox.keymap:
+            self.infobox.keymap[key]()
 
-        try:
-            cmdscr.addstr(0, 1, self.message+" ",
-                          look.colors["ConfirmMessage"])
-        except curses.error:
-            cmdscr.erase()
-            maxwidth = x-2-util.termwidth(" ".join(self.options))
-            cmdscr.addstr(0, 1, util.mbs_ljust(self.message+" ", maxwidth),
-                          look.colors["ConfirmMessage"])
-
-        if self.confirmcursor < 0:
-            self.confirmcursor = 0
-        elif self.confirmcursor > size - 1:
-            self.confirmcursor = size - 1
-        for i, s in enumerate(self.options):
-            if self.confirmcursor == i:
-                try:
-                    cmdscr.addstr(s, curses.A_REVERSE)
-                    cmdscr.addstr(" ", 0)
-                except curses.error:
-                    pass
-            else:
-                try:
-                    cmdscr.addstr(s+" ", 0)
-                except curses.error:
-                    pass
-        cmdscr.move(y-1, x-1)
-        cmdscr.noutrefresh()
+    def run(self, message, options, info=None):
+        self.result = None
+        self.show(message, options)
+        if info:
+            _info = []
+            for item in info:
+                if isinstance(item, ui.InfoBoxContext):
+                    _info.append(item)
+                else:
+                    _info.append(ui.InfoBoxContext(item))
+            self.infobox.show(_info)
+        viewer = ui.Viewer(self.view)
+        controller = ui.Controller(self.input)
+        while self.active:
+            viewer.view_and_update()
+            controller.control()
+        return self.result
