@@ -91,12 +91,12 @@ class Completion(ui.InfoBox):
                 not self.parser.now_in_quote():
             string = util.string_to_safe(string)
 
-        self.cmdline.setstring(self.parser.part[0] + string + self.parser.part[2])
+        self.cmdline.settext(self.parser.part[0] + string + self.parser.part[2])
         self.cmdline.cursor = util.mbslen(self.parser.part[0]+string)
         self.finish()
 
     def start(self):
-        self.parser = Parser(self.cmdline.string, self.cmdline.cursor)
+        self.parser = Parser(self.cmdline.text, self.cmdline.cursor)
         CompletionFunction.parser = self.parser
         if self.cmdline.mode.__class__.__name__ == "Shell":
             self.parser.parse()

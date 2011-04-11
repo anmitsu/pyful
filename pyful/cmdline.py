@@ -32,213 +32,38 @@ from pyful import process
 from pyful import ui
 from pyful import util
 
-class Cmdline(ui.Widget):
-    keymap = {}
-    wordbreakchars = re.compile("[._/\s\t\n\"\\`'@$><=:|&{(]")
-
+class Cmdline(ui.TextBox):
     def __init__(self):
-        ui.Widget.__init__(self, "Cmdline")
-        self.string = ""
-        self.stringmap = []
-        self.cursor = 0
+        ui.TextBox.__init__(self, "Cmdline")
         self.mode = None
         self.history = History(self)
         self.clipboard = Clipboard(self)
         self.output = Output(self)
         self.completion = completion.Completion(self)
 
-    def execute(self, action=None):
-        string = self.string
+    def resize(self):
+        self.win = None
+        y, x = self.stdscr.getmaxyx()
+        self.y = 2
+        self.x = x
+        self.begy = y - 2
+        self.begx = 0
+        self.winattr = look.colors["CmdlineWindow"]
+        self.promptattr = look.colors["CmdlinePrompt"]
+
+    def edithook(self):
+        self.history.start()
+
+    def yankhook(self, yanked):
+        self.clipboard.yank(yanked)
+
+    def view_text(self, text):
         if self.mode.__class__.__name__ == "Shell":
-            expand_string = util.expandmacro(self.string, shell=True)
-        else:
-            expand_string = util.expandmacro(self.string, shell=False)
-        self.finish()
-        self.history.append(string)
-        ret = self.mode.execute(expand_string, action)
-        if isinstance(ret, (tuple, list)) and len(ret) == 2:
-            self.restart(ret[0], ret[1])
-
-    def expandmacro(self):
-        if self.mode.__class__.__name__ == "Shell":
-            self.setstring(util.expandmacro(self.string, shell=True))
-        else:
-            self.setstring(util.expandmacro(self.string, shell=False))
-        self.history.start()
-
-    def select_action(self):
-        action = self.mode.select_action()
-        if action:
-            self.execute(action)
-
-    def escape(self):
-        self.history.append(self.string)
-        self.finish()
-
-    def settop(self):
-        self.cursor = 0
-
-    def setbottom(self):
-        self.cursor = util.mbslen(self.string)
-
-    def forward_char(self):
-        self.cursor += 1
-
-    def backward_char(self):
-        self.cursor -= 1
-
-    def forward_word(self):
-        i = self.cursor + 1
-        s = util.U(self.string)
-        while i < util.mbslen(self.string):
-            c = s[i]
-            if self.wordbreakchars.search(c):
-                break
-            i += 1
-        self.cursor = i
-
-    def backward_word(self):
-        if 0 >= self.cursor:
-            return
-
-        i = self.cursor - 1
-        s = util.U(self.string)
-        while 0 < i:
-            c = s[i-1]
-            if self.wordbreakchars.search(c):
-                break
-            i -= 1
-        self.cursor = i
-
-    def delete_backward_char(self):
-        if not self.cursor:
-            return
-        self.string = util.rmstr(self.string, self.cursor-1)
-        self.cursor -= 1
-        del self.stringmap[self.cursor]
-        self.history.start()
-
-    def delete_char(self):
-        if not self.string:
-            self.finish()
-        try:
-            self.string = util.rmstr(self.string, self.cursor)
-            del self.stringmap[self.cursor]
-            self.history.start()
-        except IndexError:
-            pass
-
-    def delete_forward_word(self):
-        i = self.cursor + 1
-        s = self.string
-        while i < util.mbslen(self.string):
-            c = s[i]
-            if self.wordbreakchars.search(c):
-                break
-            i += 1
-        delword = util.U(self.string)[self.cursor:i]
-        self.clipboard.yank(delword)
-        self.string = util.slicestr(self.string, self.cursor, i)
-        del self.stringmap[self.cursor:i]
-        self.history.start()
-
-    def delete_backward_word(self):
-        if not self.cursor:
-            return
-        i = self.cursor - 1
-        s = util.U(self.string)
-        while 0 < i:
-            c = s[i-1]
-            if self.wordbreakchars.search(c):
-                break
-            i -= 1
-        delword = util.U(self.string)[:self.cursor]
-        self.clipboard.yank(delword)
-        self.string = util.slicestr(self.string, i, self.cursor)
-        del self.stringmap[i:self.cursor]
-        self.cursor = i
-        self.history.start()
-
-    def kill_line(self):
-        self.string = util.U(self.string)
-        killword = self.string[self.cursor:]
-        self.clipboard.yank(killword)
-        self.string = self.string[:self.cursor]
-        self.stringmap = self.stringmap[:self.cursor]
-        self.history.start()
-
-    def kill_line_all(self):
-        self.clipboard.yank(self.string)
-        self.string = ""
-        self.cursor = 0
-        self.stringmap[:] = []
-        self.history.start()
-
-    def insert(self, string):
-        self.string = util.insertstr(self.string, string, self.cursor)
-        self.string = util.U(self.string)
-        for i, c in enumerate(util.U(string)):
-            if unicodedata.east_asian_width(c) in "WF":
-                self.stringmap.insert(self.cursor+i, 2)
-            else:
-                self.stringmap.insert(self.cursor+i, 1)
-        self.cursor += util.mbslen(string)
-
-    def setstring(self, string):
-        self.string = util.U(string)
-        self.cursor = util.mbslen(string)
-        self.stringmap = []
-        for c in util.U(self.string):
-            if unicodedata.east_asian_width(c) in "WF":
-                self.stringmap.append(2)
-            else:
-                self.stringmap.append(1)
-
-    def _get_current_line(self, win):
-        maxy, maxx = win.getmaxyx()
-        prompt = "{1[0]}{0}{1[1]}".format(self.mode.prompt, self.mode.prompt_side)
-        promptlen = util.termwidth(prompt)
-        if promptlen > maxx:
-            prompt = util.mbs_ljust(prompt, maxx-4)
-            promptlen = util.termwidth(prompt)
-        realcurpos = sum(self.stringmap[:self.cursor])
-        if maxx-promptlen <= sum(self.stringmap):
-            if maxx-promptlen <= realcurpos+1:
-                width = start = 0
-                for i, count in enumerate(self.stringmap):
-                    width += count
-                    if maxx-promptlen <= width:
-                        if self.cursor < i:
-                            curpos = realcurpos - sum(self.stringmap[:start])
-                            return (prompt, self.string[start:i], curpos+promptlen)
-                        start = i
-                        width = count
-                        prompt = "..."
-                        promptlen = len(prompt)
-                curpos = realcurpos - sum(self.stringmap[:start])
-                return (prompt, self.string[start:], curpos+promptlen)
-            else:
-                cmd = util.mbs_ljust(self.string, maxx-promptlen)
-                curpos = realcurpos+promptlen
-                return (prompt, cmd, curpos)
-        else:
-            return (prompt, self.string, realcurpos+promptlen)
-
-    def _view_cmdline(self):
-        cmdscr = ui.getwidget("Cmdscr").win
-        cmdscr.erase()
-        cmdscr.move(0, 0)
-
-        prompt, cmd, curpos = self._get_current_line(cmdscr)
-        cmdscr.addstr(prompt, look.colors["CmdlinePrompt"])
-        if self.mode.__class__.__name__ == "Shell":
-            self.print_color_shell(cmdscr, cmd)
+            self.print_color_shell(self.win, text)
         elif self.mode.__class__.__name__ == "Eval":
-            self.print_color_eval(cmdscr, cmd)
+            self.print_color_eval(self.win, text)
         else:
-            self.print_color_default(cmdscr, cmd)
-        cmdscr.move(0, curpos)
-        cmdscr.noutrefresh()
+            self.print_color_default(self.win, text)
 
     def view(self):
         if self.completion.active:
@@ -249,16 +74,7 @@ class Cmdline(ui.Widget):
             self.output.view()
         elif self.history.active:
             self.history.view()
-
-        if self.cursor < 0:
-            self.cursor = 0
-        elif self.cursor > util.mbslen(self.string):
-            self.cursor = util.mbslen(self.string)
-
-        try:
-            self._view_cmdline()
-        except curses.error:
-            ui.getwidget("Cmdscr").win.noutrefresh()
+        super(self.__class__, self).view()
 
     def input(self, key):
         if self.completion.active:
@@ -268,49 +84,69 @@ class Cmdline(ui.Widget):
         elif self.output.active:
             self.output.input(key)
         else:
-            self.cmdline_input(key)
+            super(self.__class__, self).input(key)
 
-    def finish(self):
-        cmdscr = ui.getwidget("Cmdscr").win
-        cmdscr.erase()
-        cmdscr.noutrefresh()
-        self.string = ""
-        self.cursor = 0
-        self.stringmap[:] = []
-        self.active = False
-
-    def start(self, mode, string="", pos=-1):
+    def start(self, mode, text="", pos=-1):
         self.mode = mode
-        self.setstring(string)
+        self.settext(text)
+        self.prompt = "{1[0]}{0}{1[1]}".format(self.mode.prompt, self.mode.prompt_side)
         if pos >= 0:
             self.cursor = pos
         else:
-            self.cursor = util.mbslen(self.string) + 1 + pos
+            self.cursor = util.mbslen(self.text) + 1 + pos
         self.active = True
-        self.history.start()
+        self.edithook()
 
-    def restart(self, string="", pos=-1):
-        self.start(self.mode, string, pos)
+    def restart(self, text="", pos=-1):
+        self.start(self.mode, text, pos)
 
-    def shell(self, string="", pos=-1):
-        self.start(mode.Shell(), string, pos)
+    def shell(self, text="", pos=-1):
+        self.start(mode.Shell(), text, pos)
 
-    def eval(self, string="", pos=-1):
-        self.start(mode.Eval(), string, pos)
+    def eval(self, text="", pos=-1):
+        self.start(mode.Eval(), text, pos)
 
-    def mx(self, string="", pos=-1):
-        self.start(mode.Mx(), string, pos)
+    def mx(self, text="", pos=-1):
+        self.start(mode.Mx(), text, pos)
 
-    def print_color_default(self, win, string):
-        for s in re.split(r"(?<!\\)(%(?:[mMfFxX]|[dD]2?))", string):
+    def execute(self, action=None):
+        text = self.text
+        if self.mode.__class__.__name__ == "Shell":
+            expanded = util.expandmacro(self.text, shell=True)
+        else:
+            expanded = util.expandmacro(self.text, shell=False)
+        self.finish()
+        self.history.append(text)
+        ret = self.mode.execute(expanded, action)
+        if isinstance(ret, (tuple, list)) and len(ret) == 2:
+            self.restart(ret[0], ret[1])
+
+    def expandmacro(self):
+        if self.mode.__class__.__name__ == "Shell":
+            self.settext(util.expandmacro(self.text, shell=True))
+        else:
+            self.settext(util.expandmacro(self.text, shell=False))
+        self.edithook()
+
+    def escape(self):
+        self.history.append(self.text)
+        self.finish()
+
+    def select_action(self):
+        action = self.mode.select_action()
+        if action:
+            self.execute(action)
+
+    def print_color_default(self, win, text):
+        for s in re.split(r"(?<!\\)(%(?:[mMfFxX]|[dD]2?))", text):
             attr = 0
             if re.search("^%(?:[mMfFxX]|[dD]2?)$", s):
                 attr = look.colors["CmdlineMacro"]
             win.addstr(s, attr)
 
-    def print_color_shell(self, win, string):
+    def print_color_shell(self, win, text):
         prg = False
-        for s in re.split(r"(?<!\\)([\s;|>&]|%(?:[&TqmMfFxX]|[dD]2?))", string):
+        for s in re.split(r"(?<!\\)([\s;|>&]|%(?:[&TqmMfFxX]|[dD]2?))", text):
             attr = 0
             if re.search("^%(?:[&TqmMfFxX]|[dD]2?)$", s):
                 attr = look.colors["CmdlineMacro"]
@@ -327,8 +163,8 @@ class Cmdline(ui.Widget):
                     attr = look.colors["CmdlineNoProgram"]
             win.addstr(s, attr)
 
-    def print_color_eval(self, win, string):
-        for s in re.split(r"(?<!\\)([\s;.()]|%(?:[&TqmMfFxX]|[dD]2?))", string):
+    def print_color_eval(self, win, text):
+        for s in re.split(r"(?<!\\)([\s;.()]|%(?:[&TqmMfFxX]|[dD]2?))", text):
             attr = 0
             if re.search("^%(?:[&TqmMfFxX]|[dD]2?)$", s):
                 attr = look.colors["CmdlineMacro"]
@@ -338,16 +174,6 @@ class Cmdline(ui.Widget):
                 attr = look.colors["CmdlinePythonFunction"]
             win.addstr(s, attr)
 
-    def cmdline_input(self, key):
-        if key in self.keymap:
-            self.keymap[key]()
-        else:
-            if key == "SPC":
-                key = " "
-            if util.mbslen(key) == 1:
-                self.insert(key)
-                self.history.start()
-
 class History(ui.InfoBox):
     maxsave = 10000
     histories = {}
@@ -355,7 +181,7 @@ class History(ui.InfoBox):
     def __init__(self, cmdline):
         ui.InfoBox.__init__(self, "History")
         self.cmdline = cmdline
-        self.source_string = self.cmdline.string
+        self.source_string = self.cmdline.text
         self.lb = -1
 
     def loadfile(self, path, key):
@@ -407,13 +233,13 @@ class History(ui.InfoBox):
         if item.string in history:
             history.remove(item.string)
         x = self.cursor
-        self.cmdline.setstring(self.source_string)
+        self.cmdline.settext(self.source_string)
         self.start()
         self.setcursor(x)
 
     def start(self):
-        self.source_string = self.cmdline.string
-        t = self.cmdline.string
+        self.source_string = self.cmdline.text
+        t = self.cmdline.text
         info = [ui.InfoBoxContext(item, histr=t) for item in self.gethistory() if t in item]
         info.reverse()
         if info:
@@ -426,11 +252,11 @@ class History(ui.InfoBox):
             return
         super(self.__class__, self).mvcursor(x)
         if self.cursor == self.lb:
-            self.cmdline.setstring(self.source_string)
+            self.cmdline.settext(self.source_string)
         else:
             item = self.cursor_item()
             if item:
-                self.cmdline.setstring(item.string)
+                self.cmdline.settext(item.string)
 
 class Clipboard(ui.InfoBox):
     maxsave = 100
@@ -531,7 +357,7 @@ class Output(ui.InfoBox):
         if self.cmdline.mode.__class__.__name__ != "Shell":
             return
         if string is None:
-            string = self.cmdline.string
+            string = self.cmdline.text
         cmd = util.expandmacro(string)
         out, err = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).communicate()
         info = []
