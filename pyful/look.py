@@ -170,9 +170,9 @@ def init_colors():
     attrs = {}
     for m in dir(curses):
         if m.startswith("COLOR_"):
-            cols[m[6:].lower()] = curses.__dict__[m]
+            cols[m[6:].lower()] = getattr(curses, m)
         elif m.startswith("A_"):
-            attrs[m[2:].lower()] = curses.__dict__[m]
+            attrs[m[2:].lower()] = getattr(curses, m)
 
     if curses.has_colors():
         for i, (name, v) in enumerate(mylook.items()):

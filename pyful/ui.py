@@ -157,6 +157,6 @@ def _init_special_keys():
     for name in dir(curses):
         if name.startswith("KEY_"):
             keyname = "<{0}>".format(name[4:].lower())
-            KeyHandler.special_keys[curses.__dict__[name]] = keyname
+            KeyHandler.special_keys[getattr(curses, name)] = keyname
 
 _init_special_keys()
