@@ -206,7 +206,7 @@ def myatexit():
 #     The key such as "C-A" are interpreted such as "C-a".
 #     The key such as "C-<down>" are undefine.
 #
-myfilerkeymap = {
+widget.get("Filer").keymap = {
     "M-1"           : lambda: filer.focus_workspace(0),
     "M-2"           : lambda: filer.focus_workspace(1),
     "M-3"           : lambda: filer.focus_workspace(2),
@@ -304,7 +304,7 @@ myfilerkeymap = {
     ("RET", ".list"): commands["enter_listfile"],
     }
 
-myfinderkeymap = {
+widget.get("Finder").keymap = {
     "M-n"         : lambda: filer.finder.history_select(-1),
     "M-p"         : lambda: filer.finder.history_select(+1),
     "C-g"         : lambda: filer.finder.finish(),
@@ -314,7 +314,7 @@ myfinderkeymap = {
     "<backspace>" : lambda: filer.finder.delete_backward_char(),
     }
 
-mycmdlinekeymap = {
+widget.get("Cmdline").keymap = {
     "C-f"         : lambda: cmdline.forward_char(),
     "<right>"     : lambda: cmdline.forward_char(),
     "C-b"         : lambda: cmdline.backward_char(),
@@ -322,6 +322,7 @@ mycmdlinekeymap = {
     "M-f"         : lambda: cmdline.forward_word(),
     "M-b"         : lambda: cmdline.backward_word(),
     "C-d"         : lambda: cmdline.delete_char(),
+    "<dc>"        : lambda: cmdline.delete_char(),
     "C-h"         : lambda: cmdline.delete_backward_char(),
     "<backspace>" : lambda: cmdline.delete_backward_char(),
     "M-d"         : lambda: cmdline.delete_forward_word(),
@@ -357,7 +358,7 @@ mycmdlinekeymap = {
     "M-="         : lambda: cmdline.history.zoombox(0),
     }
 
-myclipboardkeymap = {
+widget.get("Clipboard").keymap = {
     "C-n"    : lambda: cmdline.clipboard.mvcursor(1),
     "<down>" : lambda: cmdline.clipboard.mvcursor(1),
     "C-v"    : lambda: cmdline.clipboard.pagedown(),
@@ -366,6 +367,8 @@ myclipboardkeymap = {
     "<up>"   : lambda: cmdline.clipboard.mvcursor(-1),
     "M-v"    : lambda: cmdline.clipboard.pageup(),
     "C-u"    : lambda: cmdline.clipboard.pageup(),
+    "M-n"    : lambda: cmdline.clipboard.mvscroll(+1),
+    "M-p"    : lambda: cmdline.clipboard.mvscroll(-1),
     "C-x"    : lambda: cmdline.clipboard.delete(),
     "C-g"    : lambda: cmdline.clipboard.finish(),
     "C-c"    : lambda: cmdline.clipboard.finish(),
@@ -376,7 +379,7 @@ myclipboardkeymap = {
     "M-="    : lambda: cmdline.clipboard.zoombox(0),
     }
 
-mycompletionkeymap = {
+widget.get("Completion").keymap = {
     "C-n"     : lambda: cmdline.completion.cursordown(),
     "<down>"  : lambda: cmdline.completion.cursordown(),
     "C-p"     : lambda: cmdline.completion.cursorup(),
@@ -386,6 +389,8 @@ mycompletionkeymap = {
     "<right>" : lambda: cmdline.completion.mvcursor(+1),
     "C-b"     : lambda: cmdline.completion.mvcursor(-1),
     "<left>"  : lambda: cmdline.completion.mvcursor(-1),
+    "M-n"     : lambda: cmdline.completion.mvscroll(+1),
+    "M-p"     : lambda: cmdline.completion.mvscroll(-1),
     "C-g"     : lambda: cmdline.completion.finish(),
     "C-c"     : lambda: cmdline.completion.finish(),
     "ESC"     : lambda: cmdline.completion.finish(),
@@ -395,7 +400,7 @@ mycompletionkeymap = {
     "M-="     : lambda: cmdline.completion.zoombox(0),
     }
 
-myoutputkeymap = {
+widget.get("Output").keymap = {
     "C-n"    : lambda: cmdline.output.mvcursor(1),
     "<down>" : lambda: cmdline.output.mvcursor(1),
     "C-v"    : lambda: cmdline.output.pagedown(),
@@ -404,6 +409,8 @@ myoutputkeymap = {
     "<up>"   : lambda: cmdline.output.mvcursor(-1),
     "M-v"    : lambda: cmdline.output.pageup(),
     "C-u"    : lambda: cmdline.output.pageup(),
+    "M-n"    : lambda: cmdline.output.mvscroll(+1),
+    "M-p"    : lambda: cmdline.output.mvscroll(-1),
     "C-g"    : lambda: cmdline.output.finish(),
     "C-c"    : lambda: cmdline.output.finish(),
     "ESC"    : lambda: cmdline.output.finish(),
@@ -413,7 +420,7 @@ myoutputkeymap = {
     "M-="    : lambda: cmdline.output.zoombox(0),
     }
 
-mymenukeymap = {
+widget.get("Menu").keymap = {
     "C-n"    : lambda: menu.mvcursor(+1),
     "<down>" : lambda: menu.mvcursor(+1),
     "C-p"    : lambda: menu.mvcursor(-1),
@@ -433,15 +440,6 @@ mymenukeymap = {
     "ESC"    : lambda: menu.hide(),
     "RET"    : lambda: menu.run(),
     }
-
-# Update the keymap of pyful.
-filer.keymap.update(myfilerkeymap)
-Finder.keymap.update(myfinderkeymap)
-cmdline.keymap.update(mycmdlinekeymap)
-cmdline.clipboard.keymap.update(myclipboardkeymap)
-cmdline.completion.keymap.update(mycompletionkeymap)
-cmdline.output.keymap.update(myoutputkeymap)
-menu.keymap.update(mymenukeymap)
 
 # Define the menu.
 #
@@ -516,7 +514,7 @@ menu.items["launcher"] = (
     )
 
 # Update the filer keymap.
-filer.keymap.update({
+widget.get("Filer").keymap.update({
         "V": lambda: menu.show("filer"),
         "s": lambda: menu.show("sort"),
         "L": lambda: menu.show("layout"),
@@ -596,7 +594,7 @@ myassociation = {
     ("RET", ".flv"  ): lambda: menu.show("video"),
     }
 
-filer.keymap.update(myassociation)
+widget.get("Filer").keymap.update(myassociation)
 
 import os, sys
 if "screen" in os.getenv("TERM"):
