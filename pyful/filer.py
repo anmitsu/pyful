@@ -34,6 +34,8 @@ from pyful import util
 from pyful import widget
 
 class Filer(widget.base.Widget):
+    keymap = {}
+
     def __init__(self):
         widget.base.Widget.__init__(self, "Filer")
         y, x = self.stdscr.getmaxyx()
@@ -42,10 +44,6 @@ class Filer(widget.base.Widget):
         self.workspaces = []
         self.cursor = 0
         self.default_init()
-
-    @property
-    def keymap(self):
-        return Directory.keymap
 
     @property
     def workspace(self):
@@ -80,7 +78,25 @@ class Filer(widget.base.Widget):
             pass
 
     def input(self, key):
-        self.dir.input(key)
+        if self.finder.active:
+            if not self.finder.input(key):
+                return
+        kmap = self.keymap
+        f = self.file
+        ext = util.extname(f.name)
+        if f.marked and (key, ".mark") in kmap:
+            kmap[(key, ".mark")]()
+        elif f.islink() and (key, ".link") in kmap:
+            kmap[(key, ".link")]()
+        elif f.isdir() and (key, ".dir") in kmap:
+            kmap[(key, ".dir")]()
+        elif f.isexec() and (key, ".exec") in kmap:
+            kmap[(key, ".exec")]()
+        elif ext and (key, ext) in kmap:
+            kmap[(key, ext)]()
+        else:
+            if key in kmap:
+                kmap[key]()
 
     def create_workspace(self, title=None):
         if title is None:
@@ -576,7 +592,6 @@ class Directory(widget.base.StandardScreen):
     sort_kind = "Name[^]"
     scroll_type = "HalfScroll"
     statusbar_format = " [{MARK}/{FILE}] {MARKSIZE}bytes {SCROLL}({CURSOR}) {SORT} "
-    keymap = {}
 
     def __init__(self, path, height, width, begy, begx):
         self.win = curses.newwin(height, width, begy, begx)
@@ -601,27 +616,6 @@ class Directory(widget.base.StandardScreen):
             return self.files[self.cursor]
         except IndexError:
             return self.files[0]
-
-    def input(self, key):
-        if self.finder.active:
-            if not self.finder.input(key):
-                return
-        keymap = self.keymap
-        f = self.file
-        ext = util.extname(f.name)
-        if f.marked and (key, ".mark") in keymap:
-            keymap[(key, ".mark")]()
-        elif f.islink() and (key, ".link") in keymap:
-            keymap[(key, ".link")]()
-        elif f.isdir() and (key, ".dir") in keymap:
-            keymap[(key, ".dir")]()
-        elif f.isexec() and (key, ".exec") in keymap:
-            keymap[(key, ".exec")]()
-        elif ext and (key, ext) in keymap:
-            keymap[(key, ext)]()
-        else:
-            if key in keymap:
-                keymap[key]()
 
     def settop(self):
         self.cursor = 0
