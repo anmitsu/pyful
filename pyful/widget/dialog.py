@@ -44,6 +44,10 @@ class DialogBox(base.Widget):
             "ESC"     : lambda: self.hide(),
             }
 
+    def keybind(self, func):
+        self.keymap = func(self)
+        return self.keymap
+
     def resize(self):
         self.win = None
         self.winattr = 0

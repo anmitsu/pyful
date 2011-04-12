@@ -58,6 +58,10 @@ class TextBox(base.Widget):
             "ESC"         : self.finish,
             }
 
+    def keybind(self, func):
+        self.keymap = func(self)
+        return self.keymap
+
     def resize(self):
         self.win = None
         y, x = self.stdscr.getmaxyx()

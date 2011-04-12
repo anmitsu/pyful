@@ -61,6 +61,10 @@ class Filer(widget.base.Widget):
     def finder(self):
         return self.workspace.dir.finder
 
+    def keybind(self, func):
+        self.keymap = func(self)
+        return self.keymap
+
     def resize(self):
         y, x = self.stdscr.getmaxyx()
         self.titlebar = curses.newwin(1, x, 0, 0)
@@ -1206,8 +1210,8 @@ class PathHistory(object):
             self.pos = len(self.history) - 1
 
 class Finder(widget.textbox.TextBox):
-    keymap = {}
     smartcase = True
+    keybindfunc = None
     migemo = None
 
     class History(object):
@@ -1230,6 +1234,10 @@ class Finder(widget.textbox.TextBox):
                 self.pos = len(self.history) - 1
             return self.history[self.pos]
 
+    @classmethod
+    def keybind(cls, func):
+        cls.keybindfunc = func
+
     def __init__(self, directory):
         widget.textbox.TextBox.__init__(self, "Finder", register=False)
         self.dir = directory
@@ -1237,10 +1245,11 @@ class Finder(widget.textbox.TextBox):
         self.cache = []
         self.startfname = ""
         self.history = self.History()
-        self.keymap = self.__class__.keymap
         self.resize()
 
     def resize(self):
+        if self.keybindfunc:
+            self.keymap = self.keybindfunc()
         self.win = None
         y, x = self.dir.win.getmaxyx()
         by, bx = self.dir.win.getbegyx()

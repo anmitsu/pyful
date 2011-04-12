@@ -56,6 +56,10 @@ class InfoBox(base.Widget):
             "M-="   : lambda: self.zoombox(0),
             }
 
+    def keybind(self, func):
+        self.keymap = func(self)
+        return self.keymap
+
     def zoombox(self, amount):
         if amount == 0:
             self.zoom = 0
