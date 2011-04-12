@@ -97,6 +97,8 @@ class InfoBox(base.Widget):
         self.info = []
 
     def mvscroll(self, amount):
+        if not self.win:
+            return
         y, x = self.win.getmaxyx()
         height = (y-2)*self.maxrow
         amount *= self.maxrow
@@ -139,6 +141,8 @@ class InfoBox(base.Widget):
         self.cursor = len(self.info) - 1
 
     def pagedown(self):
+        if not self.win:
+            return
         height = (self.win.getmaxyx()[0]-2) * self.maxrow
         if self.scrolltop+height >= len(self.info):
             return
@@ -146,7 +150,7 @@ class InfoBox(base.Widget):
         self.cursor += height
 
     def pageup(self):
-        if self.scrolltop == 0:
+        if self.scrolltop == 0 or not self.win:
             return
         height = (self.win.getmaxyx()[0]-2) * self.maxrow
         self.scrolltop -= height
