@@ -58,6 +58,8 @@ class Widget(StandardScreen):
                 self.widgets[name] = self
             else:
                 raise WidgetAlreadyRegistered("`{0}' already registered.".format(name))
+        else:
+            self.widgets[name] = self.__class__
 
     @property
     def is_active(self):

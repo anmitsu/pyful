@@ -23,4 +23,5 @@ def get(name):
 
 def resize():
     for widget in base.Widget.widgets.values():
-        widget.resize()
+        if isinstance(widget, base.Widget):
+            widget.resize()
