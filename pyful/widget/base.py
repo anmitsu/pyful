@@ -16,8 +16,6 @@
 
 import curses
 
-from pyful import look
-
 class StandardScreen(object):
     stdscr = None
     borders = []
@@ -34,7 +32,6 @@ class StandardScreen(object):
             if curses.has_colors():
                 curses.start_color()
                 curses.use_default_colors()
-            look.init_colors()
             self.stdscr.refresh()
 
     @classmethod
