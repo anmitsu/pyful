@@ -16,6 +16,7 @@
 
 import curses
 
+from pyful import look
 from pyful import util
 from pyful.widget import base
 
@@ -50,12 +51,12 @@ class DialogBox(base.Widget):
 
     def resize(self):
         self.win = None
-        self.winattr = 0
         y, x = self.stdscr.getmaxyx()
         self.y = 2
         self.x = x
         self.begy = y - 2
         self.begx = 0
+        self.winattr = look.colors["Window"]
         self.messageattr = 0
 
     def settop(self):
