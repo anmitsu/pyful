@@ -358,12 +358,12 @@ def _change_workspace_layout():
         filer.workspace.fullscreen()
 
 @defcmd
-def _view_next_workspace():
+def _switch_next_workspace():
     """Switching to next workspace."""
     widget.get("Filer").next_workspace()
 
 @defcmd
-def _view_prev_workspace():
+def _switch_prev_workspace():
     """Switching to previous workspace."""
     widget.get("Filer").prev_workspace()
 
