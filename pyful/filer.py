@@ -40,6 +40,7 @@ class Filer(widget.base.Widget):
         widget.base.Widget.__init__(self, "Filer")
         y, x = self.stdscr.getmaxyx()
         self.titlebar = curses.newwin(1, x, 0, 0)
+        self.titlebar.bkgd(look.colors["Titlebar"])
         self.navigationbar = curses.newwin(2, x, y-2, 0)
         self.navigationbar.bkgd(look.colors["Window"])
         self.workspaces = []
@@ -69,6 +70,7 @@ class Filer(widget.base.Widget):
     def resize(self):
         y, x = self.stdscr.getmaxyx()
         self.titlebar = curses.newwin(1, x, 0, 0)
+        self.titlebar.bkgd(look.colors["Titlebar"])
         self.navigationbar = curses.newwin(2, x, y-2, 0)
         self.navigationbar.bkgd(look.colors["Window"])
         self.workspace.resize()
