@@ -75,13 +75,13 @@ class Filer(widget.base.Widget):
         self.navigationbar.bkgd(look.colors["Window"])
         self.workspace.resize()
 
-    def view(self):
+    def draw(self):
         try:
-            self.view_titlebar()
+            self.draw_titlebar()
         except curses.error:
             self.titlebar.noutrefresh()
         try:
-            self.workspace.view()
+            self.workspace.draw()
         except curses.error:
             pass
 
@@ -178,7 +178,7 @@ class Filer(widget.base.Widget):
     def swap_workspace_dec(self):
         self.swap_workspace(-1)
 
-    def view_titlebar(self):
+    def draw_titlebar(self):
         self.titlebar.erase()
         self.titlebar.move(0, 0)
         length = sum([util.termwidth(w.title)+2 for w in self.workspaces])
@@ -214,32 +214,32 @@ class Filer(widget.base.Widget):
                 self.titlebar.addstr(string)
         self.titlebar.noutrefresh()
 
-    def toggle_view_ext(self):
-        FileStat.view_ext = not FileStat.view_ext
+    def toggle_draw_ext(self):
+        FileStat.draw_ext = not FileStat.draw_ext
         self.workspace.all_reload()
 
-    def toggle_view_permission(self):
-        FileStat.view_permission = not FileStat.view_permission
+    def toggle_draw_permission(self):
+        FileStat.draw_permission = not FileStat.draw_permission
         self.workspace.all_reload()
 
-    def toggle_view_nlink(self):
-        FileStat.view_nlink = not FileStat.view_nlink
+    def toggle_draw_nlink(self):
+        FileStat.draw_nlink = not FileStat.draw_nlink
         self.workspace.all_reload()
 
-    def toggle_view_user(self):
-        FileStat.view_user = not FileStat.view_user
+    def toggle_draw_user(self):
+        FileStat.draw_user = not FileStat.draw_user
         self.workspace.all_reload()
 
-    def toggle_view_group(self):
-        FileStat.view_group = not FileStat.view_group
+    def toggle_draw_group(self):
+        FileStat.draw_group = not FileStat.draw_group
         self.workspace.all_reload()
 
-    def toggle_view_size(self):
-        FileStat.view_size = not FileStat.view_size
+    def toggle_draw_size(self):
+        FileStat.draw_size = not FileStat.draw_size
         self.workspace.all_reload()
 
-    def toggle_view_mtime(self):
-        FileStat.view_mtime = not FileStat.view_mtime
+    def toggle_draw_mtime(self):
+        FileStat.draw_mtime = not FileStat.draw_mtime
         self.workspace.all_reload()
 
     def default_init(self):
@@ -587,14 +587,14 @@ class Workspace(widget.base.StandardScreen):
             d.win = None
             d.files[:] = []
 
-    def view(self):
+    def draw(self):
         if self.layout == "Fullscreen":
-            self.dir.view(True)
+            self.dir.draw(True)
         else:
             for i, d in enumerate(self.dirs):
                 if i != self.cursor:
-                    d.view(False)
-            self.dir.view(True)
+                    d.draw(False)
+            self.dir.draw(True)
 
 class Directory(widget.base.StandardScreen):
     sort_kind = "Name[^]"
@@ -1083,7 +1083,7 @@ class Directory(widget.base.StandardScreen):
         elif self.scrolltop >= size:
             self.scrolltop = (size//height) * height
 
-    def _view_titlebar(self, width):
+    def _draw_titlebar(self, width):
         title = ""
         titlewidth = width
         if not self.path.endswith(os.sep):
@@ -1096,7 +1096,7 @@ class Directory(widget.base.StandardScreen):
         path = util.path_omission(path, titlewidth)
         self.win.addstr(0, 2, path+title, look.colors["DirectoryPath"])
 
-    def _view_statusbar(self, size, height):
+    def _draw_statusbar(self, size, height):
         try:
             p = float(self.scrolltop)/float(size-height)*100
         except ZeroDivisionError:
@@ -1119,7 +1119,7 @@ class Directory(widget.base.StandardScreen):
             status = util.mbs_ljust(status, x-2)
         self.win.addstr(y-1, 1, status)
 
-    def view(self, focus):
+    def draw(self, focus):
         size = len(self.files)
         height = self.win.getmaxyx()[0] - 2
         width = self.win.getmaxyx()[1] - 3
@@ -1130,7 +1130,7 @@ class Directory(widget.base.StandardScreen):
 
         self.win.erase()
         self.win.border(*self.borders)
-        self._view_titlebar(width)
+        self._draw_titlebar(width)
         self._fix_position(size, height)
 
         line = 0
@@ -1140,7 +1140,7 @@ class Directory(widget.base.StandardScreen):
                 break
 
             f = self.files[i]
-            fstr = f.get_view_file_string(self.path, width)
+            fstr = f.get_drawn_text(self.path, width)
             attr = f.get_attr()
             if self.cursor == i and focus:
                 attr += curses.A_REVERSE
@@ -1148,13 +1148,13 @@ class Directory(widget.base.StandardScreen):
                 self.win.addstr(line, 1, "*"+fstr, attr)
             else:
                 self.win.addstr(line, 1, " "+fstr, attr)
-        self._view_statusbar(size, height)
+        self._draw_statusbar(size, height)
         self.win.noutrefresh()
 
         if focus:
-            self.file.view()
+            self.file.draw()
         if self.finder.active:
-            self.finder.view()
+            self.finder.draw()
 
 class PathHistory(object):
     maxsave = 20
@@ -1333,13 +1333,13 @@ class InvalidEncodingError(Exception):
     pass
 
 class FileStat(object):
-    view_ext = True
-    view_permission = True
-    view_nlink = False
-    view_user = False
-    view_group = False
-    view_size = True
-    view_mtime = True
+    draw_ext = True
+    draw_permission = True
+    draw_nlink = False
+    draw_user = False
+    draw_group = False
+    draw_size = True
+    draw_mtime = True
     time_format = "%y-%m-%d %H:%M"
     time_24_flag = "!"
     time_week_flag = "#"
@@ -1347,7 +1347,7 @@ class FileStat(object):
 
     def __init__(self, name):
         self.marked = False
-        self.view_file_string = None
+        self.drawn_text = None
         self.lstat = self.stat = os.lstat(name)
         if self.islink():
             try:
@@ -1392,10 +1392,10 @@ class FileStat(object):
         return self.marked
 
     def cache_clear(self):
-        self.view_file_string = None
+        self.drawn_text = None
 
-    def get_view_file_string(self, path, width):
-        if self.view_file_string is None:
+    def get_drawn_text(self, path, width):
+        if self.drawn_text is None:
             fname = self.get_file_name(path)
             fstat = self.get_file_stat()
             namewidth = width - util.termwidth(fstat)
@@ -1403,11 +1403,11 @@ class FileStat(object):
                 namewidth = 0
                 fstat = util.mbs_ljust(fstat, width)
             fname = util.mbs_ljust(fname, namewidth)
-            self.view_file_string = fname + fstat
-        return self.view_file_string
+            self.drawn_text = fname + fstat
+        return self.drawn_text
 
     def get_file_name(self, path):
-        if self.view_ext and not self.isdir() and not self.islink():
+        if self.draw_ext and not self.isdir() and not self.islink():
             fname = os.path.splitext(self.name)[0]
         else:
             fname = self.name
@@ -1432,22 +1432,22 @@ class FileStat(object):
 
     def get_file_stat(self):
         fstat = ""
-        if self.view_ext and not self.isdir() and not self.islink():
+        if self.draw_ext and not self.isdir() and not self.islink():
             fstat += " {0}".format(util.extname(self.name))
-        if self.view_user:
+        if self.draw_user:
             fstat += " {0}".format(self.get_user_name())
-        if self.view_group:
+        if self.draw_group:
             fstat += " {0}".format(self.get_group_name())
-        if self.view_nlink:
+        if self.draw_nlink:
             fstat += " {0:>3}".format(self.stat.st_nlink)
-        if self.view_size:
+        if self.draw_size:
             if self.isdir():
                 fstat += " {0:>7}".format("<DIR>")
             else:
                 fstat += " {0:>7}".format(self.get_file_size())
-        if self.view_permission:
+        if self.draw_permission:
             fstat += " {0}".format(self.get_permission())
-        if self.view_mtime:
+        if self.draw_mtime:
             fstat += " {0}".format(self.get_mtime())
         return fstat
 
@@ -1542,7 +1542,7 @@ class FileStat(object):
         else:
             self.name = ""
 
-    def view(self):
+    def draw(self):
         navbar = widget.get("Filer").navigationbar
         navbar.erase()
         perm = self.get_permission()

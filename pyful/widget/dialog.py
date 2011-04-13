@@ -94,7 +94,7 @@ class DialogBox(base.Widget):
             self.win = curses.newwin(self.y, self.x, self.begy, self.begx)
             self.win.bkgd(self.winattr)
 
-    def view(self):
+    def draw(self):
         self.create_window()
         self._fix_position()
 

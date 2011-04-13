@@ -39,24 +39,24 @@ class ActionBox(widget.infobox.InfoBox):
         self.selected = self.cursor_item().string
         self.hide()
 
-    def _get_view(self):
+    def _get_draw(self):
         filer = widget.get("Filer")
         cmdline = widget.get("Cmdline")
-        def viewfunc():
-            filer.view()
+        def drawfunc():
+            filer.draw()
             if cmdline.is_active:
-                cmdline.view()
-            self.view()
-        return viewfunc
+                cmdline.draw()
+            self.draw()
+        return drawfunc
 
     def run(self, actions):
         if not actions:
             return
         self.show([widget.infobox.Context(a) for a in actions])
-        viewer = ui.Viewer(self._get_view())
+        drawer = ui.Drawer(self._get_draw())
         controller = ui.Controller(self.input)
         while self.is_active:
-            viewer.view_and_update()
+            drawer.draw_and_update()
             controller.control()
         if self.selected:
             ret = self.selected

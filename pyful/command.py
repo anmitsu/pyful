@@ -153,7 +153,7 @@ def _open_listfile():
 @defcmd
 def _message_history():
     """Display message history."""
-    message.viewhistroy()
+    message.drawhistroy()
 
 @defcmd
 def _kill_thread():
@@ -581,39 +581,39 @@ def _sort_permission_rev():
     widget.get("Filer").dir.sort_permission_rev()
 
 @defcmd
-def _toggle_view_ext():
+def _toggle_draw_ext():
     """Toggle the file extension display."""
-    widget.get("Filer").toggle_view_ext()
+    widget.get("Filer").toggle_draw_ext()
 
 @defcmd
-def _toggle_view_permission():
+def _toggle_draw_permission():
     """Toggle the file permission display."""
-    widget.get("Filer").toggle_view_permission()
+    widget.get("Filer").toggle_draw_permission()
 
 @defcmd
-def _toggle_view_nlink():
+def _toggle_draw_nlink():
     """Toggle the nuber of link display."""
-    widget.get("Filer").toggle_view_nlink()
+    widget.get("Filer").toggle_draw_nlink()
 
 @defcmd
-def _toggle_view_user():
+def _toggle_draw_user():
     """Toggle the user name of file display."""
-    widget.get("Filer").toggle_view_user()
+    widget.get("Filer").toggle_draw_user()
 
 @defcmd
-def _toggle_view_group():
+def _toggle_draw_group():
     """Toggle the group name of file display."""
-    widget.get("Filer").toggle_view_group()
+    widget.get("Filer").toggle_draw_group()
 
 @defcmd
-def _toggle_view_size():
+def _toggle_draw_size():
     """Toggle the file size display."""
-    widget.get("Filer").toggle_view_size()
+    widget.get("Filer").toggle_draw_size()
 
 @defcmd
-def _toggle_view_mtime():
+def _toggle_draw_mtime():
     """Toggle the change time of file display."""
-    widget.get("Filer").toggle_view_mtime()
+    widget.get("Filer").toggle_draw_mtime()
 
 @defcmd
 def _create_dir():

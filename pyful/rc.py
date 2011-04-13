@@ -104,19 +104,19 @@ FileStat.time_week_flag = "#"
 FileStat.time_yore_flag = " "
 
 # Display the file extension?
-FileStat.view_ext = False
+FileStat.draw_ext = False
 # Display the file permission?
-FileStat.view_permission = False
+FileStat.draw_permission = False
 # Display the number of link?
-FileStat.view_nlink = False
+FileStat.draw_nlink = False
 # Display the user name of file?
-FileStat.view_user = False
+FileStat.draw_user = False
 # Display the group name of file?
-FileStat.view_group = False
+FileStat.draw_group = False
 # Display the file size?
-FileStat.view_size = True
+FileStat.draw_size = True
 # Display the change time of file?
-FileStat.view_mtime = True
+FileStat.draw_mtime = True
 
 # Set my look.
 #
@@ -460,13 +460,13 @@ widget.get("Menu").keybind(
 #     - The third element is the callable function of no argument.
 #
 menu.items["filer"] = (
-    ("toggle (e)xtension" , "e", commands["toggle_view_ext"]),
-    ("toggle (p)ermission", "p", commands["toggle_view_permission"]),
-    ("toggle n(l)ink"     , "l", commands["toggle_view_nlink"]),
-    ("toggle (u)ser"      , "u", commands["toggle_view_user"]),
-    ("toggle (g)roup"     , "g", commands["toggle_view_group"]),
-    ("toggle (s)ize"      , "s", commands["toggle_view_size"]),
-    ("toggle m(t)ime"     , "t", commands["toggle_view_mtime"]),
+    ("toggle (e)xtension" , "e", commands["toggle_draw_ext"]),
+    ("toggle (p)ermission", "p", commands["toggle_draw_permission"]),
+    ("toggle n(l)ink"     , "l", commands["toggle_draw_nlink"]),
+    ("toggle (u)ser"      , "u", commands["toggle_draw_user"]),
+    ("toggle (g)roup"     , "g", commands["toggle_draw_group"]),
+    ("toggle (s)ize"      , "s", commands["toggle_draw_size"]),
+    ("toggle m(t)ime"     , "t", commands["toggle_draw_mtime"]),
     )
 
 menu.items["layout"] = (

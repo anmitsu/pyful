@@ -208,7 +208,7 @@ class Subloop(object):
         menu = widget.get("Menu")
         message = widget.get("Message")
         helper = widget.get("Help")
-        def inputf(key):
+        def _input(key):
             if cmdline.is_active:
                 cmdline.input(key)
             elif menu.is_active:
@@ -217,24 +217,24 @@ class Subloop(object):
                 helper.input(key)
             else:
                 filer.input(key)
-        def viewf():
-            filer.view()
+        def _draw():
+            filer.draw()
             if menu.is_active:
-                menu.view()
+                menu.draw()
             if cmdline.is_active:
-                cmdline.view()
+                cmdline.draw()
             elif helper.is_active:
-                helper.view()
+                helper.draw()
             else:
                 if not filer.finder.active:
-                    message.view()
-                self.subthreads_view()
+                    message.draw()
+                self.draw_threads()
         self.confirmbox = widget.get("ConfirmBox")
-        self.viewer = ui.Viewer(viewf)
-        self.controller = ui.Controller(inputf)
+        self.drawer = ui.Drawer(_draw)
+        self.controller = ui.Controller(_input)
         self.stdscr = widget.base.StandardScreen.stdscr
 
-    def subthreads_view(self):
+    def draw_threads(self):
         navbar = widget.get("Filer").navigationbar
         y, x = navbar.getmaxyx()
         string = " | ".join("[{0}] {1}".format(i+1, t.title) for i, t in enumerate(Filectrl.threads))
@@ -244,7 +244,7 @@ class Subloop(object):
     def run(self):
         with self.confirmbox.rlock:
             self.stdscr.timeout(100)
-            self.viewer.view_and_update()
+            self.drawer.draw_and_update()
             self.controller.control()
             self.stdscr.timeout(-1)
 
@@ -330,10 +330,10 @@ class JobThread(threading.Thread):
             Filectrl.threads.remove(self)
 
     def kill(self):
-        self.view_thread("Waiting...")
+        self.draw_thread("Waiting...")
         self.active = False
 
-    def view_thread(self, status):
+    def draw_thread(self, status):
         message.puts(status, 0)
 
 class TarThread(JobThread):
@@ -342,7 +342,7 @@ class TarThread(JobThread):
 
     def __init__(self, src, dst, tarmode="gzip", wrap=""):
         JobThread.__init__(self)
-        self.view_thread("Reading...")
+        self.draw_thread("Reading...")
         ext = self.tarexts[tarmode]
         if not dst.endswith(ext):
             dst += ext
@@ -376,7 +376,7 @@ class TarThread(JobThread):
             for path in self.src:
                 for f in self.generate(path):
                     arcname = f.replace(os.path.commonprefix([f, self.src_dirname]), "")
-                    self.view_thread("Adding({0}/{1}): {2}".format(elapse, goal, arcname))
+                    self.draw_thread("Adding({0}/{1}): {2}".format(elapse, goal, arcname))
                     self.add_file(tar, f, arcname)
                     elapse += 1
         finally:
@@ -411,7 +411,7 @@ class UntarThread(JobThread):
 
     def __init__(self, src, dstdir="."):
         JobThread.__init__(self)
-        self.view_thread("Reading...")
+        self.draw_thread("Reading...")
         if isinstance(src, list):
             self.title = "Untar: mark files -> {0}".format(dstdir)
             self.src = [util.abspath(f) for f in src]
@@ -442,7 +442,7 @@ class UntarThread(JobThread):
             for info in tar.getmembers():
                 if not self.active:
                     raise FilectrlCancel(self.title)
-                self.view_thread("Untar: {0}".format(info.name))
+                self.draw_thread("Untar: {0}".format(info.name))
                 tar.extract(info, self.dstdir)
                 if info.isdir():
                     self.dirlist.append(info)
@@ -456,7 +456,7 @@ class UntarThread(JobThread):
 class UnzipThread(JobThread):
     def __init__(self, src, dstdir):
         JobThread.__init__(self)
-        self.view_thread("Reading...")
+        self.draw_thread("Reading...")
         if isinstance(src, list):
             self.title = "Unzip: mark files -> {0}".format(dstdir)
             self.src = [util.abspath(f) for f in src]
@@ -513,7 +513,7 @@ class UnzipThread(JobThread):
             source = myzip.open(fname)
             try:
                 target = open(path, "wb")
-                self.view_thread("Inflating: {0}".format(ufname))
+                self.draw_thread("Inflating: {0}".format(ufname))
                 shutil.copyfileobj(source, target)
                 source.close()
                 target.close()
@@ -542,7 +542,7 @@ class UnzipThread(JobThread):
 class ZipThread(JobThread):
     def __init__(self, src, dst, wrap=""):
         JobThread.__init__(self)
-        self.view_thread("Reading...")
+        self.draw_thread("Reading...")
         if not dst.endswith(".zip"):
             dst += ".zip"
         self.dst = util.abspath(dst)
@@ -569,7 +569,7 @@ class ZipThread(JobThread):
             for path in self.src:
                 for f in self.generate(path):
                     arcname = f.replace(os.path.commonprefix([f, self.src_dirname]), "")
-                    self.view_thread("Adding({0}/{1}): {2}".format(elapse, goal, arcname))
+                    self.draw_thread("Adding({0}/{1}): {2}".format(elapse, goal, arcname))
                     self.write_file(myzip, f, arcname)
                     elapse += 1
         finally:
@@ -630,7 +630,7 @@ class DeleteThread(JobThread):
         elapse = 1
         for path in self.path:
             for f in self.generate(path):
-                self.view_thread("Deleting({0}/{1}): {2}".format(elapse, goal, util.unix_basename(f)))
+                self.draw_thread("Deleting({0}/{1}): {2}".format(elapse, goal, util.unix_basename(f)))
                 self.delete_file(f)
                 elapse += 1
         self.delete_dirs()
@@ -665,7 +665,7 @@ class DeleteThread(JobThread):
 class CopyThread(JobThread):
     def __init__(self, src, dst):
         JobThread.__init__(self)
-        self.view_thread("Copy starting...")
+        self.draw_thread("Copy starting...")
         self.dst = util.abspath(dst)
         if isinstance(src, list):
             self.title = "Copy: mark files -> {0}".format(self.dst)
@@ -685,7 +685,7 @@ class CopyThread(JobThread):
                     if not self.active:
                         raise FilectrlCancel(self.title)
                     if job:
-                        self.view_thread("Coping({0}/{1}): {2}".format(elapse, goal, util.unix_basename(job.src)))
+                        self.draw_thread("Coping({0}/{1}): {2}".format(elapse, goal, util.unix_basename(job.src)))
                         job.copy()
                     elapse += 1
         finally:
@@ -694,7 +694,7 @@ class CopyThread(JobThread):
 class MoveThread(JobThread):
     def __init__(self, src, dst):
         JobThread.__init__(self)
-        self.view_thread("Move starting...")
+        self.draw_thread("Move starting...")
         self.dst = util.abspath(dst)
         if isinstance(src, list):
             self.title = "Move: mark files -> {0}".format(self.dst)
@@ -714,7 +714,7 @@ class MoveThread(JobThread):
                     if not self.active:
                         raise FilectrlCancel(self.title)
                     if job:
-                        self.view_thread("Moving({0}/{1}): {2}".format(elapse, goal, util.unix_basename(job.src)))
+                        self.draw_thread("Moving({0}/{1}): {2}".format(elapse, goal, util.unix_basename(job.src)))
                         job.move()
                     elapse += 1
         finally:

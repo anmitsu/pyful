@@ -91,8 +91,8 @@ class Pyful(object):
             shutil.copy(default, rcfile)
 
     def main_loop(self):
-        viewer = ui.Viewer()
+        drawer = ui.Drawer()
         controller = ui.Controller()
         while True:
-            viewer.view_and_update()
+            drawer.draw_and_update()
             controller.control()

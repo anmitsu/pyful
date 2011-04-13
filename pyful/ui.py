@@ -50,32 +50,32 @@ def end_curses():
     signal.signal(signal.SIGWINCH, signal.SIG_DFL)
     widget.base.StandardScreen.destroy()
 
-class Viewer(object):
-    def __init__(self, viewfunc=None):
-        if viewfunc is None:
-            viewfunc = self._get_default_view_function()
-        self.view = viewfunc
+class Drawer(object):
+    def __init__(self, drawfunc=None):
+        if drawfunc is None:
+            drawfunc = self._get_default_draw_function()
+        self.draw = drawfunc
 
-    def _get_default_view_function(self):
+    def _get_default_draw_function(self):
         filer = widget.get("Filer")
         menu = widget.get("Menu")
         cmdline = widget.get("Cmdline")
         helper = widget.get("Help")
         message = widget.get("Message")
-        def viewfunc():
-            filer.view()
+        def drawfunc():
+            filer.draw()
             if menu.is_active:
-                menu.view()
+                menu.draw()
             if helper.is_active:
-                helper.view()
+                helper.draw()
             elif cmdline.is_active:
-                cmdline.view()
+                cmdline.draw()
             elif message.is_active and not filer.finder.active:
-                message.view()
-        return viewfunc
+                message.draw()
+        return drawfunc
 
-    def view_and_update(self):
-        self.view()
+    def draw_and_update(self):
+        self.draw()
         curses.doupdate()
 
 class Controller(object):

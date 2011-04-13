@@ -83,7 +83,7 @@ class Process(object):
                 proc = Popen(cmd, shell=True, executable=self.shell[0],
                              close_fds=True, preexec_fn=os.setsid, stdout=PIPE, stderr=PIPE)
                 message.puts("Spawn: {0} ({1})".format(cmd.strip(), proc.pid))
-                ProcessViewThread(proc, cmd).start()
+                ProcessNotify(proc, cmd).start()
             except Exception as e:
                 message.exception(e)
         else:
@@ -115,7 +115,7 @@ class Process(object):
         proc = Popen([self.terminal_emulator[0], self.terminal_emulator[1], cmd],
                      stdout=PIPE, stderr=PIPE)
         message.puts("Spawn: {0} ({1})".format(cmd.strip(), self.terminal_emulator[0]))
-        ProcessViewThread(proc, cmd).start()
+        ProcessNotify(proc, cmd).start()
 
     def parsemacro(self, string):
         ret = string
@@ -130,7 +130,7 @@ class Process(object):
             ret = re.sub(r"(?!\\)%T", "", ret)
         return ret
 
-class ProcessViewThread(threading.Thread):
+class ProcessNotify(threading.Thread):
     def __init__(self, proc, name):
         threading.Thread.__init__(self)
         self.setDaemon(True)
@@ -140,13 +140,13 @@ class ProcessViewThread(threading.Thread):
     def run(self):
         out, err = self.proc.communicate()
         if out:
-            self.view_output(out)
+            self.notify_output(out)
         if err:
-            self.view_error(err)
+            self.notify_error(err)
         if out or err:
-            message.forceview()
+            message.forcedraw()
 
-    def view_output(self, out):
+    def notify_output(self, out):
         for line in out.splitlines():
             if not line:
                 continue
@@ -157,7 +157,7 @@ class ProcessViewThread(threading.Thread):
                 line = "????? - Invalid encoding"
                 message.error("{0} - ({1})".format(line, self.name))
 
-    def view_error(self, err):
+    def notify_error(self, err):
         for line in err.splitlines():
             if not line:
                 continue

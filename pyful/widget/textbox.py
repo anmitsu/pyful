@@ -244,20 +244,20 @@ class TextBox(base.Widget):
         elif self.cursor > len(self.text):
             self.cursor = len(self.text)
 
-    def view_prompt(self, prompt):
+    def draw_prompt(self, prompt):
         self.win.addstr(prompt, self.promptattr)
 
-    def view_text(self, text):
+    def draw_text(self, text):
         self.win.addstr(text)
 
-    def view(self):
+    def draw(self):
         self.create_window()
         self._fix_position()
         self.win.erase()
         self.win.move(0, 0)
         prompt, text, pos = self._get_current_line(self.win)
-        self.view_prompt(prompt)
-        self.view_text(text)
+        self.draw_prompt(prompt)
+        self.draw_text(text)
         self.win.move(0, pos)
         self.win.noutrefresh()
 

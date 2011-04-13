@@ -36,12 +36,12 @@ def exception(except_cls):
 def confirm(message, options, info=None, position=0):
     return widget.get("Message").confirm(message, options, info, position)
 
-def forceview():
-    widget.get("Message").view()
+def forcedraw():
+    widget.get("Message").draw()
     curses.doupdate()
 
-def viewhistroy():
-    widget.get("Message").view_histroy()
+def drawhistroy():
+    widget.get("Message").draw_histroy()
 
 class Message(widget.base.Widget):
     maxsave = 100
@@ -87,7 +87,7 @@ class Message(widget.base.Widget):
             self.confirmbox.setcursor(position)
             return self.confirmbox.run(message, options, info)
 
-    def view_histroy(self):
+    def draw_histroy(self):
         self.confirm("Message history", ["Close"], self.messages)
 
     def hide(self):
@@ -95,10 +95,10 @@ class Message(widget.base.Widget):
             self.active = False
             self.messagebox.hide()
 
-    def view(self):
+    def draw(self):
         with self.rlock:
             self.messagebox.show(self.messages)
-            self.messagebox.view()
+            self.messagebox.draw()
 
 class MessageBox(widget.infobox.InfoBox):
     height = 4
@@ -142,9 +142,9 @@ class ConfirmBox(widget.dialog.DialogBox):
         self.hide()
         self.infobox.hide()
 
-    def view(self):
-        self.infobox.view()
-        super(self.__class__, self).view()
+    def draw(self):
+        self.infobox.draw()
+        super(self.__class__, self).draw()
 
     def input(self, key):
         if key in self.keymap:
@@ -163,9 +163,9 @@ class ConfirmBox(widget.dialog.DialogBox):
                 else:
                     _info.append(widget.infobox.Context(item))
             self.infobox.show(_info)
-        viewer = ui.Viewer(self.view)
+        drawer = ui.Drawer(self.draw)
         controller = ui.Controller(self.input)
         while self.active:
-            viewer.view_and_update()
+            drawer.draw_and_update()
             controller.control()
         return self.result

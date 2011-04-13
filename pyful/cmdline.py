@@ -55,7 +55,7 @@ class Cmdline(widget.textbox.TextBox):
     def yankhook(self, yanked):
         self.clipboard.yank(yanked)
 
-    def view_text(self, text):
+    def draw_text(self, text):
         if self.mode.__class__.__name__ == "Shell":
             self.print_color_shell(self.win, text)
         elif self.mode.__class__.__name__ == "Eval":
@@ -63,16 +63,16 @@ class Cmdline(widget.textbox.TextBox):
         else:
             self.print_color_default(self.win, text)
 
-    def view(self):
+    def draw(self):
         if self.completion.active:
-            self.completion.view()
+            self.completion.draw()
         elif self.clipboard.active:
-            self.clipboard.view()
+            self.clipboard.draw()
         elif self.output.active:
-            self.output.view()
+            self.output.draw()
         elif self.history.active:
-            self.history.view()
-        super(self.__class__, self).view()
+            self.history.draw()
+        super(self.__class__, self).draw()
 
     def input(self, key):
         if self.completion.active:

@@ -197,7 +197,7 @@ class InfoBox(base.Widget):
         elif self.scrolltop >= size:
             self.scrolltop = size//height * height
 
-    def _view_titlebar(self, size, infocount):
+    def _draw_titlebar(self, size, infocount):
         if self.cursor < 0:
             cpage = 1
         else:
@@ -207,7 +207,7 @@ class InfoBox(base.Widget):
                         (self.title, size, cpage, maxpage),
                         look.colors["InfoBoxTitle"])
 
-    def _view_scrollbar(self, size, height, infocount, offset_x):
+    def _draw_scrollbar(self, size, height, infocount, offset_x):
         if size <= infocount:
             return
         line = 1 + int(float(self.scrolltop) / float(size-infocount) * height)
@@ -226,7 +226,7 @@ class InfoBox(base.Widget):
             self.win = curses.newwin(self.y, self.x, self.begy, self.begx)
             self.win.bkgd(self.winattr)
 
-    def view(self):
+    def draw(self):
         if not self.info:
             return self.hide()
         self.create_window()
@@ -242,8 +242,8 @@ class InfoBox(base.Widget):
 
         self.win.erase()
         self.win.border(*self.borders)
-        self._view_titlebar(size, infocount)
-        self._view_scrollbar(size, height, infocount, x-2)
+        self._draw_titlebar(size, infocount)
+        self._draw_scrollbar(size, height, infocount, x-2)
 
         line = row = 0
         for i in range(self.scrolltop, size):
