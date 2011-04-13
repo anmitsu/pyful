@@ -129,12 +129,12 @@ class ConfirmBox(widget.dialog.DialogBox):
 
     def resize(self):
         self.win = None
-        self.winattr = 0
         y, x = self.stdscr.getmaxyx()
         self.y = 2
         self.x = x
         self.begy = y - 2
         self.begx = 0
+        self.winattr = look.colors["Window"]
         self.messageattr = look.colors["ConfirmMessage"]
 
     def get_result(self):
