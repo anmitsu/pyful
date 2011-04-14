@@ -397,6 +397,8 @@ widget.get("Completion").keybind(
         "<left>"  : lambda: completion.mvcursor(-1),
         "M-n"     : lambda: completion.mvscroll(+1),
         "M-p"     : lambda: completion.mvscroll(-1),
+        "C-v"     : lambda: completion.pagedown(),
+        "M-v"     : lambda: completion.pageup(),
         "C-g"     : lambda: completion.finish(),
         "C-c"     : lambda: completion.finish(),
         "ESC"     : lambda: completion.finish(),
