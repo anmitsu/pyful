@@ -40,13 +40,9 @@ class Cmdline(widget.textbox.TextBox):
         self.completion = completion.Completion(self)
 
     def resize(self):
-        self.win = None
         y, x = self.stdscr.getmaxyx()
-        self.y = 2
-        self.x = x
-        self.begy = y - 2
-        self.begx = 0
-        self.winattr = look.colors["CmdlineWindow"]
+        self.screen.resize(2, x, y-2, 0)
+        self.screen.attr = look.colors["CmdlineWindow"]
         self.promptattr = look.colors["CmdlinePrompt"]
 
     def edithook(self):
@@ -57,11 +53,11 @@ class Cmdline(widget.textbox.TextBox):
 
     def draw_text(self, text):
         if self.mode.__class__.__name__ == "Shell":
-            self.print_color_shell(self.win, text)
+            self.print_color_shell(self.screen.win, text)
         elif self.mode.__class__.__name__ == "Eval":
-            self.print_color_eval(self.win, text)
+            self.print_color_eval(self.screen.win, text)
         else:
-            self.print_color_default(self.win, text)
+            self.print_color_default(self.screen.win, text)
 
     def draw(self):
         if self.completion.active:
@@ -93,7 +89,7 @@ class Cmdline(widget.textbox.TextBox):
         else:
             self.cursor = util.mbslen(self.text) + 1 + pos
         self.active = True
-        self.edithook()
+        self.history.start()
 
     def restart(self, text="", pos=-1):
         self.start(self.mode, text, pos)
@@ -115,6 +111,7 @@ class Cmdline(widget.textbox.TextBox):
             expanded = util.expandmacro(self.text, shell=False)
         self.finish()
         self.history.append(text)
+        self.history.hide()
         ret = self.mode.execute(expanded, action)
         if isinstance(ret, (tuple, list)) and len(ret) == 2:
             self.restart(ret[0], ret[1])
@@ -128,6 +125,7 @@ class Cmdline(widget.textbox.TextBox):
 
     def escape(self):
         self.history.append(self.text)
+        self.history.hide()
         self.finish()
 
     def select_action(self):

@@ -44,7 +44,6 @@ class Menu(widget.infobox.InfoBox):
     def resize(self):
         if not self.current:
             return
-        self.win = None
         y, x = self.stdscr.getmaxyx()
         maxy = y // 2
         height = len(self.current) + 2
@@ -53,11 +52,8 @@ class Menu(widget.infobox.InfoBox):
         width = 50
         if width > x:
             width = x
-        self.y = height
-        self.x = width
-        self.begy = 1
-        self.begx = 0
-        self.winattr = look.colors["MenuWindow"]
+        self.screen.resize(height, width, 1, 0)
+        self.screen.attr = look.colors["MenuWindow"]
 
     def run(self):
         swap = self.current

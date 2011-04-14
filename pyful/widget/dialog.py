@@ -21,8 +21,6 @@ from pyful import util
 from pyful.widget import base
 
 class DialogBox(base.Widget):
-    win = None
-    winattr = 0
     messageattr = 0
 
     def __init__(self, name, register=True):
@@ -50,13 +48,9 @@ class DialogBox(base.Widget):
         return self.keymap
 
     def resize(self):
-        self.win = None
         y, x = self.stdscr.getmaxyx()
-        self.y = 2
-        self.x = x
-        self.begy = y - 2
-        self.begx = 0
-        self.winattr = look.colors["Window"]
+        self.screen.resize(2, x, y-2, 0)
+        self.screen.attr = look.colors["Window"]
         self.messageattr = 0
 
     def settop(self):
@@ -80,7 +74,7 @@ class DialogBox(base.Widget):
         self.active = True
 
     def hide(self):
-        self.win = None
+        self.screen.unlink_window()
         self.active = False
 
     def _fix_position(self):
@@ -89,33 +83,30 @@ class DialogBox(base.Widget):
         elif self.cursor >= len(self.options):
             self.cursor = len(self.options) - 1
 
-    def create_window(self):
-        if not self.win:
-            self.win = curses.newwin(self.y, self.x, self.begy, self.begx)
-            self.win.bkgd(self.winattr)
-
     def draw(self):
-        self.create_window()
+        self.screen.create_window()
+        win = self.screen.win
         self._fix_position()
 
-        y, x = self.win.getmaxyx()
+        win.erase()
+        y, x = win.getmaxyx()
         msg = self.message + " "
         try:
-            self.win.addstr(self.y_offset, self.x_offset, msg, self.messageattr)
+            win.addstr(self.y_offset, self.x_offset, msg, self.messageattr)
         except curses.error:
-            self.win.erase()
+            win.erase()
             maxwidth = x - 2 - util.termwidth(" ".join(self.options))
             fixed = util.mbs_ljust(msg, maxwidth)
-            self.win.addstr(self.y_offset, self.x_offset, fixed, self.messageattr)
+            win.addstr(self.y_offset, self.x_offset, fixed, self.messageattr)
 
         for i, opt in enumerate(self.options):
             if self.cursor == i:
-                self.win.addstr(opt, curses.A_REVERSE)
+                win.addstr(opt, curses.A_REVERSE)
             else:
-                self.win.addstr(opt)
-            self.win.addstr(" ")
-        self.win.move(y-1, x-1)
-        self.win.noutrefresh()
+                win.addstr(opt)
+            win.addstr(" ")
+        win.move(y-1, x-1)
+        win.noutrefresh()
 
     def input(self, key):
         if key in self.keymap:

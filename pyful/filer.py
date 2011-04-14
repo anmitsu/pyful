@@ -584,7 +584,7 @@ class Workspace(widget.base.StandardScreen):
 
     def clear(self):
         for d in self.dirs:
-            d.win = None
+            d.screen.unlink_window()
             d.files[:] = []
 
     def draw(self):
@@ -602,10 +602,8 @@ class Directory(widget.base.StandardScreen):
     statusbar_format = " [{MARK}/{FILE}] {MARKSIZE}bytes {SCROLL}({CURSOR}) {SORT} "
 
     def __init__(self, path, height, width, begy, begx):
-        self.win = curses.newwin(height, width, begy, begx)
-        self.win.bkgd(look.colors["Window"])
-        y, x = self.win.getmaxyx()
-        by, bx = self.win.getbegyx()
+        self.screen = widget.base.Screen(height, width, begy, begx)
+        self.screen.create_window()
         self.path = util.abspath(path)
         self.files = [FileStat(os.pardir)]
         self.mark_files = {}
@@ -638,7 +636,7 @@ class Directory(widget.base.StandardScreen):
         self.cursor = x
 
     def mvscroll(self, amount):
-        y, x = self.win.getmaxyx()
+        y, x = self.screen.win.getmaxyx()
         height = y - 2
         bottom = self.scrolltop+height
         if amount > 0:
@@ -660,7 +658,7 @@ class Directory(widget.base.StandardScreen):
                 self.cursor = bottom - 1
 
     def pagedown(self):
-        height = self.win.getmaxyx()[0] - 2
+        height = self.screen.win.getmaxyx()[0] - 2
         size = len(self.files)
         if self.scrolltop+height >= size:
             return
@@ -672,7 +670,7 @@ class Directory(widget.base.StandardScreen):
     def pageup(self):
         if self.scrolltop == 0:
             return
-        height = self.win.getmaxyx()[0] - 2
+        height = self.screen.win.getmaxyx()[0] - 2
         for f in self.files[self.scrolltop:self.scrolltop+height]:
             f.cache_clear()
         self.scrolltop -= height
@@ -1053,8 +1051,8 @@ class Directory(widget.base.StandardScreen):
         self.sort_kind = "Ext[$]"
 
     def resize(self, height, width, begy, begx):
-        self.win = curses.newwin(height, width, begy, begx)
-        self.win.bkgd(look.colors["Window"])
+        self.screen.resize(height, width, begy, begx)
+        self.screen.create_window()
         self.finder.resize()
 
     def _fix_position(self, size, height):
@@ -1094,7 +1092,7 @@ class Directory(widget.base.StandardScreen):
             titlewidth -= util.termwidth(self.maskreg.pattern)
         path = util.replhome(self.path)
         path = util.path_omission(path, titlewidth)
-        self.win.addstr(0, 2, path+title, look.colors["DirectoryPath"])
+        self.screen.win.addstr(0, 2, path+title, look.colors["DirectoryPath"])
 
     def _draw_statusbar(self, size, height):
         try:
@@ -1114,22 +1112,23 @@ class Directory(widget.base.StandardScreen):
         if self.list_title is not None:
             status += self.list_title
 
-        y, x = self.win.getmaxyx()
+        y, x = self.screen.win.getmaxyx()
         if util.termwidth(status) > x-2:
             status = util.mbs_ljust(status, x-2)
-        self.win.addstr(y-1, 1, status)
+        self.screen.win.addstr(y-1, 1, status)
 
     def draw(self, focus):
         size = len(self.files)
-        height = self.win.getmaxyx()[0] - 2
-        width = self.win.getmaxyx()[1] - 3
+        win = self.screen.win
+        height = win.getmaxyx()[0] - 2
+        width = win.getmaxyx()[1] - 3
         if self.finder.active:
             height -= self.finder.y
         if not height:
             return
 
-        self.win.erase()
-        self.win.border(*self.borders)
+        win.erase()
+        win.border(*self.borders)
         self._draw_titlebar(width)
         self._fix_position(size, height)
 
@@ -1145,11 +1144,11 @@ class Directory(widget.base.StandardScreen):
             if self.cursor == i and focus:
                 attr += curses.A_REVERSE
             if f.marked:
-                self.win.addstr(line, 1, "*"+fstr, attr)
+                win.addstr(line, 1, "*"+fstr, attr)
             else:
-                self.win.addstr(line, 1, " "+fstr, attr)
+                win.addstr(line, 1, " "+fstr, attr)
         self._draw_statusbar(size, height)
-        self.win.noutrefresh()
+        win.noutrefresh()
 
         if focus:
             self.file.draw()
@@ -1254,14 +1253,10 @@ class Finder(widget.textbox.TextBox):
     def resize(self):
         if self.keybindfunc:
             self.keymap = self.keybindfunc()
-        self.win = None
-        y, x = self.dir.win.getmaxyx()
-        by, bx = self.dir.win.getbegyx()
-        self.y = 1
-        self.x = x - 2
-        self.begy = by + y - 2
-        self.begx = bx + 1
-        self.winattr = look.colors["FinderWindow"]
+        y, x = self.dir.screen.win.getmaxyx()
+        by, bx = self.dir.screen.win.getbegyx()
+        self.screen.resize(1, x-2, by+y-2, bx+1)
+        self.screen.attr = look.colors["FinderWindow"]
         self.promptattr = look.colors["FinderPrompt"]
 
     def edithook(self):

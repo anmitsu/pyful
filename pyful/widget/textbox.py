@@ -23,13 +23,12 @@ from pyful import util
 from pyful.widget import base
 
 class TextBox(base.Widget):
-    win = None
-    winattr = 0
     promptattr = 0
     wordbreakchars = re.compile("[._/\s\t\n\"\\`'@$><=:|&{(]")
 
     def __init__(self, name, register=True):
         base.Widget.__init__(self, name, register)
+        self.screen.leaveok = False
         self.text = ""
         self.textmap = []
         self.prompt = ""
@@ -65,11 +64,8 @@ class TextBox(base.Widget):
     def resize(self):
         self.win = None
         y, x = self.stdscr.getmaxyx()
-        self.y = 1
-        self.x = x
-        self.begy = y - 2
-        self.begx = 0
-        self.winattr = look.colors["TextBoxWindow"]
+        self.screen.resize(1, x, y-2, 0)
+        self.screen.attr = look.colors["TextBoxWindow"]
         self.promptattr = 0
 
     def edithook(self):
@@ -196,17 +192,12 @@ class TextBox(base.Widget):
                 self.textmap.append(1)
 
     def finish(self):
-        self.win = None
+        self.screen.unlink_window()
         self.text = ""
         self.textmap[:] = []
         self.prompt = ""
         self.cursor = 0
         self.active = False
-
-    def create_window(self):
-        if not self.win:
-            self.win = curses.newwin(self.y, self.x, self.begy, self.begx)
-            self.win.bkgd(self.winattr)
 
     def _get_current_line(self, win):
         y, x = win.getmaxyx()
@@ -245,21 +236,22 @@ class TextBox(base.Widget):
             self.cursor = len(self.text)
 
     def draw_prompt(self, prompt):
-        self.win.addstr(prompt, self.promptattr)
+        self.screen.win.addstr(prompt, self.promptattr)
 
     def draw_text(self, text):
-        self.win.addstr(text)
+        self.screen.win.addstr(text)
 
     def draw(self):
-        self.create_window()
+        self.screen.create_window()
         self._fix_position()
-        self.win.erase()
-        self.win.move(0, 0)
-        prompt, text, pos = self._get_current_line(self.win)
+        win = self.screen.win
+        win.erase()
+        win.move(0, 0)
+        prompt, text, pos = self._get_current_line(win)
         self.draw_prompt(prompt)
         self.draw_text(text)
-        self.win.move(0, pos)
-        self.win.noutrefresh()
+        win.move(0, pos)
+        win.noutrefresh()
 
     def input(self, key):
         if key in self.keymap:

@@ -106,16 +106,11 @@ class MessageBox(widget.infobox.InfoBox):
     def __init__(self):
         widget.infobox.InfoBox.__init__(self, "MessageBox")
         self.lb = -1
-        self.resize()
 
     def resize(self):
-        self.win = None
         y, x = self.stdscr.getmaxyx()
-        self.y = self.height+2
-        self.x = x
-        self.begy = y-self.height-4
-        self.begx = 0
-        self.winattr = look.colors["MessageWindow"]
+        self.screen.resize(self.height+2, x, y-self.height-4, 0)
+        self.screen.attr = look.colors["MessageWindow"]
 
 class ConfirmBox(widget.dialog.DialogBox):
     rlock = threading.RLock()
@@ -128,19 +123,19 @@ class ConfirmBox(widget.dialog.DialogBox):
         self.result = None
 
     def resize(self):
-        self.win = None
         y, x = self.stdscr.getmaxyx()
-        self.y = 2
-        self.x = x
-        self.begy = y - 2
-        self.begx = 0
-        self.winattr = look.colors["Window"]
+        self.screen.resize(2, x, y-2, 0)
+        self.screen.attr = look.colors["Window"]
         self.messageattr = look.colors["ConfirmMessage"]
 
     def get_result(self):
         self.result = self.cursor_item()
         self.hide()
         self.infobox.hide()
+
+    def hide(self):
+        self.infobox.hide()
+        super(self.__class__, self).hide()
 
     def draw(self):
         self.infobox.draw()

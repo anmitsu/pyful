@@ -25,8 +25,6 @@ from pyful.widget import base
 class InfoBox(base.Widget):
     scroll_type = "HalfScroll"
     zoom = 0
-    win = None
-    winattr = 0
 
     def __init__(self, title, register=True):
         base.Widget.__init__(self, title, register)
@@ -68,7 +66,6 @@ class InfoBox(base.Widget):
         self.resize()
 
     def resize(self):
-        self.win = None
         y, x = self.stdscr.getmaxyx()
         odd = y % 2
         base_y = y//2 + odd
@@ -79,11 +76,8 @@ class InfoBox(base.Widget):
         elif height < 3:
             height = 3
             self.zoom = height - base_y
-        self.y = height
-        self.x = x
-        self.begy = y-height-2
-        self.begx = 0
-        self.winattr = look.colors["InfoBoxWindow"]
+        self.screen.resize(height, x, y-height-2, 0)
+        self.screen.attr = look.colors["InfoBoxWindow"]
 
     def show(self, info, pos=None):
         if pos is None:
@@ -94,16 +88,16 @@ class InfoBox(base.Widget):
         self.info = info
 
     def hide(self):
-        self.win = None
+        self.screen.unlink_window()
         self.active = False
         self.cursor = 0
         self.scrolltop = 0
         self.info = []
 
     def mvscroll(self, amount):
-        if not self.win:
+        if not self.screen.win:
             return
-        y, x = self.win.getmaxyx()
+        y, x = self.screen.win.getmaxyx()
         height = (y-2)*self.maxrow
         amount *= self.maxrow
         bottom = self.scrolltop+height
@@ -145,18 +139,18 @@ class InfoBox(base.Widget):
         self.cursor = len(self.info) - 1
 
     def pagedown(self):
-        if not self.win:
+        if not self.screen.win:
             return
-        height = (self.win.getmaxyx()[0]-2) * self.maxrow
+        height = (self.screen.win.getmaxyx()[0]-2) * self.maxrow
         if self.scrolltop+height >= len(self.info):
             return
         self.scrolltop += height
         self.cursor += height
 
     def pageup(self):
-        if self.scrolltop == 0 or not self.win:
+        if self.scrolltop == 0 or not self.screen.win:
             return
-        height = (self.win.getmaxyx()[0]-2) * self.maxrow
+        height = (self.screen.win.getmaxyx()[0]-2) * self.maxrow
         self.scrolltop -= height
         self.cursor -= height
 
@@ -203,9 +197,9 @@ class InfoBox(base.Widget):
         else:
             cpage = self.cursor//infocount + 1
         maxpage = int(math.ceil(float(size)/float(infocount)))
-        self.win.addstr(0, 2, "{0}({1}) [{2}/{3}]".format
-                        (self.title, size, cpage, maxpage),
-                        look.colors["InfoBoxTitle"])
+        self.screen.win.addstr(0, 2, "{0}({1}) [{2}/{3}]".format
+                               (self.title, size, cpage, maxpage),
+                               look.colors["InfoBoxTitle"])
 
     def _draw_scrollbar(self, size, height, infocount, offset_x):
         if size <= infocount:
@@ -215,24 +209,20 @@ class InfoBox(base.Widget):
             line = height
         for i in range(1, height+1):
             if i == line:
-                self.win.addstr(i, offset_x, "=")
+                self.screen.win.addstr(i, offset_x, "=")
             elif i == 1 or i == height:
-                self.win.addstr(i, offset_x, "+")
+                self.screen.win.addstr(i, offset_x, "+")
             else:
-                self.win.addstr(i, offset_x, "|")
-
-    def create_window(self):
-        if not self.win:
-            self.win = curses.newwin(self.y, self.x, self.begy, self.begx)
-            self.win.bkgd(self.winattr)
+                self.screen.win.addstr(i, offset_x, "|")
 
     def draw(self):
         if not self.info:
             return self.hide()
-        self.create_window()
+        self.screen.create_window()
 
+        win = self.screen.win
         size = len(self.info)
-        y, x = self.win.getmaxyx()
+        y, x = win.getmaxyx()
         height = y - 2
         width = x - 4
         infowidth = width // self.maxrow
@@ -240,8 +230,8 @@ class InfoBox(base.Widget):
 
         self._fix_position(size, height, infocount)
 
-        self.win.erase()
-        self.win.border(*self.borders)
+        win.erase()
+        win.border(*self.borders)
         self._draw_titlebar(size, infocount)
         self._draw_scrollbar(size, height, infocount, x-2)
 
@@ -252,16 +242,16 @@ class InfoBox(base.Widget):
                 line += 1
                 if line >= height:
                     break
-            self.win.move(line+1, row*infowidth+2)
+            win.move(line+1, row*infowidth+2)
             info = self.info[i]
             if self.cursor == i:
                 info.attr += curses.A_REVERSE
-                info.addstr(self.win, infowidth)
+                info.addstr(win, infowidth)
                 info.attr -= curses.A_REVERSE
             else:
-                info.addstr(self.win, infowidth)
+                info.addstr(win, infowidth)
             row += 1
-        self.win.noutrefresh()
+        win.noutrefresh()
 
 class Context(object):
     def __init__(self, string, histr=None, attr=0, hiattr=None):
