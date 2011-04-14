@@ -34,7 +34,6 @@ class InfoBox(base.Widget):
         self.scrolltop = 0
         self.lb = 0
         self.maxrow = 1
-        self.y = self.x = self.begy = self.begx = 1
         self.keymap = {
             "C-n"   : lambda: self.mvcursor(1),
             "<down>": lambda: self.mvcursor(1),

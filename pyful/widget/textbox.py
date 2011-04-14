@@ -33,7 +33,6 @@ class TextBox(base.Widget):
         self.textmap = []
         self.prompt = ""
         self.cursor = 0
-        self.y = self.x = self.begy = self.begx = 1
         self.keymap = {
             "C-f"         : self.forward_char,
             "<right>"     : self.forward_char,

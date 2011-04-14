@@ -28,7 +28,6 @@ class DialogBox(base.Widget):
         self.message = ""
         self.options = []
         self.cursor = 0
-        self.y = self.x = self.begy = self.begx = 1
         self.y_offset = 0
         self.x_offset = 1
         self.keymap = {
