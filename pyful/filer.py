@@ -1052,6 +1052,7 @@ class Directory(widget.base.StandardScreen):
 
     def resize(self, height, width, begy, begx):
         self.screen.resize(height, width, begy, begx)
+        self.screen.attr = look.colors["Window"]
         self.screen.create_window()
         self.finder.resize()
 
