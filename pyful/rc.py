@@ -427,6 +427,28 @@ widget.get("Output").keybind(
         "M-="    : lambda: output.zoombox(0),
         })
 
+widget.get("Help").keybind(
+    lambda helper: {
+        "j"      : lambda: helper.mvcursor(1),
+        "C-n"    : lambda: helper.mvcursor(1),
+        "<down>" : lambda: helper.mvcursor(1),
+        "k"      : lambda: helper.mvcursor(-1),
+        "C-p"    : lambda: helper.mvcursor(-1),
+        "<up>"   : lambda: helper.mvcursor(-1),
+        "C-v"    : lambda: helper.pagedown(),
+        "C-d"    : lambda: helper.pagedown(),
+        "M-v"    : lambda: helper.pageup(),
+        "C-u"    : lambda: helper.pageup(),
+        "M-n"    : lambda: helper.mvscroll(+1),
+        "M-p"    : lambda: helper.mvscroll(-1),
+        "C-g"    : lambda: helper.hide(),
+        "C-c"    : lambda: helper.hide(),
+        "ESC"    : lambda: helper.hide(),
+        "M-+"    : lambda: helper.zoombox(+5),
+        "M--"    : lambda: helper.zoombox(-5),
+        "M-="    : lambda: helper.zoombox(0),
+    })
+
 widget.get("Menu").keybind(
     lambda menu: {
         "C-n"    : lambda: menu.mvcursor(+1),
