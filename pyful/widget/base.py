@@ -42,6 +42,34 @@ class StandardScreen(object):
             curses.noraw()
             curses.endwin()
 
+class Screen(StandardScreen):
+    def __init__(self, y, x, begy, begx, attr=0):
+        self.y = y
+        self.x = x
+        self.begy = begy
+        self.begx = begx
+        self.attr = attr
+        self.win = None
+        self.leaveok = False
+
+    def create_window(self):
+        if not self.win:
+            self.win = curses.newwin(self.y, self.x, self.begy, self.begx)
+            self.win.bkgd(self.attr)
+            self.win.leaveok(self.leaveok)
+
+    def unlink_window(self):
+        if self.win:
+            self.win.erase()
+            self.win = None
+
+    def resize(self, y, x, begy, begx):
+        self.win = None
+        self.y = y
+        self.x = x
+        self.begy = begy
+        self.begx = begx
+
 class WidgetAlreadyRegistered(Exception):
     pass
 
@@ -50,6 +78,7 @@ class Widget(StandardScreen):
 
     def __init__(self, name, register=True):
         self.active = False
+        self.screen = Screen(1, 1, 0, 0)
         if register:
             if not name in self.widgets:
                 self.widgets[name] = self
