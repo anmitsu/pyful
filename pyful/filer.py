@@ -1124,7 +1124,7 @@ class Directory(widget.base.StandardScreen):
         height = win.getmaxyx()[0] - 2
         width = win.getmaxyx()[1] - 3
         if self.finder.active:
-            height -= self.finder.y
+            height -= self.finder.screen.y
         if not height:
             return
 
