@@ -209,21 +209,21 @@ class Subloop(object):
         message = widget.get("Message")
         helper = widget.get("Help")
         def _input(key):
-            if cmdline.is_active:
+            if cmdline.active:
                 cmdline.input(key)
-            elif menu.is_active:
+            elif menu.active:
                 menu.input(key)
-            elif helper.is_active:
+            elif helper.active:
                 helper.input(key)
             else:
                 filer.input(key)
         def _draw():
             filer.draw()
-            if menu.is_active:
+            if menu.active:
                 menu.draw()
-            if cmdline.is_active:
+            if cmdline.active:
                 cmdline.draw()
-            elif helper.is_active:
+            elif helper.active:
                 helper.draw()
             else:
                 if not filer.finder.active:

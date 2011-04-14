@@ -44,7 +44,7 @@ class ActionBox(widget.infobox.InfoBox):
         cmdline = widget.get("Cmdline")
         def drawfunc():
             filer.draw()
-            if cmdline.is_active:
+            if cmdline.active:
                 cmdline.draw()
             self.draw()
         return drawfunc
@@ -55,7 +55,7 @@ class ActionBox(widget.infobox.InfoBox):
         self.show([widget.infobox.Context(a) for a in actions])
         drawer = ui.Drawer(self._get_draw())
         controller = ui.Controller(self.input)
-        while self.is_active:
+        while self.active:
             drawer.draw_and_update()
             controller.control()
         if self.selected:

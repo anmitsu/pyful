@@ -64,13 +64,13 @@ class Drawer(object):
         message = widget.get("Message")
         def drawfunc():
             filer.draw()
-            if menu.is_active:
+            if menu.active:
                 menu.draw()
-            if helper.is_active:
+            if helper.active:
                 helper.draw()
-            elif cmdline.is_active:
+            elif cmdline.active:
                 cmdline.draw()
-            elif message.is_active and not filer.finder.active:
+            elif message.active and not filer.finder.active:
                 message.draw()
         return drawfunc
 
@@ -91,11 +91,11 @@ class Controller(object):
         cmdline = widget.get("Cmdline")
         helper = widget.get("Help")
         def inputfunc(key):
-            if helper.is_active:
+            if helper.active:
                 helper.input(key)
-            elif cmdline.is_active:
+            elif cmdline.active:
                 cmdline.input(key)
-            elif menu.is_active:
+            elif menu.active:
                 menu.input(key)
             else:
                 filer.input(key)

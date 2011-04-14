@@ -87,9 +87,5 @@ class Widget(StandardScreen):
         else:
             self.widgets[name] = self.__class__
 
-    @property
-    def is_active(self):
-        return self.active
-
     def resize(self):
         pass
