@@ -50,7 +50,7 @@ class Screen(StandardScreen):
         self.begx = begx
         self.attr = attr
         self.win = None
-        self.leaveok = False
+        self.leaveok = True
 
     def create_window(self):
         if not self.win:
@@ -70,6 +70,21 @@ class Screen(StandardScreen):
         self.begy = begy
         self.begx = begx
 
+class Panel(Screen):
+    def __init__(self):
+        Screen.__init__(self, 1, 1, 0, 0, 0)
+        self.active = False
+
+    def show(self):
+        self.active = True
+
+    def hide(self):
+        self.unlink_window()
+        self.active = False
+
+    def hidden(self):
+        return not self.active
+
 class WidgetAlreadyRegistered(Exception):
     pass
 
@@ -77,8 +92,7 @@ class Widget(StandardScreen):
     widgets = {}
 
     def __init__(self, name, register=True):
-        self.active = False
-        self.screen = Screen(1, 1, 0, 0)
+        self.panel = Panel()
         if register:
             if not name in self.widgets:
                 self.widgets[name] = self
@@ -86,6 +100,10 @@ class Widget(StandardScreen):
                 raise WidgetAlreadyRegistered("`{0}' already registered.".format(name))
         else:
             self.widgets[name] = self.__class__
+
+    @property
+    def active(self):
+        return self.panel.active
 
     def resize(self):
         pass

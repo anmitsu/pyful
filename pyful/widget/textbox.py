@@ -28,7 +28,7 @@ class TextBox(base.Widget):
 
     def __init__(self, name, register=True):
         base.Widget.__init__(self, name, register)
-        self.screen.leaveok = False
+        self.panel.leaveok = False
         self.text = ""
         self.textmap = []
         self.prompt = ""
@@ -63,8 +63,8 @@ class TextBox(base.Widget):
     def resize(self):
         self.win = None
         y, x = self.stdscr.getmaxyx()
-        self.screen.resize(1, x, y-2, 0)
-        self.screen.attr = look.colors["TextBoxWindow"]
+        self.panel.resize(1, x, y-2, 0)
+        self.panel.attr = look.colors["TextBoxWindow"]
         self.promptattr = 0
 
     def edithook(self):
@@ -191,12 +191,11 @@ class TextBox(base.Widget):
                 self.textmap.append(1)
 
     def finish(self):
-        self.screen.unlink_window()
+        self.panel.hide()
         self.text = ""
         self.textmap[:] = []
         self.prompt = ""
         self.cursor = 0
-        self.active = False
 
     def _get_current_line(self, win):
         y, x = win.getmaxyx()
@@ -235,15 +234,15 @@ class TextBox(base.Widget):
             self.cursor = len(self.text)
 
     def draw_prompt(self, prompt):
-        self.screen.win.addstr(prompt, self.promptattr)
+        self.panel.win.addstr(prompt, self.promptattr)
 
     def draw_text(self, text):
-        self.screen.win.addstr(text)
+        self.panel.win.addstr(text)
 
     def draw(self):
-        self.screen.create_window()
+        self.panel.create_window()
         self._fix_position()
-        win = self.screen.win
+        win = self.panel.win
         win.erase()
         win.move(0, 0)
         prompt, text, pos = self._get_current_line(win)

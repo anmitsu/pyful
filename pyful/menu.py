@@ -52,8 +52,8 @@ class Menu(widget.infobox.InfoBox):
         width = 50
         if width > x:
             width = x
-        self.screen.resize(height, width, 1, 0)
-        self.screen.attr = look.colors["MenuWindow"]
+        self.panel.resize(height, width, 1, 0)
+        self.panel.attr = look.colors["MenuWindow"]
 
     def run(self):
         swap = self.current

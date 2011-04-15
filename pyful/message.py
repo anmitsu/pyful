@@ -62,7 +62,7 @@ class Message(widget.base.Widget):
         self.timer.start()
 
     def puts(self, string, timex=3):
-        self.active = True
+        self.panel.show()
         string = re.sub(r"[\n\r]", "", string).expandtabs()
         self.messages.insert(0, widget.infobox.Context(string, attr=look.colors["PutsMessage"]))
         if self.maxsave < len(self.messages):
@@ -71,7 +71,7 @@ class Message(widget.base.Widget):
             self.start_timer(timex)
 
     def error(self, string, timex=3):
-        self.active = True
+        self.panel.show()
         string = re.sub(r"[\n\r]", "", string).expandtabs()
         self.messages.insert(0, widget.infobox.Context(string, attr=look.colors["ErrorMessage"]))
         if self.maxsave < len(self.messages):
@@ -92,7 +92,7 @@ class Message(widget.base.Widget):
 
     def hide(self):
         with self.rlock:
-            self.active = False
+            self.panel.hide()
             self.messagebox.hide()
 
     def draw(self):
@@ -109,8 +109,8 @@ class MessageBox(widget.infobox.InfoBox):
 
     def resize(self):
         y, x = self.stdscr.getmaxyx()
-        self.screen.resize(self.height+2, x, y-self.height-4, 0)
-        self.screen.attr = look.colors["MessageWindow"]
+        self.panel.resize(self.height+2, x, y-self.height-4, 0)
+        self.panel.attr = look.colors["MessageWindow"]
 
 class ConfirmBox(widget.dialog.DialogBox):
     rlock = threading.RLock()
@@ -124,8 +124,8 @@ class ConfirmBox(widget.dialog.DialogBox):
 
     def resize(self):
         y, x = self.stdscr.getmaxyx()
-        self.screen.resize(2, x, y-2, 0)
-        self.screen.attr = look.colors["Window"]
+        self.panel.resize(2, x, y-2, 0)
+        self.panel.attr = look.colors["Window"]
         self.messageattr = look.colors["ConfirmMessage"]
 
     def get_result(self):
@@ -149,7 +149,6 @@ class ConfirmBox(widget.dialog.DialogBox):
 
     def run(self, message, options, info=None):
         self.result = None
-        self.show(message, options)
         if info:
             _info = []
             for item in info:
@@ -158,7 +157,12 @@ class ConfirmBox(widget.dialog.DialogBox):
                 else:
                     _info.append(widget.infobox.Context(item))
             self.infobox.show(_info)
-        drawer = ui.Drawer(self.draw)
+        self.show(message, options)
+
+        def _draw():
+            widget.get("Filer").draw()
+            self.draw()
+        drawer = ui.Drawer(_draw)
         controller = ui.Controller(self.input)
         while self.active:
             drawer.draw_and_update()

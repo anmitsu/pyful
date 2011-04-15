@@ -41,8 +41,8 @@ class Cmdline(widget.textbox.TextBox):
 
     def resize(self):
         y, x = self.stdscr.getmaxyx()
-        self.screen.resize(2, x, y-2, 0)
-        self.screen.attr = look.colors["CmdlineWindow"]
+        self.panel.resize(2, x, y-2, 0)
+        self.panel.attr = look.colors["CmdlineWindow"]
         self.promptattr = look.colors["CmdlinePrompt"]
 
     def edithook(self):
@@ -53,11 +53,11 @@ class Cmdline(widget.textbox.TextBox):
 
     def draw_text(self, text):
         if self.mode.__class__.__name__ == "Shell":
-            self.print_color_shell(self.screen.win, text)
+            self.print_color_shell(self.panel.win, text)
         elif self.mode.__class__.__name__ == "Eval":
-            self.print_color_eval(self.screen.win, text)
+            self.print_color_eval(self.panel.win, text)
         else:
-            self.print_color_default(self.screen.win, text)
+            self.print_color_default(self.panel.win, text)
 
     def draw(self):
         if self.completion.active:
@@ -88,7 +88,7 @@ class Cmdline(widget.textbox.TextBox):
             self.cursor = pos
         else:
             self.cursor = util.mbslen(self.text) + 1 + pos
-        self.active = True
+        self.panel.show()
         self.history.start()
 
     def restart(self, text="", pos=-1):

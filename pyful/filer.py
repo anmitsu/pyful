@@ -585,6 +585,7 @@ class Workspace(widget.base.StandardScreen):
     def clear(self):
         for d in self.dirs:
             d.screen.unlink_window()
+            d.finder.panel.unlink_window()
             d.files[:] = []
 
     def draw(self):
@@ -603,6 +604,7 @@ class Directory(widget.base.StandardScreen):
 
     def __init__(self, path, height, width, begy, begx):
         self.screen = widget.base.Screen(height, width, begy, begx)
+        self.screen.attr = look.colors["Window"]
         self.screen.create_window()
         self.path = util.abspath(path)
         self.files = [FileStat(os.pardir)]
@@ -1124,7 +1126,7 @@ class Directory(widget.base.StandardScreen):
         height = win.getmaxyx()[0] - 2
         width = win.getmaxyx()[1] - 3
         if self.finder.active:
-            height -= self.finder.screen.y
+            height -= self.finder.panel.y
         if not height:
             return
 
@@ -1256,8 +1258,8 @@ class Finder(widget.textbox.TextBox):
             self.keymap = self.keybindfunc()
         y, x = self.dir.screen.win.getmaxyx()
         by, bx = self.dir.screen.win.getbegyx()
-        self.screen.resize(1, x-2, by+y-2, bx+1)
-        self.screen.attr = look.colors["FinderWindow"]
+        self.panel.resize(1, x-2, by+y-2, bx+1)
+        self.panel.attr = look.colors["FinderWindow"]
         self.promptattr = look.colors["FinderPrompt"]
 
     def edithook(self):
@@ -1304,7 +1306,7 @@ class Finder(widget.textbox.TextBox):
             self.prompt = " Finder(migemo): "
         else:
             self.prompt = " Finder: "
-        self.active = True
+        self.panel.show()
         self.cache = [f.name for f in self.dir.files if f.name != os.pardir]
         self.startfname = self.dir.file.name
         self.find(self.text)

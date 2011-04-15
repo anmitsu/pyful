@@ -48,8 +48,8 @@ class DialogBox(base.Widget):
 
     def resize(self):
         y, x = self.stdscr.getmaxyx()
-        self.screen.resize(2, x, y-2, 0)
-        self.screen.attr = look.colors["Window"]
+        self.panel.resize(2, x, y-2, 0)
+        self.panel.attr = look.colors["Window"]
         self.messageattr = 0
 
     def settop(self):
@@ -70,11 +70,10 @@ class DialogBox(base.Widget):
     def show(self, message, options):
         self.message = message
         self.options = options
-        self.active = True
+        self.panel.show()
 
     def hide(self):
-        self.screen.unlink_window()
-        self.active = False
+        self.panel.hide()
 
     def _fix_position(self):
         if self.cursor < 0:
@@ -83,8 +82,8 @@ class DialogBox(base.Widget):
             self.cursor = len(self.options) - 1
 
     def draw(self):
-        self.screen.create_window()
-        win = self.screen.win
+        self.panel.create_window()
+        win = self.panel.win
         self._fix_position()
 
         win.erase()
@@ -104,7 +103,6 @@ class DialogBox(base.Widget):
             else:
                 win.addstr(opt)
             win.addstr(" ")
-        win.move(y-1, x-1)
         win.noutrefresh()
 
     def input(self, key):

@@ -75,28 +75,27 @@ class InfoBox(base.Widget):
         elif height < 3:
             height = 3
             self.zoom = height - base_y
-        self.screen.resize(height, x, y-height-2, 0)
-        self.screen.attr = look.colors["InfoBoxWindow"]
+        self.panel.resize(height, x, y-height-2, 0)
+        self.panel.attr = look.colors["InfoBoxWindow"]
 
     def show(self, info, pos=None):
         if pos is None:
             pos = self.lb
-        self.active = True
         self.cursor = pos
         self.scrolltop = 0
         self.info = info
+        self.panel.show()
 
     def hide(self):
-        self.screen.unlink_window()
-        self.active = False
         self.cursor = 0
         self.scrolltop = 0
         self.info = []
+        self.panel.hide()
 
     def mvscroll(self, amount):
-        if not self.screen.win:
+        if not self.panel.win:
             return
-        y, x = self.screen.win.getmaxyx()
+        y, x = self.panel.win.getmaxyx()
         height = (y-2)*self.maxrow
         amount *= self.maxrow
         bottom = self.scrolltop+height
@@ -138,18 +137,18 @@ class InfoBox(base.Widget):
         self.cursor = len(self.info) - 1
 
     def pagedown(self):
-        if not self.screen.win:
+        if not self.panel.win:
             return
-        height = (self.screen.win.getmaxyx()[0]-2) * self.maxrow
+        height = (self.panel.win.getmaxyx()[0]-2) * self.maxrow
         if self.scrolltop+height >= len(self.info):
             return
         self.scrolltop += height
         self.cursor += height
 
     def pageup(self):
-        if self.scrolltop == 0 or not self.screen.win:
+        if self.scrolltop == 0 or not self.panel.win:
             return
-        height = (self.screen.win.getmaxyx()[0]-2) * self.maxrow
+        height = (self.panel.win.getmaxyx()[0]-2) * self.maxrow
         self.scrolltop -= height
         self.cursor -= height
 
@@ -196,7 +195,7 @@ class InfoBox(base.Widget):
         else:
             cpage = self.cursor//infocount + 1
         maxpage = int(math.ceil(float(size)/float(infocount)))
-        self.screen.win.addstr(0, 2, "{0}({1}) [{2}/{3}]".format
+        self.panel.win.addstr(0, 2, "{0}({1}) [{2}/{3}]".format
                                (self.title, size, cpage, maxpage),
                                look.colors["InfoBoxTitle"])
 
@@ -208,18 +207,18 @@ class InfoBox(base.Widget):
             line = height
         for i in range(1, height+1):
             if i == line:
-                self.screen.win.addstr(i, offset_x, "=")
+                self.panel.win.addstr(i, offset_x, "=")
             elif i == 1 or i == height:
-                self.screen.win.addstr(i, offset_x, "+")
+                self.panel.win.addstr(i, offset_x, "+")
             else:
-                self.screen.win.addstr(i, offset_x, "|")
+                self.panel.win.addstr(i, offset_x, "|")
 
     def draw(self):
         if not self.info:
             return self.hide()
-        self.screen.create_window()
+        self.panel.create_window()
 
-        win = self.screen.win
+        win = self.panel.win
         size = len(self.info)
         y, x = win.getmaxyx()
         height = y - 2
