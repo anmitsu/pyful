@@ -18,12 +18,12 @@
 
 import os
 import re
+import sys
 import unicodedata
 
 # ----------------------------------------------------------------------
 # Functions for interchangeability:
-try:
-    unicode
+if sys.version_info < (3, 0):
     def U(string):
         return string.decode("utf-8")
 
@@ -35,10 +35,11 @@ try:
                 return string.decode("cp932")
             except UnicodeError:
                 return string.decode("ascii")
-except:
+else:
     def U(string):
         string.encode("utf-8")
         return string
+
     def force_decode(string):
         return string
 
