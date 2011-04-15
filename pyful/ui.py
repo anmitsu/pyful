@@ -55,6 +55,7 @@ class Drawer(object):
         if drawfunc is None:
             drawfunc = self._get_default_draw_function()
         self.draw = drawfunc
+        self.stdscr = widget.base.StandardScreen.stdscr
 
     def _get_default_draw_function(self):
         filer = widget.get("Filer")
@@ -76,6 +77,7 @@ class Drawer(object):
 
     def draw_and_update(self):
         self.draw()
+        curses.setsyx(*self.stdscr.getmaxyx())
         curses.doupdate()
 
 class Controller(object):
