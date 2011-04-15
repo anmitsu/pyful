@@ -451,6 +451,41 @@ widget.get("Help").keybind(
         "M-="    : lambda: helper.zoombox(0),
     })
 
+widget.get("ActionBox").keybind(
+    lambda actionbox: {
+        "C-n"    : lambda: actionbox.mvcursor(1),
+        "<down>" : lambda: actionbox.mvcursor(1),
+        "C-v"    : lambda: actionbox.pagedown(),
+        "C-d"    : lambda: actionbox.pagedown(),
+        "C-p"    : lambda: actionbox.mvcursor(-1),
+        "<up>"   : lambda: actionbox.mvcursor(-1),
+        "M-n"    : lambda: actionbox.mvscroll(1),
+        "M-p"    : lambda: actionbox.mvscroll(-1),
+        "M-v"    : lambda: actionbox.pageup(),
+        "C-u"    : lambda: actionbox.pageup(),
+        "C-g"    : lambda: actionbox.hide(),
+        "C-c"    : lambda: actionbox.hide(),
+        "ESC"    : lambda: actionbox.hide(),
+        "M-+"    : lambda: actionbox.zoombox(+5),
+        "M--"    : lambda: actionbox.zoombox(-5),
+        "M-="    : lambda: actionbox.zoombox(0),
+        "RET"    : lambda: actionbox.select_action(),
+        })
+
+widget.get("ConfirmBox").keybind(
+    lambda confirmbox: {
+        "C-f"     : lambda: confirmbox.mvcursor(1),
+        "<right>" : lambda: confirmbox.mvcursor(1),
+        "C-b"     : lambda: confirmbox.mvcursor(-1),
+        "<left>"  : lambda: confirmbox.mvcursor(-1),
+        "C-a"     : lambda: confirmbox.settop(),
+        "C-e"     : lambda: confirmbox.setbottom(),
+        "C-c"     : lambda: confirmbox.hide(),
+        "C-g"     : lambda: confirmbox.hide(),
+        "ESC"     : lambda: confirmbox.hide(),
+        "RET"     : lambda: confirmbox.get_result(),
+        })
+
 widget.get("Menu").keybind(
     lambda menu: {
         "C-n"    : lambda: menu.mvcursor(+1),
