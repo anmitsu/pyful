@@ -62,23 +62,30 @@ class Message(widget.base.Widget):
         self.timer.setDaemon(True)
         self.timer.start()
 
-    def puts(self, string, timex=3):
-        self.panel.show()
-        string = re.sub(r"[\n\r]", "", string).expandtabs()
-        self.messages.insert(0, widget.infobox.Context(string, attr=look.colors["PutsMessage"]))
+    def addtext(self, text, attr=0, timex=3):
+        for t in text.splitlines():
+            if not t:
+                continue
+            try:
+                if isinstance(t, bytes):
+                    t = t.decode().expandtabs()
+                else:
+                    t = util.U(t).expandtabs()
+            except UnicodeError:
+                t = "????? - Invalid encoding"
+            self.messages.insert(0, widget.infobox.Context(t, attr=attr))
         if self.maxsave < len(self.messages):
             self.messages.pop()
         if timex:
             self.start_timer(timex)
 
-    def error(self, string, timex=3):
+    def puts(self, text, timex=3):
         self.panel.show()
-        string = re.sub(r"[\n\r]", "", string).expandtabs()
-        self.messages.insert(0, widget.infobox.Context(string, attr=look.colors["ErrorMessage"]))
-        if self.maxsave < len(self.messages):
-            self.messages.pop()
-        if timex:
-            self.start_timer(timex)
+        self.addtext(text, look.colors["PutsMessage"], timex)
+
+    def error(self, text, timex=3):
+        self.panel.show()
+        self.addtext(text, look.colors["ErrorMessage"], timex)
 
     def exception(self, except_cls):
         self.error("{0}: {1}".format(except_cls.__class__.__name__, except_cls))
