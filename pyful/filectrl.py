@@ -229,7 +229,6 @@ class Subloop(object):
                 if not filer.finder.active:
                     message.draw()
                 self.draw_threads()
-        self.confirmbox = widget.get("ConfirmBox")
         self.drawer = ui.Drawer(_draw)
         self.controller = ui.Controller(_input)
         self.stdscr = widget.base.StandardScreen.stdscr
@@ -242,7 +241,7 @@ class Subloop(object):
         navbar.noutrefresh()
 
     def run(self):
-        with self.confirmbox.rlock:
+        with util.global_rlock:
             self.stdscr.timeout(100)
             self.drawer.draw_and_update()
             self.controller.control()

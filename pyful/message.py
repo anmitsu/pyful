@@ -22,6 +22,7 @@ import threading
 
 from pyful import look
 from pyful import ui
+from pyful import util
 from pyful import widget
 
 def puts(string, timex=3):
@@ -83,7 +84,7 @@ class Message(widget.base.Widget):
         self.error("{0}: {1}".format(except_cls.__class__.__name__, except_cls))
 
     def confirm(self, message, options, info=None, position=0):
-        with self.confirmbox.rlock:
+        with util.global_rlock:
             self.confirmbox.setcursor(position)
             return self.confirmbox.run(message, options, info)
 
@@ -113,8 +114,6 @@ class MessageBox(widget.infobox.InfoBox):
         self.panel.attr = look.colors["MessageWindow"]
 
 class ConfirmBox(widget.dialog.DialogBox):
-    rlock = threading.RLock()
-
     def __init__(self):
         widget.dialog.DialogBox.__init__(self, "ConfirmBox")
         self.infobox = widget.infobox.InfoBox("ConfirmInfoBox")

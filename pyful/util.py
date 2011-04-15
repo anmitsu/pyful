@@ -19,7 +19,10 @@
 import os
 import re
 import sys
+import threading
 import unicodedata
+
+global_rlock = threading.RLock()
 
 # ----------------------------------------------------------------------
 # Functions for interchangeability:
