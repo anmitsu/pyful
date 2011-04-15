@@ -16,11 +16,10 @@
 
 import array
 import curses
-import signal
 
 from pyful import widget
 
-def refresh(*args):
+def refresh():
     curses.endwin()
     widget.base.StandardScreen.stdscr.refresh()
     widget.resize()
@@ -44,10 +43,8 @@ def start_curses():
         curses.raw()
     except curses.error:
         widget.base.StandardScreen()
-    signal.signal(signal.SIGWINCH, refresh)
 
 def end_curses():
-    signal.signal(signal.SIGWINCH, signal.SIG_DFL)
     widget.base.StandardScreen.destroy()
 
 class Drawer(object):
@@ -106,7 +103,10 @@ class Controller(object):
     def control(self):
         key = self.keyhandler.getkey()
         if key != -1:
-            self.input(key)
+            if key == "<resize>":
+                refresh()
+            else:
+                self.input(key)
 
 class KeyHandler(object):
     special_keys = {}
