@@ -31,7 +31,7 @@ from pyful import widget
 
 class ActionBox(widget.infobox.InfoBox):
     def __init__(self):
-        widget.infobox.InfoBox.__init__(self, "Action")
+        widget.infobox.InfoBox.__init__(self, "ActionBox")
         self.keymap["RET"] = self.select_action
         self.selected = None
 
@@ -39,29 +39,22 @@ class ActionBox(widget.infobox.InfoBox):
         self.selected = self.cursor_item().string
         self.hide()
 
-    def _get_draw(self):
-        filer = widget.get("Filer")
-        cmdline = widget.get("Cmdline")
-        def drawfunc():
-            filer.draw()
-            if cmdline.active:
-                cmdline.draw()
-            self.draw()
-        return drawfunc
-
     def run(self, actions):
         if not actions:
             return
+        self.selected = None
         self.show([widget.infobox.Context(a) for a in actions])
-        drawer = ui.Drawer(self._get_draw())
+
+        def _draw():
+            widget.get("Filer").draw()
+            widget.get("Cmdline").draw()
+            self.draw()
+        drawer = ui.Drawer(_draw)
         controller = ui.Controller(self.input)
         while self.active:
             drawer.draw_and_update()
             controller.control()
-        if self.selected:
-            ret = self.selected
-            self.selected = None
-            return ret
+        return self.selected
 
 class Mode(object):
     actionbox = ActionBox()
