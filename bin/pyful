@@ -81,7 +81,7 @@ def run():
 
     look.init_colors()
 
-    message.puts("Python {0}".format(sys.version))
+    message.puts("Python {0}".format(sys.version.replace(os.linesep, "")))
     rcpath = Pyful.environs["RCFILE"]
     if error:
         message.exception(error)
