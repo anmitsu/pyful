@@ -20,9 +20,7 @@ from pyful import look
 from pyful import util
 from pyful.widget import base
 
-class DialogBox(base.Widget):
-    messageattr = 0
-
+class Dialog(base.Widget):
     def __init__(self, name, register=True):
         base.Widget.__init__(self, name, register)
         self.message = ""
@@ -42,15 +40,26 @@ class DialogBox(base.Widget):
             "ESC"     : lambda: self.hide(),
             }
 
+    def resize(self):
+        pass
+
+    def draw(self):
+        pass
+
+    def input(self, key):
+        pass
+
+    def show(self, message, options):
+        self.message = message
+        self.options = options
+        self.panel.show()
+
+    def hide(self):
+        self.panel.hide()
+
     def keybind(self, func):
         self.keymap = func(self)
         return self.keymap
-
-    def resize(self):
-        y, x = self.stdscr.getmaxyx()
-        self.panel.resize(2, x, y-2, 0)
-        self.panel.attr = look.colors["Window"]
-        self.messageattr = 0
 
     def settop(self):
         self.cursor = 0
@@ -67,6 +76,16 @@ class DialogBox(base.Widget):
     def cursor_item(self):
         return self.options[self.cursor]
 
+    def fix_position(self):
+        if self.cursor < 0:
+            self.cursor = 0
+        elif self.cursor >= len(self.options):
+            self.cursor = len(self.options) - 1
+
+class DialogBar(Dialog):
+    def __init__(self, name, register=True):
+        Dialog.__init__(self, name, register)
+
     def show(self, message, options):
         self.message = message
         self.options = options
@@ -75,27 +94,29 @@ class DialogBox(base.Widget):
     def hide(self):
         self.panel.hide()
 
-    def _fix_position(self):
-        if self.cursor < 0:
-            self.cursor = 0
-        elif self.cursor >= len(self.options):
-            self.cursor = len(self.options) - 1
+    def resize(self):
+        y, x = self.stdscr.getmaxyx()
+        self.panel.resize(2, x, y-2, 0)
+        self.panel.attr = look.colors["Window"]
+        self.messageattr = look.colors["ConfirmMessage"]
 
     def draw(self):
         self.panel.create_window()
         win = self.panel.win
-        self._fix_position()
+        self.fix_position()
 
         win.erase()
         y, x = win.getmaxyx()
+        y_offset = 0
+        x_offset = 1
         msg = self.message + " "
         try:
-            win.addstr(self.y_offset, self.x_offset, msg, self.messageattr)
+            win.addstr(y_offset, x_offset, msg, self.messageattr)
         except curses.error:
             win.erase()
             maxwidth = x - 2 - util.termwidth(" ".join(self.options))
             fixed = util.mbs_ljust(msg, maxwidth)
-            win.addstr(self.y_offset, self.x_offset, fixed, self.messageattr)
+            win.addstr(y_offset, x_offset, fixed, self.messageattr)
 
         for i, opt in enumerate(self.options):
             if self.cursor == i:
@@ -108,3 +129,67 @@ class DialogBox(base.Widget):
     def input(self, key):
         if key in self.keymap:
             self.keymap[key]()
+
+class DialogBox(Dialog):
+    def __init__(self, name, register=True):
+        Dialog.__init__(self, name, register)
+
+    def resize(self):
+        self.messageattr = look.colors["ConfirmMessage"]
+
+    def show(self, message, options):
+        self.lines = message.splitlines()
+        self.options = options
+        self.panel.resize(*self.get_window_size())
+        self.panel.show()
+
+    def hide(self):
+        self.panel.hide()
+
+    def get_window_size(self):
+        olen = util.termwidth(" ".join(self.options))
+        mlen = max(util.termwidth(line) for line in self.lines)
+        height = len(self.lines) + 4
+        width = max(mlen, olen) + 4
+
+        y, x = self.stdscr.getmaxyx()
+        if height > y:
+            height = y
+        if width > x:
+            width = x
+        begy = y//2 - height//2
+        begx = x//2 - width//2
+        if begy < 0:
+            begy = 0
+        if begx < 0:
+            begx = 0
+        return (height, width, begy, begx)
+
+    def draw(self):
+        self.panel.create_window()
+        win = self.panel.win
+        y, x = win.getmaxyx()
+        win.erase()
+        win.border(*self.borders)
+        self.fix_position()
+
+        for i, line in enumerate(range(1, 1+len(self.lines))):
+            if line >= y-2:
+                break
+            try:
+                win.addstr(line, 2, self.lines[i])
+            except curses.error:
+                break
+
+        olen = util.termwidth(" ".join(self.options))
+        if olen > x-2:
+            win.move(y-2, 2)
+        else:
+            win.move(y-2, (x-olen)//2)
+        for i, opt in enumerate(self.options):
+            if self.cursor == i:
+                win.addstr(opt, curses.A_REVERSE)
+            else:
+                win.addstr(opt)
+            win.addstr(" ")
+        win.noutrefresh()

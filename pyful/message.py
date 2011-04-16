@@ -120,19 +120,13 @@ class MessageBox(widget.infobox.InfoBox):
         self.panel.resize(self.height+2, x, y-self.height-4, 0)
         self.panel.attr = look.colors["MessageWindow"]
 
-class ConfirmBox(widget.dialog.DialogBox):
+class ConfirmBox(widget.dialog.DialogBar):
     def __init__(self):
-        widget.dialog.DialogBox.__init__(self, "ConfirmBox")
+        widget.dialog.DialogBar.__init__(self, "ConfirmBox")
         self.infobox = widget.infobox.InfoBox("ConfirmInfoBox")
         self.infobox.lb = -1
         self.keymap["RET"] = self.get_result
         self.result = None
-
-    def resize(self):
-        y, x = self.stdscr.getmaxyx()
-        self.panel.resize(2, x, y-2, 0)
-        self.panel.attr = look.colors["Window"]
-        self.messageattr = look.colors["ConfirmMessage"]
 
     def get_result(self):
         self.result = self.cursor_item()
