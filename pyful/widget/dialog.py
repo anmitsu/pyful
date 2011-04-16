@@ -98,7 +98,7 @@ class DialogBar(Dialog):
         y, x = self.stdscr.getmaxyx()
         self.panel.resize(2, x, y-2, 0)
         self.panel.attr = look.colors["Window"]
-        self.messageattr = look.colors["ConfirmMessage"]
+        self.messageattr = look.colors["DialogMessage"]
 
     def draw(self):
         self.panel.create_window()
@@ -135,7 +135,7 @@ class DialogBox(Dialog):
         Dialog.__init__(self, name, register)
 
     def resize(self):
-        self.messageattr = look.colors["ConfirmMessage"]
+        self.messageattr = look.colors["DialogMessage"]
 
     def show(self, message, options):
         self.lines = message.splitlines()
