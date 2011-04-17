@@ -1245,7 +1245,7 @@ class Finder(widget.textbox.TextBox):
         cls.keybindfunc = func
 
     def __init__(self, directory):
-        widget.textbox.TextBox.__init__(self, "Finder", register=False)
+        widget.textbox.TextBox.__init__(self)
         self.dir = directory
         self.results = []
         self.cache = []

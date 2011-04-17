@@ -22,8 +22,8 @@ from pyful.widget import base
 from pyful.widget import infobox
 
 class Dialog(base.Widget):
-    def __init__(self, name=None, register=True):
-        base.Widget.__init__(self, name, register)
+    def __init__(self, name=None):
+        base.Widget.__init__(self, name)
         self.message = ""
         self.options = []
         self.cursor = 0
@@ -105,8 +105,8 @@ class Dialog(base.Widget):
             self.cursor = len(self.options) - 1
 
 class DialogBar(Dialog):
-    def __init__(self, name=None, register=True):
-        Dialog.__init__(self, name, register)
+    def __init__(self, name=None):
+        Dialog.__init__(self, name)
 
     def resize(self):
         self.infobox.resize()
@@ -144,8 +144,8 @@ class DialogBar(Dialog):
         win.noutrefresh()
 
 class DialogBox(Dialog):
-    def __init__(self, name=None, register=True):
-        Dialog.__init__(self, name, register)
+    def __init__(self, name=None):
+        Dialog.__init__(self, name)
 
     def resize(self):
         y, x, begy, begx = self.get_window_size()

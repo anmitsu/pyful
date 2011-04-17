@@ -26,8 +26,8 @@ class InfoBox(base.Widget):
     scroll_type = "HalfScroll"
     zoom = 0
 
-    def __init__(self, title=None, register=True):
-        base.Widget.__init__(self, title, register)
+    def __init__(self, title=None):
+        base.Widget.__init__(self, title)
         self.info = []
         self.title = title
         self.cursor = 0

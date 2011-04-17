@@ -91,16 +91,13 @@ class WidgetAlreadyRegistered(Exception):
 class Widget(StandardScreen):
     widgets = {}
 
-    def __init__(self, name=None, register=True):
+    def __init__(self, name=None):
         self.panel = Panel()
         if name:
-            if register:
-                if not name in self.widgets:
-                    self.widgets[name] = self
-                else:
-                    raise WidgetAlreadyRegistered("`{0}' already registered.".format(name))
+            if not name in self.widgets:
+                self.widgets[name] = self
             else:
-                self.widgets[name] = self.__class__
+                raise WidgetAlreadyRegistered("`{0}' already registered.".format(name))
 
     @property
     def active(self):

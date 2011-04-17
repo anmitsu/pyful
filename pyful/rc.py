@@ -306,7 +306,7 @@ widget.get("Filer").keybind(
         ("RET", ".list"): commands["enter_listfile"],
         })
 
-widget.get("Finder").keybind(
+widget.get("Filer").finder.keybind(
     lambda finder: {
         "M-n"         : lambda: finder.history_select(-1),
         "M-p"         : lambda: finder.history_select(+1),
