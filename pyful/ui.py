@@ -68,7 +68,10 @@ class Drawer(object):
         return drawfunc
 
     def draw_and_update(self):
-        self.draw()
+        try:
+            self.draw()
+        except curses.error:
+            pass
         curses.setsyx(*self.stdscr.getmaxyx())
         curses.doupdate()
 
