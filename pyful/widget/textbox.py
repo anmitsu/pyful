@@ -26,7 +26,7 @@ class TextBox(base.Widget):
     promptattr = 0
     wordbreakchars = re.compile("[._/\s\t\n\"\\`'@$><=:|&{(]")
 
-    def __init__(self, name, register=True):
+    def __init__(self, name=None, register=True):
         base.Widget.__init__(self, name, register)
         self.panel.leaveok = False
         self.text = ""

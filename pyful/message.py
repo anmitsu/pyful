@@ -122,42 +122,10 @@ class MessageBox(widget.infobox.InfoBox):
 class ConfirmBox(widget.dialog.DialogBar):
     def __init__(self):
         widget.dialog.DialogBar.__init__(self, "ConfirmBox")
-        self.infobox = widget.infobox.InfoBox("ConfirmInfoBox")
-        self.infobox.lb = -1
-        self.keymap["RET"] = self.get_result
-        self.result = None
-
-    def get_result(self):
-        self.result = self.cursor_item()
-        self.hide()
-        self.infobox.hide()
-
-    def hide(self):
-        self.infobox.hide()
-        super(self.__class__, self).hide()
-
-    def draw(self):
-        self.infobox.draw()
-        super(self.__class__, self).draw()
-
-    def input(self, key):
-        if key in self.keymap:
-            self.keymap[key]()
-        elif self.infobox.active and key in self.infobox.keymap:
-            self.infobox.keymap[key]()
 
     def run(self, message, options, info=None):
         self.result = None
-        if info:
-            _info = []
-            for item in info:
-                if isinstance(item, widget.infobox.Context):
-                    _info.append(item)
-                else:
-                    _info.append(widget.infobox.Context(item))
-            self.infobox.show(_info)
-        self.show(message, options)
-
+        self.show(message, options, info)
         def _draw():
             widget.get("Filer").draw()
             self.draw()

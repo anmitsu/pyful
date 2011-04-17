@@ -26,7 +26,7 @@ class InfoBox(base.Widget):
     scroll_type = "HalfScroll"
     zoom = 0
 
-    def __init__(self, title, register=True):
+    def __init__(self, title=None, register=True):
         base.Widget.__init__(self, title, register)
         self.info = []
         self.title = title
@@ -190,6 +190,8 @@ class InfoBox(base.Widget):
             self.scrolltop = size//height * height
 
     def _draw_titlebar(self, size, infocount):
+        if not self.title:
+            return
         if self.cursor < 0:
             cpage = 1
         else:
