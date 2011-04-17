@@ -484,6 +484,17 @@ widget.get("ConfirmBox").keybind(
         "C-g"     : lambda: confirmbox.hide(),
         "ESC"     : lambda: confirmbox.hide(),
         "RET"     : lambda: confirmbox.get_result(),
+        "C-n"     : lambda: confirmbox.infobox.mvcursor(1),
+        "<down>"  : lambda: confirmbox.infobox.mvcursor(1),
+        "C-p"     : lambda: confirmbox.infobox.mvcursor(-1),
+        "<up>"    : lambda: confirmbox.infobox.mvcursor(-1),
+        "M-n"     : lambda: confirmbox.infobox.mvscroll(1),
+        "M-p"     : lambda: confirmbox.infobox.mvscroll(-1),
+        "C-v"     : lambda: confirmbox.infobox.pagedown(),
+        "M-v"     : lambda: confirmbox.infobox.pageup(),
+        "M-+"     : lambda: confirmbox.infobox.zoombox(+5),
+        "M--"     : lambda: confirmbox.infobox.zoombox(-5),
+        "M-="     : lambda: confirmbox.infobox.zoombox(0),
         })
 
 widget.get("Menu").keybind(

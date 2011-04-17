@@ -28,6 +28,8 @@ class Dialog(base.Widget):
         self.options = []
         self.cursor = 0
         self.result = None
+        self.infobox = infobox.InfoBox()
+        self.infobox.lb = -1
         self.keymap = {
             "C-f"     : lambda: self.mvcursor(1),
             "<right>" : lambda: self.mvcursor(1),
@@ -38,10 +40,19 @@ class Dialog(base.Widget):
             "C-c"     : lambda: self.hide(),
             "C-g"     : lambda: self.hide(),
             "ESC"     : lambda: self.hide(),
-            "RED"     : lambda: self.get_result(),
+            "RET"     : lambda: self.get_result(),
+            "C-n"     : lambda: self.infobox.mvcursor(1),
+            "<down>"  : lambda: self.infobox.mvcursor(1),
+            "C-p"     : lambda: self.infobox.mvcursor(-1),
+            "<up>"    : lambda: self.infobox.mvcursor(-1),
+            "M-n"     : lambda: self.infobox.mvscroll(1),
+            "M-p"     : lambda: self.infobox.mvscroll(-1),
+            "C-v"     : lambda: self.infobox.pagedown(),
+            "M-v"     : lambda: self.infobox.pageup(),
+            "M-+"     : lambda: self.infobox.zoombox(+5),
+            "M--"     : lambda: self.infobox.zoombox(-5),
+            "M-="     : lambda: self.infobox.zoombox(0),
             }
-        self.infobox = infobox.InfoBox()
-        self.infobox.lb = -1
 
     def refresh(self):
         pass
@@ -52,8 +63,6 @@ class Dialog(base.Widget):
     def input(self, key):
         if key in self.keymap:
             self.keymap[key]()
-        elif self.infobox.active and key in self.infobox.keymap:
-            self.infobox.keymap[key]()
 
     def show_infobox(self, info):
         _info = []
