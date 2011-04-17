@@ -19,11 +19,6 @@ import curses
 
 from pyful import widget
 
-def refresh():
-    curses.endwin()
-    widget.base.StandardScreen.stdscr.refresh()
-    widget.resize()
-
 def start_widget():
     import pyful.cmdline
     import pyful.filer
@@ -104,7 +99,7 @@ class Controller(object):
         key = self.keyhandler.getkey()
         if key != -1:
             if key == "<resize>":
-                refresh()
+                widget.refresh_all_widgets()
             else:
                 self.input(key)
 

@@ -50,7 +50,7 @@ def _reload_rcfile():
 @defcmd
 def _refresh_window():
     """Refresh all window."""
-    ui.refresh()
+    widget.refresh_all_widgets()
 
 @defcmd
 def _rehash_programs():

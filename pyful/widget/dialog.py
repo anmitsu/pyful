@@ -43,7 +43,7 @@ class Dialog(base.Widget):
         self.infobox = infobox.InfoBox()
         self.infobox.lb = -1
 
-    def resize(self):
+    def refresh(self):
         pass
 
     def draw(self):
@@ -108,8 +108,8 @@ class DialogBar(Dialog):
     def __init__(self, name=None):
         Dialog.__init__(self, name)
 
-    def resize(self):
-        self.infobox.resize()
+    def refresh(self):
+        self.infobox.refresh()
         y, x = self.stdscr.getmaxyx()
         self.panel.resize(2, x, y-2, 0)
         self.panel.attr = look.colors["Window"]
@@ -147,7 +147,7 @@ class DialogBox(Dialog):
     def __init__(self, name=None):
         Dialog.__init__(self, name)
 
-    def resize(self):
+    def refresh(self):
         y, x, begy, begx = self.get_window_size()
         self.infobox.panel.resize(y-3, x-2, begy+1, begx+1)
         self.panel.resize(y, x, begy, begx)

@@ -42,6 +42,11 @@ class StandardScreen(object):
             curses.noraw()
             curses.endwin()
 
+    def refresh(self):
+        if self.stdscr:
+            curses.endwin()
+            self.stdscr.refresh()
+
 class Screen(StandardScreen):
     def __init__(self, y, x, begy, begx, attr=0):
         self.y = y
@@ -103,5 +108,5 @@ class Widget(StandardScreen):
     def active(self):
         return self.panel.active
 
-    def resize(self):
+    def refresh(self):
         pass

@@ -33,7 +33,7 @@ class Menu(widget.infobox.InfoBox):
             return message.error("Undefined menu `{0}'".format(name))
         self.title = name
         self.current = self.items[name]
-        self.resize()
+        self.refresh()
         info = [widget.infobox.Context(i[0]) for i in self.current]
         super(self.__class__, self).show(info, pos)
 
@@ -41,7 +41,7 @@ class Menu(widget.infobox.InfoBox):
         self.current = None
         super(self.__class__, self).hide()
 
-    def resize(self):
+    def refresh(self):
         if not self.current:
             return
         y, x = self.stdscr.getmaxyx()

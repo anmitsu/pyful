@@ -60,7 +60,7 @@ class TextBox(base.Widget):
         self.keymap = func(self)
         return self.keymap
 
-    def resize(self):
+    def refresh(self):
         self.win = None
         y, x = self.stdscr.getmaxyx()
         self.panel.resize(1, x, y-2, 0)

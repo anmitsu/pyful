@@ -62,9 +62,9 @@ class InfoBox(base.Widget):
             self.zoom = 0
         else:
             self.zoom += amount
-        self.resize()
+        self.refresh()
 
-    def resize(self):
+    def refresh(self):
         y, x = self.stdscr.getmaxyx()
         odd = y % 2
         base_y = y//2 + odd

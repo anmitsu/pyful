@@ -39,7 +39,7 @@ class Cmdline(widget.textbox.TextBox):
         self.output = Output(self)
         self.completion = completion.Completion(self)
 
-    def resize(self):
+    def refresh(self):
         y, x = self.stdscr.getmaxyx()
         self.panel.resize(2, x, y-2, 0)
         self.panel.attr = look.colors["CmdlineWindow"]

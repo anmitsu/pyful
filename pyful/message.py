@@ -114,7 +114,7 @@ class MessageBox(widget.infobox.InfoBox):
         widget.infobox.InfoBox.__init__(self, "MessageBox")
         self.lb = -1
 
-    def resize(self):
+    def refresh(self):
         y, x = self.stdscr.getmaxyx()
         self.panel.resize(self.height+2, x, y-self.height-4, 0)
         self.panel.attr = look.colors["MessageWindow"]

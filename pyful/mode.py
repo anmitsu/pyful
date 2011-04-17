@@ -128,7 +128,7 @@ class ChangeLooks(Mode):
         if name in look.looks:
             look.Look.mylook = name
             look.init_colors()
-            ui.refresh()
+            widget.refresh_all_widgets()
         else:
             message.error("`{0}' looks doesn't exist".format(name))
 

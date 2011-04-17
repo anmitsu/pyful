@@ -91,7 +91,7 @@ def run():
     message.puts("Welcome to pyful v{0}".format(__version__))
 
     pyful.init_function()
-    widget.resize()
+    widget.refresh_all_widgets()
     try:
         pyful.main_loop()
     except SystemExit:

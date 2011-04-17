@@ -67,13 +67,13 @@ class Filer(widget.base.Widget):
         self.keymap = func(self)
         return self.keymap
 
-    def resize(self):
+    def refresh(self):
         y, x = self.stdscr.getmaxyx()
         self.titlebar = curses.newwin(1, x, 0, 0)
         self.titlebar.bkgd(look.colors["Titlebar"])
         self.navigationbar = curses.newwin(2, x, y-2, 0)
         self.navigationbar.bkgd(look.colors["Window"])
-        self.workspace.resize()
+        self.workspace.refresh()
 
     def draw(self):
         try:
@@ -114,7 +114,7 @@ class Filer(widget.base.Widget):
         ws.create_dir(os.getenv("HOME"))
         self.workspaces.append(ws)
         self.focus_workspace(len(self.workspaces) - 1)
-        self.workspace.resize()
+        self.workspace.refresh()
 
     def close_workspace(self, x=None):
         if x is None:
@@ -134,7 +134,7 @@ class Filer(widget.base.Widget):
             return
         self.workspace.clear()
         self.cursor = x
-        self.workspace.resize()
+        self.workspace.refresh()
 
     def mvdir_workspace_to(self, x):
         d = self.workspace.close_dir()
@@ -142,7 +142,7 @@ class Filer(widget.base.Widget):
             return
         self.workspaces[x].dirs.insert(0, d)
         self.workspaces[x].setcursor(0)
-        self.workspace.resize()
+        self.workspace.refresh()
 
     def mvfocus(self, x):
         self.workspace.clear()
@@ -151,7 +151,7 @@ class Filer(widget.base.Widget):
             self.cursor = 0
         elif self.cursor < 0:
             self.cursor = len(self.workspaces) - 1
-        self.workspace.resize()
+        self.workspace.refresh()
 
     def next_workspace(self):
         self.mvfocus(+1)
@@ -309,7 +309,7 @@ class Filer(widget.base.Widget):
             self.default_init()
         if not 0 <= self.cursor < len(self.workspaces):
             self.cursor = 0
-        self.workspace.resize()
+        self.workspace.refresh()
 
 class Workspace(widget.base.StandardScreen):
     default_path = os.getenv("HOME")
@@ -376,7 +376,7 @@ class Workspace(widget.base.StandardScreen):
         self.dirs.insert(0, Directory(path, height, width, begy, begx))
         self.setcursor(0)
         self.dir.chdir(path)
-        self.resize()
+        self.refresh()
         return self
 
     def close_dir(self, x=None):
@@ -389,13 +389,13 @@ class Workspace(widget.base.StandardScreen):
         if self.cursor > len(self.dirs) - 1:
             self.setcursor(len(self.dirs)-1)
         self.setcursor(self.cursor)
-        self.resize()
+        self.refresh()
         return d
 
     def chtitle(self, title):
         self.title = title
 
-    def resize(self):
+    def refresh(self):
         if self.layout == "Tile":
             self.tile()
         elif self.layout == "TileLeft":
@@ -565,7 +565,7 @@ class Workspace(widget.base.StandardScreen):
         self.dirs.remove(d)
         self.dirs.insert(new, d)
         self.setcursor(new)
-        self.resize()
+        self.refresh()
 
     def swap_dir_inc(self):
         self.swap_dir(1)
@@ -1056,7 +1056,7 @@ class Directory(widget.base.StandardScreen):
         self.screen.resize(height, width, begy, begx)
         self.screen.attr = look.colors["Window"]
         self.screen.create_window()
-        self.finder.resize()
+        self.finder.refresh()
 
     def _fix_position(self, size, height):
         if self.cursor < 0:
@@ -1251,9 +1251,9 @@ class Finder(widget.textbox.TextBox):
         self.cache = []
         self.startfname = ""
         self.history = self.History()
-        self.resize()
+        self.refresh()
 
-    def resize(self):
+    def refresh(self):
         if self.keybindfunc:
             self.keymap = self.keybindfunc()
         y, x = self.dir.screen.win.getmaxyx()
