@@ -20,7 +20,6 @@ import curses
 import threading
 
 from pyful import look
-from pyful import ui
 from pyful import util
 from pyful import widget
 
@@ -129,9 +128,7 @@ class ConfirmBox(widget.dialog.DialogBar):
         def _draw():
             widget.get("Filer").draw()
             self.draw()
-        drawer = ui.Drawer(_draw)
-        controller = ui.Controller(self.input)
+        ui = widget.ui.UI(_draw, self.input)
         while self.active:
-            drawer.draw_and_update()
-            controller.control()
+            ui.run()
         return self.result

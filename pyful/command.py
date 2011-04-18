@@ -24,7 +24,6 @@ from pyful import filectrl
 from pyful import message
 from pyful import mode
 from pyful import process
-from pyful import ui
 from pyful import util
 from pyful import widget
 

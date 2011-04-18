@@ -24,12 +24,12 @@ This application is CUI filer of the keyboard operation for Linux.
 __version__ = "0.2.2"
 
 __all__ = ["cmdline", "command", "filectrl", "filer", "help", "look", "menu",
-           "message", "mode", "process", "ui", "util", "completion", "widget"]
+           "message", "mode", "process", "util", "completion", "widget"]
 
 import os
 import shutil
 
-from pyful import ui
+from pyful import widget
 
 class Pyful(object):
     """PYthon File management UtiLity"""
@@ -55,7 +55,16 @@ class Pyful(object):
 
     def __init__(self, binpath):
         self.environs["SCRIPT"] = binpath
-        ui.start_widget()
+        import pyful.cmdline
+        import pyful.filer
+        import pyful.message
+        import pyful.menu
+        import pyful.help
+        pyful.cmdline.Cmdline()
+        pyful.filer.Filer()
+        pyful.message.Message()
+        pyful.menu.Menu()
+        pyful.help.Help()
 
     def init_function(self):
         for func in self.initfuncs: func()
@@ -91,8 +100,30 @@ class Pyful(object):
             shutil.copy(default, rcfile)
 
     def main_loop(self):
-        drawer = ui.Drawer()
-        controller = ui.Controller()
+        filer = widget.get("Filer")
+        menu = widget.get("Menu")
+        cmdline = widget.get("Cmdline")
+        message = widget.get("Message")
+        helper = widget.get("Help")
+        def _input(key):
+            if helper.active:
+                helper.input(key)
+            elif cmdline.active:
+                cmdline.input(key)
+            elif menu.active:
+                menu.input(key)
+            else:
+                filer.input(key)
+        def _draw():
+            filer.draw()
+            if menu.active:
+                menu.draw()
+            if helper.active:
+                helper.draw()
+            elif cmdline.active:
+                cmdline.draw()
+            elif message.active and not filer.finder.active:
+                message.draw()
+        ui = widget.ui.UI(_draw, _input)
         while True:
-            drawer.draw_and_update()
-            controller.control()
+            ui.run()

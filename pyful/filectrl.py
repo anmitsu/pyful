@@ -27,7 +27,6 @@ import grp
 import errno
 
 from pyful import message
-from pyful import ui
 from pyful import util
 from pyful import widget
 
@@ -229,8 +228,7 @@ class Subloop(object):
                 if not filer.finder.active:
                     message.draw()
                 self.draw_threads()
-        self.drawer = ui.Drawer(_draw)
-        self.controller = ui.Controller(_input)
+        self.ui = widget.ui.UI(_draw, _input)
         self.stdscr = widget.base.StandardScreen.stdscr
 
     def draw_threads(self):
@@ -243,8 +241,7 @@ class Subloop(object):
     def run(self):
         with util.global_rlock:
             self.stdscr.timeout(100)
-            self.drawer.draw_and_update()
-            self.controller.control()
+            self.ui.run()
             self.stdscr.timeout(-1)
 
 class FilectrlCancel(Exception):

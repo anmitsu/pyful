@@ -17,92 +17,41 @@
 import array
 import curses
 
-from pyful import widget
+from pyful.widget import base
 
-def start_widget():
-    import pyful.cmdline
-    import pyful.filer
-    import pyful.message
-    import pyful.menu
-    import pyful.help
-    pyful.cmdline.Cmdline()
-    pyful.filer.Filer()
-    pyful.message.Message()
-    pyful.menu.Menu()
-    pyful.help.Help()
+class UI(object):
+    def __init__(self, drawfunc, inputfunc):
+        self.drawer = Drawer(drawfunc)
+        self.controller = Controller(inputfunc)
 
-def start_curses():
-    try:
-        curses.noecho()
-        curses.cbreak()
-        curses.raw()
-    except curses.error:
-        widget.base.StandardScreen()
-
-def end_curses():
-    widget.base.StandardScreen.destroy()
+    def run(self):
+        self.drawer.draw_and_update()
+        self.controller.control()
 
 class Drawer(object):
-    def __init__(self, drawfunc=None):
-        if drawfunc is None:
-            drawfunc = self._get_default_draw_function()
+    def __init__(self, drawfunc, screen=None):
         self.draw = drawfunc
-        self.stdscr = widget.base.StandardScreen.stdscr
-
-    def _get_default_draw_function(self):
-        filer = widget.get("Filer")
-        menu = widget.get("Menu")
-        cmdline = widget.get("Cmdline")
-        helper = widget.get("Help")
-        message = widget.get("Message")
-        def drawfunc():
-            filer.draw()
-            if menu.active:
-                menu.draw()
-            if helper.active:
-                helper.draw()
-            elif cmdline.active:
-                cmdline.draw()
-            elif message.active and not filer.finder.active:
-                message.draw()
-        return drawfunc
+        if not screen:
+            self.screen = base.StandardScreen.stdscr
 
     def draw_and_update(self):
         try:
             self.draw()
         except curses.error:
             pass
-        curses.setsyx(*self.stdscr.getmaxyx())
+        curses.setsyx(*self.screen.getmaxyx())
         curses.doupdate()
 
 class Controller(object):
-    def __init__(self, inputfunc=None):
-        if inputfunc is None:
-            inputfunc = self._get_default_input_function()
+    def __init__(self, inputfunc, screen=None):
         self.input = inputfunc
-        self.keyhandler = KeyHandler()
-
-    def _get_default_input_function(self):
-        filer = widget.get("Filer")
-        menu = widget.get("Menu")
-        cmdline = widget.get("Cmdline")
-        helper = widget.get("Help")
-        def inputfunc(key):
-            if helper.active:
-                helper.input(key)
-            elif cmdline.active:
-                cmdline.input(key)
-            elif menu.active:
-                menu.input(key)
-            else:
-                filer.input(key)
-        return inputfunc
+        self.keyhandler = KeyHandler(screen)
 
     def control(self):
         key = self.keyhandler.getkey()
         if key != -1:
             if key == "<resize>":
-                widget.refresh_all_widgets()
+                base.Widget.refresh_all_widgets()
             else:
                 self.input(key)
 
@@ -112,7 +61,7 @@ class KeyHandler(object):
 
     def __init__(self, screen=None):
         if screen is None:
-            screen = widget.base.StandardScreen.stdscr
+            screen = base.StandardScreen.stdscr
         self.screen = screen
 
     def getkey(self):
@@ -158,5 +107,4 @@ def _init_special_keys():
         if name.startswith("KEY_"):
             keyname = "<{0}>".format(name[4:].lower())
             KeyHandler.special_keys[getattr(curses, name)] = keyname
-
 _init_special_keys()

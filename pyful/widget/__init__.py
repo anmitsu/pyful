@@ -14,7 +14,9 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-__all__ = ["base", "dialog", "infobox", "textbox"]
+__all__ = ["base", "dialog", "infobox", "textbox", "ui"]
+
+import curses
 
 from pyful.widget import *
 
@@ -23,3 +25,14 @@ def get(name):
 
 def refresh_all_widgets():
     base.Widget.refresh_all_widgets()
+
+def start_curses():
+    try:
+        curses.noecho()
+        curses.cbreak()
+        curses.raw()
+    except curses.error:
+        base.StandardScreen()
+
+def end_curses():
+    base.StandardScreen.destroy()

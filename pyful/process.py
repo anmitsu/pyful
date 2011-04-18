@@ -23,8 +23,8 @@ from subprocess import Popen, PIPE
 
 from pyful import Pyful
 from pyful import message
-from pyful import ui
 from pyful import util
+from pyful import widget
 
 def spawn(cmd, title=None, expandmacro=True):
     if expandmacro:
@@ -64,7 +64,7 @@ class Process(object):
     def python(self, cmd):
         cmd = self.parsemacro(cmd)
         try:
-            ui.end_curses()
+            widget.end_curses()
             os.system("clear")
             exec(cmd)
             if not self.quick:
@@ -75,7 +75,7 @@ class Process(object):
         except Exception as e:
             message.exception(e)
         finally:
-            ui.start_curses()
+            widget.start_curses()
 
     def system(self, cmd):
         if self.background:
@@ -88,7 +88,7 @@ class Process(object):
                 message.exception(e)
         else:
             try:
-                ui.end_curses()
+                widget.end_curses()
                 os.system("clear")
                 proc = Popen(cmd, shell=True, executable=self.shell[0],
                              close_fds=True, preexec_fn=os.setsid)
@@ -101,7 +101,7 @@ class Process(object):
             except Exception as e:
                 message.exception(e)
             finally:
-                ui.start_curses()
+                widget.start_curses()
 
     def screen(self, cmd, title):
         if self.quick:
