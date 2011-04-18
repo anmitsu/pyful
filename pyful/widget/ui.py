@@ -20,9 +20,9 @@ import curses
 from pyful.widget import base
 
 class UI(object):
-    def __init__(self, drawfunc, inputfunc):
-        self.drawer = Drawer(drawfunc)
-        self.controller = Controller(inputfunc)
+    def __init__(self, drawfunc, inputfunc, screen=None):
+        self.drawer = Drawer(drawfunc, screen)
+        self.controller = Controller(inputfunc, screen)
 
     def run(self):
         self.drawer.draw_and_update()
