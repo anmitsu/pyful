@@ -22,6 +22,4 @@ def get(name):
     return base.Widget.widgets[name]
 
 def refresh_all_widgets():
-    base.StandardScreen().refresh()
-    for widget in base.Widget.widgets.values():
-        widget.refresh()
+    base.Widget.refresh_all_widgets()

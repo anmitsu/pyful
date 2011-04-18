@@ -96,6 +96,13 @@ class WidgetAlreadyRegistered(Exception):
 class Widget(StandardScreen):
     widgets = {}
 
+    @classmethod
+    def refresh_all_widgets(cls):
+        curses.endwin()
+        cls.stdscr.refresh()
+        for widget in cls.widgets.values():
+            widget.refresh()
+
     def __init__(self, name=None):
         self.panel = Panel()
         if name:
