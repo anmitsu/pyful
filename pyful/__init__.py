@@ -60,11 +60,11 @@ class Pyful(object):
         import pyful.message
         import pyful.menu
         import pyful.help
-        pyful.cmdline.Cmdline()
-        pyful.filer.Filer()
-        pyful.message.Message()
-        pyful.menu.Menu()
-        pyful.help.Help()
+        self.cmdline = pyful.cmdline.Cmdline()
+        self.filer = pyful.filer.Filer()
+        self.message = pyful.message.Message()
+        self.menu = pyful.menu.Menu()
+        self.help = pyful.help.Help()
 
     def init_function(self):
         for func in self.initfuncs: func()
@@ -99,31 +99,28 @@ class Pyful(object):
             default = os.path.join(libdir, "rc.py")
             shutil.copy(default, rcfile)
 
+    def draw(self):
+        self.filer.draw()
+        if self.menu.active:
+            self.menu.draw()
+        if self.help.active:
+            self.help.draw()
+        elif self.cmdline.active:
+            self.cmdline.draw()
+        elif self.message.active and not self.filer.finder.active:
+            self.message.draw()
+
+    def input(self, key):
+        if self.help.active:
+            self.help.input(key)
+        elif self.cmdline.active:
+            self.cmdline.input(key)
+        elif self.menu.active:
+            self.menu.input(key)
+        else:
+            self.filer.input(key)
+
     def main_loop(self):
-        filer = widget.get("Filer")
-        menu = widget.get("Menu")
-        cmdline = widget.get("Cmdline")
-        message = widget.get("Message")
-        helper = widget.get("Help")
-        def _input(key):
-            if helper.active:
-                helper.input(key)
-            elif cmdline.active:
-                cmdline.input(key)
-            elif menu.active:
-                menu.input(key)
-            else:
-                filer.input(key)
-        def _draw():
-            filer.draw()
-            if menu.active:
-                menu.draw()
-            if helper.active:
-                helper.draw()
-            elif cmdline.active:
-                cmdline.draw()
-            elif message.active and not filer.finder.active:
-                message.draw()
-        ui = widget.ui.UI(_draw, _input)
+        ui = widget.ui.UI(self.draw, self.input)
         while True:
             ui.run()
