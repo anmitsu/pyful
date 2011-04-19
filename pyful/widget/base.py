@@ -20,6 +20,14 @@ class StandardScreen(object):
     stdscr = None
     borders = []
 
+    @classmethod
+    def destroy(cls):
+        if cls.stdscr:
+            curses.echo()
+            curses.nocbreak()
+            curses.noraw()
+            curses.endwin()
+
     def __init__(self):
         if not self.stdscr:
             self.__class__.stdscr = curses.initscr()
@@ -32,19 +40,6 @@ class StandardScreen(object):
             if curses.has_colors():
                 curses.start_color()
                 curses.use_default_colors()
-            self.stdscr.refresh()
-
-    @classmethod
-    def destroy(cls):
-        if cls.stdscr:
-            curses.echo()
-            curses.nocbreak()
-            curses.noraw()
-            curses.endwin()
-
-    def refresh(self):
-        if self.stdscr:
-            curses.endwin()
             self.stdscr.refresh()
 
 class Screen(StandardScreen):
