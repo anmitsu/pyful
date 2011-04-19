@@ -32,7 +32,8 @@ class Drawer(object):
     def __init__(self, drawfunc, screen=None):
         self.draw = drawfunc
         if not screen:
-            self.screen = base.StandardScreen.stdscr
+            screen = base.StandardScreen.stdscr
+        self.screen = screen
 
     def draw_and_update(self):
         try:
