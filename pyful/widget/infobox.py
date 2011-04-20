@@ -217,9 +217,8 @@ class InfoBox(base.Widget):
 
     def draw(self):
         if not self.info:
-            return self.hide()
+            return
         self.panel.create_window()
-
         win = self.panel.win
         size = len(self.info)
         y, x = win.getmaxyx()
