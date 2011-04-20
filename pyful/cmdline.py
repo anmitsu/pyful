@@ -261,6 +261,13 @@ class Clipboard(widget.infobox.InfoBox):
     def __init__(self, cmdline):
         widget.infobox.InfoBox.__init__(self, "Clipboard")
         self.cmdline = cmdline
+        self.textbox = widget.textbox.TextBox()
+        self.textbox.prompt = " Clipboard: "
+        self.textbox.edithook = self.start
+
+    def refresh(self):
+        self.textbox.refresh()
+        super(self.__class__, self).refresh()
 
     def loadfile(self, path):
         path = os.path.expanduser(path)
@@ -317,24 +324,34 @@ class Clipboard(widget.infobox.InfoBox):
         self.cmdline.insert(item)
         self.finish()
 
+    def draw(self):
+        super(self.__class__, self).draw()
+        self.textbox.draw()
+
     def input(self, key):
         if key in self.keymap:
             self.keymap[key]()
+        elif key == "SPC":
+            self.textbox.insert(" ")
+        elif util.mbslen(key) == 1:
+            self.textbox.insert(key)
         else:
             self.finish()
             self.cmdline.input(key)
 
     def start(self):
-        info = [widget.infobox.Context(item) for item in self.clip]
+        if not self.clip:
+            return
+        text = self.textbox.text
+        info = [widget.infobox.Context(item) for item in self.clip if text in item]
         info.reverse()
-        if info:
-            self.cmdline.history.hide()
-            self.show(info)
-        else:
-            self.hide()
+        self.cmdline.history.hide()
+        self.show(info)
+        self.textbox.panel.show()
 
     def finish(self):
         self.hide()
+        self.textbox.hide()
         self.cmdline.history.start()
 
 class Output(widget.infobox.InfoBox):
