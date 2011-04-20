@@ -368,7 +368,10 @@ class Output(widget.infobox.InfoBox):
                 line = "????? - Invalid encoding"
                 attr = look.colors["ErrorMessage"]
             info.append(widget.infobox.Context(line, attr=attr))
-        self.show(info)
+        if info:
+            self.show(info)
+        else:
+            self.show([widget.infobox.Context("No output: `{0}'".format(cmd))])
 
     def terminal(self):
         pass
