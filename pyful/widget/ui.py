@@ -53,8 +53,50 @@ class Controller(object):
         if key != -1:
             if key == "<resize>":
                 base.Widget.refresh_all_widgets()
+            elif key == "<mouse>":
+                # TODO: we have to implement interface of widget for mouse
+                pass
             else:
                 self.input(key)
+
+class MouseHandler(object):
+    buttons = {}
+
+    @classmethod
+    def enable(cls, flag):
+        if flag:
+            attr = curses.BUTTON1_CLICKED | curses.BUTTON1_DOUBLE_CLICKED
+            curses.mousemask(attr)
+            curses.mouseinterval(200)
+        else:
+            curses.mousemask(0)
+
+    def __init__(self):
+        pass
+
+    def getmouse(self):
+        try:
+            return MouseEvent(*curses.getmouse())
+        except curses.error:
+            pass
+
+class MouseEvent(object):
+    def __init__(self, did, x, y, z, bstate):
+        self.id = did
+        self.y, self.x, self.z = y, x, z
+        self.button = MouseHandler.buttons.get(bstate, "ignore")
+
+    def enclose(self, win):
+        return win.enclose(self.y, self.x)
+
+    def getrelyx(self, win):
+        if self.enclose(win):
+            begy, begx = win.getbegyx()
+            _y = self.y - begy
+            _x = self.x - begx
+        else:
+            _y = _x = -1
+        return (_y, _x)
 
 class KeyHandler(object):
     special_keys = {}
@@ -103,9 +145,11 @@ class KeyHandler(object):
                 key = "UNKNOWN ({0:d} :: 0x{0:x})".format(ch)
         return key
 
-def _init_special_keys():
+def _init_special_keys_and_mouse_buttons():
     for name in dir(curses):
         if name.startswith("KEY_"):
             keyname = "<{0}>".format(name[4:].lower())
             KeyHandler.special_keys[getattr(curses, name)] = keyname
-_init_special_keys()
+        elif name.startswith("BUTTON"):
+            MouseHandler.buttons[getattr(curses, name)] = name
+_init_special_keys_and_mouse_buttons()
