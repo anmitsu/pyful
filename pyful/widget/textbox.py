@@ -51,9 +51,9 @@ class TextBox(base.Widget):
             "C-u"         : self.kill_line_all,
             "C-a"         : self.settop,
             "C-e"         : self.setbottom,
-            "C-g"         : self.finish,
-            "C-c"         : self.finish,
-            "ESC"         : self.finish,
+            "C-g"         : self.hide,
+            "C-c"         : self.hide,
+            "ESC"         : self.hide,
             }
 
     def keybind(self, func):
@@ -61,11 +61,11 @@ class TextBox(base.Widget):
         return self.keymap
 
     def refresh(self):
-        self.win = None
+        self.panel.unlink_window()
         y, x = self.stdscr.getmaxyx()
-        self.panel.resize(1, x, y-2, 0)
+        self.panel.resize(2, x, y-2, 0)
         self.panel.attr = look.colors["TextBoxWindow"]
-        self.promptattr = 0
+        self.promptattr = look.colors["CmdlinePrompt"]
 
     def edithook(self):
         pass
@@ -115,7 +115,7 @@ class TextBox(base.Widget):
 
     def delete_char(self):
         if not self.text:
-            self.finish()
+            self.hide()
         try:
             self.text = util.rmstr(self.text, self.cursor)
             del self.textmap[self.cursor]
@@ -190,11 +190,13 @@ class TextBox(base.Widget):
             else:
                 self.textmap.append(1)
 
-    def finish(self):
+    def show(self):
+        self.panel.show()
+
+    def hide(self):
         self.panel.hide()
         self.text = ""
         self.textmap[:] = []
-        self.prompt = ""
         self.cursor = 0
 
     def _get_current_line(self, win):

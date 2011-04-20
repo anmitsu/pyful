@@ -83,12 +83,12 @@ class Cmdline(widget.textbox.TextBox):
     def start(self, mode, text="", pos=-1):
         self.mode = mode
         self.settext(text)
+        self.show()
         self.prompt = "{1[0]}{0}{1[1]}".format(self.mode.prompt, self.mode.prompt_side)
         if pos >= 0:
             self.cursor = pos
         else:
             self.cursor = util.mbslen(self.text) + 1 + pos
-        self.panel.show()
         self.history.start()
 
     def restart(self, text="", pos=-1):
@@ -109,7 +109,7 @@ class Cmdline(widget.textbox.TextBox):
             expanded = util.expandmacro(self.text, shell=True)
         else:
             expanded = util.expandmacro(self.text, shell=False)
-        self.finish()
+        self.hide()
         self.history.append(text)
         self.history.hide()
         ret = self.mode.execute(expanded, action)
@@ -126,7 +126,7 @@ class Cmdline(widget.textbox.TextBox):
     def escape(self):
         self.history.append(self.text)
         self.history.hide()
-        self.finish()
+        self.hide()
 
     def select_action(self):
         action = self.mode.select_action()

@@ -1306,7 +1306,7 @@ class Finder(widget.textbox.TextBox):
             self.prompt = " Finder(migemo): "
         else:
             self.prompt = " Finder: "
-        self.panel.show()
+        self.show()
         self.cache = [f.name for f in self.dir.files if f.name != os.pardir]
         self.startfname = self.dir.file.name
         self.find(self.text)
@@ -1316,7 +1316,7 @@ class Finder(widget.textbox.TextBox):
         self.history.pos = 0
         self.results[:] = []
         self.cache[:] = []
-        super(self.__class__, self).finish()
+        self.hide()
         self.select_result()
 
     def input(self, key):
