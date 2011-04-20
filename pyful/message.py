@@ -89,9 +89,12 @@ class Message(widget.base.Widget):
         self.error("{0}: {1}".format(except_cls.__class__.__name__, except_cls))
 
     def confirm(self, message, options, info=None, position=0):
-        with util.global_rlock:
-            self.confirmbox.setcursor(position)
-            return self.confirmbox.run(message, options, info)
+        util.global_synchro_event.wait()
+        util.global_synchro_event.clear()
+        self.confirmbox.setcursor(position)
+        ret = self.confirmbox.run(message, options, info)
+        util.global_synchro_event.set()
+        return ret
 
     def draw_histroy(self):
         self.confirm("Message history", ["Close"], self.messages)

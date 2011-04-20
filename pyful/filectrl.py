@@ -239,10 +239,10 @@ class Subloop(object):
         navbar.noutrefresh()
 
     def run(self):
-        with util.global_rlock:
-            self.stdscr.timeout(100)
-            self.ui.run()
-            self.stdscr.timeout(-1)
+        util.global_synchro_event.wait()
+        self.stdscr.timeout(100)
+        self.ui.run()
+        self.stdscr.timeout(-1)
 
 class FilectrlCancel(Exception):
     pass

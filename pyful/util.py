@@ -22,7 +22,8 @@ import sys
 import threading
 import unicodedata
 
-global_rlock = threading.RLock()
+global_synchro_event = threading.Event()
+global_synchro_event.set()
 
 # ----------------------------------------------------------------------
 # Functions for interchangeability:
