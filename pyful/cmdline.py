@@ -60,6 +60,7 @@ class Cmdline(widget.textbox.TextBox):
             self.print_color_default(self.panel.win, text)
 
     def draw(self):
+        super(self.__class__, self).draw()
         if self.completion.active:
             self.completion.draw()
         elif self.clipboard.active:
@@ -68,7 +69,6 @@ class Cmdline(widget.textbox.TextBox):
             self.output.draw()
         elif self.history.active:
             self.history.draw()
-        super(self.__class__, self).draw()
 
     def input(self, key):
         if self.completion.active:
