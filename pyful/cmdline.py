@@ -293,8 +293,10 @@ class Clipboard(widget.infobox.InfoBox):
 
     def delete(self):
         item = self.cursor_item()
-        if item:
+        try:
             self.clip.remove(item.string)
+        except ValueError:
+            return
         x = self.cursor
         self.start()
         self.setcursor(x)
