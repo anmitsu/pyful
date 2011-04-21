@@ -28,7 +28,7 @@ mode.TrashBox.path = "~/.pyful/trashbox"
 mode.Replace.form = "emacs" # or "vim"
 
 # Set the prompt of shell mode.
-mode.Shell.prompt = "$"
+mode.Shell.prompt = " $ "
 
 # Set message history.
 message.Message.history = 100

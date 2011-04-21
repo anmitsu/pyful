@@ -84,7 +84,7 @@ class Cmdline(widget.textbox.TextBox):
         self.mode = mode
         self.settext(text)
         self.show()
-        self.prompt = "{1[0]}{0}{1[1]}".format(self.mode.prompt, self.mode.prompt_side)
+        self.prompt = self.mode.prompt
         if pos >= 0:
             self.cursor = pos
         else:

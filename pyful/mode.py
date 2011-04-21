@@ -57,7 +57,6 @@ class Mode(object):
     actionbox = ActionBox()
     actions = []
     prompt = ""
-    prompt_side = (" ", " ")
 
     def select_action(self):
         return self.actionbox.run(self.actions)
@@ -69,7 +68,7 @@ class Mode(object):
         pass
 
 class Shell(Mode):
-    prompt = "$"
+    prompt = " $ "
     actions = ["Run background", "Run external terminal", "Run quickly",]
 
     def complete(self, comp):
@@ -85,7 +84,7 @@ class Shell(Mode):
         process.spawn(cmd, expandmacro=False)
 
 class Eval(Mode):
-    prompt = "Eval:"
+    prompt = " Eval: "
     actions = ["Run quickly",]
 
     def complete(self, comp):
@@ -97,7 +96,7 @@ class Eval(Mode):
         process.python(cmd)
 
 class Mx(Mode):
-    prompt = "M-x"
+    prompt = " M-x "
     actions = ["Show command help",]
 
     def complete(self, comp):
@@ -115,7 +114,7 @@ class Mx(Mode):
                 message.error("Undefined command `{0}'".format(cmd))
 
 class ChangeLooks(Mode):
-    prompt = "Change looks:"
+    prompt = " Change looks: "
 
     def complete(self, comp):
         return sorted([l for l in look.looks.keys()
@@ -130,7 +129,7 @@ class ChangeLooks(Mode):
             message.error("`{0}' looks doesn't exist".format(name))
 
 class ChangeWorkspaceTitle(Mode):
-    prompt = "Change workspace title:"
+    prompt = " Change workspace title: "
 
     def complete(self, comp):
         return [ws.title for ws in widget.get("Filer").workspaces
@@ -140,7 +139,7 @@ class ChangeWorkspaceTitle(Mode):
         widget.get("Filer").workspace.chtitle(title)
 
 class Chdir(Mode):
-    prompt = "Chdir to:"
+    prompt = " Chdir to: "
 
     def complete(self, comp):
         return comp.comp_dirs()
@@ -153,9 +152,9 @@ class Chmod(Mode):
     def prompt(self):
         filer = widget.get("Filer")
         if filer.dir.ismark():
-            return "Chmod mark files:"
+            return " Chmod mark files: "
         else:
-            return "Chmod ({0} - {1:#o}):".format(filer.file.name, filer.file.stat.st_mode)
+            return " Chmod ({0} - {1:#o}): ".format(filer.file.name, filer.file.stat.st_mode)
 
     def complete(self, comp):
         symbols = ["+r", "-r", "+w", "-w", "+x", "-x"]
@@ -196,11 +195,11 @@ class Chown(Mode):
     @property
     def prompt(self):
         if self.user is None:
-            return "User:"
+            return " User: "
         elif self.group is None:
-            return "Group:"
+            return " Group: "
         else:
-            return "Chown:"
+            return " Chown: "
 
     def complete(self, comp):
         if self.user is None:
@@ -229,13 +228,13 @@ class Copy(Mode):
     @property
     def prompt(self):
         if widget.get("Filer").dir.ismark():
-            return "Copy mark files to:"
+            return " Copy mark files to: "
         elif self.src:
-            return "Copy from {0} to:".format(self.src)
+            return " Copy from {0} to: ".format(self.src)
         elif self.src is None:
-            return "Copy from:"
+            return " Copy from: "
         else:
-            return "Copy:"
+            return " Copy: "
 
     def complete(self, comp):
         if widget.get("Filer").dir.ismark() or self.src:
@@ -256,7 +255,7 @@ class Copy(Mode):
             filectrl.copy(self.src, path)
 
 class CreateWorkspace(Mode):
-    prompt = "Create workspace (title):"
+    prompt = " Create workspace (title): "
 
     def complete(self, comp):
         return comp.comp_files()
@@ -267,7 +266,7 @@ class CreateWorkspace(Mode):
 class Delete(Mode):
     @property
     def prompt(self):
-        return "Delete:"
+        return " Delete: "
 
     def complete(self, comp):
         return comp.comp_files()
@@ -287,9 +286,9 @@ class Glob(Mode):
     @property
     def prompt(self):
         if self.default == "":
-            return "Glob pattern:"
+            return " Glob pattern: "
         else:
-            return "Glob pattern (default {0}):".format(self.default)
+            return " Glob pattern (default {0}): ".format(self.default)
 
     def complete(self, comp):
         return comp.comp_files()
@@ -310,9 +309,9 @@ class GlobDir(Mode):
     @property
     def prompt(self):
         if self.default == "":
-            return "Glob dir pattern:"
+            return " Glob dir pattern: "
         else:
-            return "Glob dir pattern (default {0}):".format(self.default)
+            return " Glob dir pattern (default {0}): ".format(self.default)
 
     def complete(self, comp):
         return comp.comp_files()
@@ -328,7 +327,7 @@ class GlobDir(Mode):
             filer.dir.globdir(pattern)
 
 class Help(Mode):
-    prompt = "Help:"
+    prompt = " Help: "
 
     def complete(self, comp):
         return comp.comp_pyful_commands()
@@ -343,13 +342,13 @@ class Link(Mode):
     @property
     def prompt(self):
         if widget.get("Filer").dir.ismark():
-            return "Link mark files to:"
+            return " Link mark files to: "
         elif self.src:
-            return "Link from `{0}' to:".format(self.src)
+            return " Link from `{0}' to: ".format(self.src)
         elif self.src is None:
-            return "Link from:"
+            return " Link from: "
         else:
-            return "Link:"
+            return " Link: "
 
     def complete(self, comp):
         return comp.comp_files()
@@ -388,9 +387,9 @@ class Mark(Mode):
     @property
     def prompt(self):
         if self.default:
-            return "Mark pattern (default {0}):".format(self.default.pattern)
+            return " Mark pattern (default {0}): ".format(self.default.pattern)
         else:
-            return "Mark pattern:"
+            return " Mark pattern: "
 
     def complete(self, comp):
         return comp.comp_files()
@@ -434,9 +433,9 @@ class Mask(Mode):
     @property
     def prompt(self):
         if self.default:
-            return "Mask pattern (default {0}):".format(self.default.pattern)
+            return " Mask pattern (default {0}): ".format(self.default.pattern)
         else:
-            return "Mask pattern:"
+            return " Mask pattern: "
 
     def complete(self, comp):
         return comp.comp_files()
@@ -465,7 +464,7 @@ class Mask(Mode):
             filer.dir.mask(r)
 
 class Menu(Mode):
-    prompt = "Menu name:"
+    prompt = " Menu name: "
 
     def complete(self, comp):
         return sorted([item for item in widget.get("Menu").items.keys()
@@ -476,7 +475,7 @@ class Menu(Mode):
 
 class Mkdir(Mode):
     dirmode = 0o755
-    prompt = "Make directory:"
+    prompt = " Make directory: "
 
     def complete(self, comp):
         return comp.comp_dirs()
@@ -494,13 +493,13 @@ class Move(Mode):
     @property
     def prompt(self):
         if widget.get("Filer").dir.ismark():
-            return "Move mark files to:"
+            return " Move mark files to: "
         elif self.src:
-            return "Move from {0} to:".format(self.src)
+            return " Move from {0} to: ".format(self.src)
         elif self.src is None:
-            return "Move from:"
+            return " Move from: "
         else:
-            return "Move:"
+            return " Move: "
 
     def complete(self, comp):
         if widget.get("Filer").dir.ismark() or self.src:
@@ -522,7 +521,7 @@ class Move(Mode):
 
 class Newfile(Mode):
     filemode = 0o644
-    prompt = "New file:"
+    prompt = " New file: "
 
     def complete(self, comp):
         return comp.comp_files()
@@ -534,7 +533,7 @@ class Newfile(Mode):
         filer.dir.setcursor(filer.dir.get_index(path))
 
 class OpenListfile(Mode):
-    prompt = "Open list file:"
+    prompt = " Open list file: "
 
     def complete(self, comp):
         return comp.comp_files()
@@ -556,7 +555,7 @@ class Rename(Mode):
 
     @property
     def prompt(self):
-        return "Rename: {0} ->".format(self.path)
+        return " Rename: {0} -> ".format(self.path)
 
     def complete(self, comp):
         return comp.comp_files()
@@ -572,17 +571,15 @@ class Replace(Mode):
     actions = ["Replace on form of `emacs'", "Replace on form of `vim'",]
 
     def _get_emacs_prompt(self):
-        self.prompt_side = (" ", " ")
         if self.pattern is None and self.default:
-            return "Replace regexp (default {0} -> {1}):".format(self.default[0].pattern, self.default[1])
+            return " Replace regexp (default {0} -> {1}): ".format(self.default[0].pattern, self.default[1])
         elif self.pattern is None:
-            return "Replace pattern:"
+            return " Replace pattern: "
         else:
-            return "Replace regexp {0} with:".format(self.pattern.pattern)
+            return " Replace regexp {0} with: ".format(self.pattern.pattern)
 
     def _get_vim_prompt(self):
-        self.prompt_side = (" ", "")
-        return ":%s/"
+        return " :%s/"
 
     @property
     def prompt(self):
@@ -660,13 +657,13 @@ class Symlink(Mode):
     def prompt(self):
         filer = widget.get("Filer")
         if filer.dir.ismark():
-            return "Symlink mark files to:"
+            return " Symlink mark files to: "
         elif self.src:
-            return "Symlink from `{0}' to:".format(self.src)
+            return " Symlink from `{0}' to: ".format(self.src)
         elif self.src is None:
-            return "Symlink from:"
+            return " Symlink from: "
         else:
-            return "Symlink:"
+            return " Symlink: "
 
     def complete(self, comp):
         return comp.comp_files()
@@ -693,7 +690,7 @@ class Symlink(Mode):
 
 class TrashBox(Mode):
     path = os.path.join(os.getenv("HOME"), ".pyful", "trashbox")
-    prompt = "Trashbox:"
+    prompt = " Trashbox: "
 
     def complete(self, comp):
         return comp.comp_dirs()
@@ -716,19 +713,19 @@ class Utime(Mode):
     @property
     def prompt(self):
         if not self.path:
-            return "Utime path:"
+            return " Utime path: "
         elif len(self.sttime) == 0:
-            return "Utime year: {0} ->".format(self.timesec[0])
+            return " Utime year: {0} -> ".format(self.timesec[0])
         elif len(self.sttime) == 1:
-            return "Utime month: {0} ->".format(self.timesec[1])
+            return " Utime month: {0} -> ".format(self.timesec[1])
         elif len(self.sttime) == 2:
-            return "Utime day: {0} ->".format(self.timesec[2])
+            return " Utime day: {0} -> ".format(self.timesec[2])
         elif len(self.sttime) == 3:
-            return "Utime hour: {0} ->".format(self.timesec[3])
+            return " Utime hour: {0} -> ".format(self.timesec[3])
         elif len(self.sttime) == 4:
-            return "Utime min: {0} ->".format(self.timesec[4])
+            return " Utime min: {0} -> ".format(self.timesec[4])
         elif len(self.sttime) == 5:
-            return "Utime sec: {0} ->".format(self.timesec[5])
+            return " Utime sec: {0} -> ".format(self.timesec[5])
 
     def complete(self, comp):
         if not self.path:
@@ -821,16 +818,16 @@ class Tar(Mode):
         filer = widget.get("Filer")
         if filer.dir.ismark() or self.each:
             if self.wrap is None:
-                return "Mark files wrap is:"
+                return " Mark files wrap is: "
             else:
                 if self.each:
-                    return "Mark files {0} each to:".format(self.tarmode)
+                    return " Mark files {0} each to: ".format(self.tarmode)
                 else:
-                    return "Mark files {0} to:".format(self.tarmode)
+                    return " Mark files {0} to: ".format(self.tarmode)
         elif self.src is None:
-            return "{0} from:".format(self.tarmode)
+            return " {0} from: ".format(self.tarmode)
         else:
-            return "{0} from {1} to:".format(self.tarmode, self.src)
+            return " {0} from {1} to: ".format(self.tarmode, self.src)
 
     def complete(self, comp):
         return comp.comp_files()
@@ -871,11 +868,11 @@ class UnTar(Mode):
     def prompt(self):
         filer = widget.get("Filer")
         if filer.dir.ismark():
-            return "Mark files untar to:"
+            return " Mark files untar to: "
         elif self.src is None:
-            return "Untar from:"
+            return " Untar from: "
         else:
-            return "Untar from {0} to:".format(self.src)
+            return " Untar from {0} to: ".format(self.src)
 
     def complete(self, comp):
         return comp.comp_files()
@@ -900,7 +897,7 @@ class WebSearch(Mode):
 
     @property
     def prompt(self):
-        return "{0} search:".format(self.engine)
+        return " {0} search: ".format(self.engine)
 
     def complete(self, comp):
         return comp.comp_files()
@@ -928,16 +925,16 @@ class Zip(Mode):
         filer = widget.get("Filer")
         if filer.dir.ismark() or self.each:
             if self.wrap is None:
-                return "Mark files wrap is:"
+                return " Mark files wrap is: "
             else:
                 if self.each:
-                    return "Mark files zip each to:"
+                    return " Mark files zip each to: "
                 else:
-                    return "Mark files zip to:"
+                    return " Mark files zip to: "
         elif self.src is None:
-            return "Zip from:"
+            return " Zip from: "
         else:
-            return "Zip from {0} to:".format(self.src)
+            return " Zip from {0} to: ".format(self.src)
 
     def complete(self, comp):
         return comp.comp_files()
@@ -978,11 +975,11 @@ class UnZip(Mode):
     def prompt(self):
         filer = widget.get("Filer")
         if filer.dir.ismark():
-            return "Mark files unzip to:"
+            return " Mark files unzip to: "
         elif self.src is None:
-            return "Unzip from:"
+            return " Unzip from: "
         else:
-            return "Unzip from {0} to:".format(self.src)
+            return " Unzip from {0} to: ".format(self.src)
 
     def complete(self, comp):
         return comp.comp_files()
