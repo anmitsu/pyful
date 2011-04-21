@@ -215,19 +215,21 @@ class History(widget.infobox.InfoBox):
         if not string:
             return
         history = self.gethistory()
-        if string in history:
+        try:
             history.remove(string)
+        except ValueError:
+            pass
         if self.maxsave <= len(history):
             history.pop(0)
         history.append(string)
 
     def delete(self):
         history = self.gethistory()
-        if not history or not self.info or not 0 <= self.cursor < len(history):
-            return
         item = self.cursor_item()
-        if item.string in history:
+        try:
             history.remove(item.string)
+        except ValueError:
+            return
         x = self.cursor
         self.cmdline.settext(self.source_string)
         self.start()
@@ -311,8 +313,10 @@ class Clipboard(widget.infobox.InfoBox):
     def yank(self, string):
         if not string:
             return
-        if string in self.clip:
+        try:
             self.clip.remove(string)
+        except ValueError:
+            pass
         if len(self.clip) >= self.maxsave:
             self.clip.pop(0)
         self.clip.append(string)
