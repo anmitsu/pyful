@@ -246,14 +246,12 @@ class History(widget.infobox.InfoBox):
             self.hide()
 
     def mvcursor(self, x):
-        if not self.info:
-            return
         super(self.__class__, self).mvcursor(x)
         if self.cursor == self.lb:
             self.cmdline.settext(self.source_string)
         else:
             item = self.cursor_item()
-            if item:
+            if item.string:
                 self.cmdline.settext(item.string)
 
 class Clipboard(widget.infobox.InfoBox):
