@@ -87,7 +87,8 @@ Finder.smartcase = True
 # It is necessary to install PyMigemo to use migemo.
 try:
     import migemo
-    Finder.migemo = migemo.Migemo("/usr/share/cmigemo/utf-8/migemo-dict")
+    if not Finder.migemo:
+        Finder.migemo = migemo.Migemo("/usr/share/cmigemo/utf-8/migemo-dict")
 except (ImportError, ValueError):
     Finder.migemo = None
 
