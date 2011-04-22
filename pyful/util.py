@@ -29,11 +29,11 @@ global_synchro_event.set()
 # Functions for interchangeability:
 if sys.version_info < (3, 0):
     def U(string):
-        return string.decode("utf-8")
+        return string.decode()
 
     def force_decode(string):
         try:
-            return string.decode("utf-8")
+            return string.decode()
         except UnicodeError:
             try:
                 return string.decode("cp932")
@@ -41,7 +41,7 @@ if sys.version_info < (3, 0):
                 return string.decode("ascii")
 else:
     def U(string):
-        string.encode("utf-8")
+        string.encode()
         return string
 
     def force_decode(string):
