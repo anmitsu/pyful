@@ -98,7 +98,7 @@ class Help(ListBox):
         for k, v in filer.keymap.items():
             if v == cmd:
                 if isinstance(k, tuple):
-                    keybind = "{0} ({1})".format(*k)
+                    keybind = "{0[0]} ({0[1]})".format(k)
                 else:
                     keybind = k
                 keys.append(Entry(self.indent+keybind))
@@ -120,13 +120,13 @@ class Help(ListBox):
         entries.append(Entry(self.indent+name))
         entries.append(Entry(""))
 
-        key = self.find_keybind(commands[name])
-        if key:
+        keys = self.find_keybind(commands[name])
+        if keys:
             entries.append(Entry("Keybinds:", attr=curses.A_BOLD))
-            entries += key
+            entries.extend(keys)
             entries.append(Entry(""))
 
-        entries += self.parse_docstring(doc)
+        entries.extend(self.parse_docstring(doc))
         self.show(entries)
 
     def show_all_command(self):
@@ -141,13 +141,13 @@ class Help(ListBox):
             entries.append(Entry(self.indent+name))
             entries.append(Entry(""))
 
-            key = self.find_keybind(commands[name])
-            if key:
+            keys = self.find_keybind(commands[name])
+            if keys:
                 entries.append(Entry("Keybinds:", attr=curses.A_BOLD))
-                entries += key
+                entries.extend(keys)
                 entries.append(Entry(""))
 
-            entries += self.parse_docstring(doc)
+            entries.extend(self.parse_docstring(doc))
             entries.append(Entry("-"*100))
         self.show(entries)
 
