@@ -21,10 +21,10 @@ from pyful import completion
 
 def _pkgnames(s):
     try:
-        out, err = subprocess.Popen(
+        out = subprocess.Popen(
             ["apt-cache", "pkgnames"],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE
-            ).communicate()
+            ).communicate()[0]
     except Exception:
         return []
     try:
@@ -35,10 +35,10 @@ def _pkgnames(s):
 
 def _dpkglist(s):
     try:
-        out, err = subprocess.Popen(
+        out = subprocess.Popen(
             ["dpkg", "-l"],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE
-            ).communicate()
+            ).communicate()[0]
     except Exception:
         return []
     try:
