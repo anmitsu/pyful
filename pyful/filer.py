@@ -33,11 +33,14 @@ from pyful import message
 from pyful import util
 from pyful import widget
 
-class Filer(widget.base.Widget):
+from pyful.widget.base import StandardScreen, Screen, Widget
+from pyful.widget.textbox import TextBox
+
+class Filer(Widget):
     keymap = {}
 
     def __init__(self):
-        widget.base.Widget.__init__(self, "Filer")
+        Widget.__init__(self, "Filer")
         y, x = self.stdscr.getmaxyx()
         self.titlebar = curses.newwin(1, x, 0, 0)
         self.titlebar.bkgd(look.colors["Titlebar"])
@@ -311,7 +314,7 @@ class Filer(widget.base.Widget):
             self.cursor = 0
         self.workspace.refresh()
 
-class Workspace(widget.base.StandardScreen):
+class Workspace(StandardScreen):
     default_path = os.getenv("HOME")
     layout = "Tile"
 
@@ -597,13 +600,13 @@ class Workspace(widget.base.StandardScreen):
                     d.draw(False)
             self.dir.draw(True)
 
-class Directory(widget.base.StandardScreen):
+class Directory(StandardScreen):
     sort_kind = "Name[^]"
     scroll_type = "HalfScroll"
     statusbar_format = " [{MARK}/{FILE}] {MARKSIZE}bytes {SCROLL}({CURSOR}) {SORT} "
 
     def __init__(self, path, height, width, begy, begx):
-        self.screen = widget.base.Screen(height, width, begy, begx)
+        self.screen = Screen(height, width, begy, begx)
         self.screen.attr = look.colors["Window"]
         self.screen.create_window()
         self.path = util.abspath(path)
@@ -1215,7 +1218,7 @@ class PathHistory(object):
         elif self.pos >= len(self.history):
             self.pos = len(self.history) - 1
 
-class Finder(widget.textbox.TextBox):
+class Finder(TextBox):
     smartcase = True
     keybindfunc = None
     migemo = None
@@ -1245,7 +1248,7 @@ class Finder(widget.textbox.TextBox):
         cls.keybindfunc = func
 
     def __init__(self, directory):
-        widget.textbox.TextBox.__init__(self)
+        TextBox.__init__(self)
         self.dir = directory
         self.results = []
         self.cache = []

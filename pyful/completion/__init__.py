@@ -25,7 +25,8 @@ import re
 import sys
 
 from pyful import util
-from pyful import widget
+
+from pyful.widget.infobox import InfoBox, Context
 
 compfunctions = {}
 
@@ -42,11 +43,11 @@ def _extendcompfunctions():
     __all__.sort()
 _extendcompfunctions()
 
-class Completion(widget.infobox.InfoBox):
+class Completion(InfoBox):
     programs = []
 
     def __init__(self, cmdline):
-        widget.infobox.InfoBox.__init__(self, "Completion")
+        InfoBox.__init__(self, "Completion")
         self.cmdline = cmdline
         self.parser = None
         self.loadprograms()
@@ -120,7 +121,7 @@ class Completion(widget.infobox.InfoBox):
             if common:
                 self.insert(common)
                 self.parser.part[1] = common
-            info = [widget.infobox.Context(c, histr=self.parser.part[1]) for c in candidates]
+            info = [Context(c, histr=self.parser.part[1]) for c in candidates]
             self.show(info)
             self.maxrow = self._get_maxrow()
 

@@ -28,9 +28,11 @@ from pyful import process
 from pyful import util
 from pyful import widget
 
-class ActionBox(widget.infobox.InfoBox):
+from pyful.widget.infobox import InfoBox, Context
+
+class ActionBox(InfoBox):
     def __init__(self):
-        widget.infobox.InfoBox.__init__(self, "ActionBox")
+        InfoBox.__init__(self, "ActionBox")
         self.keymap["RET"] = self.select_action
         self.selected = None
 
@@ -42,7 +44,7 @@ class ActionBox(widget.infobox.InfoBox):
         if not actions:
             return
         self.selected = None
-        self.show([widget.infobox.Context(a) for a in actions])
+        self.show([Context(a) for a in actions])
 
         def _draw():
             widget.get("Filer").draw()

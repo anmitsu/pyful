@@ -23,6 +23,10 @@ from pyful import look
 from pyful import util
 from pyful import widget
 
+from pyful.widget.base import Widget
+from pyful.widget.dialog import DialogBar
+from pyful.widget.infobox import InfoBox, Context
+
 def puts(string, timex=3):
     widget.get("Message").puts(string, timex)
 
@@ -42,12 +46,12 @@ def forcedraw():
 def drawhistroy():
     widget.get("Message").draw_histroy()
 
-class Message(widget.base.Widget):
+class Message(Widget):
     maxsave = 100
     rlock = threading.RLock()
 
     def __init__(self):
-        widget.base.Widget.__init__(self, "Message")
+        Widget.__init__(self, "Message")
         self.messages = []
         self.timer = None
         self.messagebox = MessageBox()
@@ -71,7 +75,7 @@ class Message(widget.base.Widget):
                     t = util.U(t).expandtabs()
             except UnicodeError:
                 t = "????? - Invalid encoding"
-            self.messages.insert(0, widget.infobox.Context(t, attr=attr))
+            self.messages.insert(0, Context(t, attr=attr))
         if self.maxsave < len(self.messages):
             self.messages.pop()
         if timex:
@@ -109,11 +113,11 @@ class Message(widget.base.Widget):
             self.messagebox.show(self.messages)
             self.messagebox.draw()
 
-class MessageBox(widget.infobox.InfoBox):
+class MessageBox(InfoBox):
     height = 4
 
     def __init__(self):
-        widget.infobox.InfoBox.__init__(self, "MessageBox")
+        InfoBox.__init__(self, "MessageBox")
         self.lb = -1
 
     def refresh(self):
@@ -121,9 +125,9 @@ class MessageBox(widget.infobox.InfoBox):
         self.panel.resize(self.height+2, x, y-self.height-4, 0)
         self.panel.attr = look.colors["MessageWindow"]
 
-class ConfirmBox(widget.dialog.DialogBar):
+class ConfirmBox(DialogBar):
     def __init__(self):
-        widget.dialog.DialogBar.__init__(self, "ConfirmBox")
+        DialogBar.__init__(self, "ConfirmBox")
 
     def run(self, message, options, info=None):
         self.result = None

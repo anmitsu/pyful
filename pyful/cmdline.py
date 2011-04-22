@@ -28,11 +28,13 @@ from pyful import mode
 from pyful import message
 from pyful import process
 from pyful import util
-from pyful import widget
 
-class Cmdline(widget.textbox.TextBox):
+from pyful.widget.textbox import TextBox
+from pyful.widget.infobox import InfoBox, Context
+
+class Cmdline(TextBox):
     def __init__(self):
-        widget.textbox.TextBox.__init__(self, "Cmdline")
+        TextBox.__init__(self, "Cmdline")
         self.mode = None
         self.history = History(self)
         self.clipboard = Clipboard(self)
@@ -170,12 +172,12 @@ class Cmdline(widget.textbox.TextBox):
                 attr = look.colors["CmdlinePythonFunction"]
             win.addstr(s, attr)
 
-class History(widget.infobox.InfoBox):
+class History(InfoBox):
     maxsave = 10000
     histories = {}
 
     def __init__(self, cmdline):
-        widget.infobox.InfoBox.__init__(self, "History")
+        InfoBox.__init__(self, "History")
         self.cmdline = cmdline
         self.source_string = self.cmdline.text
         self.lb = -1
@@ -238,7 +240,7 @@ class History(widget.infobox.InfoBox):
     def start(self):
         self.source_string = self.cmdline.text
         t = self.cmdline.text
-        info = [widget.infobox.Context(item, histr=t) for item in self.gethistory() if t in item]
+        info = [Context(item, histr=t) for item in self.gethistory() if t in item]
         info.reverse()
         if info:
             self.show(info)
@@ -254,14 +256,14 @@ class History(widget.infobox.InfoBox):
             if item.string:
                 self.cmdline.settext(item.string)
 
-class Clipboard(widget.infobox.InfoBox):
+class Clipboard(InfoBox):
     maxsave = 100
     clip = []
 
     def __init__(self, cmdline):
-        widget.infobox.InfoBox.__init__(self, "Clipboard")
+        InfoBox.__init__(self, "Clipboard")
         self.cmdline = cmdline
-        self.textbox = widget.textbox.TextBox()
+        self.textbox = TextBox()
         self.textbox.prompt = " Clipboard: "
         self.textbox.edithook = self.start
 
@@ -345,7 +347,7 @@ class Clipboard(widget.infobox.InfoBox):
         if not self.clip:
             return
         text = self.textbox.text
-        info = [widget.infobox.Context(item) for item in self.clip if text in item]
+        info = [Context(item) for item in self.clip if text in item]
         info.reverse()
         self.cmdline.history.hide()
         self.show(info)
@@ -356,9 +358,9 @@ class Clipboard(widget.infobox.InfoBox):
         self.textbox.hide()
         self.cmdline.history.start()
 
-class Output(widget.infobox.InfoBox):
+class Output(InfoBox):
     def __init__(self, cmdline):
-        widget.infobox.InfoBox.__init__(self, "Output")
+        InfoBox.__init__(self, "Output")
         self.cmdline = cmdline
 
     def edit(self):
@@ -386,11 +388,11 @@ class Output(widget.infobox.InfoBox):
             except UnicodeError:
                 line = "????? - Invalid encoding"
                 attr = look.colors["ErrorMessage"]
-            info.append(widget.infobox.Context(line, attr=attr))
+            info.append(Context(line, attr=attr))
         if info:
             self.show(info)
         else:
-            self.show([widget.infobox.Context("No output: `{0}'".format(cmd))])
+            self.show([Context("No output: `{0}'".format(cmd))])
 
     def terminal(self):
         pass

@@ -18,17 +18,18 @@ import curses
 
 from pyful import look
 from pyful import util
-from pyful.widget import base
-from pyful.widget import infobox
 
-class Dialog(base.Widget):
+from pyful.widget.base import Widget
+from pyful.widget.infobox import InfoBox, Context
+
+class Dialog(Widget):
     def __init__(self, name=None):
-        base.Widget.__init__(self, name)
+        Widget.__init__(self, name)
         self.message = ""
         self.options = []
         self.cursor = 0
         self.result = None
-        self.infobox = infobox.InfoBox()
+        self.infobox = InfoBox()
         self.infobox.lb = -1
         self.keymap = {
             "C-f"     : lambda: self.mvcursor(1),
@@ -67,10 +68,10 @@ class Dialog(base.Widget):
     def show_infobox(self, info):
         _info = []
         for item in info:
-            if isinstance(item, infobox.Context):
+            if isinstance(item, Context):
                 _info.append(item)
             else:
-                _info.append(infobox.Context(item))
+                _info.append(Context(item))
         self.infobox.show(_info)
 
     def show(self, message, options, info=None):

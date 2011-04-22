@@ -24,7 +24,9 @@ from pyful import message
 from pyful import util
 from pyful import widget
 
-class Help(widget.infobox.InfoBox):
+from pyful.widget.infobox import InfoBox, Context
+
+class Help(InfoBox):
     regexs = {
         "underline": re.compile(r"((?:[^+\\]|\\.)*)(?:\s|^)(\+(?:[^+\\]|\\.)*\+)(?:\s|$)"),
         "bold": re.compile(r"((?:[^*\\]|\\.)*)(?:\s|^)(\*(?:[^*\\]|\\.)*\*)(?:\s|$)"),
@@ -33,12 +35,12 @@ class Help(widget.infobox.InfoBox):
         }
 
     def __init__(self):
-        widget.infobox.InfoBox.__init__(self, "Help")
+        InfoBox.__init__(self, "Help")
         self.indent = " " * 4
 
     def parse_docstring(self, doc):
         info = []
-        info.append(widget.infobox.Context("Documentation:", attr=curses.A_BOLD))
+        info.append(Context("Documentation:", attr=curses.A_BOLD))
         level = 1
         number = 1
         for line in doc.splitlines():
@@ -56,7 +58,7 @@ class Help(widget.infobox.InfoBox):
                 line = re.sub(r"^=+", "", line, 1).strip()
                 indent = (count-1)*self.indent
                 attr = curses.A_BOLD
-                info.append(widget.infobox.Context(""))
+                info.append(Context(""))
                 level = count
             elif line.startswith("#"):
                 line = line.replace("#", "", 1).strip()
@@ -65,7 +67,7 @@ class Help(widget.infobox.InfoBox):
                 attr = 0
                 number += 1
             elif line.startswith("$"):
-                info.append(widget.infobox.Context(""))
+                info.append(Context(""))
                 line = line.replace("$", "", 1).strip()
                 indent = (level+1)*self.indent
                 attr = 0
@@ -83,10 +85,10 @@ class Help(widget.infobox.InfoBox):
             elif self.regexs["prompt"].search(line):
                 info.append(AttributeContext(line, indent, attr=attr, attrtype="prompt"))
             else:
-                info.append(widget.infobox.Context(indent+line, attr=attr))
+                info.append(Context(indent+line, attr=attr))
 
             if linebreak:
-                info.append(widget.infobox.Context(""))
+                info.append(Context(""))
         return info
 
     def find_keybind(self, cmd):
@@ -99,7 +101,7 @@ class Help(widget.infobox.InfoBox):
                     keybind = "{0} ({1})".format(*k)
                 else:
                     keybind = k
-                keys.append(widget.infobox.Context(self.indent+keybind))
+                keys.append(Context(self.indent+keybind))
         return keys
 
     def show_command(self, name):
@@ -114,15 +116,15 @@ class Help(widget.infobox.InfoBox):
             return message.error("`{0}' hasn't documentation".format(name))
 
         info = []
-        info.append(widget.infobox.Context("Name:", attr=curses.A_BOLD))
-        info.append(widget.infobox.Context(self.indent+name))
-        info.append(widget.infobox.Context(""))
+        info.append(Context("Name:", attr=curses.A_BOLD))
+        info.append(Context(self.indent+name))
+        info.append(Context(""))
 
         key = self.find_keybind(commands[name])
         if key:
-            info.append(widget.infobox.Context("Keybinds:", attr=curses.A_BOLD))
+            info.append(Context("Keybinds:", attr=curses.A_BOLD))
             info += key
-            info.append(widget.infobox.Context(""))
+            info.append(Context(""))
 
         info += self.parse_docstring(doc)
         self.show(info)
@@ -135,23 +137,23 @@ class Help(widget.infobox.InfoBox):
             doc = cmd.__doc__
             if not doc:
                 continue
-            info.append(widget.infobox.Context("Name:", attr=curses.A_BOLD))
-            info.append(widget.infobox.Context(self.indent+name))
-            info.append(widget.infobox.Context(""))
+            info.append(Context("Name:", attr=curses.A_BOLD))
+            info.append(Context(self.indent+name))
+            info.append(Context(""))
 
             key = self.find_keybind(commands[name])
             if key:
-                info.append(widget.infobox.Context("Keybinds:", attr=curses.A_BOLD))
+                info.append(Context("Keybinds:", attr=curses.A_BOLD))
                 info += key
-                info.append(widget.infobox.Context(""))
+                info.append(Context(""))
 
             info += self.parse_docstring(doc)
-            info.append(widget.infobox.Context("-"*100))
+            info.append(Context("-"*100))
         self.show(info)
 
-class AttributeContext(widget.infobox.Context):
+class AttributeContext(Context):
     def __init__(self, string, indent, attr=0, attrtype="bold"):
-        widget.infobox.Context.__init__(self, string, attr=attr)
+        Context.__init__(self, string, attr=attr)
         self.indent = indent
         if attrtype == "bold":
             self.hiattr = curses.A_BOLD

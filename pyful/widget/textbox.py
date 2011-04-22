@@ -20,14 +20,15 @@ import unicodedata
 
 from pyful import look
 from pyful import util
-from pyful.widget import base
 
-class TextBox(base.Widget):
+from pyful.widget.base import Widget
+
+class TextBox(Widget):
     promptattr = 0
     wordbreakchars = re.compile("[._/\s\t\n\"\\`'@$><=:|&{(]")
 
     def __init__(self, name=None):
-        base.Widget.__init__(self, name)
+        Widget.__init__(self, name)
         self.panel.leaveok = False
         self.text = ""
         self.textmap = []

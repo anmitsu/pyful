@@ -20,14 +20,15 @@ import re
 
 from pyful import look
 from pyful import util
-from pyful.widget import base
 
-class InfoBox(base.Widget):
+from pyful.widget.base import Widget
+
+class InfoBox(Widget):
     scroll_type = "HalfScroll"
     zoom = 0
 
     def __init__(self, title=None):
-        base.Widget.__init__(self, title)
+        Widget.__init__(self, title)
         self.info = []
         self.title = title
         self.cursor = 0
