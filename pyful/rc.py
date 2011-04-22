@@ -131,22 +131,22 @@ look.Look.mylook = "default"
 # Set borders.
 # Smooth borders:
 widget.base.StandardScreen.borders = []
-widget.infobox.InfoBox.borders = []
+widget.listbox.ListBox.borders = []
 # Classical borders:
 # widget.base.StandardScreen.borders = ["|", "|", "-", "-", "+", "+", "+", "+"]
-# widget.infobox.InfoBox.borders = ["|", "|", "-", "-", "+", "+", "+", "+"]
+# widget.listbox.ListBox.borders = ["|", "|", "-", "-", "+", "+", "+", "+"]
 
-# Set zoom attribute of infobox.
-# Infobox is an area displaying information of cmdline and message.
-widget.infobox.InfoBox.zoom = 0
+# Set zoom attribute of listbox.
+# Listbox is an area displaying information of cmdline and message.
+widget.listbox.ListBox.zoom = 0
 
-# Set scroll type in infobox.
+# Set scroll type in listbox.
 #
 #     "HalfScroll"
 #     "PageScroll"
 #     "ContinuousScroll"
 #
-widget.infobox.InfoBox.scroll_type = "HalfScroll"
+widget.listbox.ListBox.scroll_type = "HalfScroll"
 
 
 # Get very useful widgets.
@@ -346,7 +346,7 @@ widget.get("Cmdline").keybind(
         "C-y"         : lambda: cmdline.clipboard.paste(),
         "M-y"         : lambda: cmdline.clipboard.start(),
         "C-i"         : lambda: cmdline.completion.start(),
-        "M-j"         : lambda: cmdline.output.infoarea(),
+        "M-j"         : lambda: cmdline.output.communicate(),
         "C-n"         : lambda: cmdline.history.mvcursor(+1),
         "<down>"      : lambda: cmdline.history.mvcursor(+1),
         "C-p"         : lambda: cmdline.history.mvcursor(-1),
@@ -502,17 +502,17 @@ widget.get("ConfirmBox").keybind(
         "C-g"     : lambda: confirmbox.hide(),
         "ESC"     : lambda: confirmbox.hide(),
         "RET"     : lambda: confirmbox.get_result(),
-        "C-n"     : lambda: confirmbox.infobox.mvcursor(1),
-        "<down>"  : lambda: confirmbox.infobox.mvcursor(1),
-        "C-p"     : lambda: confirmbox.infobox.mvcursor(-1),
-        "<up>"    : lambda: confirmbox.infobox.mvcursor(-1),
-        "M-n"     : lambda: confirmbox.infobox.mvscroll(1),
-        "M-p"     : lambda: confirmbox.infobox.mvscroll(-1),
-        "C-v"     : lambda: confirmbox.infobox.pagedown(),
-        "M-v"     : lambda: confirmbox.infobox.pageup(),
-        "M-+"     : lambda: confirmbox.infobox.zoombox(+5),
-        "M--"     : lambda: confirmbox.infobox.zoombox(-5),
-        "M-="     : lambda: confirmbox.infobox.zoombox(0),
+        "C-n"     : lambda: confirmbox.listbox.mvcursor(1),
+        "<down>"  : lambda: confirmbox.listbox.mvcursor(1),
+        "C-p"     : lambda: confirmbox.listbox.mvcursor(-1),
+        "<up>"    : lambda: confirmbox.listbox.mvcursor(-1),
+        "M-n"     : lambda: confirmbox.listbox.mvscroll(1),
+        "M-p"     : lambda: confirmbox.listbox.mvscroll(-1),
+        "C-v"     : lambda: confirmbox.listbox.pagedown(),
+        "M-v"     : lambda: confirmbox.listbox.pageup(),
+        "M-+"     : lambda: confirmbox.listbox.zoombox(+5),
+        "M--"     : lambda: confirmbox.listbox.zoombox(-5),
+        "M-="     : lambda: confirmbox.listbox.zoombox(0),
         })
 
 widget.get("Menu").keybind(

@@ -25,7 +25,7 @@ from pyful import widget
 
 from pyful.widget.base import Widget
 from pyful.widget.dialog import DialogBar
-from pyful.widget.infobox import InfoBox, Context
+from pyful.widget.listbox import ListBox, Entry
 
 def puts(string, timex=3):
     widget.get("Message").puts(string, timex)
@@ -36,8 +36,8 @@ def error(string, timex=3):
 def exception(except_cls):
     widget.get("Message").exception(except_cls)
 
-def confirm(message, options, info=None, position=0):
-    return widget.get("Message").confirm(message, options, info, position)
+def confirm(message, options, entries=None, position=0):
+    return widget.get("Message").confirm(message, options, entries, position)
 
 def forcedraw():
     widget.get("Message").draw()
@@ -75,7 +75,7 @@ class Message(Widget):
                     t = util.U(t).expandtabs()
             except UnicodeError:
                 t = "????? - Invalid encoding"
-            self.messages.insert(0, Context(t, attr=attr))
+            self.messages.insert(0, Entry(t, attr=attr))
         if self.maxsave < len(self.messages):
             self.messages.pop()
         if timex:
@@ -92,11 +92,11 @@ class Message(Widget):
     def exception(self, except_cls):
         self.error("{0}: {1}".format(except_cls.__class__.__name__, except_cls))
 
-    def confirm(self, message, options, info=None, position=0):
+    def confirm(self, message, options, entries=None, position=0):
         util.global_synchro_event.wait()
         util.global_synchro_event.clear()
         self.confirmbox.setcursor(position)
-        ret = self.confirmbox.run(message, options, info)
+        ret = self.confirmbox.run(message, options, entries)
         util.global_synchro_event.set()
         return ret
 
@@ -113,11 +113,11 @@ class Message(Widget):
             self.messagebox.show(self.messages)
             self.messagebox.draw()
 
-class MessageBox(InfoBox):
+class MessageBox(ListBox):
     height = 4
 
     def __init__(self):
-        InfoBox.__init__(self, "MessageBox")
+        ListBox.__init__(self, "MessageBox")
         self.lb = -1
 
     def refresh(self):
@@ -129,9 +129,9 @@ class ConfirmBox(DialogBar):
     def __init__(self):
         DialogBar.__init__(self, "ConfirmBox")
 
-    def run(self, message, options, info=None):
+    def run(self, message, options, entries=None):
         self.result = None
-        self.show(message, options, info)
+        self.show(message, options, entries)
         def _draw():
             widget.get("Filer").draw()
             self.draw()

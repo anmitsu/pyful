@@ -19,13 +19,13 @@
 from pyful import look
 from pyful import message
 
-from pyful.widget.infobox import InfoBox, Context
+from pyful.widget.listbox import ListBox, Entry
 
-class Menu(InfoBox):
+class Menu(ListBox):
     items = {}
 
     def __init__(self):
-        InfoBox.__init__(self, "Menu")
+        ListBox.__init__(self, "Menu")
         self.title = ""
         self.current = None
 
@@ -35,8 +35,8 @@ class Menu(InfoBox):
         self.title = name
         self.current = self.items[name]
         self.refresh()
-        info = [Context(i[0]) for i in self.current]
-        super(self.__class__, self).show(info, pos)
+        entries = [Entry(i[0]) for i in self.current]
+        super(self.__class__, self).show(entries, pos)
 
     def hide(self):
         self.current = None

@@ -26,7 +26,7 @@ import sys
 
 from pyful import util
 
-from pyful.widget.infobox import InfoBox, Context
+from pyful.widget.listbox import ListBox, Entry
 
 compfunctions = {}
 
@@ -43,11 +43,11 @@ def _extendcompfunctions():
     __all__.sort()
 _extendcompfunctions()
 
-class Completion(InfoBox):
+class Completion(ListBox):
     programs = []
 
     def __init__(self, cmdline):
-        InfoBox.__init__(self, "Completion")
+        ListBox.__init__(self, "Completion")
         self.cmdline = cmdline
         self.parser = None
         self.loadprograms()
@@ -77,7 +77,7 @@ class Completion(InfoBox):
         self.programs.sort()
 
     def _get_maxrow(self):
-        maxlen = max(util.termwidth(item.string) for item in self.info)
+        maxlen = max(util.termwidth(entry.text) for entry in self.list)
         y, x = self.stdscr.getmaxyx()
         maxrow = x // (maxlen+2)
         if maxrow:
@@ -85,15 +85,15 @@ class Completion(InfoBox):
         else:
             return 1
 
-    def insert(self, string=None):
-        if string is None:
-            string = self.cursor_item().string
+    def insert(self, text=None):
+        if text is None:
+            text = self.cursor_entry().text
         if self.cmdline.mode.__class__.__name__ == "Shell" and \
                 not self.parser.now_in_quote():
-            string = util.string_to_safe(string)
+            text = util.string_to_safe(text)
 
-        self.cmdline.settext(self.parser.part[0] + string + self.parser.part[2])
-        self.cmdline.cursor = util.mbslen(self.parser.part[0]+string)
+        self.cmdline.settext(self.parser.part[0] + text + self.parser.part[2])
+        self.cmdline.cursor = util.mbslen(self.parser.part[0]+text)
         self.finish()
 
     def start(self):
@@ -121,8 +121,8 @@ class Completion(InfoBox):
             if common:
                 self.insert(common)
                 self.parser.part[1] = common
-            info = [Context(c, histr=self.parser.part[1]) for c in candidates]
-            self.show(info)
+            entries = [Entry(c, histr=self.parser.part[1]) for c in candidates]
+            self.show(entries)
             self.maxrow = self._get_maxrow()
 
     def finish(self):

@@ -28,23 +28,23 @@ from pyful import process
 from pyful import util
 from pyful import widget
 
-from pyful.widget.infobox import InfoBox, Context
+from pyful.widget.listbox import ListBox, Entry
 
-class ActionBox(InfoBox):
+class ActionBox(ListBox):
     def __init__(self):
-        InfoBox.__init__(self, "ActionBox")
+        ListBox.__init__(self, "ActionBox")
         self.keymap["RET"] = self.select_action
         self.selected = None
 
     def select_action(self):
-        self.selected = self.cursor_item().string
+        self.selected = self.cursor_entry().text
         self.hide()
 
     def run(self, actions):
         if not actions:
             return
         self.selected = None
-        self.show([Context(a) for a in actions])
+        self.show([Entry(a) for a in actions])
 
         def _draw():
             widget.get("Filer").draw()

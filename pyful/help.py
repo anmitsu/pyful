@@ -24,9 +24,9 @@ from pyful import message
 from pyful import util
 from pyful import widget
 
-from pyful.widget.infobox import InfoBox, Context
+from pyful.widget.listbox import ListBox, Entry
 
-class Help(InfoBox):
+class Help(ListBox):
     regexs = {
         "underline": re.compile(r"((?:[^+\\]|\\.)*)(?:\s|^)(\+(?:[^+\\]|\\.)*\+)(?:\s|$)"),
         "bold": re.compile(r"((?:[^*\\]|\\.)*)(?:\s|^)(\*(?:[^*\\]|\\.)*\*)(?:\s|$)"),
@@ -35,12 +35,12 @@ class Help(InfoBox):
         }
 
     def __init__(self):
-        InfoBox.__init__(self, "Help")
+        ListBox.__init__(self, "Help")
         self.indent = " " * 4
 
     def parse_docstring(self, doc):
-        info = []
-        info.append(Context("Documentation:", attr=curses.A_BOLD))
+        entries = []
+        entries.append(Entry("Documentation:", attr=curses.A_BOLD))
         level = 1
         number = 1
         for line in doc.splitlines():
@@ -58,7 +58,7 @@ class Help(InfoBox):
                 line = re.sub(r"^=+", "", line, 1).strip()
                 indent = (count-1)*self.indent
                 attr = curses.A_BOLD
-                info.append(Context(""))
+                entries.append(Entry(""))
                 level = count
             elif line.startswith("#"):
                 line = line.replace("#", "", 1).strip()
@@ -67,7 +67,7 @@ class Help(InfoBox):
                 attr = 0
                 number += 1
             elif line.startswith("$"):
-                info.append(Context(""))
+                entries.append(Entry(""))
                 line = line.replace("$", "", 1).strip()
                 indent = (level+1)*self.indent
                 attr = 0
@@ -77,19 +77,19 @@ class Help(InfoBox):
                 attr = 0
 
             if self.regexs["underline"].search(line):
-                info.append(AttributeContext(line, indent, attr=attr, attrtype="underline"))
+                entries.append(AttributeEntry(line, indent, attr=attr, attrtype="underline"))
             elif self.regexs["bold"].search(line):
-                info.append(AttributeContext(line, indent, attr=attr, attrtype="bold"))
+                entries.append(AttributeEntry(line, indent, attr=attr, attrtype="bold"))
             elif self.regexs["reverse"].search(line):
-                info.append(AttributeContext(line, indent, attr=attr, attrtype="reverse"))
+                entries.append(AttributeEntry(line, indent, attr=attr, attrtype="reverse"))
             elif self.regexs["prompt"].search(line):
-                info.append(AttributeContext(line, indent, attr=attr, attrtype="prompt"))
+                entries.append(AttributeEntry(line, indent, attr=attr, attrtype="prompt"))
             else:
-                info.append(Context(indent+line, attr=attr))
+                entries.append(Entry(indent+line, attr=attr))
 
             if linebreak:
-                info.append(Context(""))
-        return info
+                entries.append(Entry(""))
+        return entries
 
     def find_keybind(self, cmd):
         filer = widget.get("Filer")
@@ -101,7 +101,7 @@ class Help(InfoBox):
                     keybind = "{0} ({1})".format(*k)
                 else:
                     keybind = k
-                keys.append(Context(self.indent+keybind))
+                keys.append(Entry(self.indent+keybind))
         return keys
 
     def show_command(self, name):
@@ -115,45 +115,45 @@ class Help(InfoBox):
         if not doc:
             return message.error("`{0}' hasn't documentation".format(name))
 
-        info = []
-        info.append(Context("Name:", attr=curses.A_BOLD))
-        info.append(Context(self.indent+name))
-        info.append(Context(""))
+        entries = []
+        entries.append(Entry("Name:", attr=curses.A_BOLD))
+        entries.append(Entry(self.indent+name))
+        entries.append(Entry(""))
 
         key = self.find_keybind(commands[name])
         if key:
-            info.append(Context("Keybinds:", attr=curses.A_BOLD))
-            info += key
-            info.append(Context(""))
+            entries.append(Entry("Keybinds:", attr=curses.A_BOLD))
+            entries += key
+            entries.append(Entry(""))
 
-        info += self.parse_docstring(doc)
-        self.show(info)
+        entries += self.parse_docstring(doc)
+        self.show(entries)
 
     def show_all_command(self):
         from pyful.command import commands
 
-        info = []
+        entries = []
         for name, cmd in sorted(commands.items()):
             doc = cmd.__doc__
             if not doc:
                 continue
-            info.append(Context("Name:", attr=curses.A_BOLD))
-            info.append(Context(self.indent+name))
-            info.append(Context(""))
+            entries.append(Entry("Name:", attr=curses.A_BOLD))
+            entries.append(Entry(self.indent+name))
+            entries.append(Entry(""))
 
             key = self.find_keybind(commands[name])
             if key:
-                info.append(Context("Keybinds:", attr=curses.A_BOLD))
-                info += key
-                info.append(Context(""))
+                entries.append(Entry("Keybinds:", attr=curses.A_BOLD))
+                entries += key
+                entries.append(Entry(""))
 
-            info += self.parse_docstring(doc)
-            info.append(Context("-"*100))
-        self.show(info)
+            entries += self.parse_docstring(doc)
+            entries.append(Entry("-"*100))
+        self.show(entries)
 
-class AttributeContext(Context):
-    def __init__(self, string, indent, attr=0, attrtype="bold"):
-        Context.__init__(self, string, attr=attr)
+class AttributeEntry(Entry):
+    def __init__(self, text, indent, attr=0, attrtype="bold"):
+        Entry.__init__(self, text, attr=attr)
         self.indent = indent
         if attrtype == "bold":
             self.hiattr = curses.A_BOLD
@@ -173,10 +173,10 @@ class AttributeContext(Context):
             self.symbol = "$"
 
     def addstr(self, win, width):
-        string = util.mbs_ljust(self.string, width-len(self.indent))
+        text = util.mbs_ljust(self.text, width-len(self.indent))
         symbol = self.symbol
         win.addstr(self.indent, self.attr)
-        for s in self.rematch.split(string):
+        for s in self.rematch.split(text):
             if s.startswith(symbol) and s.endswith(symbol):
                 s = s.replace("\{0}".format(symbol), symbol)
                 win.addstr(s.strip(symbol), self.attr | self.hiattr)

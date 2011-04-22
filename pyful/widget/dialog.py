@@ -20,7 +20,7 @@ from pyful import look
 from pyful import util
 
 from pyful.widget.base import Widget
-from pyful.widget.infobox import InfoBox, Context
+from pyful.widget.listbox import ListBox, Entry
 
 class Dialog(Widget):
     def __init__(self, name=None):
@@ -29,8 +29,8 @@ class Dialog(Widget):
         self.options = []
         self.cursor = 0
         self.result = None
-        self.infobox = InfoBox()
-        self.infobox.lb = -1
+        self.listbox = ListBox()
+        self.listbox.lb = -1
         self.keymap = {
             "C-f"     : lambda: self.mvcursor(1),
             "<right>" : lambda: self.mvcursor(1),
@@ -42,17 +42,17 @@ class Dialog(Widget):
             "C-g"     : lambda: self.hide(),
             "ESC"     : lambda: self.hide(),
             "RET"     : lambda: self.get_result(),
-            "C-n"     : lambda: self.infobox.mvcursor(1),
-            "<down>"  : lambda: self.infobox.mvcursor(1),
-            "C-p"     : lambda: self.infobox.mvcursor(-1),
-            "<up>"    : lambda: self.infobox.mvcursor(-1),
-            "M-n"     : lambda: self.infobox.mvscroll(1),
-            "M-p"     : lambda: self.infobox.mvscroll(-1),
-            "C-v"     : lambda: self.infobox.pagedown(),
-            "M-v"     : lambda: self.infobox.pageup(),
-            "M-+"     : lambda: self.infobox.zoombox(+5),
-            "M--"     : lambda: self.infobox.zoombox(-5),
-            "M-="     : lambda: self.infobox.zoombox(0),
+            "C-n"     : lambda: self.listbox.mvcursor(1),
+            "<down>"  : lambda: self.listbox.mvcursor(1),
+            "C-p"     : lambda: self.listbox.mvcursor(-1),
+            "<up>"    : lambda: self.listbox.mvcursor(-1),
+            "M-n"     : lambda: self.listbox.mvscroll(1),
+            "M-p"     : lambda: self.listbox.mvscroll(-1),
+            "C-v"     : lambda: self.listbox.pagedown(),
+            "M-v"     : lambda: self.listbox.pageup(),
+            "M-+"     : lambda: self.listbox.zoombox(+5),
+            "M--"     : lambda: self.listbox.zoombox(-5),
+            "M-="     : lambda: self.listbox.zoombox(0),
             }
 
     def refresh(self):
@@ -65,24 +65,24 @@ class Dialog(Widget):
         if key in self.keymap:
             self.keymap[key]()
 
-    def show_infobox(self, info):
-        _info = []
-        for item in info:
-            if isinstance(item, Context):
-                _info.append(item)
+    def show_listbox(self, entries):
+        _entries = []
+        for entry in entries:
+            if isinstance(entry, Entry):
+                _entries.append(entry)
             else:
-                _info.append(Context(item))
-        self.infobox.show(_info)
+                _entries.append(Entry(entry))
+        self.listbox.show(_entries)
 
-    def show(self, message, options, info=None):
-        if info:
-            self.show_infobox(info)
+    def show(self, message, options, entries=None):
+        if entries:
+            self.show_listbox(entries)
         self.message = message
         self.options = options
         self.panel.show()
 
     def hide(self):
-        self.infobox.hide()
+        self.listbox.hide()
         self.panel.hide()
 
     def keybind(self, func):
@@ -90,7 +90,7 @@ class Dialog(Widget):
         return self.keymap
 
     def get_result(self):
-        self.result = self.cursor_item()
+        self.result = self.cursor_entry()
         self.hide()
 
     def settop(self):
@@ -105,7 +105,7 @@ class Dialog(Widget):
     def setcursor(self, dist):
         self.cursor = dist
 
-    def cursor_item(self):
+    def cursor_entry(self):
         return self.options[self.cursor]
 
     def fix_position(self):
@@ -119,14 +119,14 @@ class DialogBar(Dialog):
         Dialog.__init__(self, name)
 
     def refresh(self):
-        self.infobox.refresh()
+        self.listbox.refresh()
         y, x = self.stdscr.getmaxyx()
         self.panel.resize(2, x, y-2, 0)
         self.panel.attr = look.colors["Window"]
         self.messageattr = look.colors["DialogMessage"]
 
     def draw(self):
-        self.infobox.draw()
+        self.listbox.draw()
 
         self.panel.create_window()
         win = self.panel.win
@@ -159,17 +159,17 @@ class DialogBox(Dialog):
 
     def refresh(self):
         y, x, begy, begx = self.get_window_size()
-        self.infobox.panel.resize(y-3, x-2, begy+1, begx+1)
+        self.listbox.panel.resize(y-3, x-2, begy+1, begx+1)
         self.panel.resize(y, x, begy, begx)
         self.messageattr = look.colors["DialogMessage"]
 
-    def show(self, message, options, info=None):
+    def show(self, message, options, entries=None):
         self.message = message
         self.options = options
-        if info:
-            self.show_infobox(info)
+        if entries:
+            self.show_listbox(entries)
         y, x, begy, begx = self.get_window_size()
-        self.infobox.panel.resize(y-3, x-2, begy+1, begx+1)
+        self.listbox.panel.resize(y-3, x-2, begy+1, begx+1)
         self.panel.resize(y, x, begy, begx)
         self.panel.show()
 
@@ -204,12 +204,12 @@ class DialogBox(Dialog):
         self.draw_message(win)
         self.draw_options(win)
         win.noutrefresh()
-        self.infobox.draw()
+        self.listbox.draw()
 
     def get_window_size(self):
-        if self.infobox.active:
-            ilen = max(util.termwidth(info.string) for info in self.infobox.info) + 2
-            height = len(self.infobox.info) + 5
+        if self.listbox.active:
+            ilen = max(util.termwidth(entry.text) for entry in self.listbox.list) + 2
+            height = len(self.listbox.list) + 5
         else:
             ilen = 0
             height = 3

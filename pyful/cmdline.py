@@ -30,7 +30,7 @@ from pyful import process
 from pyful import util
 
 from pyful.widget.textbox import TextBox
-from pyful.widget.infobox import InfoBox, Context
+from pyful.widget.listbox import ListBox, Entry
 
 class Cmdline(TextBox):
     def __init__(self):
@@ -172,12 +172,12 @@ class Cmdline(TextBox):
                 attr = look.colors["CmdlinePythonFunction"]
             win.addstr(s, attr)
 
-class History(InfoBox):
+class History(ListBox):
     maxsave = 10000
     histories = {}
 
     def __init__(self, cmdline):
-        InfoBox.__init__(self, "History")
+        ListBox.__init__(self, "History")
         self.cmdline = cmdline
         self.source_string = self.cmdline.text
         self.lb = -1
@@ -227,9 +227,9 @@ class History(InfoBox):
 
     def delete(self):
         history = self.gethistory()
-        item = self.cursor_item()
+        entry = self.cursor_entry()
         try:
-            history.remove(item.string)
+            history.remove(entry.text)
         except ValueError:
             return
         x = self.cursor
@@ -240,10 +240,10 @@ class History(InfoBox):
     def start(self):
         self.source_string = self.cmdline.text
         t = self.cmdline.text
-        info = [Context(item, histr=t) for item in self.gethistory() if t in item]
-        info.reverse()
-        if info:
-            self.show(info)
+        entries = [Entry(item, histr=t) for item in self.gethistory() if t in item]
+        entries.reverse()
+        if entries:
+            self.show(entries)
         else:
             self.hide()
 
@@ -252,16 +252,16 @@ class History(InfoBox):
         if self.cursor == self.lb:
             self.cmdline.settext(self.source_string)
         else:
-            item = self.cursor_item()
-            if item.string:
-                self.cmdline.settext(item.string)
+            entry = self.cursor_entry()
+            if entry.text:
+                self.cmdline.settext(entry.text)
 
-class Clipboard(InfoBox):
+class Clipboard(ListBox):
     maxsave = 100
     clip = []
 
     def __init__(self, cmdline):
-        InfoBox.__init__(self, "Clipboard")
+        ListBox.__init__(self, "Clipboard")
         self.cmdline = cmdline
         self.textbox = TextBox()
         self.textbox.prompt = " Clipboard: "
@@ -296,14 +296,14 @@ class Clipboard(InfoBox):
             return
 
     def insert(self):
-        item = self.cursor_item()
-        self.cmdline.insert(item.string)
+        entry = self.cursor_entry()
+        self.cmdline.insert(entry.text)
         self.finish()
 
     def delete(self):
-        item = self.cursor_item()
+        entry = self.cursor_entry()
         try:
-            self.clip.remove(item.string)
+            self.clip.remove(entry.text)
         except ValueError:
             return
         x = self.cursor
@@ -324,8 +324,8 @@ class Clipboard(InfoBox):
     def paste(self):
         if not self.clip:
             return
-        item = self.clip[-1]
-        self.cmdline.insert(item)
+        pastetext = self.clip[-1]
+        self.cmdline.insert(pastetext)
         self.finish()
 
     def draw(self):
@@ -347,10 +347,10 @@ class Clipboard(InfoBox):
         if not self.clip:
             return
         text = self.textbox.text
-        info = [Context(item) for item in self.clip if text in item]
-        info.reverse()
+        entries = [Entry(item) for item in self.clip if text in item]
+        entries.reverse()
         self.cmdline.history.hide()
-        self.show(info)
+        self.show(entries)
         self.textbox.panel.show()
 
     def finish(self):
@@ -358,13 +358,13 @@ class Clipboard(InfoBox):
         self.textbox.hide()
         self.cmdline.history.start()
 
-class Output(InfoBox):
+class Output(ListBox):
     def __init__(self, cmdline):
-        InfoBox.__init__(self, "Output")
+        ListBox.__init__(self, "Output")
         self.cmdline = cmdline
 
     def edit(self):
-        grepoutputs = self.cursor_item().string.split(":")
+        grepoutputs = self.cursor_entry().text.split(":")
         fname = grepoutputs[0]
         lnum = grepoutputs[1]
         try:
@@ -372,14 +372,14 @@ class Output(InfoBox):
         except Exception as e:
             message.exception(e)
 
-    def infoarea(self, string=None):
+    def communicate(self, string=None):
         if self.cmdline.mode.__class__.__name__ != "Shell":
             return
         if string is None:
             string = self.cmdline.text
         cmd = util.expandmacro(string)
         out, err = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).communicate()
-        info = []
+        entries = []
         for line in (out + err).splitlines():
             try:
                 line = line.decode()
@@ -388,11 +388,11 @@ class Output(InfoBox):
             except UnicodeError:
                 line = "????? - Invalid encoding"
                 attr = look.colors["ErrorMessage"]
-            info.append(Context(line, attr=attr))
-        if info:
-            self.show(info)
+            entries.append(Entry(line, attr=attr))
+        if entries:
+            self.show(entries)
         else:
-            self.show([Context("No output: `{0}'".format(cmd))])
+            self.show([Entry("No output: `{0}'".format(cmd))])
 
     def terminal(self):
         pass
