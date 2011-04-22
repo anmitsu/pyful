@@ -200,6 +200,9 @@ class Parser(object):
                     fdq = not fdq
         return (psq and fsq) or (pdq and fdq)
 
+    def match_current_part(self, text):
+        return text.startswith(self.part[1])
+
 class CompletionFunction(object):
     parser = None
 
@@ -226,45 +229,75 @@ class CompletionFunction(object):
     def comp_files(self):
         bname, dpath = self._update_completion_path()
         try:
-            files = os.listdir(dpath)
+            entries = os.listdir(dpath)
         except OSError:
             return []
-        def func(f):
-            if os.path.isdir(os.path.join(dpath, f)):
-                return f + os.sep
-            else:
-                return f
-        return sorted([func(f) for f in files if f.startswith(bname)])
+        files = []
+        for fname in entries:
+            if fname.startswith(bname):
+                if os.path.isdir(os.path.join(dpath, fname)):
+                    files.append(fname+os.sep)
+                else:
+                    files.append(fname)
+        files.sort()
+        return files
 
     def comp_dirs(self):
         bname, dpath = self._update_completion_path()
         try:
-            files = os.listdir(dpath)
+            entries = os.listdir(dpath)
         except OSError:
             return []
-        return sorted([f+os.sep for f in files if f.startswith(bname) and
-                       os.path.isdir(os.path.join(dpath, f))])
+        dirs = []
+        for fname in entries:
+            if fname.startswith(bname):
+                if os.path.isdir(os.path.join(dpath, fname)):
+                    dirs.append(fname+os.sep)
+        dirs.sort()
+        return dirs
 
     def comp_username(self):
-        return sorted([usrname for usrname in [p[0] for p in pwd.getpwall()]
-                       if usrname.startswith(self.parser.part[1])])
+        usrnames = zip(*pwd.getpwall())[0]
+        candidates = []
+        for name in usrnames:
+            if self.parser.match_current_part(name):
+                candidates.append(name)
+        candidates.sort()
+        return candidates
 
     def comp_groupname(self):
-        return sorted([grpname for grpname in [g[0] for g in grp.getgrall()]
-                       if grpname.startswith(self.parser.part[1])])
+        grpnames = zip(*grp.getgrall())[0]
+        candidates = []
+        for name in grpnames:
+            if self.parser.match_current_part(name):
+                candidates.append(name)
+        candidates.sort()
+        return candidates
 
     def comp_programs(self):
-        return sorted([item for item in Completion.programs
-                       if item.startswith(self.parser.part[1])])
+        candidates = []
+        for program in Completion.programs:
+            if self.parser.match_current_part(program):
+                candidates.append(program)
+        candidates.sort()
+        return candidates
 
     def comp_pyful_commands(self):
         from pyful.command import commands
-        return sorted([cmd for cmd in commands.keys()
-                       if cmd.startswith(self.parser.part[1])])
+        candidates = []
+        for cmdname in commands:
+            if self.parser.match_current_part(cmdname):
+                candidates.append(cmdname)
+        candidates.sort()
+        return candidates
 
     def comp_python_builtin_functions(self):
-        return sorted([func for func in __builtins__.keys()
-                       if func.startswith(self.parser.part[1])])
+        candidates = []
+        for func in __builtins__.keys():
+            if self.parser.match_current_part(func):
+                candidates.append(func)
+        candidates.sort()
+        return candidates
 
 class ShellCompletionFunction(CompletionFunction):
     arguments = None
