@@ -66,7 +66,7 @@ class ProgressGauge(object):
         rate = self.curval / self.maxval
         percent = int(rate * 100)
 
-        status = "{0}% |".format(percent)
+        status = "{0:>3}% |".format(percent)
         win.addstr(y_offset, x_offset, status)
 
         eta_status = "| {0} [{1}]".format(self.eta(), self.bps())
