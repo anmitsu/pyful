@@ -36,6 +36,24 @@ from pyful import widget
 from pyful.widget.base import StandardScreen, Screen, Widget
 from pyful.widget.textbox import TextBox
 
+class NavigationBar(Widget):
+    def __init__(self):
+        Widget.__init__(self, "NavigationBar")
+        self.refresh()
+
+    def refresh(self):
+        y, x = self.stdscr.getmaxyx()
+        self.panel.resize(2, x, y-2, 0)
+        self.panel.attr = look.colors["Window"]
+
+    def draw(self, drawfunc, *args, **kwd):
+        self.panel.create_window()
+        try:
+            drawfunc(self.panel.win, *args, **kwd)
+        except curses.error:
+            pass
+        self.panel.win.noutrefresh()
+
 class Filer(Widget):
     keymap = {}
 
@@ -44,8 +62,7 @@ class Filer(Widget):
         y, x = self.stdscr.getmaxyx()
         self.titlebar = curses.newwin(1, x, 0, 0)
         self.titlebar.bkgd(look.colors["Titlebar"])
-        self.navigationbar = curses.newwin(2, x, y-2, 0)
-        self.navigationbar.bkgd(look.colors["Window"])
+        self.navigationbar = NavigationBar()
         self.workspaces = []
         self.cursor = 0
         self.default_init()
@@ -74,11 +91,9 @@ class Filer(Widget):
         y, x = self.stdscr.getmaxyx()
         self.titlebar = curses.newwin(1, x, 0, 0)
         self.titlebar.bkgd(look.colors["Titlebar"])
-        self.navigationbar = curses.newwin(2, x, y-2, 0)
-        self.navigationbar.bkgd(look.colors["Window"])
         self.workspace.refresh()
 
-    def draw(self):
+    def draw(self, navigation=True):
         try:
             self.draw_titlebar()
         except curses.error:
@@ -87,6 +102,8 @@ class Filer(Widget):
             self.workspace.draw()
         except curses.error:
             pass
+        if navigation:
+            self.navigationbar.draw(self.file.draw)
 
     def input(self, key):
         if self.finder.active:
@@ -1156,8 +1173,6 @@ class Directory(StandardScreen):
         self._draw_statusbar(size, height)
         win.noutrefresh()
 
-        if focus:
-            self.file.draw()
         if self.finder.active:
             self.finder.draw()
 
@@ -1543,9 +1558,8 @@ class FileStat(object):
         else:
             self.name = ""
 
-    def draw(self):
-        navbar = widget.get("Filer").navigationbar
-        navbar.erase()
+    def draw(self, win):
+        win.erase()
         perm = self.get_permission()
         user = self.get_user_name()
         group = self.get_group_name()
@@ -1554,6 +1568,5 @@ class FileStat(object):
         mtime = self.get_mtime()
         name = self.name
         fstat = "{0} {1} {2} {3} {4} {5} {6}".format(perm, nlink, user, group, size, mtime, name)
-        fstat = util.mbs_ljust(fstat, navbar.getmaxyx()[1]-1)
-        navbar.addstr(1, 0, fstat)
-        navbar.noutrefresh()
+        win.addstr(1, 0, fstat)
+        win.noutrefresh()
