@@ -338,7 +338,7 @@ class JobThread(threading.Thread):
                 Filectrl.threads.remove(self)
 
     def kill(self):
-        self.draw_thread("Waiting...")
+        self.update("Waiting...")
         self.active = False
 
     def draw(self, navbar):
@@ -346,8 +346,11 @@ class JobThread(threading.Thread):
         navbar.clrtoeol()
         navbar.addstr(self.status, curses.A_BOLD)
 
-    def draw_thread(self, status):
+    def update(self, status):
         self.status = status
+
+    def notify(self, notice):
+        message.puts(notice)
 
 class TarThread(JobThread):
     tarmodes = {"tar": "", "gzip": "gz", "bzip2": "bz2"}
@@ -355,7 +358,7 @@ class TarThread(JobThread):
 
     def __init__(self, src, dst, tarmode="gzip", wrap=""):
         JobThread.__init__(self)
-        self.draw_thread("Reading...")
+        self.update("Reading...")
         ext = self.tarexts[tarmode]
         if not dst.endswith(ext):
             dst += ext
@@ -389,8 +392,10 @@ class TarThread(JobThread):
             for path in self.src:
                 for f in self.generate(path):
                     arcname = f.replace(os.path.commonprefix([f, self.src_dirname]), "")
-                    self.draw_thread("Adding({0}/{1}): {2}".format(elapse, goal, arcname))
+                    msg = "({0}/{1}): {2}".format(elapse, goal, arcname)
+                    self.update("Adding{0}".format(msg))
                     self.add_file(tar, f, arcname)
+                    self.notify("Added{0}".format(msg))
                     elapse += 1
         finally:
             tar.close()
@@ -434,7 +439,7 @@ class UntarThread(JobThread):
         self.dirlist = []
 
     def main(self):
-        self.draw_thread("Reading...")
+        self.update("Reading...")
         if not os.path.exists(self.dstdir):
             try:
                 os.makedirs(self.dstdir)
@@ -455,8 +460,9 @@ class UntarThread(JobThread):
             for info in tar.getmembers():
                 if not self.active:
                     raise FilectrlCancel(self.title)
-                self.draw_thread("Untar: {0}".format(info.name))
+                self.update("Extracting: {0}".format(info.name))
                 tar.extract(info, self.dstdir)
+                self.notify("Extracted: {0}".format(info.name))
                 if info.isdir():
                     self.dirlist.append(info)
         finally:
@@ -479,7 +485,7 @@ class UnzipThread(JobThread):
         self.dirlist = []
 
     def main(self):
-        self.draw_thread("Reading...")
+        self.update("Reading...")
         if not os.path.exists(self.dstdir):
             try:
                 os.makedirs(self.dstdir)
@@ -526,8 +532,9 @@ class UnzipThread(JobThread):
             source = myzip.open(fname)
             try:
                 target = open(path, "wb")
-                self.draw_thread("Inflating: {0}".format(ufname))
+                self.update("Inflating: {0}".format(ufname))
                 shutil.copyfileobj(source, target)
+                self.notify("Inflated: {0}".format(ufname))
                 source.close()
                 target.close()
                 self.copy_external_attr(myzip, fname)
@@ -569,7 +576,7 @@ class ZipThread(JobThread):
         self.wrap = wrap
 
     def main(self):
-        self.draw_thread("Reading...")
+        self.update("Reading...")
         try:
             mode = self.get_mode()
             import zipfile
@@ -582,8 +589,10 @@ class ZipThread(JobThread):
             for path in self.src:
                 for f in self.generate(path):
                     arcname = f.replace(os.path.commonprefix([f, self.src_dirname]), "")
-                    self.draw_thread("Adding({0}/{1}): {2}".format(elapse, goal, arcname))
+                    msg = "({0}/{1}): {2}".format(elapse, goal, arcname)
+                    self.update("Adding{0}".format(msg))
                     self.write_file(myzip, f, arcname)
+                    self.notify("Added{0}".format(msg))
                     elapse += 1
         finally:
             myzip.close()
@@ -643,8 +652,10 @@ class DeleteThread(JobThread):
         elapse = 1
         for path in self.path:
             for f in self.generate(path):
-                self.draw_thread("Deleting({0}/{1}): {2}".format(elapse, goal, util.unix_basename(f)))
+                msg = "({0}/{1}): {2}".format(elapse, goal, util.unix_basename(f))
+                self.update("Deleting{0}".format(msg))
                 self.delete_file(f)
+                self.notify("Deleted{0}".format(msg))
                 elapse += 1
         self.delete_dirs()
 
@@ -688,7 +699,7 @@ class CopyThread(JobThread):
             self.src = [src]
 
     def main(self):
-        self.draw_thread("Copy starting...")
+        self.update("Copy starting...")
         goal = _get_file_length(self.src)[0]
         fjg = FileJobGenerator()
         elapse = 1
@@ -698,8 +709,10 @@ class CopyThread(JobThread):
                     if not self.active:
                         raise FilectrlCancel(self.title)
                     if job:
-                        self.draw_thread("Copying({0}/{1}): {2}".format(elapse, goal, util.unix_basename(job.src)))
+                        msg = "({0}/{1}): {2}".format(elapse, goal, util.unix_basename(job.src))
+                        self.update("Copying{0}".format(msg))
                         job.copy()
+                        self.notify("Copied{0}".format(msg))
                     elapse += 1
         finally:
             fjg.copydirs()
@@ -717,7 +730,7 @@ class MoveThread(JobThread):
             self.src = [src]
 
     def main(self):
-        self.draw_thread("Move starting...")
+        self.update("Move starting...")
         goal = _get_file_length(self.src)[0]
         fjg = FileJobGenerator()
         elapse = 1
@@ -727,8 +740,10 @@ class MoveThread(JobThread):
                     if not self.active:
                         raise FilectrlCancel(self.title)
                     if job:
-                        self.draw_thread("Moving({0}/{1}): {2}".format(elapse, goal, util.unix_basename(job.src)))
+                        msg = "({0}/{1}): {2}".format(elapse, goal, util.unix_basename(job.src))
+                        self.update("Moving{0}".format(msg))
                         job.move()
+                        self.notify("Moved{0}".format(msg))
                     elapse += 1
         finally:
             fjg.copydirs()
