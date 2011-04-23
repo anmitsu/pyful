@@ -76,8 +76,7 @@ class Message(Widget):
             except UnicodeError:
                 t = "????? - Invalid encoding"
             self.messages.insert(0, Entry(t, attr=attr))
-        if self.maxsave < len(self.messages):
-            self.messages.pop()
+        self.messages = self.messages[:self.maxsave]
         if timex:
             self.start_timer(timex)
 
