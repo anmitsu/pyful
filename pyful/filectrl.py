@@ -239,11 +239,9 @@ class Subloop(object):
     def draw_thread(self):
         try:
             thread = Filectrl.threads[0]
+            self.navbar.draw(thread.draw)
         except IndexError:
             return
-        if thread:
-            if thread.status:
-                self.navbar.draw(thread.draw)
 
     def run(self):
         util.global_synchro_event.wait()
@@ -345,6 +343,7 @@ class JobThread(threading.Thread):
         navbar.move(0, 1)
         navbar.clrtoeol()
         navbar.addstr(self.status, curses.A_BOLD)
+        navbar.noutrefresh()
 
     def update(self, status):
         self.status = status
