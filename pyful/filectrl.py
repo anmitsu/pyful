@@ -30,6 +30,8 @@ from pyful import message
 from pyful import util
 from pyful import widget
 
+from pyful.widget.gauge import ProgressGauge
+
 def chmod(path, mode):
     try:
         os.chmod(path, int(mode, 8))
@@ -179,12 +181,14 @@ def zipeach(src, dst, wrap=""):
 
 
 def kill_thread():
-    if len(Filectrl.threads) == 0:
+    try:
+        thread = Filectrl.threads[0]
+    except IndexError:
         return message.error("Thread doesn't exist.")
-    ret = message.confirm("Kill thread: ", [t.title for t in Filectrl.threads])
-    for th in Filectrl.threads:
-        if th.title == ret:
-            th.kill()
+    title = thread.title
+    ret = message.confirm("Kill {0}: ".format(title), ["OK", "Cancel"])
+    if ret == "OK":
+        thread.kill()
 
 def _get_file_length(paths):
     flen = dlen = 0
@@ -217,7 +221,7 @@ class Subloop(object):
             else:
                 filer.input(key)
         def _draw():
-            filer.draw()
+            filer.draw(navigation=False)
             if menu.active:
                 menu.draw()
             if cmdline.active:
@@ -225,18 +229,21 @@ class Subloop(object):
             elif helper.active:
                 helper.draw()
             else:
-                if not filer.finder.active:
+                if message.active and not filer.finder.active:
                     message.draw()
-                self.draw_threads()
+                self.draw_thread()
+        self.navbar = widget.get("NavigationBar")
         self.ui = widget.ui.UI(_draw, _input)
         self.stdscr = widget.base.StandardScreen.stdscr
 
-    def draw_threads(self):
-        navbar = widget.get("Filer").navigationbar
-        y, x = navbar.getmaxyx()
-        string = " | ".join("[{0}] {1}".format(i+1, t.title) for i, t in enumerate(Filectrl.threads))
-        navbar.addstr(0, 1, util.mbs_ljust(string, x-2), curses.A_BOLD)
-        navbar.noutrefresh()
+    def draw_thread(self):
+        try:
+            thread = Filectrl.threads[0]
+        except IndexError:
+            return
+        if thread:
+            if thread.status:
+                self.navbar.draw(thread.draw)
 
     def run(self):
         util.global_synchro_event.wait()
@@ -307,30 +314,40 @@ class Filectrl(object):
         message.puts("Finished 'zipeach'")
 
 class JobThread(threading.Thread):
+    lock = threading.Lock()
+
     def __init__(self):
         threading.Thread.__init__(self)
         self.setDaemon(True)
         self.active = True
         self.title = self.__class__.__name__
+        self.navbar = widget.get("NavigationBar")
+        self.status = ""
 
     def main(self):
         pass
 
     def run(self):
-        try:
-            self.main()
-            message.puts("Finished: {0}".format(self.title))
-        except FilectrlCancel as e:
-            message.exception(e)
-        finally:
-            Filectrl.threads.remove(self)
+        with self.lock:
+            try:
+                self.main()
+                message.puts("Finished: {0}".format(self.title))
+            except FilectrlCancel as e:
+                message.exception(e)
+            finally:
+                Filectrl.threads.remove(self)
 
     def kill(self):
         self.draw_thread("Waiting...")
         self.active = False
 
+    def draw(self, navbar):
+        navbar.move(0, 1)
+        navbar.clrtoeol()
+        navbar.addstr(self.status, curses.A_BOLD)
+
     def draw_thread(self, status):
-        message.puts(status, 0)
+        self.status = status
 
 class TarThread(JobThread):
     tarmodes = {"tar": "", "gzip": "gz", "bzip2": "bz2"}
@@ -407,7 +424,6 @@ class UntarThread(JobThread):
 
     def __init__(self, src, dstdir="."):
         JobThread.__init__(self)
-        self.draw_thread("Reading...")
         if isinstance(src, list):
             self.title = "Untar: mark files -> {0}".format(dstdir)
             self.src = [util.abspath(f) for f in src]
@@ -418,6 +434,7 @@ class UntarThread(JobThread):
         self.dirlist = []
 
     def main(self):
+        self.draw_thread("Reading...")
         if not os.path.exists(self.dstdir):
             try:
                 os.makedirs(self.dstdir)
@@ -452,7 +469,6 @@ class UntarThread(JobThread):
 class UnzipThread(JobThread):
     def __init__(self, src, dstdir):
         JobThread.__init__(self)
-        self.draw_thread("Reading...")
         if isinstance(src, list):
             self.title = "Unzip: mark files -> {0}".format(dstdir)
             self.src = [util.abspath(f) for f in src]
@@ -463,6 +479,7 @@ class UnzipThread(JobThread):
         self.dirlist = []
 
     def main(self):
+        self.draw_thread("Reading...")
         if not os.path.exists(self.dstdir):
             try:
                 os.makedirs(self.dstdir)
@@ -538,7 +555,6 @@ class UnzipThread(JobThread):
 class ZipThread(JobThread):
     def __init__(self, src, dst, wrap=""):
         JobThread.__init__(self)
-        self.draw_thread("Reading...")
         if not dst.endswith(".zip"):
             dst += ".zip"
         self.dst = util.abspath(dst)
@@ -553,6 +569,7 @@ class ZipThread(JobThread):
         self.wrap = wrap
 
     def main(self):
+        self.draw_thread("Reading...")
         try:
             mode = self.get_mode()
             import zipfile
@@ -661,7 +678,6 @@ class DeleteThread(JobThread):
 class CopyThread(JobThread):
     def __init__(self, src, dst):
         JobThread.__init__(self)
-        self.draw_thread("Copy starting...")
         self.dst = util.abspath(dst)
         if isinstance(src, list):
             self.title = "Copy: mark files -> {0}".format(self.dst)
@@ -672,6 +688,7 @@ class CopyThread(JobThread):
             self.src = [src]
 
     def main(self):
+        self.draw_thread("Copy starting...")
         goal = _get_file_length(self.src)[0]
         fjg = FileJobGenerator()
         elapse = 1
@@ -681,7 +698,7 @@ class CopyThread(JobThread):
                     if not self.active:
                         raise FilectrlCancel(self.title)
                     if job:
-                        self.draw_thread("Coping({0}/{1}): {2}".format(elapse, goal, util.unix_basename(job.src)))
+                        self.draw_thread("Copying({0}/{1}): {2}".format(elapse, goal, util.unix_basename(job.src)))
                         job.copy()
                     elapse += 1
         finally:
@@ -690,7 +707,6 @@ class CopyThread(JobThread):
 class MoveThread(JobThread):
     def __init__(self, src, dst):
         JobThread.__init__(self)
-        self.draw_thread("Move starting...")
         self.dst = util.abspath(dst)
         if isinstance(src, list):
             self.title = "Move: mark files -> {0}".format(self.dst)
@@ -701,6 +717,7 @@ class MoveThread(JobThread):
             self.src = [src]
 
     def main(self):
+        self.draw_thread("Move starting...")
         goal = _get_file_length(self.src)[0]
         fjg = FileJobGenerator()
         elapse = 1
@@ -821,6 +838,33 @@ class FileJob(object):
         self.src = src
         self.dst = dst
 
+    def copyfileobj(self, fsrc, fdst, length=16*1024):
+        curval = 0
+        navbar = widget.get("NavigationBar")
+        cmdline = widget.get("Cmdline")
+        size = os.stat(self.src).st_size
+        if size:
+            gauge = ProgressGauge(size)
+        else:
+            gauge = ProgressGauge(1)
+        while True:
+            buf = fsrc.read(length)
+            if not buf:
+                gauge.finish()
+                if not cmdline.active:
+                    navbar.draw(gauge.draw, 1, 1)
+                break
+            curval += len(buf)
+            gauge.update(curval)
+            if not cmdline.active:
+                navbar.draw(gauge.draw, 1, 1)
+            fdst.write(buf)
+
+    def copyfile(self, src, dst):
+        with open(src, "rb") as fsrc:
+            with open(dst, "wb") as fdst:
+                self.copyfileobj(fsrc, fdst)
+
     def copysymlink(self, src, dst):
         if not os.path.islink(src):
             return
@@ -837,7 +881,7 @@ class FileJob(object):
             if os.path.islink(self.src):
                 self.copysymlink(self.src, self.dst)
             else:
-                shutil.copyfile(self.src, self.dst)
+                self.copyfile(self.src, self.dst)
                 shutil.copystat(self.src, self.dst)
         except Exception as e:
             message.exception(e)
