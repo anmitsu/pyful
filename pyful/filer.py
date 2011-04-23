@@ -51,8 +51,7 @@ class NavigationBar(Widget):
         try:
             drawfunc(self.panel.win, *args, **kwd)
         except curses.error:
-            pass
-        self.panel.win.noutrefresh()
+            self.panel.win.noutrefresh()
 
 class Filer(Widget):
     keymap = {}
