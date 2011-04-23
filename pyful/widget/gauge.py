@@ -45,7 +45,7 @@ class ProgressGauge(object):
             bps = 0.0
         for unit in self.units:
             if bps < 1024:
-                bps_text = "{0:>7.1f}{1}/s".format(bps, unit)
+                bps_text = "{0:>6.1f}{1}/s".format(bps, unit)
                 break
             bps /= 1024
         return bps_text
