@@ -68,6 +68,13 @@ def cmp_to_key(_cmp):
 def cmp(x, y):
     return (x > y) - (x < y)
 
+def loadfile(path):
+    if "execfile" in __builtins__.keys():
+        execfile(path, {})
+    else:
+        with open(path, "r") as fd:
+            exec(compile(fd.read(), path, "exec"), {})
+
 # ----------------------------------------------------------------------
 # Functions for shell:
 def string_to_safe(string):
