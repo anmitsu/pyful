@@ -29,7 +29,10 @@ __all__ = ["cmdline", "command", "filectrl", "filer", "help", "look", "menu",
 
 import os
 import shutil
+import sys
 
+from pyful import look
+from pyful import util
 from pyful import widget
 
 class Pyful(object):
@@ -39,7 +42,6 @@ class Pyful(object):
         "EDITOR": "vim",
         "PAGER": "less",
         "RCFILE": os.path.join(os.getenv("HOME"), ".pyful", "rc.py"),
-        "SCRIPT": "",
         }
     initfuncs = []
     exitfuncs = []
@@ -54,8 +56,7 @@ class Pyful(object):
         cls.exitfuncs.append(func)
         return func
 
-    def __init__(self, binpath):
-        self.environs["SCRIPT"] = binpath
+    def __init__(self):
         import pyful.cmdline
         import pyful.filer
         import pyful.message
@@ -81,12 +82,10 @@ class Pyful(object):
             if not os.path.exists(path):
                 path = defpath
         try:
-            with open(path, "r") as rc:
-                exec(rc.read(), locals())
+            util.loadfile(path)
             self.environs["RCFILE"] = path
         except Exception as e:
-            with open(defpath, "r") as rc:
-                exec(rc.read(), locals())
+            util.loadfile(defpath)
             self.environs["RCFILE"] = defpath
             return e
 
@@ -125,3 +124,24 @@ class Pyful(object):
         ui = widget.ui.UI(self.draw, self.input)
         while True:
             ui.run()
+
+    def setup(self, rcpath):
+        error = self.loadrcfile(rcpath)
+        look.init_colors()
+        sysver = sys.version.replace(os.linesep, "")
+        self.message.puts("Launching on Python {0}".format(sysver))
+        if error:
+            self.message.exception(error)
+            self.message.error("RC error: instead loaded `{0}'".format(self.environs["RCFILE"]))
+        else:
+            self.message.puts("Loaded {0}".format(self.environs["RCFILE"]))
+        widget.refresh_all_widgets()
+
+    def run(self):
+        self.message.puts("Welcome to pyful v{0}".format(__version__))
+        self.init_function()
+        try:
+            self.main_loop()
+        except SystemExit:
+            self.savercfile()
+            self.exit_function()

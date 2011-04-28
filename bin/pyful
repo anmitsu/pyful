@@ -19,86 +19,68 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import imp
+import locale
+import optparse
 import os
 import sys
 
-if __name__ == "__main__":
+def add_pyful_path():
     libdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     if os.path.exists(os.path.join(libdir, "pyful")):
         sys.path.insert(0, libdir)
+    sys.argv[0] = os.path.abspath(__file__)
 
-from optparse import OptionParser
-from pyful import __version__
+def set_encoding():
+    locale.setlocale(locale.LC_ALL, "")
+    imp.reload(sys)
+    sys.setdefaultencoding("utf-8")
 
 def option_parse():
     usage = "usage: %prog [options]"
-    parser = OptionParser(usage)
-    parser.add_option("-v", "--version", action="store_true", dest="version",
-                      help="display program version")
-    parser.add_option("-c", "--config", dest="config",
-                      help="load configure file")
-    parser.add_option("-e", action="store_true", dest="enter",
-                      help="wait of the user input")
-    (options, args) = parser.parse_args()
+    parser = optparse.OptionParser(usage)
+    parser.add_option(
+        "-v", "--version",
+        action="store_true",
+        dest="version",
+        help="display program version")
+    parser.add_option(
+        "-c", "--config",
+        dest="config",
+        help="load configure file")
+    parser.add_option(
+        "-e",
+        action="store_true",
+        dest="enter",
+        help="wait of the user input")
+    return parser.parse_args()[0]
 
+def main(options):
     if options.version:
-        print("{0} v{1}".format("pyful", __version__))
+        from pyful import __version__
+        print("pyful v{0}".format(__version__))
         sys.exit(0)
-    if options.enter:
+    elif options.enter:
         from pyful import util
         util.wait_restore()
         sys.exit(0)
-    if options.config is not None:
+    elif options.config:
         if not os.path.exists(options.config):
-            print("No such rcfile ({0})".format(options.config))
+            print("No such rcfile `{0}'".format(options.config))
             sys.exit(1)
-    return options
 
-
-import locale
-import imp
-
-locale.setlocale(locale.LC_ALL, "")
-imp.reload(sys)
-sys.setdefaultencoding("utf-8")
-
-from pyful import Pyful
-from pyful import look
-from pyful import message
-from pyful import widget
-
-# Load completion functions
-from pyful.completion import *
-
-def run():
-    options = option_parse()
-
-    widget.start_curses()
-
-    pyful = Pyful(os.path.abspath(__file__))
-    error = pyful.loadrcfile(options.config)
-
-    look.init_colors()
-
-    message.puts("Python {0}".format(sys.version.replace(os.linesep, "")))
-    rcpath = Pyful.environs["RCFILE"]
-    if error:
-        message.exception(error)
-        message.error("rc error: instead loaded `{0}'".format(rcpath))
-    else:
-        message.puts("Loaded {0}".format(rcpath))
-    message.puts("Welcome to pyful v{0}".format(__version__))
-
-    pyful.init_function()
-    widget.refresh_all_widgets()
+    from pyful import Pyful
+    from pyful import widget
     try:
-        pyful.main_loop()
-    except SystemExit:
-        pyful.savercfile()
-        pyful.exit_function()
-
-if __name__ == "__main__":
-    try:
-        run()
+        widget.start_curses()
+        pyful = Pyful()
+        pyful.setup(options.config)
+        pyful.run()
     finally:
         widget.end_curses()
+
+
+if __name__ == "__main__":
+    add_pyful_path()
+    set_encoding()
+    main(option_parse())
