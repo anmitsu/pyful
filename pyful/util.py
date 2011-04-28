@@ -71,7 +71,11 @@ def cmp(x, y):
 # ----------------------------------------------------------------------
 # Functions for shell:
 def string_to_safe(string):
-    return re.sub(r"([^A-Za-z0-9_\-.,:\/@\n])", r"\\\1", string)
+    escape = r"([^A-Za-z0-9_\-.,:\/@\n])"
+    if string.startswith("~"):
+        return replhome(re.sub(escape, r"\\\1", expanduser(string)))
+    else:
+        return re.sub(escape, r"\\\1", string)
 
 def string_to_norm(string):
     return re.sub(r"\\([^A-Za-z0-9_\-.,:\/@\n])", r"\1", string)
