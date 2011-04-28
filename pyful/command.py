@@ -40,8 +40,7 @@ def _reload_rcfile():
     """Reload Pyful.environs["RCFILE"]"""
     try:
         path = Pyful.environs["RCFILE"]
-        with open(path, "r") as rc:
-            exec(rc.read(), locals())
+        util.loadfile(path)
         message.puts("Reloaded: {0}".format(path))
     except Exception as e:
         message.exception(e)
