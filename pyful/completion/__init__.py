@@ -33,15 +33,19 @@ compfunctions = {}
 def register(name, cls):
     compfunctions[name] = cls
 
-def _extendcompfunctions():
-    libdir = os.path.dirname(os.path.abspath(__file__))
+def import_completion_functions(path=None):
+    if path is None:
+        path = os.path.dirname(os.path.abspath(__file__))
     try:
-        __all__.extend(set(os.path.splitext(f)[0] for f in os.listdir(libdir)))
+        modules = list(set(os.path.splitext(f)[0] for f in os.listdir(path)))
     except OSError:
         return
-    __all__.remove("__init__")
-    __all__.sort()
-_extendcompfunctions()
+    try:
+        modules.remove("__init__")
+    except ValueError:
+        pass
+    __all__.extend(modules)
+    __import__("pyful.completion", {}, {}, modules)
 
 class Completion(ListBox):
     programs = []
@@ -51,6 +55,7 @@ class Completion(ListBox):
         self.cmdline = cmdline
         self.parser = None
         self.loadprograms()
+        import_completion_functions()
 
     def input(self, key):
         if key in self.keymap:
