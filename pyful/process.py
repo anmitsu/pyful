@@ -19,9 +19,9 @@
 import threading
 import os
 import re
+import sys
 from subprocess import Popen, PIPE
 
-from pyful import Pyful
 from pyful import message
 from pyful import util
 from pyful import widget
@@ -108,7 +108,7 @@ class Process(object):
             Popen(["screen", "-t", title, self.shell[0], self.shell[1], cmd])
         else:
             Popen(["screen", "-t", title, self.shell[0], self.shell[1],
-                   "{0}; {1} -e".format(cmd, Pyful.environs["SCRIPT"])])
+                   "{0}; {1} -e".format(cmd, sys.argv[0])])
         message.puts("Spawn: {0} (screen)".format(cmd.strip()))
 
     def terminal(self, cmd):
