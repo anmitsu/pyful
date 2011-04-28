@@ -689,6 +689,8 @@ class CopyThread(JobThread):
     def __init__(self, src, dst):
         JobThread.__init__(self)
         self.dst = util.abspath(dst)
+        if dst.endswith(os.sep):
+            self.dst += os.sep
         if isinstance(src, list):
             self.title = "Copy: mark files -> {0}".format(self.dst)
             self.src = [util.abspath(f) for f in src]
@@ -702,9 +704,10 @@ class CopyThread(JobThread):
         goal = _get_file_length(self.src)[0]
         fjg = FileJobGenerator()
         elapse = 1
+        mark = len(self.src) - 1
         try:
             for f in self.src:
-                for job in fjg.generate(f, self.dst):
+                for job in fjg.generate(f, self.dst, mark):
                     if not self.active:
                         raise FilectrlCancel(self.title)
                     if job:
@@ -720,6 +723,8 @@ class MoveThread(JobThread):
     def __init__(self, src, dst):
         JobThread.__init__(self)
         self.dst = util.abspath(dst)
+        if dst.endswith(os.sep):
+            self.dst += os.sep
         if isinstance(src, list):
             self.title = "Move: mark files -> {0}".format(self.dst)
             self.src = [util.abspath(f) for f in src]
@@ -733,9 +738,10 @@ class MoveThread(JobThread):
         goal = _get_file_length(self.src)[0]
         fjg = FileJobGenerator()
         elapse = 1
+        mark = len(self.src) - 1
         try:
             for f in self.src:
-                for job in fjg.generate(f, self.dst):
+                for job in fjg.generate(f, self.dst, mark):
                     if not self.active:
                         raise FilectrlCancel(self.title)
                     if job:
@@ -754,7 +760,7 @@ class FileJobGenerator(object):
         self.dirlist = []
         self.dircopylist = []
 
-    def generate(self, src, dst):
+    def generate(self, src, dst, join=False):
         def _checkfile(src, dst):
             ret = self.check_override(src, dst)
             if ret == "Cancel":
@@ -776,7 +782,9 @@ class FileJobGenerator(object):
                 else:
                     yield _checkfile(ssub, dsub)
 
-        dst = os.path.join(dst, util.unix_basename(src))
+        if join or os.path.isdir(dst) or dst.endswith(os.sep):
+            dst = os.path.join(dst, util.unix_basename(src))
+
         if os.path.isdir(src) and not os.path.islink(src):
             for checked in _checkdir(src, dst):
                 yield checked

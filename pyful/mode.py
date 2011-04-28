@@ -239,10 +239,7 @@ class Copy(Mode):
             return " Copy: "
 
     def complete(self, comp):
-        if widget.get("Filer").dir.ismark() or self.src:
-            return comp.comp_dirs()
-        else:
-            return comp.comp_files()
+        return comp.comp_files()
 
     def execute(self, path, action):
         filer = widget.get("Filer")
@@ -504,10 +501,7 @@ class Move(Mode):
             return " Move: "
 
     def complete(self, comp):
-        if widget.get("Filer").dir.ismark() or self.src:
-            return comp.comp_dirs()
-        else:
-            return comp.comp_files()
+        return comp.comp_files()
 
     def execute(self, path, action):
         filer = widget.get("Filer")
