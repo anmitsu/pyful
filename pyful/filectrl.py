@@ -644,7 +644,6 @@ class DeleteThread(JobThread):
             path = util.abspath(path)
             self.title = "Delete: {0}".format(path)
             self.path = [path]
-        self.dirlist = []
 
     def main(self):
         self.update("Delete starting...")
@@ -657,7 +656,6 @@ class DeleteThread(JobThread):
                 self.delete_file(f)
                 self.notify("Deleted{0}".format(msg))
                 elapse += 1
-        self.delete_dirs()
 
     def delete_file(self, f):
         try:
@@ -668,23 +666,22 @@ class DeleteThread(JobThread):
         if not self.active:
             raise FilectrlCancel(self.title)
 
-    def delete_dirs(self):
-        for d in reversed(sorted(self.dirlist)):
-            try:
-                os.rmdir(d)
-            except Exception as e:
-                if e[0] != errno.ENOTEMPTY:
-                    message.exception(e)
-                    raise FilectrlCancel("Exception occurred while directory deleting")
+    def delete_dir(self, directory):
+        try:
+            os.rmdir(directory)
+        except Exception as e:
+            if e[0] != errno.ENOTEMPTY:
+                message.exception(e)
+                raise FilectrlCancel("Exception occurred while directory deleting")
 
     def generate(self, path):
         if os.path.islink(path) or not os.path.isdir(path):
             yield path
         else:
-            self.dirlist.append(path)
             for sub in os.listdir(path):
                 for f in self.generate(os.path.join(path, sub)):
                     yield f
+            self.delete_dir(path)
 
 class CopyThread(JobThread):
     def __init__(self, src, dst):
@@ -706,19 +703,16 @@ class CopyThread(JobThread):
         fjg = FileJobGenerator()
         elapse = 1
         mark = len(self.src) - 1
-        try:
-            for f in self.src:
-                for job in fjg.generate(f, self.dst, mark):
-                    if not self.active:
-                        raise FilectrlCancel(self.title)
-                    if job:
-                        msg = "({0}/{1}): {2}".format(elapse, goal, util.unix_basename(job.src))
-                        self.update("Copying{0}".format(msg))
-                        job.copy()
-                        self.notify("Copied{0}".format(msg))
-                    elapse += 1
-        finally:
-            fjg.copydirs()
+        for f in self.src:
+            for job in fjg.generate(f, self.dst, False, mark):
+                if not self.active:
+                    raise FilectrlCancel(self.title)
+                if job:
+                    msg = "({0}/{1}): {2}".format(elapse, goal, util.unix_basename(job.src))
+                    self.update("Copying{0}".format(msg))
+                    job.copy()
+                    self.notify("Copied{0}".format(msg))
+                elapse += 1
 
 class MoveThread(JobThread):
     def __init__(self, src, dst):
@@ -740,28 +734,22 @@ class MoveThread(JobThread):
         fjg = FileJobGenerator()
         elapse = 1
         mark = len(self.src) - 1
-        try:
-            for f in self.src:
-                for job in fjg.generate(f, self.dst, mark):
-                    if not self.active:
-                        raise FilectrlCancel(self.title)
-                    if job:
-                        msg = "({0}/{1}): {2}".format(elapse, goal, util.unix_basename(job.src))
-                        self.update("Moving{0}".format(msg))
-                        job.move()
-                        self.notify("Moved{0}".format(msg))
-                    elapse += 1
-        finally:
-            fjg.copydirs()
-            fjg.removedirs()
+        for f in self.src:
+            for job in fjg.generate(f, self.dst, True, mark):
+                if not self.active:
+                    raise FilectrlCancel(self.title)
+                if job:
+                    msg = "({0}/{1}): {2}".format(elapse, goal, util.unix_basename(job.src))
+                    self.update("Moving{0}".format(msg))
+                    job.move()
+                    self.notify("Moved{0}".format(msg))
+                elapse += 1
 
 class FileJobGenerator(object):
     def __init__(self):
         self.confirm = "Importunate"
-        self.dirlist = []
-        self.dircopylist = []
 
-    def generate(self, src, dst, join=False):
+    def generate(self, src, dst, moving, join=False):
         def _checkfile(src, dst):
             ret = self.check_override(src, dst)
             if ret == "Cancel":
@@ -770,9 +758,9 @@ class FileJobGenerator(object):
                 return FileJob(src, dst)
 
         def _checkdir(src, dst):
-            self.dirlist.append(src)
+            copypair = None
             if not os.path.isdir(dst):
-                self.dircopylist.append((os.stat(src), dst))
+                copypair = (os.stat(src), dst)
 
             for f in os.listdir(src):
                 ssub = os.path.join(src, f)
@@ -782,6 +770,10 @@ class FileJobGenerator(object):
                         yield checked
                 else:
                     yield _checkfile(ssub, dsub)
+            if copypair:
+                self.copydir(copypair)
+            if moving:
+                self.removedir(src)
 
         if join or os.path.isdir(dst) or dst.endswith(os.sep):
             dst = os.path.join(dst, util.unix_basename(src))
@@ -834,27 +826,25 @@ class FileJobGenerator(object):
                 checked = "Cancel"
         return checked
 
-    def copydirs(self):
-        for d in reversed(sorted(self.dircopylist)):
-            try:
-                os.makedirs(d[1])
-            except OSError as e:
-                if e.errno != errno.EEXIST:
-                    message.exception(e)
-            sst, dst = d
-            try:
-                os.utime(dst, (sst.st_atime, sst.st_mtime))
-                os.chmod(dst, stat.S_IMODE(sst.st_mode))
-            except Exception as e:
+    def copydir(self, pair):
+        try:
+            os.makedirs(pair[1])
+        except OSError as e:
+            if e.errno != errno.EEXIST:
                 message.exception(e)
+        sst, dst = pair
+        try:
+            os.utime(dst, (sst.st_atime, sst.st_mtime))
+            os.chmod(dst, stat.S_IMODE(sst.st_mode))
+        except Exception as e:
+            message.exception(e)
 
-    def removedirs(self):
-        for d in reversed(sorted(self.dirlist)):
-            try:
-                os.rmdir(d)
-            except Exception as e:
-                if e[0] != errno.ENOTEMPTY:
-                    message.exception(e)
+    def removedir(self, directory):
+        try:
+            os.rmdir(directory)
+        except Exception as e:
+            if e[0] != errno.ENOTEMPTY:
+                message.exception(e)
 
 class FileJob(object):
     def __init__(self, src, dst):
