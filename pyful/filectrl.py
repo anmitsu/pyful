@@ -647,6 +647,7 @@ class DeleteThread(JobThread):
         self.dirlist = []
 
     def main(self):
+        self.update("Delete starting...")
         goal = _get_file_length(self.path)[0]
         elapse = 1
         for path in self.path:
