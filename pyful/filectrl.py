@@ -778,6 +778,9 @@ class FileJobGenerator(object):
         if join or os.path.isdir(dst) or dst.endswith(os.sep):
             dst = os.path.join(dst, util.unix_basename(src))
 
+        if dst.startswith(src):
+            raise FilectrlCancel("Cannot copy/move a directory, `{0}', into itself, `{1}'".format(src, dst))
+
         if os.path.isdir(src) and not os.path.islink(src):
             for checked in _checkdir(src, dst):
                 yield checked
