@@ -254,6 +254,8 @@ class ListBox(Widget):
         win.noutrefresh()
 
 class Entry(object):
+    __slots__ = ["text", "histr", "attr", "hiattr"]
+
     def __init__(self, text, histr=None, attr=0, hiattr=None):
         if hiattr is None:
             hiattr = look.colors["CandidateHighlight"]
@@ -264,6 +266,9 @@ class Entry(object):
 
     def addstr(self, win, width):
         text = util.mbs_ljust(self.text, width)
+        self.addtext(win, text)
+
+    def addtext(self, win, text):
         if self.histr:
             r = re.compile(r"({0})".format(re.escape(self.histr)))
             for s in r.split(text):
