@@ -15,51 +15,51 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from pyful import completion
+from pyful.completion import Argument
+
+def _cp_arguments(f): return (
+    (("-a", "--archive")              , "", f.comp_files),
+    ("--backup="                      , "", _backup_control),
+    ("-b"                             , "", f.comp_files),
+    ("--copy-contents"                , "", f.comp_files),
+    ("-d"                             , "", f.comp_files),
+    (("-f", "--force")                , "", f.comp_files),
+    (("-i", "--interactive")          , "", f.comp_files),
+    ("-H"                             , "", f.comp_files),
+    (("-l", "--link")                 , "", f.comp_files),
+    (("-L", "--dereference")          , "", f.comp_files),
+    (("-n", "--no-clobber")           , "", f.comp_files),
+    (("-P", "--no-dereference")       , "", f.comp_files),
+    ("-p"                             , "", f.comp_files),
+    ("--preserve="                    , "", _attr_list),
+    ("--no-preserve="                 , "", _attr_list),
+    ("--parents"                      , "", f.comp_files),
+    (("-r", "-R", "--recursive")      , "", f.comp_files),
+    ("--reflink"                      , "", f.comp_files),
+    ("--remove-destination"           , "", f.comp_files),
+    ("--sparse="                      , "", ["always", "auto", "never"]),
+    ("--strip-trailing-slashes"       , "", f.comp_files),
+    (("-s", "--symbolic-link")        , "", f.comp_files),
+    (("-S", "--suffix")               , "", []),
+    (("-t", "--target-directory=")    , "", f.comp_dirs),
+    (("-T", "--no-target-directory=") , "", f.comp_dirs),
+    (("-u", "--update")               , "", f.comp_files),
+    (("-v", "--verbose")              , "", f.comp_files),
+    (("-x", "--one-file-system")      , "", f.comp_files),
+    ("--reply="                       , "", ["no", "query", "yes"]),
+    ("--help"                         , "", f.comp_files),
+    ("--version"                      , "", f.comp_files),
+    )
+
+def _backup_control():
+    return ["existing", "never", "nil", "none", "numbered", "off", "simple", "t"]
+
+def _attr_list():
+    return ["all", "links", "mode", "ownership", "timestamps"]
 
 class Cp(completion.ShellCompletionFunction):
     def __init__(self):
-        self.arguments = {
-            "--archive": self.comp_files,
-            "--copy-contents": self.comp_files,
-            "--dereference": self.comp_files,
-            "--force": self.comp_files,
-            "--interactive": self.comp_files,
-            "--link": self.comp_files,
-            "--one-file-system": self.comp_files,
-            "--parents": self.comp_files,
-            "--recursive": self.comp_files,
-            "--remove-destination": self.comp_files,
-            "--strip-trailing-slashes": self.comp_files,
-            "--symbolic-link": self.comp_files,
-            "--update": self.comp_files,
-            "--verbose": self.comp_files,
-            "-H": self.comp_files,
-            "-L": self.comp_files,
-            "-P": self.comp_files,
-            "-S": [],
-            "-R": self.comp_files,
-            "-b": self.comp_files,
-            "-d": self.comp_files,
-            "-p": self.comp_files,
-            "-a": self.comp_files,
-            "-f": self.comp_files,
-            "-i": self.comp_files,
-            "-l": self.comp_files,
-            "-r": self.comp_files,
-            "-s": self.comp_files,
-            "-u": self.comp_files,
-            "-v": self.comp_files,
-            "-x": self.comp_files,
-            "--backup=": ["existing", "never", "nil", "none", "numbered", "off", "simple", "t"],
-            "--help": self.comp_files,
-            "--no-preserve=": ["all", "links", "mode", "ownership", "timestamps"],
-            "--preserve=": ["all", "links", "mode", "ownership", "timestamps"],
-            "--reply=": ["no", "query", "yes"],
-            "--sparse=": ["always", "auto", "never"],
-            "--suffix": [],
-            "--target-directory=": self.comp_dirs,
-            "--version": self.comp_files,
-            }
+        self.arguments = [Argument(*item) for item in _cp_arguments(self)]
 
     def default(self):
         return self.comp_files()

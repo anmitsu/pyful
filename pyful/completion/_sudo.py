@@ -15,30 +15,33 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from pyful import completion
+from pyful.completion import Argument
+
+def _sudo_arguments(f): return (
+    ("-E", "", f.comp_programs),
+    ("-H", "", f.comp_programs),
+    ("-K", "", f.comp_programs),
+    ("-L", "", f.comp_programs),
+    ("-P", "", f.comp_programs),
+    ("-S", "", f.comp_programs),
+    ("-V", "", f.comp_programs),
+    ("-a", "", []),
+    ("-b", "", f.comp_programs),
+    ("-c", "", []),
+    ("-h", "", f.comp_programs),
+    ("-i", "", f.comp_programs),
+    ("-k", "", f.comp_programs),
+    ("-l", "", f.comp_programs),
+    ("-p", "", []),
+    ("-r", "", []),
+    ("-s", "", f.comp_programs),
+    ("-u", "", f.comp_username),
+    ("-v", "", f.comp_programs),
+    )
 
 class Sudo(completion.ShellCompletionFunction):
     def __init__(self):
-        self.arguments = {
-            "-E": self.comp_programs,
-            "-H": self.comp_programs,
-            "-K": self.comp_programs,
-            "-L": self.comp_programs,
-            "-P": self.comp_programs,
-            "-S": self.comp_programs,
-            "-V": self.comp_programs,
-            "-a": [],
-            "-b": self.comp_programs,
-            "-c": [],
-            "-h": self.comp_programs,
-            "-i": self.comp_programs,
-            "-k": self.comp_programs,
-            "-l": self.comp_programs,
-            "-p": [],
-            "-r": [],
-            "-s": self.comp_programs,
-            "-u": self.comp_username,
-            "-v": self.comp_programs,
-            }
+        self.arguments = [Argument(*items) for items in _sudo_arguments(self)]
 
     def default(self):
         progs = self.comp_programs()
@@ -59,7 +62,14 @@ class Sudo(completion.ShellCompletionFunction):
         if self.parser.part[1].startswith("-"):
             return self.options()
 
-        value = self.arguments.get(self.parser.current_option, self.default)
+        current = self.parser.part[1]
+        value = None
+        for arg in self.arguments:
+            if arg.match(current) == self.parser.current_option:
+                value = arg.callback
+                break
+        if value is None:
+            value = self.default
         if hasattr(value, "__call__"):
             return value()
         else:

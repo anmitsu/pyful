@@ -81,8 +81,8 @@ class Completion(ListBox):
                 self.programs.append(f)
         self.programs.sort()
 
-    def _get_maxrow(self):
-        maxlen = max(util.termwidth(entry.text) for entry in self.list)
+    def _get_maxrow(self, entries):
+        maxlen = max(util.termwidth(entry.text) for entry in entries)
         y, x = self.stdscr.getmaxyx()
         maxrow = x // (maxlen+2)
         if maxrow:
@@ -92,7 +92,9 @@ class Completion(ListBox):
 
     def insert(self, text=None):
         if text is None:
-            text = self.cursor_entry().text
+            entry = self.cursor_entry()
+            text = entry.match(self.parser.part[1])
+
         if self.cmdline.mode.__class__.__name__ == "Shell" and \
                 not self.parser.now_in_quote():
             text = util.string_to_safe(text)
@@ -111,24 +113,37 @@ class Completion(ListBox):
             self.parser.parse_nonshell()
             compfunc = CompletionFunction()
 
-        candidates = self.cmdline.mode.complete(compfunc)
+        candidates = []
+        for item in self.cmdline.mode.complete(compfunc):
+            if isinstance(item, Candidate):
+                candidates.append(item)
+            else:
+                candidates.append(Candidate(item))
 
-        if not isinstance(candidates, list) or len(candidates) == 0:
+        if not candidates:
             return
-        if len(candidates) == 1:
-            if candidates[0] == self.parser.part[1]:
+        elif len(candidates) == 1:
+            name = candidates[0].match(self.parser.part[1])
+            if not name or name == self.parser.part[1]:
                 return
-            self.insert(candidates[0])
+            self.insert(name)
             self.hide()
         else:
             self.cmdline.history.hide()
-            common = os.path.commonprefix(candidates)
+            current = self.parser.part[1]
+            names = [candidate.match(current) for candidate in candidates]
+            common = os.path.commonprefix(names)
             if common:
                 self.insert(common)
                 self.parser.part[1] = common
-            entries = [Entry(c, histr=self.parser.part[1]) for c in candidates]
-            self.show(entries)
-            self.maxrow = self._get_maxrow()
+                for candidate in candidates:
+                    candidate.histr = common
+            if [c for c in candidates if c.doc]:
+                self.maxrow = 1
+                Candidate.maxwidth = max(util.termwidth(c.text) for c in candidates)
+            else:
+                self.maxrow = self._get_maxrow(candidates)
+            self.show(candidates)
 
     def finish(self):
         self.hide()
@@ -208,6 +223,49 @@ class Parser(object):
     def match_current_part(self, text):
         return text.startswith(self.part[1])
 
+class Candidate(Entry):
+    __slots__ = ["names", "doc", "histr", "attr", "hiattr"]
+    maxwidth = 0
+
+    def __init__(self, names, doc=None, histr=None, attr=0, hiattr=None):
+        if isinstance(names, (tuple, list)):
+            self.names = names
+        else:
+            self.names = (names,)
+        self.doc = doc
+        text = ", ".join(self.names)
+        Entry.__init__(self, text, histr=histr, attr=attr, hiattr=hiattr)
+
+    def addstr(self, win, width):
+        if self.doc:
+            if self.maxwidth:
+                textwidth = self.maxwidth + 2
+                if textwidth >= width:
+                    textwidth = width // 2
+                docwidth = width - textwidth
+            else:
+                textwidth = docwidth = width // 2
+            text = util.mbs_ljust(self.text, textwidth)
+            self.addtext(win, text)
+            doc = util.mbs_ljust(self.doc, docwidth)
+            win.addstr(doc)
+        else:
+            text = util.mbs_ljust(self.text, width)
+            self.addtext(win, text)
+
+    def match(self, text):
+        for name in self.names:
+            if name.startswith(text):
+                return name
+        return ""
+
+class Argument(Candidate):
+    __slots__ = ["names", "doc", "histr", "attr", "hiattr", "callback"]
+
+    def __init__(self, names, doc=None, callback=None):
+        Candidate.__init__(self, names, doc)
+        self.callback = callback
+
 class CompletionFunction(object):
     parser = None
 
@@ -229,6 +287,7 @@ class CompletionFunction(object):
             self.parser.part[0] += _dirname(path)
         bname = os.path.basename(path)
         dpath = os.path.expanduser(util.abspath(os.path.dirname(path)))
+        self.parser.part[1] = bname
         return (bname, dpath)
 
     def comp_files(self):
@@ -241,9 +300,8 @@ class CompletionFunction(object):
         for fname in entries:
             if fname.startswith(bname):
                 if os.path.isdir(os.path.join(dpath, fname)):
-                    files.append(fname+os.sep)
-                else:
-                    files.append(fname)
+                    fname += os.sep
+                files.append(fname)
         files.sort()
         return files
 
@@ -311,16 +369,31 @@ class ShellCompletionFunction(CompletionFunction):
         return self.options()
 
     def options(self):
-        return sorted(
-            [opt for opt in self.arguments.keys()
-             if opt.startswith(self.parser.part[1])
-             and not opt in self.parser.options])
+        options = []
+        already = self.parser.options
+        for arg in self.arguments:
+            if not arg.match(self.parser.part[1]):
+                continue
+            if already:
+                for opt in already:
+                    if not arg.match(opt):
+                        options.append(arg)
+            else:
+                options.append(arg)
+        return options
 
     def complete(self):
         if self.arguments:
             if self.parser.part[1].startswith("-"):
                 return self.options()
-            value = self.arguments.get(self.parser.current_option, self.default)
+            current = self.parser.part[1]
+            value = None
+            for arg in self.arguments:
+                if arg.match(current) == self.parser.current_option:
+                    value = arg.callback
+                    break
+            if value is None:
+                value = self.default
             if hasattr(value, "__call__"):
                 return value()
             else:

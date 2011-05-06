@@ -17,84 +17,66 @@
 import os
 
 from pyful import completion
+from pyful.completion import Argument
+
+def _make_arguments(f): return (
+    (("-b", "-m")                                         , "-- ugnored for compatibility", []),
+    (("-B", "--always-make")                              , "-- unconditionally make all targets", []),
+    (("-C", "--directory=")                               , "-- change to DIRECTORY before doing anything", f.comp_dirs),
+    ("-d"                                                 , "-- print lots of debugging information", []),
+    ("--debug"                                            , "-- print various types of debugging information", []),
+    (("-e", "--environment-overrides")                    , "-- environment variables override makefiles", []),
+    (("-f", "--file=", "--makefile=")                     , "-- read FILE as a makefile", f.comp_files),
+    (("-h", "--help")                                     , "-- print this message and exit", []),
+    (("-i", "--ignore-errors")                            , "-- ignore errors from commands", []),
+    (("-I", "--include-dir=")                             , "-- search DIRECTORY for included makefiles", f.comp_dirs),
+    (("-j", "--jobs")                                     , "-- allow N jobs at once", []),
+    (("-k", "--keep-going")                               , "-- keep going when some targets can't be made", []),
+    (("-l", "--load-average")                             , "-- don't start multiple jobs unless load is below N", []),
+    (("-L", "--check-symlink-times")                      , "-- use the latest mtime between symlinks and target", []),
+    (("-n", "--just-print", "--dry-run", "--recon")       , "-- don't actually run any commands", []),
+    (("-o", "--old-file=", "--assume-old=")               , "-- consider FILE to be very old and don't remake it", f.comp_files),
+    (("-p", "--print-data-base")                          , "-- print make's internal database", []),
+    (("-q", "--question")                                 , "-- run no commands; exit status says if up to date", []),
+    (("-r", "--no-builtin-rules")                         , "-- disable the built-in implicit rules", []),
+    (("-R", "--no-builtin-variables")                     , "-- disable the built-in variable settings", []),
+    (("-s", "--silent", "--quiet")                        , "-- don't echo commands", []),
+    (("-S", "--no-keep-going", "--stop")                  , "-- turns off -k", []),
+    (("-t", "--touch")                                    , "-- touch targets instead of remaking them", []),
+    (("-v", "--version")                                  , "-- print the version number of make and exit", []),
+    (("-w", "--print-directory")                          , "-- print the current directory", []),
+    ("--no-print-directory"                               , "-- turn off -w, even if it was turned on implicitly", []),
+    (("-W", "--what-if=", "--new-file=", "--assume-new=") , "-- consider FILE to be infinitely new", f.comp_files),
+    ("--warn-undefined-variables"                         , "-- warn when an undefined variable is referenced", []),
+    )
 
 class Make(completion.ShellCompletionFunction):
     def __init__(self):
-        self.arguments = {
-            "--directory=": self.comp_dirs,
-            "--debug": [],
-            "--environment-overrides": [],
-            "--file=": self.comp_files,
-            "--makefile=": self.comp_files,
-            "--help": [],
-            "--ignore-errors": [],
-            "--include-dir=": self.comp_dirs,
-            "--jobs=": [],
-            "--keep-going": [],
-            "--load-average=": [],
-            "--max-load=": [],
-            "--just-print": [],
-            "--dry-run": [],
-            "--recon": [],
-            "--old-file=": self.comp_files,
-            "--assume-old=": self.comp_files,
-            "--print-data-base": [],
-            "--question": [],
-            "--no-builtin-rules": [],
-            "--silent": [],
-            "--quiet": [],
-            "--no-keep-going": [],
-            "--stop": [],
-            "--touch": [],
-            "--version": [],
-            "--print-directory": [],
-            "--no-print-directory": [],
-            "--what-if=": self.comp_files,
-            "--new-file=": self.comp_files,
-            "--assume-new=": self.comp_files,
-            "--warn-undefined-variables": [],
-            "-b": [],
-            "-m": [],
-            "-C": self.comp_dirs,
-            "-d": [],
-            "-e": [],
-            "-f": self.comp_files,
-            "-h": [],
-            "-i": [],
-            "-I": self.comp_dirs,
-            "-j": [],
-            "-k": [],
-            "-l": [],
-            "-n": [],
-            "-o": self.comp_files,
-            "-p": [],
-            "-q": [],
-            "-r": [],
-            "-s": [],
-            "-S": [],
-            "-t": [],
-            "-v": [],
-            "-w": [],
-            "-W": self.comp_files,
-            }
+        self.arguments = [Argument(*item) for item in _make_arguments(self)]
 
     def default(self):
-        fname = ""
-        if os.path.exists("GNUmakefile"):
-            fname = "GNUmakefile"
-        elif os.path.exists("makefile"):
-            fname = "makefile"
-        elif os.path.exists("Makefile"):
-            fname = "Makefile"
-        if not fname:
+        makefile = None
+        for fname in ["GNUmakefile", "makefile", "Makefile"]:
+            if os.path.exists(fname):
+                makefile = fname
+                break
+        if not makefile:
             return []
-        command = []
-        with open(fname) as f:
-            for line in f:
-                tmp = line.split(":")
-                if len(tmp) == 2 and "$" not in tmp[0] and "\t" not in tmp[0] and not tmp[0].startswith("#"):
-                    if tmp[0].startswith(self.parser.part[1]):
-                        command.append(tmp[0])
-        return sorted(command)
+        commands = []
+        try:
+            fd = open(makefile, "r")
+        except OSError:
+            return []
+        current = self.parser.part[1]
+        for line in fd:
+            cols = line.split(":")
+            if len(cols) == 2 and \
+                    "$" not in cols[0] and \
+                    "\t" not in cols[0] and \
+                    not cols[0].startswith("#") and \
+                    cols[0].startswith(current):
+                commands.append(cols[0])
+        commands.sort()
+        return commands
 
 completion.register("make", Make)
