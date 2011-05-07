@@ -65,7 +65,7 @@ class Sudo(completion.ShellCompletionFunction):
         current = self.parser.part[1]
         value = None
         for arg in self.arguments:
-            if arg.match(current) == self.parser.current_option:
+            if self.parser.current_option in arg.names:
                 value = arg.callback
                 break
         if value is None:
