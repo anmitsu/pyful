@@ -31,7 +31,6 @@ import time
 from pyful import look
 from pyful import message
 from pyful import util
-from pyful import widget
 
 from pyful.widget.base import StandardScreen, Screen, Widget
 from pyful.widget.textbox import TextBox
@@ -627,7 +626,7 @@ class Directory(StandardScreen):
         self.screen.create_window()
         self.path = util.abspath(path)
         self.files = [FileStat(os.pardir)]
-        self.mark_files = {}
+        self.mark_files = set()
         self.mark_size = "0"
         self.cursor = 0
         self.scrolltop = 0
@@ -759,7 +758,7 @@ class Directory(StandardScreen):
             self.reload()
 
     def diskread(self):
-        marks = self.mark_files.copy()
+        marks = set(f.name for f in self.mark_files)
         self.files[:] = [FileStat(os.pardir)]
         self.mark_files.clear()
 
@@ -865,19 +864,16 @@ class Directory(StandardScreen):
                 continue
             if toggle:
                 if fs.marktoggle():
-                    self.mark_files[fs.name] = fs
+                    self.mark_files.add(fs)
                 else:
-                    try:
-                        self.mark_files.pop(fs.name)
-                    except KeyError:
-                        pass
+                    self.mark_files.discard(fs)
             else:
                 fs.markon()
-                self.mark_files[fs.name] = fs
+                self.mark_files.add(fs)
         self.mark_size = self.get_mark_size()
 
     def mark_clear(self):
-        for f in self.mark_files.values():
+        for f in self.mark_files:
             f.markoff()
         self.mark_files.clear()
         self.mark_size = "0"
@@ -885,14 +881,11 @@ class Directory(StandardScreen):
     def get_mark_size(self):
         if not self.mark_files:
             return "0"
-        size = sum(f.stat.st_size for f in self.mark_files.values() if not f.isdir())
+        size = sum(f.stat.st_size for f in self.mark_files if not f.isdir())
         return re.sub(r"(\d)(?=(?:\d\d\d)+(?!\d))", r"\1,", str(size))
 
     def get_mark_files(self):
-        if len(self.mark_files) == 0:
-            return [self.file.name]
-        else:
-            return [f for f in self.mark_files.keys()]
+        return [f.name for f in self.mark_files] or [self.file.name]
 
     def ismark(self):
         return len(self.mark_files) != 0
