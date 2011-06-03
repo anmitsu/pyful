@@ -35,7 +35,7 @@ def _ruby_arguments(f): return (
     ("-i"                , "-- edit ARGV files in place (make backup if extension supplied)", f.comp_files),
     (("-n", "-l")        , "-- assume 'while gets(); ... end' loop around your script", f.comp_files),
     ("-p"                , "-- assume loop like -n but print line also like sed", f.comp_files),
-    ("-r"                , "-- require the library, before executing your script", lambda: _ruby_library(f.parser.part[1])),
+    ("-r"                , "-- require the library, before executing your script", _ruby_library),
     ("-s"                , "-- enable some switch parsing for switches after script name", f.comp_files),
     ("-w"                , "-- turn warnings on for your script", f.comp_files),
     ("-x"                , "-- strip off text before #!ruby line and perhaps cd to directory", f.comp_files),
@@ -47,7 +47,7 @@ def _ruby_arguments(f): return (
     ("--version"         , "-- print the version", f.comp_files),
     )
 
-def _ruby_library(s):
+def _ruby_library():
     rubyeval = "puts $:"
     try:
         paths = subprocess.Popen(
@@ -68,10 +68,9 @@ def _ruby_library(s):
         except OSError:
             continue
         for lib in entries:
-            if lib.startswith(s):
-                if os.path.isdir(os.path.join(path, lib)):
-                    lib += os.sep
-                library.append(lib)
+            if os.path.isdir(os.path.join(path, lib)):
+                lib += os.sep
+            library.append(lib)
     library.sort()
     return library
 

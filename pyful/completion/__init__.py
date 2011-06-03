@@ -90,13 +90,17 @@ class Completion(ListBox):
         else:
             return 1
 
-    def insert(self, text=None):
-        if text is None:
+    def insert(self, entry=None):
+        if entry is None:
             entry = self.cursor_entry()
-            text = entry.match(self.parser.part[1])
-
+        escape = False
         if self.cmdline.mode.__class__.__name__ == "Shell" and \
-                not self.parser.now_in_quote():
+                not self.parser.now_in_quote() and \
+                not isinstance(entry, Argument):
+            escape = True
+
+        text = entry.match(self.parser.part[1])
+        if escape:
             text = util.string_to_safe(text)
 
         self.cmdline.settext(self.parser.part[0] + text + self.parser.part[2])
@@ -116,25 +120,24 @@ class Completion(ListBox):
         candidates = []
         for item in self.cmdline.mode.complete(compfunc):
             if isinstance(item, Candidate):
-                candidates.append(item)
+                if item.match(self.parser.part[1]):
+                    candidates.append(item)
             else:
-                candidates.append(Candidate(item))
+                if item.startswith(self.parser.part[1]):
+                    candidates.append(Candidate(item))
 
         if not candidates:
             return
         elif len(candidates) == 1:
-            name = candidates[0].match(self.parser.part[1])
-            if not name or name == self.parser.part[1]:
-                return
-            self.insert(name)
+            self.insert(candidates[0])
             self.hide()
         else:
             self.cmdline.history.hide()
             current = self.parser.part[1]
-            names = [candidate.match(current) for candidate in candidates]
+            names = [c.match(current) for c in candidates]
             common = os.path.commonprefix(names)
             if common:
-                self.insert(common)
+                self.insert(Candidate(common))
                 self.parser.part[1] = common
                 for candidate in candidates:
                     candidate.histr = common

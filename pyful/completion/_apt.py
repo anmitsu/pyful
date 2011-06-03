@@ -18,20 +18,20 @@ import os
 import subprocess
 
 from pyful import completion
-from pyful.completion import Argument
+from pyful.completion import Argument, Candidate
 
 def _aptget_arguments(f): return (
     ("autoclean"      , "", []),
-    ("autoremove"     , "", lambda: _dpkglist(f.parser.part[1])),
-    ("build-dep"      , "", lambda: _pkgnames(f.parser.part[1])),
+    ("autoremove"     , "", _dpkglist),
+    ("build-dep"      , "", _pkgnames),
     ("check"          , "", []),
     ("clean"          , "", []),
     ("dist-upgrade"   , "", []),
     ("dselect-upgrade", "", []),
-    ("install"        , "", lambda: _pkgnames(f.parser.part[1])),
-    ("purge"          , "", lambda: _dpkglist(f.parser.part[1])),
-    ("remove"         , "", lambda: _dpkglist(f.parser.part[1])),
-    ("source"         , "", lambda: _pkgnames(f.parser.part[1])),
+    ("install"        , "", _pkgnames),
+    ("purge"          , "", _dpkglist),
+    ("remove"         , "", _dpkglist),
+    ("source"         , "", _pkgnames),
     ("update"         , "", []),
     ("upgrade"        , "", []),
     ("help"           , "", []),
@@ -39,26 +39,26 @@ def _aptget_arguments(f): return (
 
 def _aptcache_arguments(f): return (
     ("add"      , "", []),
-    ("depends"  , "", lambda: _pkgnames(f.parser.part[1])),
-    ("dotty"    , "", lambda: _pkgnames(f.parser.part[1])),
+    ("depends"  , "", _pkgnames),
+    ("dotty"    , "", _pkgnames),
     ("dump"     , "", []),
     ("dumpavail", "", []),
     ("gencaches", "", []),
     ("help"     , "", []),
-    ("madison"  , "", lambda: _pkgnames(f.parser.part[1])),
+    ("madison"  , "", _pkgnames),
     ("pkgnames" , "", []),
-    ("policy"   , "", lambda: _pkgnames(f.parser.part[1])),
-    ("rdepends" , "", lambda: _pkgnames(f.parser.part[1])),
+    ("policy"   , "", _pkgnames),
+    ("rdepends" , "", _pkgnames),
     ("search"   , "", []),
-    ("show"     , "", lambda: _pkgnames(f.parser.part[1])),
-    ("showpkg"  , "", lambda: _pkgnames(f.parser.part[1])),
-    ("showsrc"  , "", lambda: _pkgnames(f.parser.part[1])),
+    ("show"     , "", _pkgnames),
+    ("showpkg"  , "", _pkgnames),
+    ("showsrc"  , "", _pkgnames),
     ("stats"    , "", []),
     ("unmet"    , "", []),
-    ("xvcg"     , "", lambda: _pkgnames(f.parser.part[1])),
+    ("xvcg"     , "", _pkgnames),
     )
 
-def _pkgnames(s):
+def _pkgnames():
     try:
         out = subprocess.Popen(
             ["apt-cache", "pkgnames"],
@@ -70,9 +70,9 @@ def _pkgnames(s):
         out = out.decode()
     except UnicodeError:
         return []
-    return [item for item in out.splitlines() if item.startswith(s)]
+    return out.splitlines()
 
-def _dpkglist(s):
+def _dpkglist():
     try:
         out = subprocess.Popen(
             ["dpkg", "-l"],
@@ -84,8 +84,15 @@ def _dpkglist(s):
         out = out.decode()
     except UnicodeError:
         return []
-    return [line.split()[1] for line in out.splitlines()[5:]
-            if len(line) > 2 and line[1].startswith(s)]
+    candidates = []
+    vermax = max(len(line.split()[2]) for line in out.splitlines()[5:])
+    for line in out.splitlines()[5:]:
+        info = line.split()
+        version = info[2]
+        description = " ".join(info[3:])
+        doc = "-- v{0:<{1}}{2}".format(version, vermax, description)
+        candidates.append(Candidate(names=info[1], doc=doc))
+    return candidates
 
 class AptGet(completion.ShellCompletionFunction):
     def __init__(self):

@@ -46,11 +46,9 @@ class Pydoc(completion.ShellCompletionFunction):
                 name, ext = os.path.splitext(module)
                 if ext in (".py", ".pyc", "pyo") or \
                         (os.path.isdir(os.path.join(path, module)) and not ext):
-                    if self.parser.match_current_part(name):
-                        modules.append(name)
+                    modules.append(name)
         modules = list(set(modules))
         modules.sort()
-        kwds = [kw for kw in keyword.kwlist if self.parser.match_current_part(kw)]
-        return modules + kwds
+        return modules + keyword.kwlist
 
 completion.register("pydoc", Pydoc)
