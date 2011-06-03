@@ -190,7 +190,7 @@ class ListBox(Widget):
         elif self.scrolltop >= size:
             self.scrolltop = size//height * height
 
-    def _draw_titlebar(self, size, listcount):
+    def _draw_titlebar(self, win, size, listcount):
         if not self.title:
             return
         if self.cursor < 0:
@@ -198,11 +198,11 @@ class ListBox(Widget):
         else:
             cpage = self.cursor//listcount + 1
         maxpage = int(math.ceil(float(size)/float(listcount)))
-        self.panel.win.addstr(0, 2, "{0}({1}) [{2}/{3}]".format
-                               (self.title, size, cpage, maxpage),
-                               look.colors["ListBoxTitle"])
+        win.addstr(0, 2, "{0}({1}) [{2}/{3}]".format
+                   (self.title, size, cpage, maxpage),
+                   look.colors["ListBoxTitle"])
 
-    def _draw_scrollbar(self, size, height, listcount, x_offset):
+    def _draw_scrollbar(self, win, size, height, listcount, x_offset):
         if size <= listcount:
             return
         line = 1 + int(float(self.scrolltop) / float(size-listcount) * height)
@@ -210,11 +210,11 @@ class ListBox(Widget):
             line = height
         for i in range(1, height+1):
             if i == line:
-                self.panel.win.addstr(i, x_offset, "=")
+                win.addstr(i, x_offset, "=")
             elif i == 1 or i == height:
-                self.panel.win.addstr(i, x_offset, "+")
+                win.addstr(i, x_offset, "+")
             else:
-                self.panel.win.addstr(i, x_offset, "|")
+                win.addstr(i, x_offset, "|")
 
     def draw(self):
         if not self.list:
@@ -232,8 +232,8 @@ class ListBox(Widget):
 
         win.erase()
         win.border(*self.borders)
-        self._draw_titlebar(size, listcount)
-        self._draw_scrollbar(size, height, listcount, x-2)
+        self._draw_titlebar(win, size, listcount)
+        self._draw_scrollbar(win, size, height, listcount, x-2)
 
         line = row = 0
         for i in range(self.scrolltop, size):
