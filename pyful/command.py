@@ -521,62 +521,70 @@ def _chdir_forward():
 @defcmd
 def _sort_name():
     """Sort name by ascending order."""
-    widget.get("Filer").dir.sort_name()
+    widget.get("Filer").dir.sort_name(rev=False)
 
 @defcmd
 def _sort_name_rev():
     """Sort name by descending order."""
-    widget.get("Filer").dir.sort_name_rev()
+    widget.get("Filer").dir.sort_name(rev=True)
 
 @defcmd
 def _sort_ext():
     """Sort file extension by ascending order."""
-    widget.get("Filer").dir.sort_ext()
+    widget.get("Filer").dir.sort_ext(rev=False)
 
 @defcmd
 def _sort_ext_rev():
     """Sort file extension by descending order."""
-    widget.get("Filer").dir.sort_ext_rev()
+    widget.get("Filer").dir.sort_ext(rev=True)
 
 @defcmd
 def _sort_size():
     """Sort file size by ascending order."""
-    widget.get("Filer").dir.sort_size()
+    widget.get("Filer").dir.sort_size(rev=False)
 
 @defcmd
 def _sort_size_rev():
     """Sort file size by descending order."""
-    widget.get("Filer").dir.sort_size_rev()
+    widget.get("Filer").dir.sort_size(rev=True)
 
 @defcmd
 def _sort_time():
     """Sort time by ascending order."""
-    widget.get("Filer").dir.sort_time()
+    widget.get("Filer").dir.sort_time(rev=False)
 
 @defcmd
 def _sort_time_rev():
     """Sort time by descending order."""
-    widget.get("Filer").dir.sort_time_rev()
+    widget.get("Filer").dir.sort_time(rev=True)
 
 @defcmd
 def _sort_nlink():
     """Sort link by ascending order."""
-    widget.get("Filer").dir.sort_nlink()
+    widget.get("Filer").dir.sort_nlink(rev=False)
 
 @defcmd
 def _sort_nlink_rev():
     """Sort link by descending order."""
-    widget.get("Filer").dir.sort_nlink_rev()
+    widget.get("Filer").dir.sort_nlink(rev=True)
 
 @defcmd
 def _sort_permission():
     """Sort permission by ascending order."""
-    widget.get("Filer").dir.sort_permission()
+    widget.get("Filer").dir.sort_permission(rev=False)
 
 @defcmd
 def _sort_permission_rev():
     """Sort permission by ascending order."""
-    widget.get("Filer").dir.sort_permission_rev()
+    widget.get("Filer").dir.sort_permission(rev=True)
+
+@defcmd
+def _toggle_sort_updir():
+    """Toggle of directory sort type"""
+    filer = widget.get("Filer")
+    dircls = filer.dir.__class__
+    dircls.sort_updir = not dircls.sort_updir
+    filer.workspace.all_reload()
 
 @defcmd
 def _toggle_draw_ext():

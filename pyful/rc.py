@@ -69,6 +69,9 @@ Workspace.layout = "Tile"
 #
 Directory.sort_kind = "Name[^]"
 
+# Is a directory sorted in upwards?
+Directory.sort_updir = False
+
 # Set scroll type in directory.
 #
 #     "HalfScroll"
@@ -581,6 +584,7 @@ menu.items["sort"] = (
     ("(L)ink reverse"      , "L", commands["sort_nlink_rev"]),
     ("(p)ermission"        , "p", commands["sort_permission"]),
     ("(P)ermission reverse", "P", commands["sort_permission_rev"]),
+    ("toggle (u)pward directory", "u", commands["toggle_sort_updir"]),
     )
 
 # The editor launcher example.

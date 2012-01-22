@@ -617,6 +617,7 @@ class Workspace(StandardScreen):
 
 class Directory(StandardScreen):
     sort_kind = "Name[^]"
+    sort_updir = False
     scroll_type = "HalfScroll"
     statusbar_format = " [{MARK}/{FILE}] {MARKSIZE}bytes {SCROLL}({CURSOR}) {SORT} "
 
@@ -891,178 +892,113 @@ class Directory(StandardScreen):
         return len(self.mark_files) != 0
 
     def sort(self):
-        if self.sort_kind == "Name[^]": self.sort_name()
-        elif self.sort_kind == "Name[$]": self.sort_name_rev()
-        elif self.sort_kind == "Size[^]": self.sort_size()
-        elif self.sort_kind == "Size[$]": self.sort_size_rev()
-        elif self.sort_kind == "Time[^]": self.sort_time()
-        elif self.sort_kind == "Time[$]": self.sort_time_rev()
-        elif self.sort_kind == "Permission[^]": self.sort_permission()
-        elif self.sort_kind == "Permission[$]": self.sort_permission_rev()
-        elif self.sort_kind == "Link[^]": self.sort_nlink()
-        elif self.sort_kind == "Link[$]": self.sort_nlink_rev()
-        elif self.sort_kind == "Ext[^]": self.sort_ext()
-        elif self.sort_kind == "Ext[$]": self.sort_ext_rev()
+        if self.sort_kind == "Name[^]": self.sort_name(rev=False)
+        elif self.sort_kind == "Name[$]": self.sort_name(rev=True)
+        elif self.sort_kind == "Size[^]": self.sort_size(rev=False)
+        elif self.sort_kind == "Size[$]": self.sort_size(rev=True)
+        elif self.sort_kind == "Time[^]": self.sort_time(rev=False)
+        elif self.sort_kind == "Time[$]": self.sort_time(rev=True)
+        elif self.sort_kind == "Permission[^]": self.sort_permission(rev=False)
+        elif self.sort_kind == "Permission[$]": self.sort_permission(rev=True)
+        elif self.sort_kind == "Link[^]": self.sort_nlink(rev=False)
+        elif self.sort_kind == "Link[$]": self.sort_nlink(rev=True)
+        elif self.sort_kind == "Ext[^]": self.sort_ext(rev=False)
+        elif self.sort_kind == "Ext[$]": self.sort_ext(rev=True)
 
-    def sort_name(self):
-        def _sort(x, y):
-            if x.name == os.pardir:
-                return -1
-            if y.name == os.pardir:
-                return 1
-            return util.cmp(x.name, y.name)
-        self.files.sort(key=util.cmp_to_key(_sort))
-        self.sort_kind = "Name[^]"
-
-    def sort_name_rev(self):
-        def _sort(x, y):
-            if x.name == os.pardir:
-                return -1
-            if y.name == os.pardir:
-                return 1
-            return util.cmp(y.name, x.name)
-        self.files.sort(key=util.cmp_to_key(_sort))
-        self.sort_kind = "Name[$]"
-
-    def sort_size(self):
-        def _sort(x, y):
-            if x.name == os.pardir:
-                return -1
-            if y.name == os.pardir:
-                return 1
-            ret = util.cmp(x.stat.st_size, y.stat.st_size)
-            if ret == 0:
-                return util.cmp(x.name, y.name)
+    def _sort_default(self, sortfunc, x, y, rev):
+        if x.name == os.pardir:
+            return -1
+        if y.name == os.pardir:
+            return 1
+        if self.sort_updir:
+            xdir = x.isdir()
+            ydir = y.isdir()
+            if xdir == ydir:
+                return sortfunc(x, y, rev)
             else:
-                return ret
-        self.files.sort(key=util.cmp_to_key(_sort))
-        self.sort_kind = "Size[^]"
+                return 1 if ydir == 1 else -1
+        else:
+            return sortfunc(x, y, rev)
 
-    def sort_size_rev(self):
-        def _sort(x, y):
-            if x.name == os.pardir:
-                return -1
-            if y.name == os.pardir:
-                return 1
-            ret = util.cmp(y.stat.st_size, x.stat.st_size)
-            if ret == 0:
+    def sort_name(self, rev=False):
+        def _namecompare(x, y, rev):
+            if rev:
                 return util.cmp(y.name, x.name)
             else:
-                return ret
-        self.files.sort(key=util.cmp_to_key(_sort))
-        self.sort_kind = "Size[$]"
-
-    def sort_permission(self):
-        def _sort(x, y):
-            if x.name == os.pardir:
-                return -1
-            if y.name == os.pardir:
-                return 1
-            ret = util.cmp(x.stat.st_mode, y.stat.st_mode)
-            if ret == 0:
                 return util.cmp(x.name, y.name)
-            else:
-                return ret
+        _sort = lambda x, y: self._sort_default(_namecompare, x, y, rev)
         self.files.sort(key=util.cmp_to_key(_sort))
-        self.sort_kind = "Permission[^]"
+        self.sort_kind = "Name[$]" if rev else "Name[^]"
 
-    def sort_permission_rev(self):
-        def _sort(x, y):
-            if x.name == os.pardir:
-                return -1
-            if y.name == os.pardir:
-                return 1
-            ret = util.cmp(y.stat.st_mode, x.stat.st_mode)
+    def sort_size(self, rev=False):
+        def _sizecompare(x, y, rev):
+            if rev:
+                ret = util.cmp(y.stat.st_size, x.stat.st_size) 
+            else:
+                ret = util.cmp(x.stat.st_size, y.stat.st_size)
             if ret == 0:
-                return util.cmp(y.name, x.name)
+                return util.cmp(y.name, x.name) if rev else util.cmp(x.name, y.name)
             else:
                 return ret
+        _sort = lambda x, y: self._sort_default(_sizecompare, x, y, rev)
         self.files.sort(key=util.cmp_to_key(_sort))
-        self.sort_kind = "Permission[$]"
+        self.sort_kind = "Size[$]" if rev else "Size[^]"
 
-    def sort_time(self):
-        def _sort(x, y):
-            if x.name == os.pardir:
-                return -1
-            if y.name == os.pardir:
-                return 1
-            ret = util.cmp(x.stat.st_mtime, y.stat.st_mtime)
+    def sort_permission(self, rev=False):
+        def _permcompare(x, y, rev):
+            if rev:
+                ret = util.cmp(y.stat.st_mode, x.stat.st_mode) 
+            else:
+                ret = util.cmp(x.stat.st_mode, y.stat.st_mode)
             if ret == 0:
-                return util.cmp(x.name, y.name)
+                return util.cmp(y.name, x.name) if rev else util.cmp(x.name, y.name)
             else:
                 return ret
+        _sort = lambda x, y: self._sort_default(_permcompare, x, y, rev)
         self.files.sort(key=util.cmp_to_key(_sort))
-        self.sort_kind = "Time[^]"
+        self.sort_kind = "Permission[$]" if rev else "Permission[^]"
 
-    def sort_time_rev(self):
-        def _sort(x, y):
-            if x.name == os.pardir:
-                return -1
-            if y.name == os.pardir:
-                return 1
-            ret = util.cmp(y.stat.st_mtime, x.stat.st_mtime)
+    def sort_time(self, rev=False):
+        def _timecompare(x, y, rev):
+            if rev:
+                ret = util.cmp(y.stat.st_mtime, x.stat.st_mtime) 
+            else:
+                ret = util.cmp(x.stat.st_mtime, y.stat.st_mtime)
             if ret == 0:
-                return util.cmp(y.name, x.name)
+                return util.cmp(y.name, x.name) if rev else util.cmp(x.name, y.name)
             else:
                 return ret
+        _sort = lambda x, y: self._sort_default(_timecompare, x, y, rev)
         self.files.sort(key=util.cmp_to_key(_sort))
-        self.sort_kind = "Time[$]"
+        self.sort_kind = "Time[$]" if rev else "Time[^]"
 
-    def sort_nlink(self):
-        def _sort(x, y):
-            if x.name == os.pardir:
-                return -1
-            if y.name == os.pardir:
-                return 1
-            ret = util.cmp(x.stat.st_nlink, y.stat.st_nlink)
+    def sort_nlink(self, rev=False):
+        def _nlinkcompare(x, y, rev):
+            if rev:
+                ret = util.cmp(y.stat.st_nlink, x.stat.st_nlink) 
+            else:
+                ret = util.cmp(x.stat.st_nlink, y.stat.st_nlink)
             if ret == 0:
-                return util.cmp(x.name, y.name)
+                return util.cmp(y.name, x.name) if rev else util.cmp(x.name, y.name)
             else:
                 return ret
+        _sort = lambda x, y: self._sort_default(_nlinkcompare, x, y, rev)
         self.files.sort(key=util.cmp_to_key(_sort))
-        self.sort_kind = "Link[^]"
+        self.sort_kind = "Link[$]" if rev else "Link[^]"
 
-    def sort_nlink_rev(self):
-        def _sort(x, y):
-            if x.name == os.pardir:
-                return -1
-            if y.name == os.pardir:
-                return 1
-            ret = util.cmp(y.stat.st_nlink, x.stat.st_nlink)
+    def sort_ext(self, rev=False):
+        def _extcompare(x, y, rev):
+            if rev:
+                ret = util.cmp(util.extname(y.name), util.extname(x.name)) 
+            else:
+                ret = util.cmp(util.extname(x.name), util.extname(y.name)) 
             if ret == 0:
-                return util.cmp(y.name, x.name)
+                return util.cmp(y.name, x.name) if rev else util.cmp(x.name, y.name)
             else:
                 return ret
+        _sort = lambda x, y: self._sort_default(_extcompare, x, y, rev)
         self.files.sort(key=util.cmp_to_key(_sort))
-        self.sort_kind = "Link[$]"
-
-    def sort_ext(self):
-        def _sort(x, y):
-            if x.name == os.pardir:
-                return -1
-            if y.name == os.pardir:
-                return 1
-            ret = util.cmp(util.extname(x.name), util.extname(y.name))
-            if ret == 0:
-                return util.cmp(x.name, y.name)
-            else:
-                return ret
-        self.files.sort(key=util.cmp_to_key(_sort))
-        self.sort_kind = "Ext[^]"
-
-    def sort_ext_rev(self):
-        def _sort(x, y):
-            if x.name == os.pardir:
-                return -1
-            if y.name == os.pardir:
-                return 1
-            ret = util.cmp(util.extname(y.name), util.extname(x.name))
-            if ret == 0:
-                return util.cmp(y.name, x.name)
-            else:
-                return ret
-        self.files.sort(key=util.cmp_to_key(_sort))
-        self.sort_kind = "Ext[$]"
+        self.sort_kind = "Ext[$]" if rev else "Ext[^]"
 
     def resize(self, height, width, begy, begx):
         self.screen.resize(height, width, begy, begx)
