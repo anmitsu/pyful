@@ -166,7 +166,7 @@ cmdline.clipboard.maxsave = 100
 #
 @Pyful.atinit
 def myatinit():
-    filer.loadfile("~/.pyful/info.json")
+    filer.loadfile("~/.pyfulinfo.json")
     cmdline.clipboard.loadfile("~/.pyful/clipboard")
     cmdline.history.loadfile("~/.pyful/history/shell", "Shell")
     cmdline.history.loadfile("~/.pyful/history/eval", "Eval")
@@ -178,7 +178,7 @@ def myatinit():
 #
 @Pyful.atexit
 def myatexit():
-    filer.savefile("~/.pyful/info.json")
+    filer.savefile("~/.pyfulinfo.json")
     cmdline.clipboard.savefile("~/.pyful/clipboard")
     cmdline.history.savefile("~/.pyful/history/shell", "Shell")
     cmdline.history.savefile("~/.pyful/history/eval", "Eval")
