@@ -270,7 +270,7 @@ def _enter_mark():
 @defcmd
 def _enter_exec():
     """Behavior of executable file."""
-    widget.get("Cmdline").start(mode.Shell(), " ./%f", 0)
+    widget.get("Cmdline").start(mode.Shell(), util.expandmacro(" ./%f", shell=True), 0)
 
 @defcmd
 def _enter_dir():
