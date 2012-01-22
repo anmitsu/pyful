@@ -214,7 +214,7 @@ class History(ListBox):
         return self.histories[key]
 
     def append(self, string):
-        if not string:
+        if not string or string.startswith(" "):
             return
         history = self.gethistory()
         try:
