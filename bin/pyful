@@ -33,8 +33,9 @@ def add_pyful_path():
 
 def set_encoding():
     locale.setlocale(locale.LC_ALL, "")
-    imp.reload(sys)
-    sys.setdefaultencoding("utf-8")
+    if sys.version_info < (3, 0):
+        imp.reload(sys)
+        sys.setdefaultencoding("utf-8")
 
 def option_parse():
     usage = "usage: %prog [options]"
