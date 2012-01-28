@@ -107,7 +107,7 @@ class TextBox(Widget):
         self.cursor = i
 
     def delete_backward_char(self):
-        if not self.text:
+        if not self.text or self.cursor <= 0:
             return
         self.text = util.rmstr(self.text, self.cursor-1)
         self.cursor -= 1
