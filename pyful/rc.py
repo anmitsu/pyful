@@ -4,40 +4,33 @@
 # This file is executed in the local namespace and not generate module.
 #
 
-from pyful import Pyful
-from pyful import look
-from pyful import message
-from pyful import mode
-from pyful import process
-from pyful import widget
-from pyful.command import commands
-from pyful.filer import Workspace, Directory, Finder, FileStat
+import pyful
 
 # Set environments of pyful.
-Pyful.environs["EDITOR"] = "vim"
-Pyful.environs["PAGER"] = "less"
+pyful.Pyful.environs["EDITOR"] = "vim"
+pyful.Pyful.environs["PAGER"] = "lv"
 
 # Set proc attributes.
-process.Process.shell = ("/bin/bash", "-c")
-process.Process.terminal_emulator = ("x-terminal-emulator", "-e")
+pyful.process.Process.shell = ("/bin/bash", "-c")
+pyful.process.Process.terminal_emulator = ("x-terminal-emulator", "-e")
 
 # Set the mode of mkdir and newfile in octal number.
-mode.Mkdir.dirmode = 0o755
-mode.Newfile.filemode = 0o644
-mode.TrashBox.path = "~/.pyful/trashbox"
-mode.Replace.form = "emacs" # or "vim"
+pyful.mode.Mkdir.dirmode = 0o755
+pyful.mode.Newfile.filemode = 0o644
+pyful.mode.TrashBox.path = "~/.pyful/trashbox"
+pyful.mode.Replace.form = "vim" # or "vim"
 
 # Set the prompt of shell mode.
-mode.Shell.prompt = " $ "
+pyful.mode.Shell.prompt = " $ "
 
 # Set message history.
-message.Message.history = 100
+pyful.message.Message.history = 100
 
 # Set height of message box.
-message.MessageBox.height = 4
+pyful.message.MessageBox.height = 4
 
 # Set the default path of the directory creating.
-Workspace.default_path = "~/"
+pyful.filer.Workspace.default_path = "~/"
 
 # Set the workspace layout.
 #
@@ -50,7 +43,7 @@ Workspace.default_path = "~/"
 #     "Magnifier"
 #     "Fullscreen"
 #
-Workspace.layout = "Tile"
+pyful.filer.Workspace.layout = "Tile"
 
 # Set default kind of sorting in directory.
 #
@@ -67,10 +60,10 @@ Workspace.layout = "Tile"
 #     "Ext[^]" -> File extension sort of ascending order;
 #     "Ext[$]" -> File extension sort of descending order.
 #
-Directory.sort_kind = "Name[^]"
+pyful.filer.Directory.sort_kind = "Name[^]"
 
 # Is a directory sorted in upwards?
-Directory.sort_updir = False
+pyful.filer.Directory.sort_updir = False
 
 # Set scroll type in directory.
 #
@@ -78,49 +71,50 @@ Directory.sort_updir = False
 #     "PageScroll"
 #     "ContinuousScroll"
 #
-Directory.scroll_type = "HalfScroll"
+pyful.filer.Directory.scroll_type = "HalfScroll"
 
 # Set statusbar format in directory.
-Directory.statusbar_format = " [{MARK}/{FILE}] {MARKSIZE}bytes {SCROLL}({CURSOR}) {SORT} "
+pyful.filer.Directory.statusbar_format = " [{MARK}/{FILE}] {MARKSIZE}bytes {SCROLL}({CURSOR}) {SORT} "
 
 # Distinguish upper case and lower case at a finder?
-Finder.smartcase = True
+pyful.filer.Finder.smartcase = True
 
 # Set PyMigemo and migemo dictionary.
 # It is necessary to install PyMigemo to use migemo.
 try:
     import migemo
-    if not Finder.migemo:
-        Finder.migemo = migemo.Migemo("/usr/share/cmigemo/utf-8/migemo-dict")
+    if not pyful.filer.Finder.migemo:
+        pyful.filer.Finder.migemo = migemo.Migemo("/usr/share/cmigemo/utf-8/migemo-dict")
 except (ImportError, ValueError):
-    Finder.migemo = None
+    pyful.filer.Finder.migemo = None
 
 # Set the time format of file.
 # It conforms to the strftime format from time module.
-FileStat.time_format = "%y-%m-%d %H:%M"
-# FileStat.time_format = "%c(%a)"
+pyful.filer.FileStat.time_format = "%y-%m-%d %H:%M"
+# pyful.filer.FileStat.time_format = "%c(%a)"
+# pyful.filer.FileStat.time_format = "%c"
 
 # Set the flag of file modified within 24 hours.
-FileStat.time_24_flag = "!"
+pyful.filer.FileStat.time_24_flag = "!"
 # Set the flag of file modified within a week.
-FileStat.time_week_flag = "#"
+pyful.filer.FileStat.time_week_flag = "#"
 # Set the flag of file modified more in old time.
-FileStat.time_yore_flag = " "
+pyful.filer.FileStat.time_yore_flag = " "
 
 # Display the file extension?
-FileStat.draw_ext = False
+pyful.filer.FileStat.draw_ext = True
 # Display the file permission?
-FileStat.draw_permission = False
+pyful.filer.FileStat.draw_permission = True
 # Display the number of link?
-FileStat.draw_nlink = False
+pyful.filer.FileStat.draw_nlink = False
 # Display the user name of file?
-FileStat.draw_user = False
+pyful.filer.FileStat.draw_user = False
 # Display the group name of file?
-FileStat.draw_group = False
+pyful.filer.FileStat.draw_group = False
 # Display the file size?
-FileStat.draw_size = True
+pyful.filer.FileStat.draw_size = True
 # Display the change time of file?
-FileStat.draw_mtime = True
+pyful.filer.FileStat.draw_mtime = True
 
 # Set my look.
 #
@@ -129,19 +123,18 @@ FileStat.draw_mtime = True
 #     "dark"
 #     "light"
 #
-look.Look.mylook = "default"
+pyful.look.Look.mylook = "default"
 
 # Set borders.
 # Smooth borders:
-widget.base.StandardScreen.borders = []
-widget.listbox.ListBox.borders = []
+pyful.widget.base.StandardScreen.borders = []
+pyful.widget.listbox.ListBox.borders = []
 # Classical borders:
-# widget.base.StandardScreen.borders = ["|", "|", "-", "-", "+", "+", "+", "+"]
-# widget.listbox.ListBox.borders = ["|", "|", "-", "-", "+", "+", "+", "+"]
+# pyful.widget.base.StandardScreen.borders = ["|", "|", "-", "-", "+", "+", "+", "+"]
+# pyful.widget.listbox.ListBox.borders = ["|", "|", "-", "-", "+", "+", "+", "+"]
 
 # Set zoom attribute of listbox.
-# Listbox is an area displaying information of cmdline and message.
-widget.listbox.ListBox.zoom = 0
+pyful.widget.listbox.ListBox.zoom = 0
 
 # Set scroll type in listbox.
 #
@@ -149,22 +142,29 @@ widget.listbox.ListBox.zoom = 0
 #     "PageScroll"
 #     "ContinuousScroll"
 #
-widget.listbox.ListBox.scroll_type = "HalfScroll"
+pyful.widget.listbox.ListBox.scroll_type = "HalfScroll"
 
+# Enable mouse support?
+pyful.widget.ui.MouseHandler.enable(False)
 
-# Get very useful widgets.
-filer = widget.get("Filer")
-cmdline = widget.get("Cmdline")
-menu = widget.get("Menu")
 
 # Set cmdline attributes.
-cmdline.history.maxsave = 10000
-cmdline.clipboard.maxsave = 100
+pyful.cmdline.History.maxsave = 10000
+pyful.cmdline.Clipboard.maxsave = 100
+
+
+# Import very useful module.
+from pyful import command, process
+
+# Get very useful widgets.
+filer = pyful.widget.get("Filer")
+cmdline = pyful.widget.get("Cmdline")
+menu = pyful.widget.get("Menu")
 
 # Registration of program initialization.
 # Pyful.atinit() wraps the initialization functions.
 #
-@Pyful.atinit
+@pyful.Pyful.atinit
 def myatinit():
     filer.loadfile("~/.pyfulinfo.json")
     cmdline.clipboard.loadfile("~/.pyful/clipboard")
@@ -176,7 +176,7 @@ def myatinit():
 # Registration of program termination.
 # Pyful.atexit() wraps the termination functions.
 #
-@Pyful.atexit
+@pyful.Pyful.atexit
 def myatexit():
     filer.savefile("~/.pyfulinfo.json")
     cmdline.clipboard.savefile("~/.pyful/clipboard")
@@ -211,7 +211,7 @@ def myatexit():
 #     The key such as "C-<down>" are undefine.
 #
 
-widget.get("Filer").keybind(
+filer.keybind(
     lambda filer: {
         "M-1"           : lambda: filer.focus_workspace(0),
         "M-2"           : lambda: filer.focus_workspace(1),
@@ -223,94 +223,95 @@ widget.get("Filer").keybind(
         "M-#"           : lambda: filer.mvdir_workspace_to(2),
         "M-$"           : lambda: filer.mvdir_workspace_to(3),
         "M-%"           : lambda: filer.mvdir_workspace_to(4),
-        "M-f"           : commands["switch_next_workspace"],
-        "M-b"           : commands["switch_prev_workspace"],
-        "M-F"           : commands["swap_workspace_inc"],
-        "M-B"           : commands["swap_workspace_dec"],
-        "C-i"           : commands["focus_next_dir"],
-        "C-f"           : commands["focus_next_dir"],
-        "C-b"           : commands["focus_prev_dir"],
-        "<right>"       : commands["focus_next_dir"],
-        "<left>"        : commands["focus_prev_dir"],
-        "F"             : commands["swap_dir_inc"],
-        "B"             : commands["swap_dir_dec"],
-        "M-C-j"         : commands["create_dir"],
-        "M-C"           : commands["close_dir"],
-        "C-w"           : commands["close_dir"],
-        "C-l"           : commands["all_reload"],
-        "C-n"           : commands["filer_cursor_down"],
-        "<down>"        : commands["filer_cursor_down"],
-        "C-p"           : commands["filer_cursor_up"],
-        "<up>"          : commands["filer_cursor_up"],
+        "M-f"           : command.query("switch_next_workspace"),
+        "M-b"           : command.query("switch_prev_workspace"),
+        "M-F"           : command.query("swap_workspace_inc"),
+        "M-B"           : command.query("swap_workspace_dec"),
+        "C-i"           : command.query("focus_next_dir"),
+        "C-f"           : command.query("focus_next_dir"),
+        "C-b"           : command.query("focus_prev_dir"),
+        "<right>"       : command.query("focus_next_dir"),
+        "<left>"        : command.query("focus_prev_dir"),
+        "F"             : command.query("swap_dir_inc"),
+        "B"             : command.query("swap_dir_dec"),
+        "M-C-j"         : command.query("create_dir"),
+        "M-C"           : command.query("close_dir"),
+        "C-w"           : command.query("close_dir"),
+        "C-l"           : command.query("all_reload"),
+        "C-n"           : command.query("filer_cursor_down"),
+        "<down>"        : command.query("filer_cursor_down"),
+        "C-p"           : command.query("filer_cursor_up"),
+        "<up>"          : command.query("filer_cursor_up"),
         "C-d"           : lambda: filer.dir.mvcursor(+5),
         "C-u"           : lambda: filer.dir.mvcursor(-5),
-        "M-n"           : commands["filer_scroll_down"],
-        "M-p"           : commands["filer_scroll_up"],
-        "C-v"           : commands["filer_pagedown"],
-        "<npage>"       : commands["filer_pagedown"],
-        "M-v"           : commands["filer_pageup"],
-        "<ppage>"       : commands["filer_pageup"],
-        "C-a"           : commands["filer_settop"],
-        "M-<"           : commands["filer_settop"],
-        "C-e"           : commands["filer_setbottom"],
-        "M->"           : commands["filer_setbottom"],
-        "C-g"           : commands["filer_reset"],
-        "ESC"           : commands["filer_reset"],
-        "M-w"           : commands["switch_workspace"],
-        "M-h"           : commands["chdir_backward"],
-        "M-l"           : commands["chdir_forward"],
-        "C-h"           : commands["chdir_parent"],
-        "<backspace>"   : commands["chdir_parent"],
-        "~"             : commands["chdir_home"],
-        "\\"            : commands["chdir_root"],
-        "w"             : commands["chdir_neighbor"],
-        "f"             : commands["finder_start"],
-        "/"             : commands["finder_start"],
-        "v"             : commands["fileviewer"],
-        "P"             : commands["pack"],
-        "U"             : commands["unpack2"],
-        "u"             : commands["unpack"],
-        "J"             : commands["drivejump"],
-        "<end>"         : commands["mark_toggle_all"],
-        "SPC"           : commands["mark_toggle"],
-        "C-r"           : commands["refresh_window"],
-        "RET"           : commands["open_at_system"],
-        "e"             : commands["spawn_editor"],
-        ":"             : commands["spawn_shell"],
-        "h"             : commands["shell"],
-        "M-:"           : commands["eval"],
-        "M-x"           : commands["mx"],
-        "K"             : commands["kill_thread"],
-        "?"             : commands["help"],
-        "M-?"           : commands["help_all"],
-        "c"             : commands["copy"],
-        "<dc>"          : commands["delete"],
-        "D"             : commands["delete"],
-        "k"             : commands["mkdir"],
-        "m"             : commands["move"],
-        "n"             : commands["newfile"],
-        "r"             : commands["rename"],
-        "R"             : commands["replace"],
-        "l"             : commands["symlink"],
-        "d"             : commands["trashbox"],
-        "t"             : commands["utime"],
-        "x"             : commands["enter_exec"],
-        "*"             : commands["mark"],
-        "+"             : commands["mask"],
-        "Q"             : commands["exit"],
-        ("RET", ".dir" ): commands["enter_dir"],
-        ("RET", ".mark"): commands["enter_mark"],
-        ("RET", ".link"): commands["enter_link"],
-        ("RET", ".exec"): commands["enter_exec"],
-        ("RET", ".tar" ): commands["untar"],
-        ("RET", ".tgz" ): commands["untar"],
-        ("RET", ".gz"  ): commands["untar"],
-        ("RET", ".bz2" ): commands["untar"],
-        ("RET", ".zip" ): commands["unzip"],
-        ("RET", ".list"): commands["enter_listfile"],
+        "M-n"           : command.query("filer_scroll_down"),
+        "M-p"           : command.query("filer_scroll_up"),
+        "C-v"           : command.query("filer_pagedown"),
+        "<npage>"       : command.query("filer_pagedown"),
+        "M-v"           : command.query("filer_pageup"),
+        "<ppage>"       : command.query("filer_pageup"),
+        "C-a"           : command.query("filer_settop"),
+        "M-<"           : command.query("filer_settop"),
+        "C-e"           : command.query("filer_setbottom"),
+        "M->"           : command.query("filer_setbottom"),
+        "C-g"           : command.query("filer_reset"),
+        "ESC"           : command.query("filer_reset"),
+        "M-w"           : command.query("switch_workspace"),
+        "M-h"           : command.query("chdir_backward"),
+        "M-l"           : command.query("chdir_forward"),
+        "C-h"           : command.query("chdir_parent"),
+        "<backspace>"   : command.query("chdir_parent"),
+        "~"             : command.query("chdir_home"),
+        "\\"            : command.query("chdir_root"),
+        "w"             : command.query("chdir_neighbor"),
+        "f"             : command.query("finder_start"),
+        "/"             : command.query("finder_start"),
+        "v"             : command.query("fileviewer"),
+        "P"             : command.query("pack"),
+        "U"             : command.query("unpack2"),
+        "u"             : command.query("unpack"),
+        "J"             : command.query("drivejump"),
+        "<end>"         : command.query("mark_toggle_all"),
+        "SPC"           : command.query("mark_toggle"),
+        "C-r"           : command.query("refresh_window"),
+        "RET"           : command.query("open_at_system"),
+        "C-j"           : command.query("open_at_system"),
+        "e"             : command.query("spawn_editor"),
+        ":"             : command.query("spawn_shell"),
+        "h"             : command.query("shell"),
+        "M-:"           : command.query("eval"),
+        "M-x"           : command.query("mx"),
+        "K"             : command.query("kill_thread"),
+        "?"             : command.query("help"),
+        "M-?"           : command.query("help_all"),
+        "c"             : command.query("copy"),
+        "<dc>"          : command.query("delete"),
+        "D"             : command.query("delete"),
+        "k"             : command.query("mkdir"),
+        "m"             : command.query("move"),
+        "n"             : command.query("newfile"),
+        "r"             : command.query("rename"),
+        "R"             : command.query("replace"),
+        "l"             : command.query("symlink"),
+        "d"             : command.query("trashbox"),
+        "t"             : command.query("utime"),
+        "x"             : command.query("enter_exec"),
+        "*"             : command.query("mark"),
+        "+"             : command.query("mask"),
+        "Q"             : command.query("exit"),
+        ("RET", ".dir" ): command.query("enter_dir"),
+        ("RET", ".mark"): command.query("enter_mark"),
+        ("RET", ".link"): command.query("enter_link"),
+        ("RET", ".exec"): command.query("enter_exec"),
+        ("RET", ".tar" ): command.query("untar"),
+        ("RET", ".tgz" ): command.query("untar"),
+        ("RET", ".gz"  ): command.query("untar"),
+        ("RET", ".bz2" ): command.query("untar"),
+        ("RET", ".zip" ): command.query("unzip"),
+        ("RET", ".list"): command.query("enter_listfile"),
         })
 
-widget.get("Filer").finder.keybind(
+filer.finder.keybind(
     lambda finder: {
         "M-n"         : lambda: finder.history_select(-1),
         "M-p"         : lambda: finder.history_select(+1),
@@ -321,7 +322,7 @@ widget.get("Filer").finder.keybind(
         "<backspace>" : lambda: finder.delete_backward_char(),
         })
 
-widget.get("Cmdline").keybind(
+cmdline.keybind(
     lambda cmdline: {
         "C-f"         : lambda: cmdline.forward_char(),
         "<right>"     : lambda: cmdline.forward_char(),
@@ -366,7 +367,7 @@ widget.get("Cmdline").keybind(
         "M-="         : lambda: cmdline.history.zoombox(0),
         })
 
-widget.get("Clipboard").keybind(
+cmdline.clipboard.keybind(
     lambda clipboard: {
         "C-n"         : lambda: clipboard.mvcursor(1),
         "<down>"      : lambda: clipboard.mvcursor(1),
@@ -405,7 +406,7 @@ widget.get("Clipboard").keybind(
         "C-e"         : lambda: clipboard.textbox.setbottom(),
         })
 
-widget.get("Completion").keybind(
+cmdline.completion.keybind(
     lambda completion: {
         "C-n"     : lambda: completion.cursordown(),
         "<down>"  : lambda: completion.cursordown(),
@@ -429,7 +430,7 @@ widget.get("Completion").keybind(
         "M-="     : lambda: completion.zoombox(0),
         })
 
-widget.get("Output").keybind(
+cmdline.output.keybind(
     lambda output: {
         "C-n"    : lambda: output.mvcursor(1),
         "<down>" : lambda: output.mvcursor(1),
@@ -450,7 +451,7 @@ widget.get("Output").keybind(
         "M-="    : lambda: output.zoombox(0),
         })
 
-widget.get("Help").keybind(
+pyful.widget.get("Help").keybind(
     lambda helper: {
         "j"      : lambda: helper.mvcursor(1),
         "C-n"    : lambda: helper.mvcursor(1),
@@ -472,7 +473,7 @@ widget.get("Help").keybind(
         "M-="    : lambda: helper.zoombox(0),
     })
 
-widget.get("ActionBox").keybind(
+pyful.widget.get("ActionBox").keybind(
     lambda actionbox: {
         "C-n"    : lambda: actionbox.mvcursor(1),
         "<down>" : lambda: actionbox.mvcursor(1),
@@ -493,7 +494,7 @@ widget.get("ActionBox").keybind(
         "RET"    : lambda: actionbox.select_action(),
         })
 
-widget.get("ConfirmBox").keybind(
+pyful.widget.get("ConfirmBox").keybind(
     lambda confirmbox: {
         "C-f"     : lambda: confirmbox.mvcursor(1),
         "<right>" : lambda: confirmbox.mvcursor(1),
@@ -518,7 +519,7 @@ widget.get("ConfirmBox").keybind(
         "M-="     : lambda: confirmbox.listbox.zoombox(0),
         })
 
-widget.get("Menu").keybind(
+menu.keybind(
     lambda menu: {
         "C-n"    : lambda: menu.mvcursor(+1),
         "<down>" : lambda: menu.mvcursor(+1),
@@ -551,40 +552,40 @@ widget.get("Menu").keybind(
 #     - The third element is the callable function of no argument.
 #
 menu.items["filer"] = (
-    ("toggle (e)xtension" , "e", commands["toggle_draw_ext"]),
-    ("toggle (p)ermission", "p", commands["toggle_draw_permission"]),
-    ("toggle n(l)ink"     , "l", commands["toggle_draw_nlink"]),
-    ("toggle (u)ser"      , "u", commands["toggle_draw_user"]),
-    ("toggle (g)roup"     , "g", commands["toggle_draw_group"]),
-    ("toggle (s)ize"      , "s", commands["toggle_draw_size"]),
-    ("toggle m(t)ime"     , "t", commands["toggle_draw_mtime"]),
+    ("toggle (e)xtension" , "e", command.query("toggle_draw_ext")),
+    ("toggle (p)ermission", "p", command.query("toggle_draw_permission")),
+    ("toggle n(l)ink"     , "l", command.query("toggle_draw_nlink")),
+    ("toggle (u)ser"      , "u", command.query("toggle_draw_user")),
+    ("toggle (g)roup"     , "g", command.query("toggle_draw_group")),
+    ("toggle (s)ize"      , "s", command.query("toggle_draw_size")),
+    ("toggle m(t)ime"     , "t", command.query("toggle_draw_mtime")),
     )
 
 menu.items["layout"] = (
-    ("(t)ile"        , "t", commands["layout_tile"]),
-    ("tile(L)eft"    , "L", commands["layout_tileleft"]),
-    ("tile(T)op"     , "T", commands["layout_tiletop"]),
-    ("tile(B)ottom"  , "B", commands["layout_tilebottom"]),
-    ("one(l)ine"     , "l", commands["layout_oneline"]),
-    ("one(c)olumn"   , "c", commands["layout_onecolumn"]),
-    ("(m)agnifier"   , "m", commands["layout_magnifier"]),
-    ("(f)ullscreen"  , "f", commands["layout_fullscreen"]),
+    ("(t)ile"        , "t", command.query("layout_tile")),
+    ("tile(L)eft"    , "L", command.query("layout_tileleft")),
+    ("tile(T)op"     , "T", command.query("layout_tiletop")),
+    ("tile(B)ottom"  , "B", command.query("layout_tilebottom")),
+    ("one(l)ine"     , "l", command.query("layout_oneline")),
+    ("one(c)olumn"   , "c", command.query("layout_onecolumn")),
+    ("(m)agnifier"   , "m", command.query("layout_magnifier")),
+    ("(f)ullscreen"  , "f", command.query("layout_fullscreen")),
     )
 
 menu.items["sort"] = (
-    ("(n)ame"              , "n", commands["sort_name"]),
-    ("(N)ame reverse"      , "N", commands["sort_name_rev"]),
-    ("(e)xtension"         , "e", commands["sort_ext"]),
-    ("(E)xtension reverse" , "E", commands["sort_ext_rev"]),
-    ("(s)ize"              , "s", commands["sort_size"]),
-    ("(S)ize reverse"      , "S", commands["sort_size_rev"]),
-    ("(t)ime"              , "t", commands["sort_time"]),
-    ("(T)ime reverse"      , "T", commands["sort_time_rev"]),
-    ("(l)ink"              , "l", commands["sort_nlink"]),
-    ("(L)ink reverse"      , "L", commands["sort_nlink_rev"]),
-    ("(p)ermission"        , "p", commands["sort_permission"]),
-    ("(P)ermission reverse", "P", commands["sort_permission_rev"]),
-    ("toggle (u)pward directory", "u", commands["toggle_sort_updir"]),
+    ("(n)ame"              , "n", command.query("sort_name")),
+    ("(N)ame reverse"      , "N", command.query("sort_name_rev")),
+    ("(e)xtension"         , "e", command.query("sort_ext")),
+    ("(E)xtension reverse" , "E", command.query("sort_ext_rev")),
+    ("(s)ize"              , "s", command.query("sort_size")),
+    ("(S)ize reverse"      , "S", command.query("sort_size_rev")),
+    ("(t)ime"              , "t", command.query("sort_time")),
+    ("(T)ime reverse"      , "T", command.query("sort_time_rev")),
+    ("(l)ink"              , "l", command.query("sort_nlink")),
+    ("(L)ink reverse"      , "L", command.query("sort_nlink_rev")),
+    ("(p)ermission"        , "p", command.query("sort_permission")),
+    ("(P)ermission reverse", "P", command.query("sort_permission_rev")),
+    ("toggle (u)pward directory", "u", command.query("toggle_sort_updir")),
     )
 
 # The editor launcher example.
@@ -614,7 +615,7 @@ menu.items["launcher"] = (
     )
 
 # Update the filer keymap.
-widget.get("Filer").keymap.update({
+filer.keymap.update({
         "V": lambda: menu.show("filer"),
         "s": lambda: menu.show("sort"),
         "L": lambda: menu.show("layout"),
@@ -694,7 +695,7 @@ myassociation = {
     ("RET", ".flv"  ): lambda: menu.show("video"),
     }
 
-widget.get("Filer").keymap.update(myassociation)
+filer.keymap.update(myassociation)
 
 import os, sys
 if "screen" in os.getenv("TERM"):
