@@ -33,6 +33,9 @@ def defcmd(func):
     commands[func.__name__.strip("_")] = func
     return func
 
+def query(name):
+    return commands[name]
+
 # ----------------------------------------------------------------------
 # Utility commands:
 @defcmd
