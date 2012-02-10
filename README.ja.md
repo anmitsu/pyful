@@ -1,4 +1,4 @@
-pyful - Python file management utility
+pyful - Python File Management Utility
 ======================================
 
 pyfulはLinuxのためのキーボード操作のCUIファイラーです。
@@ -16,28 +16,20 @@ pyfulはLinuxのためのキーボード操作のCUIファイラーです。
 * 高レベルなファイル操作
 * Migemo検索に対応
 
-インストール方法
+インストール
 --------------
 
-管理者権限として以下のコマンドを実行することで**/usr/local**に
-インストールされます：
+pyfulは，以下のコマンドを実行することでインストールすることができます。
 
-     $ python setup.py install
-
-正常にインストールできれば，以下のコマンドによってアプリケーションを
-実行することができます：
-
-     $ pyful
-
-もし，システムへのインストールが必要なければ，単に以下のコマンドを
-実行することでアプリケーションが起動されます：
-
-     $ ./bin/pyful
+    $ git clone git://github.com/anmitsu/pyful
+    $ cd pyful
+    $ sudo python setup.py install -f
+    $ pyful
 
 依存関係
 --------
 
-pyfulは，Ubuntu 10.04上のPython2.6およびPython3.1によって動作が確認されています。
+pyfulは，Ubuntu 11.10上のPython2.7およびPython3.2によって動作が確認されています。
 
 日本語をはじめとするマルチバイト文字を正常に表示させるためには，
 **libncursesw**ライブラリが必要になる場合があります。

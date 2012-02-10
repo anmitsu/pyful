@@ -1,4 +1,4 @@
-pyful - Python file management utility
+pyful - Python File Management Utility
 ======================================
 
 pyful is CUI filer of the keyboard operation for Linux.
@@ -18,26 +18,18 @@ Features
 Installation
 ------------
 
-pyful is installed in **/usr/local** by executing the following
-command as a super user:
+pyful is installed by executing the following command:
 
-     $ python setup.py install
-
-The application can execute by the following command
-if the installation is normally completed:
-
-     $ pyful
-
-If the installation on the system is unnecessary,
-the application is started by only executing the following command:
-
-     $ ./bin/pyful
+    $ git clone git://github.com/anmitsu/pyful
+    $ cd pyful
+    $ sudo python setup.py install -f
+    $ pyful
 
 Dependencies
 ------------
 
-The operation of pyful is confirmed by Python2.6 and Python3.1 on
-Ubuntu 10.04.
+The operation of pyful is confirmed by Python2.7 and Python3.2 on
+Ubuntu 11.10.
 
 To display multi byte character including Japanese,
 **libncursesw** library might become necessary.
