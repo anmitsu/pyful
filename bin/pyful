@@ -23,6 +23,7 @@ import imp
 import locale
 import optparse
 import os
+import shutil
 import sys
 
 def add_pyful_path():
@@ -37,6 +38,22 @@ def set_encoding():
         imp.reload(sys)
         sys.setdefaultencoding("utf-8")
 
+def create_config():
+    confdir = os.path.join(os.getenv("HOME"), ".pyful")
+    if not os.path.exists(confdir):
+        os.makedirs(confdir, 0o700)
+    rcfile = os.path.join(confdir, "rc.py")
+    if not os.path.exists(rcfile):
+        from pyful import __file__ as __initfile__
+        default = os.path.join(os.path.dirname(__initfile__), "rc.py")
+        shutil.copy(default, rcfile)
+        print("Success.\n")
+        print("Configuration file was created to `{0}'.".format(rcfile))
+        print("From this, the configuration file is read preferentially.")
+    else:
+        print("Failure.\n")
+        print("Configuration file (rc.py) already exists `{0}'.".format(rcfile))
+
 def option_parse():
     usage = "usage: %prog [options]"
     parser = optparse.OptionParser(usage)
@@ -48,7 +65,12 @@ def option_parse():
     parser.add_option(
         "-c", "--config",
         dest="config",
-        help="load configure file")
+        help="load configuration file")
+    parser.add_option(
+        "-C", "--create-config",
+        action="store_true",
+        dest="create_config",
+        help="create configuration file")
     parser.add_option(
         "-e",
         action="store_true",
@@ -69,6 +91,9 @@ def main(options):
         if not os.path.exists(options.config):
             print("No such rcfile `{0}'".format(options.config))
             sys.exit(1)
+    elif options.create_config:
+        create_config()
+        sys.exit(1)
 
     from pyful import Pyful
     from pyful import widget

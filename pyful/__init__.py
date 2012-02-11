@@ -28,7 +28,6 @@ __all__ = ["cmdline", "command", "filectrl", "filer", "help", "look", "menu",
            "message", "mode", "process", "util", "completion", "widget"]
 
 import os
-import shutil
 import sys
 
 from pyful import look
@@ -89,16 +88,6 @@ class Pyful(object):
             self.environs["RCFILE"] = defpath
             return e
 
-    def savercfile(self):
-        confdir = os.path.join(os.getenv("HOME"), ".pyful")
-        if not os.path.exists(confdir):
-            os.makedirs(confdir, 0o700)
-        rcfile = os.path.join(confdir, "rc.py")
-        if not os.path.exists(rcfile):
-            libdir = os.path.join(os.path.dirname(os.path.abspath(__file__)))
-            default = os.path.join(libdir, "rc.py")
-            shutil.copy(default, rcfile)
-
     def draw(self):
         self.filer.draw()
         if self.menu.active:
@@ -143,5 +132,4 @@ class Pyful(object):
         try:
             self.main_loop()
         except SystemExit:
-            self.savercfile()
             self.exit_function()
