@@ -25,6 +25,17 @@ pyful is installed by executing the following command:
     $ sudo python setup.py install -f
     $ pyful
 
+Configuration
+-------------
+
+pyful configuration has edit of `~/.pyful/rc.py`.
+
+Configuration file is created to `~/.pyful/rc.py` by following command with `--create-config` option.
+
+    $ pyful --create-config
+
+For edit of rc.py, see <https://github.com/anmitsu/pyful/wiki>
+
 Dependencies
 ------------
 
@@ -37,10 +48,3 @@ To display multi byte character including Japanese,
 In addition, pyful operates in the assumption that encoding is **utf-8**.
 Therefore, normal operation cannot be expected in the environment that
 uses encoding that is not **utf-8**.
-
-Configuration
--------------
-
-pyful configuration has edit of **~/.pyful/rc.py** .
-
-For edit of rc.py, see <https://github.com/anmitsu/pyful/wiki/Configuration>

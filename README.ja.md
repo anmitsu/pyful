@@ -26,6 +26,17 @@ pyfulは，以下のコマンドを実行することでインストールする
     $ sudo python setup.py install -f
     $ pyful
 
+設定
+----
+
+pyfulの設定は，設定ファイル `~/.pyful/rc.py` を編集することで行います。
+
+設定ファイルは，以下のような `--create-config` オプションで `~/.pyful/rc.py` に作成します。
+
+    $ pyful --create-config
+
+設定ファイルの編集に関する詳細は，<https://github.com/anmitsu/pyful/wiki>を見てください。
+
 依存関係
 --------
 
@@ -38,9 +49,3 @@ pyfulは，Ubuntu 11.10上のPython2.7およびPython3.2によって動作が確
 動作しています。したがって，**utf-8**以外のエンコーディングを使用している
 環境においては正常な動作は期待できません。
 
-設定
-----
-
-pyfulの設定は**~/.pyful/rc.py**を編集することによって行います。
-
-rc.pyの設定については，<https://github.com/anmitsu/pyful/wiki/Configuration>を見てください。
