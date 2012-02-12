@@ -14,11 +14,22 @@ pyful.Pyful.environs["PAGER"] = "lv"
 pyful.process.Process.shell = ("/bin/bash", "-c")
 pyful.process.Process.terminal_emulator = ("x-terminal-emulator", "-e")
 
+# Set screen command and arguments.
+#     {TITLE} is replaced to window title in screen.
+#     {COMMAND} is replaced to a command in screen.
+import os
+if os.getenv("TMUX"):
+    # For tmux:
+    pyful.process.Process.screen_command = ("tmux", "neww", "-n", "{TITLE}", "{COMMAND}")
+else:
+    # For GNU Screen:
+    pyful.process.Process.screen_command = ("screen", "-t", "{TITLE}", "bash", "-c", "{COMMAND}")
+
 # Set the mode of mkdir and newfile in octal number.
 pyful.mode.Mkdir.dirmode = 0o755
 pyful.mode.Newfile.filemode = 0o644
 pyful.mode.TrashBox.path = "~/.pyful/trashbox"
-pyful.mode.Replace.form = "vim" # or "vim"
+pyful.mode.Replace.form = "vim" # or "emacs"
 
 # Set the prompt of shell mode.
 pyful.mode.Shell.prompt = " $ "
@@ -697,7 +708,7 @@ myassociation = {
 
 filer.keymap.update(myassociation)
 
-import os, sys
+import sys
 if "screen" in os.getenv("TERM"):
     # Change GNU SCREEN's title.
     sys.stdout.write("\033kpyful\033\\")

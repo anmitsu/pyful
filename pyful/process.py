@@ -41,6 +41,7 @@ def system(cmd):
 class Process(object):
     shell = ("/bin/bash", "-c")
     terminal_emulator = ("x-terminal-emulator", "-e")
+    screen_command = ("screen", "-t", "{TITLE}", "bash", "-c", "{COMMAND}")
 
     def __init__(self):
         self.quick = False
@@ -104,16 +105,17 @@ class Process(object):
                 widget.start_curses()
 
     def screen(self, cmd, title):
-        if self.quick:
-            Popen(["screen", "-t", title, self.shell[0], self.shell[1], cmd])
-        else:
-            Popen(["screen", "-t", title, self.shell[0], self.shell[1],
-                   "{0}; {1} -e".format(cmd, sys.argv[0])])
+        if not self.quick:
+            cmd = "{0}; {1} -e".format(cmd, sys.argv[0])
+        command = [arg.format(TITLE=title, COMMAND=cmd) for arg in self.screen_command]
+        Popen(command)
         message.puts("Spawn: {0} (screen)".format(cmd.strip()))
 
     def terminal(self, cmd):
-        proc = Popen([self.terminal_emulator[0], self.terminal_emulator[1], cmd],
-                     stdout=PIPE, stderr=PIPE)
+        command = []
+        command.extend(self.terminal_emulator)
+        command.append(cmd)
+        proc = Popen(command, stdout=PIPE, stderr=PIPE)
         message.puts("Spawn: {0} ({1})".format(cmd.strip(), self.terminal_emulator[0]))
         ProcessNotify(proc, cmd).start()
 
