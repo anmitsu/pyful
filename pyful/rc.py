@@ -309,6 +309,7 @@ filer.keybind(
         "x"             : command.query("enter_exec"),
         "*"             : command.query("mark"),
         "+"             : command.query("mask"),
+        "q"             : command.query("exit"),
         "Q"             : command.query("exit"),
         ("RET", ".dir" ): command.query("enter_dir"),
         ("RET", ".mark"): command.query("enter_mark"),
