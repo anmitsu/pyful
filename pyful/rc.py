@@ -1,10 +1,27 @@
 # coding: utf-8
 #
 # pyful configure file.
-# This file is executed in the local namespace and not generate module.
+
+# ======================================================================
+# Import modules and very useful widgets.
 #
+# ======================================================================
+
+import os
+import sys
 
 import pyful
+from pyful import command
+from pyful import process
+
+filer = pyful.widget.get("Filer")
+cmdline = pyful.widget.get("Cmdline")
+menu = pyful.widget.get("Menu")
+
+# ======================================================================
+# Configure parameters for pyful's modules.
+#
+# ======================================================================
 
 # Set environments of pyful.
 pyful.Pyful.environs["EDITOR"] = "vim"
@@ -17,7 +34,6 @@ pyful.process.Process.terminal_emulator = ("x-terminal-emulator", "-e")
 # Set screen command and arguments.
 #     {TITLE} is replaced to window title in screen.
 #     {COMMAND} is replaced to a command in screen.
-import os
 if os.getenv("TMUX"):
     # For tmux:
     pyful.process.Process.screen_command = ("tmux", "neww", "-n", "{TITLE}", "{COMMAND}")
@@ -163,15 +179,6 @@ pyful.widget.ui.MouseHandler.enable(False)
 pyful.cmdline.History.maxsave = 10000
 pyful.cmdline.Clipboard.maxsave = 100
 
-
-# Import very useful module.
-from pyful import command, process
-
-# Get very useful widgets.
-filer = pyful.widget.get("Filer")
-cmdline = pyful.widget.get("Cmdline")
-menu = pyful.widget.get("Menu")
-
 # Registration of program initialization.
 # Pyful.atinit() wraps the initialization functions.
 #
@@ -196,6 +203,7 @@ def myatexit():
     cmdline.history.savefile("~/.pyful/history/mx", "Mx")
     cmdline.history.savefile("~/.pyful/history/replace", "Replace")
 
+# ======================================================================
 # Define the keymap of pyful.
 #
 # A key of the keymap dictionary is key or (key, ext).
@@ -221,6 +229,7 @@ def myatexit():
 #     The key such as "C-A" are interpreted such as "C-a".
 #     The key such as "C-<down>" are undefine.
 #
+# ======================================================================
 
 filer.keybind(
     lambda filer: {
@@ -292,6 +301,7 @@ filer.keybind(
         "h"             : command.query("shell"),
         "M-:"           : command.query("eval"),
         "M-x"           : command.query("mx"),
+        "M-m"           : command.query("menu"),
         "K"             : command.query("kill_thread"),
         "?"             : command.query("help"),
         "M-?"           : command.query("help_all"),
@@ -553,163 +563,277 @@ menu.keybind(
         "RET"    : lambda: menu.run(),
         })
 
+# ======================================================================
 # Define the menu.
 #
 # A key of the menu item dictionary is the menu title.
 #
-# A value of the menu item dictionary must be the sequence that consist of
-# the sequence that meet the following requirement:
+# A value of the menu item dictionary must be the sequence that
+# consist of the sequence that meet the following requirement:
+# 
 #     - The first element is the menu item title;
 #     - The second element is the key symbol;
 #     - The third element is the callable function of no argument.
 #
-menu.items["filer"] = (
-    ("toggle (e)xtension" , "e", command.query("toggle_draw_ext")),
-    ("toggle (p)ermission", "p", command.query("toggle_draw_permission")),
-    ("toggle n(l)ink"     , "l", command.query("toggle_draw_nlink")),
-    ("toggle (u)ser"      , "u", command.query("toggle_draw_user")),
-    ("toggle (g)roup"     , "g", command.query("toggle_draw_group")),
-    ("toggle (s)ize"      , "s", command.query("toggle_draw_size")),
-    ("toggle m(t)ime"     , "t", command.query("toggle_draw_mtime")),
+# ======================================================================
+
+menu.items["Main"] = (
+    ("File" , "f", lambda: menu.show("File")),
+    ("Edit" , "e", lambda: menu.show("Edit")),
+    ("View" , "v", lambda: menu.show("View")),
+    ("Go"   , "g", lambda: menu.show("Go")),
+    ("Tool" , "t", lambda: menu.show("Tool")),
+    ("Help" , "h", lambda: menu.show("Help")),
+    )
+
+menu.items["File"] = (
+    ("New file"        ,  "n", command.query("newfile")),
+    ("New directory"   ,  "k", command.query("mkdir")),
+    ("New workspace"   ,  "w", command.query("create_workspace")),
+    ("New dirview"     ,  "d", command.query("create_dir")),
+    ("Open"            ,  "o", command.query("open_at_system")),
+    ("Close workspace" ,  "W", command.query("close_workspace")),
+    ("Close dirview"   ,  "D", command.query("close_dir")),
+    ("Exit"            ,  "q", command.query("exit")),
+    )
+
+menu.items["Edit"] = (
+    ("Copy"           ,  "c"     , command.query("copy")),
+    ("Move"           ,  "m"     , command.query("move")),
+    ("Delete"         ,  "D"     , command.query("delete")),
+    ("Trashbox"       ,  "d"     , command.query("trashbox")),
+    ("Toggle mark"    ,  "SPC"   , command.query("mark_toggle")),
+    ("All mark"       ,  "<end>" , command.query("mark_toggle_all")),
+    ("Rename"         ,  "r"     , command.query("rename")),
+    ("Replace"        ,  "R"     , command.query("replace")),
+    ("Create symlink" ,  "l"     , command.query("symlink")),
+    ("Create link"    ,  "L"     , command.query("link")),
+    ("Change mtime"   ,  "t"     , command.query("utime")),
+    ("Chmod"          ,  "M"     , command.query("chmod")),
+    ("Chown"          ,  "O"     , command.query("chown")),
+    ("Archive"        ,  "a"     , lambda: menu.show("archive")),
+    )
+
+menu.items["View"] = (
+    ("Reload"         , "C-l" , command.query("all_reload")),
+    ("Refresh window" , "C-r" , command.query("refresh_window")),
+    ("Info to view"   , "V"   , lambda: menu.show("fileinfo")),
+    ("Sort"           , "s"   , lambda: menu.show("sort")),
+    ("Layout"         , "L"   , lambda: menu.show("layout")),
+    ("Filter mask"    , "m"   , command.query("mask")),
+    )
+
+menu.items["Go"] = (
+    ("To parent"        , "C-h" , command.query("chdir_parent")),
+    ("To home"          , "~"   , command.query("chdir_home")),
+    ("To root"          , "\\"  , command.query("chdir_root")),
+    ("To neighbor"      , "w"   , command.query("chdir_neighbor")),
+    ("Backward history" , "M-h" , command.query("chdir_backward")),
+    ("Forward history"  , "M-l" , command.query("chdir_forward")),
+    ("Finder start"     , "f"   , command.query("finder_start")),
+    ("Bookmark"         , "b"   , lambda: menu.show("bookmark")),
+    )
+
+menu.items["Tool"] = (
+    ("Shell"           ,  "h"   , command.query("shell")),
+    ("Eval"            ,  "M-:" , command.query("eval")),
+    ("Command"         ,  "M-x" , command.query("mx")),
+    ("Glob search"     ,  "g"   , command.query("glob")),
+    ("Glob recursive"  ,  "G"   , command.query("globdir")),
+    ("Rehash programs" ,  "r"   , command.query("rehash_programs")),
+    ("Reload rc.py"    ,  "R"   , command.query("reload_rcfile")),
+    ("Editor"          ,  "E"   , lambda: menu.show("editor")),
+    ("Web browser"     ,  "w"   , lambda: menu.show("webbrowser")),
+    ("File manager"    ,  "f"   , lambda: menu.show("filemanager")),
+    )
+
+menu.items["Help"] = (
+    ("Help"     ,  "h", command.query("help")),
+    ("Help all" ,  "H", command.query("help_all")),
+    )
+
+menu.items["archive"] = (
+    ("Zip"            , "z", command.query("zip")),
+    ("Zip each files" , "Z", command.query("zipeach")),
+    ("Tar"            , "t", command.query("zip")),
+    ("Tar each files" , "T", command.query("zipeach")),
+    ("Inflat zip"     , "i", command.query("unzip")),
+    ("Extract tar"    , "e", command.query("untar")),
+    )
+
+menu.items["bookmark"] = (
+    ("/etc" , "e", lambda: filer.dir.chdir("/etc")),
+    ("/usr" , "u", lambda: filer.dir.chdir("/usr")),
+    )
+
+menu.items["fileinfo"] = (
+    ("toggle extension" , "e", command.query("toggle_draw_ext")),
+    ("toggle permission", "p", command.query("toggle_draw_permission")),
+    ("toggle nlink"     , "l", command.query("toggle_draw_nlink")),
+    ("toggle user"      , "u", command.query("toggle_draw_user")),
+    ("toggle group"     , "g", command.query("toggle_draw_group")),
+    ("toggle size"      , "s", command.query("toggle_draw_size")),
+    ("toggle mtime"     , "t", command.query("toggle_draw_mtime")),
     )
 
 menu.items["layout"] = (
-    ("(t)ile"        , "t", command.query("layout_tile")),
-    ("tile(L)eft"    , "L", command.query("layout_tileleft")),
-    ("tile(T)op"     , "T", command.query("layout_tiletop")),
-    ("tile(B)ottom"  , "B", command.query("layout_tilebottom")),
-    ("one(l)ine"     , "l", command.query("layout_oneline")),
-    ("one(c)olumn"   , "c", command.query("layout_onecolumn")),
-    ("(m)agnifier"   , "m", command.query("layout_magnifier")),
-    ("(f)ullscreen"  , "f", command.query("layout_fullscreen")),
+    ("tile"        , "t", command.query("layout_tile")),
+    ("tileLeft"    , "L", command.query("layout_tileleft")),
+    ("tileTop"     , "T", command.query("layout_tiletop")),
+    ("tileBottom"  , "B", command.query("layout_tilebottom")),
+    ("oneline"     , "l", command.query("layout_oneline")),
+    ("onecolumn"   , "c", command.query("layout_onecolumn")),
+    ("magnifier"   , "m", command.query("layout_magnifier")),
+    ("fullscreen"  , "f", command.query("layout_fullscreen")),
     )
 
 menu.items["sort"] = (
-    ("(n)ame"              , "n", command.query("sort_name")),
-    ("(N)ame reverse"      , "N", command.query("sort_name_rev")),
-    ("(e)xtension"         , "e", command.query("sort_ext")),
-    ("(E)xtension reverse" , "E", command.query("sort_ext_rev")),
-    ("(s)ize"              , "s", command.query("sort_size")),
-    ("(S)ize reverse"      , "S", command.query("sort_size_rev")),
-    ("(t)ime"              , "t", command.query("sort_time")),
-    ("(T)ime reverse"      , "T", command.query("sort_time_rev")),
-    ("(l)ink"              , "l", command.query("sort_nlink")),
-    ("(L)ink reverse"      , "L", command.query("sort_nlink_rev")),
-    ("(p)ermission"        , "p", command.query("sort_permission")),
-    ("(P)ermission reverse", "P", command.query("sort_permission_rev")),
-    ("toggle (u)pward directory", "u", command.query("toggle_sort_updir")),
+    ("name"              , "n", command.query("sort_name")),
+    ("name reverse"      , "N", command.query("sort_name_rev")),
+    ("extension"         , "e", command.query("sort_ext")),
+    ("extension reverse" , "E", command.query("sort_ext_rev")),
+    ("size"              , "s", command.query("sort_size")),
+    ("size reverse"      , "S", command.query("sort_size_rev")),
+    ("time"              , "t", command.query("sort_time")),
+    ("time reverse"      , "T", command.query("sort_time_rev")),
+    ("link"              , "l", command.query("sort_nlink")),
+    ("link reverse"      , "L", command.query("sort_nlink_rev")),
+    ("permission"        , "p", command.query("sort_permission")),
+    ("permission reverse", "P", command.query("sort_permission_rev")),
+    ("toggle upward directory", "u", command.query("toggle_sort_updir")),
     )
 
 # The editor launcher example.
 menu.items["editor"] = (
-    ("(e)macs"              , "e", lambda: process.spawn("emacs -nw %f")),
-    ("(E)macs new terminal" , "E", lambda: process.spawn("emacs -nw %f %T")),
-    ("emacs (f)rame"        , "f", lambda: process.spawn("emacs %f")),
-    ("(v)im"                , "v", lambda: process.spawn("vim %f")),
-    ("(V)im new terminal"   , "V", lambda: process.spawn("vim %f %T")),
-    ("(g)vim"               , "g", lambda: process.spawn("gvim %f %&")),
+    ("emacs"              , "e", lambda: process.spawn("emacs -nw %f")),
+    ("emacs new terminal" , "E", lambda: process.spawn("emacs -nw %f %T")),
+    ("emacs frame"        , "f", lambda: process.spawn("emacs %f")),
+    ("vim"                , "v", lambda: process.spawn("vim %f")),
+    ("vim new terminal"   , "V", lambda: process.spawn("vim %f %T")),
+    ("gvim"               , "g", lambda: process.spawn("gvim %f %&")),
+    )
+
+# The web broweser launcher example.
+menu.items["webbrowser"] = (
+    ("firefox" , "f", lambda: process.spawn("firefox %&")),
+    ("w3m"     , "w", lambda: process.spawn("w3m google.com %T")),
+    ("chrome"  , "c", lambda: process.spawn("chromium-browser %&")),
+    )
+
+# The file manager launcher example.
+menu.items["filemanager"] = (
+    ("nautilus" , "n", lambda: process.spawn("nautilus --no-desktop %D %&")),
+    ("mc"       , "m", lambda: process.spawn("mc %T")),
+    ("thunar"   , "t", lambda: process.spawn("thunar %&")),
     )
 
 # The program launcher example.
 menu.items["launcher"] = (
-    ("(h)top"           , "h", lambda: process.spawn("htop %T")),
-    ("(m)c"             , "m", lambda: process.spawn("mc %T")),
-    ("(M)OC"            , "M", lambda: process.spawn("mocp %T")),
-    ("(w)3m"            , "w", lambda: process.spawn("w3m google.com %T")),
-    ("(f)irefox"        , "f", lambda: process.spawn("firefox %&")),
-    ("(T)hunderbird"    , "T", lambda: process.spawn("thunderbird %&")),
-    ("(a)marok"         , "a", lambda: process.spawn("amarok %&")),
-    ("(g)imp"           , "g", lambda: process.spawn("gimp %&")),
-    ("(t)erminator"     , "t", lambda: process.spawn("terminator %&")),
-    ("(n)autilus"       , "n", lambda: process.spawn("nautilus --no-desktop %D %&")),
-    ("(s)ystem-monitor" , "s", lambda: process.spawn("gnome-system-monitor %&")),
-    ("(S)ynaptic"       , "S", lambda: process.spawn("gksu synaptic %&")),
+    ("htop"           , "h", lambda: process.spawn("htop %T")),
+    ("mc"             , "m", lambda: process.spawn("mc %T")),
+    ("MOC"            , "M", lambda: process.spawn("mocp %T")),
+    ("firefox"        , "f", lambda: process.spawn("firefox %&")),
+    ("thunderbird"    , "T", lambda: process.spawn("thunderbird %&")),
+    ("amarok"         , "a", lambda: process.spawn("amarok %&")),
+    ("gimp"           , "g", lambda: process.spawn("gimp %&")),
+    ("terminator"     , "t", lambda: process.spawn("terminator %&")),
+    ("nautilus"       , "n", lambda: process.spawn("nautilus --no-desktop %D %&")),
+    ("system-monitor" , "s", lambda: process.spawn("gnome-system-monitor %&")),
+    ("synaptic"       , "S", lambda: process.spawn("gksu synaptic %&")),
     )
 
 # Update the filer keymap.
 filer.keymap.update({
-        "V": lambda: menu.show("filer"),
-        "s": lambda: menu.show("sort"),
-        "L": lambda: menu.show("layout"),
-        "E": lambda: menu.show("editor"),
-        ";": lambda: menu.show("launcher"),
+        "<f1>" : lambda: menu.show("File"),
+        "<f2>" : lambda: menu.show("Edit"),
+        "<f3>" : lambda: menu.show("View"),
+        "<f4>" : lambda: menu.show("Go"),
+        "<f5>" : lambda: menu.show("Tool"),
+        "<f6>" : lambda: menu.show("Help"),
+        "C-x"  : lambda: menu.show("Main"),
+        "V"    : lambda: menu.show("fileinfo"),
+        "s"    : lambda: menu.show("sort"),
+        "L"    : lambda: menu.show("layout"),
+        "E"    : lambda: menu.show("editor"),
+        ";"    : lambda: menu.show("launcher"),
         })
 
+# ======================================================================
 # The file association example.
 #
-# The following macros do special behavior in the string passed to the process:
-#     %& -> The string passed to the process is
-#           evaluated on the background through the shell;
-#     %T -> The string passed to the process is process
-#           executed on the external terminal;
-#     %q -> Doesn't wait of the user input after
-#           the string passed to the process is evaluated;
-#
+# The following macros do special behavior in the string passed to the
+# process:
+# 
+#     %& -> The string passed to the process is evaluated on the
+#           background through the shell;
+#     %T -> The string passed to the process is process executed on
+#           the external terminal;
+#     %q -> Doesn't wait of the user input after the string passed to
+#           the process is evaluated;
 #     %f -> This macro is expanded to the file name to under the cursor;
-#     %F -> This macro is expanded to the absolute path of
-#           file to under the cursor;
-#
-#     %x -> This macro is expanded to the file name to
-#           under the cursor that removed the extension;
+#     %F -> This macro is expanded to the absolute path of file to
+#           under the cursor;
+#     %x -> This macro is expanded to the file name to under the
+#           cursor that removed the extension;
 #     %X -> This macro is expanded to the absolute path of file to
 #           under the cursor that removed the extension;
-#
 #     %d -> This macro is expanded to the current directory name;
-#     %D -> This macro is expanded to the absolute path of
-#           current directory;
-#
+#     %D -> This macro is expanded to the absolute path of current
+#           directory;
 #     %d2 -> This macro is expanded to the next directory name;
-#     %D2 -> This macro is expanded to the absolute path of
-#            next directory;
+#     %D2 -> This macro is expanded to the absolute path of next
+#            directory;
+#     %m -> This macro is expanded to the string that the mark files
+#           name in the current directory is split by the space;
+#     %M -> This macro is expanded to the string that the absolute
+#           path of mark files in the current directory is split by
+#           the space.
 #
-#     %m -> This macro is expanded to the string that the mark files name in
-#           the current directory is split by the space;
-#     %M -> This macro is expanded to the string that the absolute path of
-#           mark files in the current directory is split by the space.
-#
+# ======================================================================
 
 # Define a image file associate the menu item.
 menu.items["image"] = (
-    ("(d)isplay"    , "d", lambda: process.spawn("display %f %&")),
-    ("(g)imp"       , "g", lambda: process.spawn("gimp %f %&")),
+    ("display"    , "d", lambda: process.spawn("display %f %&")),
+    ("gimp"       , "g", lambda: process.spawn("gimp %f %&")),
     )
 
 # Define a music file associate the menu item.
 menu.items["music"] = (
-    ("(m)player"  , "m", lambda: process.spawn("mplayer %m")),
-    ("(M)OC"      , "M", lambda: process.spawn("mocp -a %m %&")),
-    ("(a)marok"   , "a", lambda: process.spawn("amarok %f %&")),
+    ("mplayer"  , "m", lambda: process.spawn("mplayer %m")),
+    ("MOC"      , "M", lambda: process.spawn("mocp -a %m %&")),
+    ("amarok"   , "a", lambda: process.spawn("amarok %f %&")),
     )
 
 # Define a video file associate the menu item.
 menu.items["video"] = (
-    ("(m)player"  , "m", lambda: process.spawn("mplayer %f")),
-    ("(v)lc"      , "v", lambda: process.spawn("vlc %f %&")),
+    ("mplayer"  , "m", lambda: process.spawn("mplayer %f")),
+    ("vlc"      , "v", lambda: process.spawn("vlc %f %&")),
     )
 
-myassociation = {
-    ("RET", ".py"   ): lambda: cmdline.shell("python %f"),
-    ("RET", ".rb"   ): lambda: cmdline.shell("ruby %f"),
-    ("RET", ".sh"   ): lambda: cmdline.shell("sh %f"),
-    ("RET", ".exe"  ): lambda: cmdline.shell("wine %f"),
-    ("RET", ".c"    ): lambda: cmdline.shell("gcc %f"),
-    ("RET", ".java" ): lambda: cmdline.shell("javac %f"),
-    ("RET", ".class"): lambda: cmdline.shell("java %x"),
-    ("RET", ".jar"  ): lambda: cmdline.shell("java -jar %f"),
-    ("RET", ".jpg"  ): lambda: menu.show("image"),
-    ("RET", ".gif"  ): lambda: menu.show("image"),
-    ("RET", ".png"  ): lambda: menu.show("image"),
-    ("RET", ".bmp"  ): lambda: menu.show("image"),
-    ("RET", ".mp3"  ): lambda: menu.show("music"),
-    ("RET", ".flac" ): lambda: menu.show("music"),
-    ("RET", ".avi"  ): lambda: menu.show("video"),
-    ("RET", ".mp4"  ): lambda: menu.show("video"),
-    ("RET", ".flv"  ): lambda: menu.show("video"),
-    }
+# Update filer keymap for file association.
+filer.keymap.update({
+        ("RET", ".py"   ): lambda: cmdline.shell("python %f"),
+        ("RET", ".rb"   ): lambda: cmdline.shell("ruby %f"),
+        ("RET", ".sh"   ): lambda: cmdline.shell("sh %f"),
+        ("RET", ".exe"  ): lambda: cmdline.shell("wine %f"),
+        ("RET", ".c"    ): lambda: cmdline.shell("gcc %f"),
+        ("RET", ".java" ): lambda: cmdline.shell("javac %f"),
+        ("RET", ".class"): lambda: cmdline.shell("java %x"),
+        ("RET", ".jar"  ): lambda: cmdline.shell("java -jar %f"),
+        ("RET", ".jpg"  ): lambda: menu.show("image"),
+        ("RET", ".gif"  ): lambda: menu.show("image"),
+        ("RET", ".png"  ): lambda: menu.show("image"),
+        ("RET", ".bmp"  ): lambda: menu.show("image"),
+        ("RET", ".mp3"  ): lambda: menu.show("music"),
+        ("RET", ".flac" ): lambda: menu.show("music"),
+        ("RET", ".avi"  ): lambda: menu.show("video"),
+        ("RET", ".mp4"  ): lambda: menu.show("video"),
+        ("RET", ".flv"  ): lambda: menu.show("video"),
+        })
 
-filer.keymap.update(myassociation)
 
-import sys
+# ======================================================================
+
 if "screen" in os.getenv("TERM"):
     # Change GNU SCREEN's title.
     sys.stdout.write("\033kpyful\033\\")
@@ -717,3 +841,7 @@ else:
     # Change terminal emulator's title.
     import socket
     sys.stdout.write("\033]0;pyful@{0}\007".format(socket.gethostname()))
+
+# ======================================================================
+
+
