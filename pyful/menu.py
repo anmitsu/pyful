@@ -35,7 +35,7 @@ class Menu(ListBox):
         self.title = name
         self.current = self.items[name]
         self.refresh()
-        entries = [Entry(i[0]) for i in self.current]
+        entries = [Entry("{0} ({1})".format(item[0], item[1])) for item in self.current]
         super(self.__class__, self).show(entries, pos)
 
     def hide(self):
@@ -43,17 +43,18 @@ class Menu(ListBox):
         super(self.__class__, self).hide()
 
     def refresh(self):
-        if not self.current:
-            return
         y, x = self.stdscr.getmaxyx()
-        maxy = y // 2
-        height = len(self.current) + 2
-        if height > maxy:
-            height = maxy
-        width = 50
-        if width > x:
-            width = x
-        self.panel.resize(height, width, 1, 0)
+        odd = y % 2
+        base_y = y//2 + odd
+        height = base_y + self.zoom
+        if height > y-2:
+            height = y - 2
+            self.zoom = height - base_y
+        elif height < 3:
+            height = 3
+            self.zoom = height - base_y
+        width = x // 3
+        self.panel.resize(height, width, y-height-3, 0)
         self.panel.attr = look.colors["MenuWindow"]
 
     def run(self):
