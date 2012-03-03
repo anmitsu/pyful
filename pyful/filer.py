@@ -1163,7 +1163,6 @@ class PathHistory(object):
 
 class Finder(TextBox):
     smartcase = True
-    keybindfunc = None
     migemo = None
 
     class History(object):
@@ -1186,10 +1185,6 @@ class Finder(TextBox):
                 self.pos = len(self.history) - 1
             return self.history[self.pos]
 
-    @classmethod
-    def keybind(cls, func):
-        cls.keybindfunc = func
-
     def __init__(self, directory):
         TextBox.__init__(self)
         self.dir = directory
@@ -1200,8 +1195,7 @@ class Finder(TextBox):
         self.refresh()
 
     def refresh(self):
-        if self.keybindfunc:
-            self.keymap = self.keybindfunc()
+        self.keymap = self.keyfun()
         y, x = self.dir.screen.win.getmaxyx()
         by, bx = self.dir.screen.win.getbegyx()
         self.panel.resize(1, x-2, by+y-2, bx+1)

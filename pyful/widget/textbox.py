@@ -26,6 +26,35 @@ from pyful.widget.base import Widget
 class TextBox(Widget):
     promptattr = 0
     wordbreakchars = re.compile("[._/\s\t\n\"\\`'@$><=:|&{(]")
+    keyfun = lambda textbox: {
+        "C-f"         : textbox.forward_char,
+        "<right>"     : textbox.forward_char,
+        "C-b"         : textbox.backward_char,
+        "<left>"      : textbox.backward_char,
+        "M-f"         : textbox.forward_word,
+        "M-b"         : textbox.backward_word,
+        "C-d"         : textbox.delete_char,
+        "<dc>"        : textbox.delete_char,
+        "C-h"         : textbox.delete_backward_char,
+        "<backspace>" : textbox.delete_backward_char,
+        "M-d"         : textbox.delete_forward_word,
+        "M-h"         : textbox.delete_backward_word,
+        "C-w"         : textbox.delete_backward_word,
+        "C-k"         : textbox.kill_line,
+        "C-u"         : textbox.kill_line_all,
+        "C-a"         : textbox.settop,
+        "C-e"         : textbox.setbottom,
+        "C-g"         : textbox.hide,
+        "C-c"         : textbox.hide,
+        "ESC"         : textbox.hide,
+        }
+
+    @classmethod
+    def keybind(cls, keyfun):
+        cls.keyfun = keyfun
+        for wdg in cls.widgets.values():
+            if isinstance(wdg, cls):
+                wdg.keymap = wdg.keyfun()
 
     def __init__(self, name=None):
         Widget.__init__(self, name)
@@ -34,32 +63,7 @@ class TextBox(Widget):
         self.textmap = []
         self.prompt = ""
         self.cursor = 0
-        self.keymap = {
-            "C-f"         : self.forward_char,
-            "<right>"     : self.forward_char,
-            "C-b"         : self.backward_char,
-            "<left>"      : self.backward_char,
-            "M-f"         : self.forward_word,
-            "M-b"         : self.backward_word,
-            "C-d"         : self.delete_char,
-            "<dc>"        : self.delete_char,
-            "C-h"         : self.delete_backward_char,
-            "<backspace>" : self.delete_backward_char,
-            "M-d"         : self.delete_forward_word,
-            "M-h"         : self.delete_backward_word,
-            "C-w"         : self.delete_backward_word,
-            "C-k"         : self.kill_line,
-            "C-u"         : self.kill_line_all,
-            "C-a"         : self.settop,
-            "C-e"         : self.setbottom,
-            "C-g"         : self.hide,
-            "C-c"         : self.hide,
-            "ESC"         : self.hide,
-            }
-
-    def keybind(self, func):
-        self.keymap = func(self)
-        return self.keymap
+        self.keymap = self.keyfun()
 
     def refresh(self):
         self.panel.unlink_window()
