@@ -34,6 +34,7 @@ from pyful import util
 
 from pyful.widget.base import StandardScreen, Screen, Widget
 from pyful.widget.textbox import TextBox
+from pyful.widget.listbox import ListBox, Entry
 
 class NavigationBar(Widget):
     def __init__(self):
@@ -81,6 +82,10 @@ class Filer(Widget):
     def finder(self):
         return self.workspace.dir.finder
 
+    @property
+    def pager(self):
+        return self.workspace.dir.pager
+
     def keybind(self, func):
         self.keymap = func(self)
         return self.keymap
@@ -104,6 +109,9 @@ class Filer(Widget):
             self.navigationbar.draw(self.file.draw)
 
     def input(self, key):
+        if self.pager.active:
+            self.pager.input(key)
+            return
         if self.finder.active:
             if not self.finder.input(key):
                 return
@@ -635,6 +643,7 @@ class Directory(StandardScreen):
         self.list = None
         self.list_title = None
         self.finder = Finder(self)
+        self.pager = Pager(self)
         self.history = PathHistory(self)
 
     @property
@@ -1005,6 +1014,7 @@ class Directory(StandardScreen):
         self.screen.attr = look.colors["Window"]
         self.screen.create_window()
         self.finder.refresh()
+        self.pager.refresh()
 
     def _fix_position(self, size, height):
         if self.cursor < 0:
@@ -1069,6 +1079,10 @@ class Directory(StandardScreen):
         self.screen.win.addstr(y-1, 1, status)
 
     def draw(self, focus):
+        if self.pager.active:
+            self.pager.draw()
+            return
+
         size = len(self.files)
         win = self.screen.win
         height = win.getmaxyx()[0] - 2
@@ -1160,6 +1174,32 @@ class PathHistory(object):
             self.pos = 0
         elif self.pos >= len(self.history):
             self.pos = len(self.history) - 1
+
+class Pager(ListBox):
+    def __init__(self, directory):
+        ListBox.__init__(self)
+        self.dir = directory
+
+    def refresh(self):
+        y, x = self.dir.screen.win.getmaxyx()
+        by, bx = self.dir.screen.win.getbegyx()
+        self.panel.resize(y, x, by, bx)
+
+    def preview(self, path):
+        path = os.path.expanduser(path)
+        entries = []
+        with open(path, "r") as fd:
+            for line in fd:
+                line = line.strip(os.linesep)
+                try:
+                    line = line.decode()
+                    line = re.sub(r"[\r]", "", line).expandtabs()
+                    attr = 0
+                except UnicodeError:
+                    line = "????? - Invalid encoding"
+                    attr = look.colors["ErrorMessage"]
+                entries.append(Entry(line, attr=attr))
+        self.show(entries)
 
 class Finder(TextBox):
     smartcase = True
