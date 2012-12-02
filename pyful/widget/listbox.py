@@ -29,7 +29,8 @@ class ListBox(Widget):
 
     def __init__(self, title=None):
         Widget.__init__(self, title)
-        self.__class__.keymap = {}
+        if not hasattr(self.__class__, "keymap"):
+            self.__class__.keymap = {}
         self.list = []
         self.title = title
         self.cursor = 0

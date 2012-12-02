@@ -29,7 +29,8 @@ class TextBox(Widget):
 
     def __init__(self, name=None):
         Widget.__init__(self, name)
-        self.__class__.keymap = {}
+        if not hasattr(self.__class__, "keymap"):
+            self.__class__.keymap = {}
         self.panel.leaveok = False
         self.text = ""
         self.textmap = []
