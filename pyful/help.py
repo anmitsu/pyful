@@ -23,6 +23,7 @@ from pyful import look
 from pyful import message
 from pyful import util
 from pyful import widget
+from pyful import widgets
 
 from pyful.widget.listbox import ListBox, Entry
 
@@ -92,10 +93,8 @@ class Help(ListBox):
         return entries
 
     def find_keybind(self, cmd):
-        filer = widget.get("Filer")
-
         keys = []
-        for k, v in filer.keymap.items():
+        for k, v in widgets.filer.keymap.items():
             if v == cmd:
                 if isinstance(k, tuple):
                     keybind = "{0[0]} ({0[1]})".format(k)

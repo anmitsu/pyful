@@ -51,7 +51,7 @@ class Completion(ListBox):
     programs = []
 
     def __init__(self, cmdline):
-        ListBox.__init__(self, "Completion")
+        ListBox.__init__(self)
         self.cmdline = cmdline
         self.parser = None
         self.loadprograms()

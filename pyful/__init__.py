@@ -34,6 +34,33 @@ from pyful import look
 from pyful import util
 from pyful import widget
 
+class Widgets(object):
+    @property
+    def filer(self):
+        return widget.get("Filer")
+
+    @property
+    def cmdline(self):
+        return widget.get("Cmdline")
+
+    @property
+    def menu(self):
+        return widget.get("Menu")
+
+    @property
+    def message(self):
+        return widget.get("Message")
+
+    @property
+    def help(self):
+        return widget.get("Help")
+
+    @property
+    def action(self):
+        return widget.get("ActionBox")
+
+widgets = Widgets()
+
 class Pyful(object):
     """PYthon File management UtiLity"""
 
@@ -61,11 +88,11 @@ class Pyful(object):
         import pyful.message
         import pyful.menu
         import pyful.help
-        self.cmdline = pyful.cmdline.Cmdline()
-        self.filer = pyful.filer.Filer()
-        self.message = pyful.message.Message()
-        self.menu = pyful.menu.Menu()
-        self.help = pyful.help.Help()
+        pyful.cmdline.Cmdline()
+        pyful.filer.Filer()
+        pyful.message.Message()
+        pyful.menu.Menu()
+        pyful.help.Help()
 
     def init_function(self):
         for func in self.initfuncs: func()
@@ -89,25 +116,25 @@ class Pyful(object):
             return e
 
     def draw(self):
-        self.filer.draw()
-        if self.menu.active:
-            self.menu.draw()
-        if self.help.active:
-            self.help.draw()
-        elif self.cmdline.active:
-            self.cmdline.draw()
-        elif self.message.active and not self.filer.finder.active:
-            self.message.draw()
+        widgets.filer.draw()
+        if widgets.menu.active:
+            widgets.menu.draw()
+        if widgets.help.active:
+            widgets.help.draw()
+        elif widgets.cmdline.active:
+            widgets.cmdline.draw()
+        elif widgets.message.active and not widgets.filer.finder.active:
+            widgets.message.draw()
 
     def input(self, key):
-        if self.help.active:
-            self.help.input(key)
-        elif self.cmdline.active:
-            self.cmdline.input(key)
-        elif self.menu.active:
-            self.menu.input(key)
+        if widgets.help.active:
+            widgets.help.input(key)
+        elif widgets.cmdline.active:
+            widgets.cmdline.input(key)
+        elif widgets.menu.active:
+            widgets.menu.input(key)
         else:
-            self.filer.input(key)
+            widgets.filer.input(key)
 
     def main_loop(self):
         ui = widget.ui.UI(self.draw, self.input)
@@ -118,16 +145,16 @@ class Pyful(object):
         error = self.loadrcfile(rcpath)
         look.init_colors()
         sysver = sys.version.replace(os.linesep, "")
-        self.message.puts("Launching on Python {0}".format(sysver))
+        widgets.message.puts("Launching on Python {0}".format(sysver))
         if error:
-            self.message.exception(error)
-            self.message.error("RC error: instead loaded `{0}'".format(self.environs["RCFILE"]))
+            widgets.message.exception(error)
+            widgets.message.error("RC error: instead loaded `{0}'".format(self.environs["RCFILE"]))
         else:
-            self.message.puts("Loaded {0}".format(self.environs["RCFILE"]))
+            widgets.message.puts("Loaded {0}".format(self.environs["RCFILE"]))
         widget.refresh_all_widgets()
 
     def run(self):
-        self.message.puts("Welcome to pyful v{0}".format(__version__))
+        widgets.message.puts("Welcome to pyful v{0}".format(__version__))
         self.init_function()
         try:
             self.main_loop()

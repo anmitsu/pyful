@@ -46,6 +46,10 @@ class Cmdline(TextBox):
         self.panel.resize(2, x, y-2, 0)
         self.panel.attr = look.colors["CmdlineWindow"]
         self.promptattr = look.colors["CmdlinePrompt"]
+        self.history.refresh()
+        self.clipboard.refresh()
+        self.output.refresh()
+        self.completion.refresh()
 
     def edithook(self):
         self.history.start()
@@ -177,7 +181,8 @@ class History(ListBox):
     histories = {}
 
     def __init__(self, cmdline):
-        ListBox.__init__(self, "History")
+        ListBox.__init__(self)
+        self.title = "history"
         self.cmdline = cmdline
         self.source_string = self.cmdline.text
         self.lb = -1
@@ -261,7 +266,8 @@ class Clipboard(ListBox):
     clip = []
 
     def __init__(self, cmdline):
-        ListBox.__init__(self, "Clipboard")
+        ListBox.__init__(self)
+        self.title = "clipboard"
         self.cmdline = cmdline
         self.textbox = TextBox()
         self.textbox.prompt = " Clipboard: "
@@ -360,7 +366,8 @@ class Clipboard(ListBox):
 
 class Output(ListBox):
     def __init__(self, cmdline):
-        ListBox.__init__(self, "Output")
+        ListBox.__init__(self)
+        self.title = "output"
         self.cmdline = cmdline
 
     def edit(self):

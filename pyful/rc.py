@@ -1,26 +1,20 @@
-# coding: utf-8
-#
-# pyful configure file.
+# -*-coding:utf-8-*-
 
 # ======================================================================
-# Import modules and very useful widgets.
-#
+# This file is pyful configuration file for setting editor, pager,
+# keybinds, menus, etc.  This file must lacate as `~/.pyful/rc.py'.
 # ======================================================================
 
 import os
 import sys
 
 import pyful
+from pyful import widgets
 from pyful import command
 from pyful import process
 
-filer = pyful.widget.get("Filer")
-cmdline = pyful.widget.get("Cmdline")
-menu = pyful.widget.get("Menu")
-
 # ======================================================================
-# Configure parameters for pyful's modules.
-#
+# Configure parameters
 # ======================================================================
 
 # Set environments of pyful.
@@ -60,7 +54,6 @@ pyful.message.MessageBox.height = 4
 pyful.filer.Workspace.default_path = "~/"
 
 # Set the workspace layout.
-#
 #     "Tile"
 #     "TileLeft"
 #     "TileTop"
@@ -69,11 +62,9 @@ pyful.filer.Workspace.default_path = "~/"
 #     "Onecolumn"
 #     "Magnifier"
 #     "Fullscreen"
-#
 pyful.filer.Workspace.layout = "Tile"
 
 # Set default kind of sorting in directory.
-#
 #     "Name[^]" -> Name sort of ascending order;
 #     "Name[$]" -> Name sort of descending order;
 #     "Size[^]" -> File size sort of ascending order;
@@ -86,18 +77,15 @@ pyful.filer.Workspace.layout = "Tile"
 #     "Link[$]" -> Link sort of descending order;
 #     "Ext[^]" -> File extension sort of ascending order;
 #     "Ext[$]" -> File extension sort of descending order.
-#
 pyful.filer.Directory.sort_kind = "Name[^]"
 
 # Is a directory sorted in upwards?
 pyful.filer.Directory.sort_updir = False
 
 # Set scroll type in directory.
-#
 #     "HalfScroll"
 #     "PageScroll"
 #     "ContinuousScroll"
-#
 pyful.filer.Directory.scroll_type = "HalfScroll"
 
 # Set statusbar format in directory.
@@ -144,12 +132,10 @@ pyful.filer.FileStat.draw_size = True
 pyful.filer.FileStat.draw_mtime = True
 
 # Set my look.
-#
 #     "default"
 #     "midnight"
 #     "dark"
 #     "light"
-#
 pyful.look.Look.mylook = "default"
 
 # Set borders.
@@ -164,16 +150,13 @@ pyful.widget.listbox.ListBox.borders = []
 pyful.widget.listbox.ListBox.zoom = 0
 
 # Set scroll type in listbox.
-#
 #     "HalfScroll"
 #     "PageScroll"
 #     "ContinuousScroll"
-#
 pyful.widget.listbox.ListBox.scroll_type = "HalfScroll"
 
 # Enable mouse support?
 pyful.widget.ui.MouseHandler.enable(False)
-
 
 # Set cmdline attributes.
 pyful.cmdline.History.maxsave = 10000
@@ -181,34 +164,31 @@ pyful.cmdline.Clipboard.maxsave = 100
 
 # Registration of program initialization.
 # Pyful.atinit() wraps the initialization functions.
-#
 @pyful.Pyful.atinit
 def myatinit():
-    filer.loadfile("~/.pyfulinfo.json")
-    cmdline.clipboard.loadfile("~/.pyful/clipboard")
-    cmdline.history.loadfile("~/.pyful/history/shell", "Shell")
-    cmdline.history.loadfile("~/.pyful/history/eval", "Eval")
-    cmdline.history.loadfile("~/.pyful/history/mx", "Mx")
-    cmdline.history.loadfile("~/.pyful/history/replace", "Replace")
+    widgets.filer.loadfile("~/.pyfulinfo.json")
+    widgets.cmdline.clipboard.loadfile("~/.pyful/clipboard")
+    widgets.cmdline.history.loadfile("~/.pyful/history/shell", "Shell")
+    widgets.cmdline.history.loadfile("~/.pyful/history/eval", "Eval")
+    widgets.cmdline.history.loadfile("~/.pyful/history/mx", "Mx")
+    widgets.cmdline.history.loadfile("~/.pyful/history/replace", "Replace")
 
 # Registration of program termination.
 # Pyful.atexit() wraps the termination functions.
-#
 @pyful.Pyful.atexit
 def myatexit():
-    filer.savefile("~/.pyfulinfo.json")
-    cmdline.clipboard.savefile("~/.pyful/clipboard")
-    cmdline.history.savefile("~/.pyful/history/shell", "Shell")
-    cmdline.history.savefile("~/.pyful/history/eval", "Eval")
-    cmdline.history.savefile("~/.pyful/history/mx", "Mx")
-    cmdline.history.savefile("~/.pyful/history/replace", "Replace")
+    widgets.filer.savefile("~/.pyfulinfo.json")
+    widgets.cmdline.clipboard.savefile("~/.pyful/clipboard")
+    widgets.cmdline.history.savefile("~/.pyful/history/shell", "Shell")
+    widgets.cmdline.history.savefile("~/.pyful/history/eval", "Eval")
+    widgets.cmdline.history.savefile("~/.pyful/history/mx", "Mx")
+    widgets.cmdline.history.savefile("~/.pyful/history/replace", "Replace")
 
 # ======================================================================
-# Define the keymap of pyful.
+# Define keymaps for widgets of pyful.
 #
 # A key of the keymap dictionary is key or (key, ext).
 # A value of the keymap dictionary is the callable function of no argument.
-#
 #     "C-a" -> Ctrl + a
 #     "M-a" -> Meta + a
 #     "M-C-a" -> Meta + Ctrl + a
@@ -228,339 +208,318 @@ def myatexit():
 #     "C-m" key is interpreted as "RET" in most terminals.
 #     The key such as "C-A" are interpreted such as "C-a".
 #     The key such as "C-<down>" are undefine.
-#
 # ======================================================================
 
-filer.keybind(
-    lambda filer: {
-        "M-1"           : lambda: filer.focus_workspace(0),
-        "M-2"           : lambda: filer.focus_workspace(1),
-        "M-3"           : lambda: filer.focus_workspace(2),
-        "M-4"           : lambda: filer.focus_workspace(3),
-        "M-5"           : lambda: filer.focus_workspace(4),
-        "M-!"           : lambda: filer.mvdir_workspace_to(0),
-        'M-"'           : lambda: filer.mvdir_workspace_to(1),
-        "M-#"           : lambda: filer.mvdir_workspace_to(2),
-        "M-$"           : lambda: filer.mvdir_workspace_to(3),
-        "M-%"           : lambda: filer.mvdir_workspace_to(4),
-        "M-f"           : command.query("switch_next_workspace"),
-        "M-b"           : command.query("switch_prev_workspace"),
-        "M-F"           : command.query("swap_workspace_inc"),
-        "M-B"           : command.query("swap_workspace_dec"),
-        "C-i"           : command.query("focus_next_dir"),
-        "C-f"           : command.query("focus_next_dir"),
-        "C-b"           : command.query("focus_prev_dir"),
-        "<right>"       : command.query("focus_next_dir"),
-        "<left>"        : command.query("focus_prev_dir"),
-        "F"             : command.query("swap_dir_inc"),
-        "B"             : command.query("swap_dir_dec"),
-        "M-C-j"         : command.query("create_dir"),
-        "M-C"           : command.query("close_dir"),
-        "C-w"           : command.query("close_dir"),
-        "C-l"           : command.query("all_reload"),
-        "C-n"           : command.query("filer_cursor_down"),
-        "<down>"        : command.query("filer_cursor_down"),
-        "C-p"           : command.query("filer_cursor_up"),
-        "<up>"          : command.query("filer_cursor_up"),
-        "C-d"           : lambda: filer.dir.mvcursor(+5),
-        "C-u"           : lambda: filer.dir.mvcursor(-5),
-        "M-n"           : command.query("filer_scroll_down"),
-        "M-p"           : command.query("filer_scroll_up"),
-        "C-v"           : command.query("filer_pagedown"),
-        "<npage>"       : command.query("filer_pagedown"),
-        "M-v"           : command.query("filer_pageup"),
-        "<ppage>"       : command.query("filer_pageup"),
-        "C-a"           : command.query("filer_settop"),
-        "M-<"           : command.query("filer_settop"),
-        "C-e"           : command.query("filer_setbottom"),
-        "M->"           : command.query("filer_setbottom"),
-        "C-g"           : command.query("filer_reset"),
-        "ESC"           : command.query("filer_reset"),
-        "M-w"           : command.query("switch_workspace"),
-        "M-h"           : command.query("chdir_backward"),
-        "M-l"           : command.query("chdir_forward"),
-        "C-h"           : command.query("chdir_parent"),
-        "<backspace>"   : command.query("chdir_parent"),
-        "~"             : command.query("chdir_home"),
-        "\\"            : command.query("chdir_root"),
-        "w"             : command.query("chdir_neighbor"),
-        "f"             : command.query("finder_start"),
-        "/"             : command.query("finder_start"),
-        "v"             : command.query("fileviewer"),
-        "P"             : command.query("pack"),
-        "U"             : command.query("unpack2"),
-        "u"             : command.query("unpack"),
-        "J"             : command.query("drivejump"),
-        "<end>"         : command.query("mark_toggle_all"),
-        "SPC"           : command.query("mark_toggle"),
-        "C-r"           : command.query("refresh_window"),
-        "RET"           : command.query("open_at_system"),
-        "C-j"           : command.query("open_at_system"),
-        "e"             : command.query("spawn_editor"),
-        ":"             : command.query("spawn_shell"),
-        "h"             : command.query("shell"),
-        "M-:"           : command.query("eval"),
-        "M-x"           : command.query("mx"),
-        "M-m"           : command.query("menu"),
-        "K"             : command.query("kill_thread"),
-        "?"             : command.query("help"),
-        "M-?"           : command.query("help_all"),
-        "c"             : command.query("copy"),
-        "<dc>"          : command.query("delete"),
-        "D"             : command.query("delete"),
-        "k"             : command.query("mkdir"),
-        "m"             : command.query("move"),
-        "n"             : command.query("newfile"),
-        "r"             : command.query("rename"),
-        "R"             : command.query("replace"),
-        "l"             : command.query("symlink"),
-        "d"             : command.query("trashbox"),
-        "t"             : command.query("utime"),
-        "x"             : command.query("enter_exec"),
-        "*"             : command.query("mark"),
-        "+"             : command.query("mask"),
-        "q"             : command.query("exit"),
-        "Q"             : command.query("exit"),
-        ("RET", ".dir" ): command.query("enter_dir"),
-        ("RET", ".mark"): command.query("enter_mark"),
-        ("RET", ".link"): command.query("enter_link"),
-        ("RET", ".exec"): command.query("enter_exec"),
-        ("RET", ".tar" ): command.query("untar"),
-        ("RET", ".tgz" ): command.query("untar"),
-        ("RET", ".gz"  ): command.query("untar"),
-        ("RET", ".bz2" ): command.query("untar"),
-        ("RET", ".zip" ): command.query("unzip"),
-        ("RET", ".list"): command.query("enter_listfile"),
+pyful.widget.define_key(widgets.filer, {
+        "M-f"           : lambda: command.run("switch_next_workspace"),
+        "M-b"           : lambda: command.run("switch_prev_workspace"),
+        "M-F"           : lambda: command.run("swap_workspace_inc"),
+        "M-B"           : lambda: command.run("swap_workspace_dec"),
+        "C-i"           : lambda: command.run("focus_next_dir"),
+        "C-f"           : lambda: command.run("focus_next_dir"),
+        "C-b"           : lambda: command.run("focus_prev_dir"),
+        "<right>"       : lambda: command.run("focus_next_dir"),
+        "<left>"        : lambda: command.run("focus_prev_dir"),
+        "F"             : lambda: command.run("swap_dir_inc"),
+        "B"             : lambda: command.run("swap_dir_dec"),
+        "M-C-j"         : lambda: command.run("create_dir"),
+        "M-C"           : lambda: command.run("close_dir"),
+        "C-w"           : lambda: command.run("close_dir"),
+        "C-l"           : lambda: command.run("all_reload"),
+        "C-n"           : lambda: command.run("filer_cursor_down"),
+        "<down>"        : lambda: command.run("filer_cursor_down"),
+        "C-p"           : lambda: command.run("filer_cursor_up"),
+        "<up>"          : lambda: command.run("filer_cursor_up"),
+        "C-d"           : lambda: command.run("filer_cursor_more_down"),
+        "C-u"           : lambda: command.run("filer_cursor_more_up"),
+        "M-n"           : lambda: command.run("filer_scroll_down"),
+        "M-p"           : lambda: command.run("filer_scroll_up"),
+        "C-v"           : lambda: command.run("filer_pagedown"),
+        "<npage>"       : lambda: command.run("filer_pagedown"),
+        "M-v"           : lambda: command.run("filer_pageup"),
+        "<ppage>"       : lambda: command.run("filer_pageup"),
+        "C-a"           : lambda: command.run("filer_settop"),
+        "M-<"           : lambda: command.run("filer_settop"),
+        "C-e"           : lambda: command.run("filer_setbottom"),
+        "M->"           : lambda: command.run("filer_setbottom"),
+        "C-g"           : lambda: command.run("filer_reset"),
+        "ESC"           : lambda: command.run("filer_reset"),
+        "M-w"           : lambda: command.run("switch_workspace"),
+        "M-h"           : lambda: command.run("chdir_backward"),
+        "M-l"           : lambda: command.run("chdir_forward"),
+        "C-h"           : lambda: command.run("chdir_parent"),
+        "<backspace>"   : lambda: command.run("chdir_parent"),
+        "~"             : lambda: command.run("chdir_home"),
+        "\\"            : lambda: command.run("chdir_root"),
+        "w"             : lambda: command.run("chdir_neighbor"),
+        "f"             : lambda: command.run("finder_start"),
+        "/"             : lambda: command.run("finder_start"),
+        "v"             : lambda: command.run("fileviewer"),
+        "P"             : lambda: command.run("pack"),
+        "U"             : lambda: command.run("unpack2"),
+        "u"             : lambda: command.run("unpack"),
+        "J"             : lambda: command.run("drivejump"),
+        "<end>"         : lambda: command.run("mark_toggle_all"),
+        "SPC"           : lambda: command.run("mark_toggle"),
+        "C-r"           : lambda: command.run("refresh_window"),
+        "RET"           : lambda: command.run("open_at_system"),
+        "C-j"           : lambda: command.run("open_at_system"),
+        "e"             : lambda: command.run("spawn_editor"),
+        ":"             : lambda: command.run("spawn_shell"),
+        "h"             : lambda: command.run("shell"),
+        "M-:"           : lambda: command.run("eval"),
+        "M-x"           : lambda: command.run("mx"),
+        "M-m"           : lambda: command.run("menu"),
+        "K"             : lambda: command.run("kill_thread"),
+        "?"             : lambda: command.run("help"),
+        "M-?"           : lambda: command.run("help_all"),
+        "c"             : lambda: command.run("copy"),
+        "<dc>"          : lambda: command.run("delete"),
+        "D"             : lambda: command.run("delete"),
+        "k"             : lambda: command.run("mkdir"),
+        "m"             : lambda: command.run("move"),
+        "n"             : lambda: command.run("newfile"),
+        "r"             : lambda: command.run("rename"),
+        "R"             : lambda: command.run("replace"),
+        "l"             : lambda: command.run("symlink"),
+        "d"             : lambda: command.run("trashbox"),
+        "t"             : lambda: command.run("utime"),
+        "x"             : lambda: command.run("enter_exec"),
+        "*"             : lambda: command.run("mark"),
+        "+"             : lambda: command.run("mask"),
+        "q"             : lambda: command.run("exit"),
+        "Q"             : lambda: command.run("exit"),
+        ("RET", ".dir" ): lambda: command.run("enter_dir"),
+        ("RET", ".mark"): lambda: command.run("enter_mark"),
+        ("RET", ".link"): lambda: command.run("enter_link"),
+        ("RET", ".exec"): lambda: command.run("enter_exec"),
+        ("RET", ".tar" ): lambda: command.run("untar"),
+        ("RET", ".tgz" ): lambda: command.run("untar"),
+        ("RET", ".gz"  ): lambda: command.run("untar"),
+        ("RET", ".bz2" ): lambda: command.run("untar"),
+        ("RET", ".zip" ): lambda: command.run("unzip"),
+        ("RET", ".list"): lambda: command.run("enter_listfile"),
         })
 
-filer.finder.keybind(
-    lambda finder: {
-        "M-n"         : lambda: finder.history_select(-1),
-        "M-p"         : lambda: finder.history_select(+1),
-        "C-g"         : lambda: finder.finish(),
-        "ESC"         : lambda: finder.finish(),
-        "C-c"         : lambda: finder.finish(),
-        "C-h"         : lambda: finder.delete_backward_char(),
-        "<backspace>" : lambda: finder.delete_backward_char(),
+pyful.widget.define_key(widgets.filer.finder, {
+        "M-n"         : lambda: widgets.filer.finder.history_select(-1),
+        "M-p"         : lambda: widgets.filer.finder.history_select(+1),
+        "C-g"         : lambda: widgets.filer.finder.finish(),
+        "ESC"         : lambda: widgets.filer.finder.finish(),
+        "C-c"         : lambda: widgets.filer.finder.finish(),
+        "C-h"         : lambda: widgets.filer.finder.delete_backward_char(),
+        "<backspace>" : lambda: widgets.filer.finder.delete_backward_char(),
         })
 
-cmdline.keybind(
-    lambda cmdline: {
-        "C-f"         : lambda: cmdline.forward_char(),
-        "<right>"     : lambda: cmdline.forward_char(),
-        "C-b"         : lambda: cmdline.backward_char(),
-        "<left>"      : lambda: cmdline.backward_char(),
-        "M-f"         : lambda: cmdline.forward_word(),
-        "M-b"         : lambda: cmdline.backward_word(),
-        "C-d"         : lambda: cmdline.delete_char(),
-        "<dc>"        : lambda: cmdline.delete_char(),
-        "C-h"         : lambda: cmdline.delete_backward_char(),
-        "<backspace>" : lambda: cmdline.delete_backward_char(),
-        "M-d"         : lambda: cmdline.delete_forward_word(),
-        "M-h"         : lambda: cmdline.delete_backward_word(),
-        "C-w"         : lambda: cmdline.delete_backward_word(),
-        "C-k"         : lambda: cmdline.kill_line(),
-        "C-u"         : lambda: cmdline.kill_line_all(),
-        "C-a"         : lambda: cmdline.settop(),
-        "C-e"         : lambda: cmdline.setbottom(),
-        "C-g"         : lambda: cmdline.escape(),
-        "C-c"         : lambda: cmdline.escape(),
-        "ESC"         : lambda: cmdline.escape(),
-        "RET"         : lambda: cmdline.execute(),
-        "M-i"         : lambda: cmdline.select_action(),
-        "M-m"         : lambda: cmdline.expandmacro(),
-        "C-y"         : lambda: cmdline.clipboard.paste(),
-        "M-y"         : lambda: cmdline.clipboard.start(),
-        "C-i"         : lambda: cmdline.completion.start(),
-        "M-j"         : lambda: cmdline.output.communicate(),
-        "C-n"         : lambda: cmdline.history.mvcursor(+1),
-        "<down>"      : lambda: cmdline.history.mvcursor(+1),
-        "C-p"         : lambda: cmdline.history.mvcursor(-1),
-        "<up>"        : lambda: cmdline.history.mvcursor(-1),
-        "M-n"         : lambda: cmdline.history.mvscroll(+1),
-        "M-p"         : lambda: cmdline.history.mvscroll(-1),
-        "C-v"         : lambda: cmdline.history.pagedown(),
-        "M-v"         : lambda: cmdline.history.pageup(),
-        "M-<"         : lambda: cmdline.history.settop(),
-        "M->"         : lambda: cmdline.history.setbottom(),
-        "C-x"         : lambda: cmdline.history.delete(),
-        "M-+"         : lambda: cmdline.history.zoombox(+5),
-        "M--"         : lambda: cmdline.history.zoombox(-5),
-        "M-="         : lambda: cmdline.history.zoombox(0),
+pyful.widget.define_key(widgets.cmdline, {
+        "C-f"         : lambda: widgets.cmdline.forward_char(),
+        "<right>"     : lambda: widgets.cmdline.forward_char(),
+        "C-b"         : lambda: widgets.cmdline.backward_char(),
+        "<left>"      : lambda: widgets.cmdline.backward_char(),
+        "M-f"         : lambda: widgets.cmdline.forward_word(),
+        "M-b"         : lambda: widgets.cmdline.backward_word(),
+        "C-d"         : lambda: widgets.cmdline.delete_char(),
+        "<dc>"        : lambda: widgets.cmdline.delete_char(),
+        "C-h"         : lambda: widgets.cmdline.delete_backward_char(),
+        "<backspace>" : lambda: widgets.cmdline.delete_backward_char(),
+        "M-d"         : lambda: widgets.cmdline.delete_forward_word(),
+        "M-h"         : lambda: widgets.cmdline.delete_backward_word(),
+        "C-w"         : lambda: widgets.cmdline.delete_backward_word(),
+        "C-k"         : lambda: widgets.cmdline.kill_line(),
+        "C-u"         : lambda: widgets.cmdline.kill_line_all(),
+        "C-a"         : lambda: widgets.cmdline.settop(),
+        "C-e"         : lambda: widgets.cmdline.setbottom(),
+        "C-g"         : lambda: widgets.cmdline.escape(),
+        "C-c"         : lambda: widgets.cmdline.escape(),
+        "ESC"         : lambda: widgets.cmdline.escape(),
+        "RET"         : lambda: widgets.cmdline.execute(),
+        "M-i"         : lambda: widgets.cmdline.select_action(),
+        "M-m"         : lambda: widgets.cmdline.expandmacro(),
+        "C-y"         : lambda: widgets.cmdline.clipboard.paste(),
+        "M-y"         : lambda: widgets.cmdline.clipboard.start(),
+        "C-i"         : lambda: widgets.cmdline.completion.start(),
+        "M-j"         : lambda: widgets.cmdline.output.communicate(),
+        "C-n"         : lambda: widgets.cmdline.history.mvcursor(+1),
+        "<down>"      : lambda: widgets.cmdline.history.mvcursor(+1),
+        "C-p"         : lambda: widgets.cmdline.history.mvcursor(-1),
+        "<up>"        : lambda: widgets.cmdline.history.mvcursor(-1),
+        "M-n"         : lambda: widgets.cmdline.history.mvscroll(+1),
+        "M-p"         : lambda: widgets.cmdline.history.mvscroll(-1),
+        "C-v"         : lambda: widgets.cmdline.history.pagedown(),
+        "M-v"         : lambda: widgets.cmdline.history.pageup(),
+        "M-<"         : lambda: widgets.cmdline.history.settop(),
+        "M->"         : lambda: widgets.cmdline.history.setbottom(),
+        "C-x"         : lambda: widgets.cmdline.history.delete(),
+        "M-+"         : lambda: widgets.cmdline.history.zoombox(+5),
+        "M--"         : lambda: widgets.cmdline.history.zoombox(-5),
+        "M-="         : lambda: widgets.cmdline.history.zoombox(0),
         })
 
-cmdline.clipboard.keybind(
-    lambda clipboard: {
-        "C-n"         : lambda: clipboard.mvcursor(1),
-        "<down>"      : lambda: clipboard.mvcursor(1),
-        "C-v"         : lambda: clipboard.pagedown(),
-        "C-d"         : lambda: clipboard.pagedown(),
-        "C-p"         : lambda: clipboard.mvcursor(-1),
-        "<up>"        : lambda: clipboard.mvcursor(-1),
-        "M-v"         : lambda: clipboard.pageup(),
-        "C-u"         : lambda: clipboard.pageup(),
-        "M-n"         : lambda: clipboard.mvscroll(+1),
-        "M-p"         : lambda: clipboard.mvscroll(-1),
-        "C-x"         : lambda: clipboard.delete(),
-        "C-g"         : lambda: clipboard.finish(),
-        "C-c"         : lambda: clipboard.finish(),
-        "ESC"         : lambda: clipboard.finish(),
-        "RET"         : lambda: clipboard.insert(),
-        "M-+"         : lambda: clipboard.zoombox(+5),
-        "M--"         : lambda: clipboard.zoombox(-5),
-        "M-="         : lambda: clipboard.zoombox(0),
-        "C-f"         : lambda: clipboard.textbox.forward_char(),
-        "<right>"     : lambda: clipboard.textbox.forward_char(),
-        "C-b"         : lambda: clipboard.textbox.backward_char(),
-        "<left>"      : lambda: clipboard.textbox.backward_char(),
-        "M-f"         : lambda: clipboard.textbox.forward_word(),
-        "M-b"         : lambda: clipboard.textbox.backward_word(),
-        "C-d"         : lambda: clipboard.textbox.delete_char(),
-        "<dc>"        : lambda: clipboard.textbox.delete_char(),
-        "C-h"         : lambda: clipboard.textbox.delete_backward_char(),
-        "<backspace>" : lambda: clipboard.textbox.delete_backward_char(),
-        "M-d"         : lambda: clipboard.textbox.delete_forward_word(),
-        "M-h"         : lambda: clipboard.textbox.delete_backward_word(),
-        "C-w"         : lambda: clipboard.textbox.delete_backward_word(),
-        "C-k"         : lambda: clipboard.textbox.kill_line(),
-        "C-u"         : lambda: clipboard.textbox.kill_line_all(),
-        "C-a"         : lambda: clipboard.textbox.settop(),
-        "C-e"         : lambda: clipboard.textbox.setbottom(),
+pyful.widget.define_key(widgets.cmdline.clipboard, {
+        "C-n"         : lambda: widgets.cmdline.clipboard.mvcursor(1),
+        "<down>"      : lambda: widgets.cmdline.clipboard.mvcursor(1),
+        "C-v"         : lambda: widgets.cmdline.clipboard.pagedown(),
+        "C-d"         : lambda: widgets.cmdline.clipboard.pagedown(),
+        "C-p"         : lambda: widgets.cmdline.clipboard.mvcursor(-1),
+        "<up>"        : lambda: widgets.cmdline.clipboard.mvcursor(-1),
+        "M-v"         : lambda: widgets.cmdline.clipboard.pageup(),
+        "C-u"         : lambda: widgets.cmdline.clipboard.pageup(),
+        "M-n"         : lambda: widgets.cmdline.clipboard.mvscroll(+1),
+        "M-p"         : lambda: widgets.cmdline.clipboard.mvscroll(-1),
+        "C-x"         : lambda: widgets.cmdline.clipboard.delete(),
+        "C-g"         : lambda: widgets.cmdline.clipboard.finish(),
+        "C-c"         : lambda: widgets.cmdline.clipboard.finish(),
+        "ESC"         : lambda: widgets.cmdline.clipboard.finish(),
+        "RET"         : lambda: widgets.cmdline.clipboard.insert(),
+        "M-+"         : lambda: widgets.cmdline.clipboard.zoombox(+5),
+        "M--"         : lambda: widgets.cmdline.clipboard.zoombox(-5),
+        "M-="         : lambda: widgets.cmdline.clipboard.zoombox(0),
+        "C-f"         : lambda: widgets.cmdline.clipboard.textbox.forward_char(),
+        "<right>"     : lambda: widgets.cmdline.clipboard.textbox.forward_char(),
+        "C-b"         : lambda: widgets.cmdline.clipboard.textbox.backward_char(),
+        "<left>"      : lambda: widgets.cmdline.clipboard.textbox.backward_char(),
+        "M-f"         : lambda: widgets.cmdline.clipboard.textbox.forward_word(),
+        "M-b"         : lambda: widgets.cmdline.clipboard.textbox.backward_word(),
+        "C-d"         : lambda: widgets.cmdline.clipboard.textbox.delete_char(),
+        "<dc>"        : lambda: widgets.cmdline.clipboard.textbox.delete_char(),
+        "C-h"         : lambda: widgets.cmdline.clipboard.textbox.delete_backward_char(),
+        "<backspace>" : lambda: widgets.cmdline.clipboard.textbox.delete_backward_char(),
+        "M-d"         : lambda: widgets.cmdline.clipboard.textbox.delete_forward_word(),
+        "M-h"         : lambda: widgets.cmdline.clipboard.textbox.delete_backward_word(),
+        "C-w"         : lambda: widgets.cmdline.clipboard.textbox.delete_backward_word(),
+        "C-k"         : lambda: widgets.cmdline.clipboard.textbox.kill_line(),
+        "C-u"         : lambda: widgets.cmdline.clipboard.textbox.kill_line_all(),
+        "C-a"         : lambda: widgets.cmdline.clipboard.textbox.settop(),
+        "C-e"         : lambda: widgets.cmdline.clipboard.textbox.setbottom(),
         })
 
-cmdline.completion.keybind(
-    lambda completion: {
-        "C-n"     : lambda: completion.cursordown(),
-        "<down>"  : lambda: completion.cursordown(),
-        "C-p"     : lambda: completion.cursorup(),
-        "<up>"    : lambda: completion.cursorup(),
-        "C-i"     : lambda: completion.mvcursor(+1),
-        "C-f"     : lambda: completion.mvcursor(+1),
-        "<right>" : lambda: completion.mvcursor(+1),
-        "C-b"     : lambda: completion.mvcursor(-1),
-        "<left>"  : lambda: completion.mvcursor(-1),
-        "M-n"     : lambda: completion.mvscroll(+1),
-        "M-p"     : lambda: completion.mvscroll(-1),
-        "C-v"     : lambda: completion.pagedown(),
-        "M-v"     : lambda: completion.pageup(),
-        "C-g"     : lambda: completion.finish(),
-        "C-c"     : lambda: completion.finish(),
-        "ESC"     : lambda: completion.finish(),
-        "RET"     : lambda: completion.insert(),
-        "M-+"     : lambda: completion.zoombox(+5),
-        "M--"     : lambda: completion.zoombox(-5),
-        "M-="     : lambda: completion.zoombox(0),
+pyful.widget.define_key(widgets.cmdline.completion, {
+        "C-n"     : lambda: widgets.cmdline.completion.cursordown(),
+        "<down>"  : lambda: widgets.cmdline.completion.cursordown(),
+        "C-p"     : lambda: widgets.cmdline.completion.cursorup(),
+        "<up>"    : lambda: widgets.cmdline.completion.cursorup(),
+        "C-i"     : lambda: widgets.cmdline.completion.mvcursor(+1),
+        "C-f"     : lambda: widgets.cmdline.completion.mvcursor(+1),
+        "<right>" : lambda: widgets.cmdline.completion.mvcursor(+1),
+        "C-b"     : lambda: widgets.cmdline.completion.mvcursor(-1),
+        "<left>"  : lambda: widgets.cmdline.completion.mvcursor(-1),
+        "M-n"     : lambda: widgets.cmdline.completion.mvscroll(+1),
+        "M-p"     : lambda: widgets.cmdline.completion.mvscroll(-1),
+        "C-v"     : lambda: widgets.cmdline.completion.pagedown(),
+        "M-v"     : lambda: widgets.cmdline.completion.pageup(),
+        "C-g"     : lambda: widgets.cmdline.completion.finish(),
+        "C-c"     : lambda: widgets.cmdline.completion.finish(),
+        "ESC"     : lambda: widgets.cmdline.completion.finish(),
+        "RET"     : lambda: widgets.cmdline.completion.insert(),
+        "M-+"     : lambda: widgets.cmdline.completion.zoombox(+5),
+        "M--"     : lambda: widgets.cmdline.completion.zoombox(-5),
+        "M-="     : lambda: widgets.cmdline.completion.zoombox(0),
         })
 
-cmdline.output.keybind(
-    lambda output: {
-        "C-n"    : lambda: output.mvcursor(1),
-        "<down>" : lambda: output.mvcursor(1),
-        "C-v"    : lambda: output.pagedown(),
-        "C-d"    : lambda: output.pagedown(),
-        "C-p"    : lambda: output.mvcursor(-1),
-        "<up>"   : lambda: output.mvcursor(-1),
-        "M-v"    : lambda: output.pageup(),
-        "C-u"    : lambda: output.pageup(),
-        "M-n"    : lambda: output.mvscroll(+1),
-        "M-p"    : lambda: output.mvscroll(-1),
-        "C-g"    : lambda: output.finish(),
-        "C-c"    : lambda: output.finish(),
-        "ESC"    : lambda: output.finish(),
-        "RET"    : lambda: output.edit(),
-        "M-+"    : lambda: output.zoombox(+5),
-        "M--"    : lambda: output.zoombox(-5),
-        "M-="    : lambda: output.zoombox(0),
+pyful.widget.define_key(widgets.cmdline.output, {
+        "C-n"    : lambda: widgets.cmdline.output.mvcursor(1),
+        "<down>" : lambda: widgets.cmdline.output.mvcursor(1),
+        "C-v"    : lambda: widgets.cmdline.output.pagedown(),
+        "C-d"    : lambda: widgets.cmdline.output.pagedown(),
+        "C-p"    : lambda: widgets.cmdline.output.mvcursor(-1),
+        "<up>"   : lambda: widgets.cmdline.output.mvcursor(-1),
+        "M-v"    : lambda: widgets.cmdline.output.pageup(),
+        "C-u"    : lambda: widgets.cmdline.output.pageup(),
+        "M-n"    : lambda: widgets.cmdline.output.mvscroll(+1),
+        "M-p"    : lambda: widgets.cmdline.output.mvscroll(-1),
+        "C-g"    : lambda: widgets.cmdline.output.finish(),
+        "C-c"    : lambda: widgets.cmdline.output.finish(),
+        "ESC"    : lambda: widgets.cmdline.output.finish(),
+        "RET"    : lambda: widgets.cmdline.output.edit(),
+        "M-+"    : lambda: widgets.cmdline.output.zoombox(+5),
+        "M--"    : lambda: widgets.cmdline.output.zoombox(-5),
+        "M-="    : lambda: widgets.cmdline.output.zoombox(0),
         })
 
-pyful.widget.get("Help").keybind(
-    lambda helper: {
-        "j"      : lambda: helper.mvcursor(1),
-        "C-n"    : lambda: helper.mvcursor(1),
-        "<down>" : lambda: helper.mvcursor(1),
-        "k"      : lambda: helper.mvcursor(-1),
-        "C-p"    : lambda: helper.mvcursor(-1),
-        "<up>"   : lambda: helper.mvcursor(-1),
-        "C-v"    : lambda: helper.pagedown(),
-        "C-d"    : lambda: helper.pagedown(),
-        "M-v"    : lambda: helper.pageup(),
-        "C-u"    : lambda: helper.pageup(),
-        "M-n"    : lambda: helper.mvscroll(+1),
-        "M-p"    : lambda: helper.mvscroll(-1),
-        "C-g"    : lambda: helper.hide(),
-        "C-c"    : lambda: helper.hide(),
-        "ESC"    : lambda: helper.hide(),
-        "M-+"    : lambda: helper.zoombox(+5),
-        "M--"    : lambda: helper.zoombox(-5),
-        "M-="    : lambda: helper.zoombox(0),
-    })
-
-pyful.widget.get("ActionBox").keybind(
-    lambda actionbox: {
-        "C-n"    : lambda: actionbox.mvcursor(1),
-        "<down>" : lambda: actionbox.mvcursor(1),
-        "C-v"    : lambda: actionbox.pagedown(),
-        "C-d"    : lambda: actionbox.pagedown(),
-        "C-p"    : lambda: actionbox.mvcursor(-1),
-        "<up>"   : lambda: actionbox.mvcursor(-1),
-        "M-n"    : lambda: actionbox.mvscroll(1),
-        "M-p"    : lambda: actionbox.mvscroll(-1),
-        "M-v"    : lambda: actionbox.pageup(),
-        "C-u"    : lambda: actionbox.pageup(),
-        "C-g"    : lambda: actionbox.hide(),
-        "C-c"    : lambda: actionbox.hide(),
-        "ESC"    : lambda: actionbox.hide(),
-        "M-+"    : lambda: actionbox.zoombox(+5),
-        "M--"    : lambda: actionbox.zoombox(-5),
-        "M-="    : lambda: actionbox.zoombox(0),
-        "RET"    : lambda: actionbox.select_action(),
+pyful.widget.define_key(widgets.help, {
+        "j"      : lambda: widgets.help.mvcursor(1),
+        "C-n"    : lambda: widgets.help.mvcursor(1),
+        "<down>" : lambda: widgets.help.mvcursor(1),
+        "k"      : lambda: widgets.help.mvcursor(-1),
+        "C-p"    : lambda: widgets.help.mvcursor(-1),
+        "<up>"   : lambda: widgets.help.mvcursor(-1),
+        "C-v"    : lambda: widgets.help.pagedown(),
+        "C-d"    : lambda: widgets.help.pagedown(),
+        "M-v"    : lambda: widgets.help.pageup(),
+        "C-u"    : lambda: widgets.help.pageup(),
+        "M-n"    : lambda: widgets.help.mvscroll(+1),
+        "M-p"    : lambda: widgets.help.mvscroll(-1),
+        "C-g"    : lambda: widgets.help.hide(),
+        "C-c"    : lambda: widgets.help.hide(),
+        "ESC"    : lambda: widgets.help.hide(),
+        "M-+"    : lambda: widgets.help.zoombox(+5),
+        "M--"    : lambda: widgets.help.zoombox(-5),
+        "M-="    : lambda: widgets.help.zoombox(0),
         })
 
-pyful.widget.get("ConfirmBox").keybind(
-    lambda confirmbox: {
-        "C-f"     : lambda: confirmbox.mvcursor(1),
-        "<right>" : lambda: confirmbox.mvcursor(1),
-        "C-b"     : lambda: confirmbox.mvcursor(-1),
-        "<left>"  : lambda: confirmbox.mvcursor(-1),
-        "C-a"     : lambda: confirmbox.settop(),
-        "C-e"     : lambda: confirmbox.setbottom(),
-        "C-c"     : lambda: confirmbox.hide(),
-        "C-g"     : lambda: confirmbox.hide(),
-        "ESC"     : lambda: confirmbox.hide(),
-        "RET"     : lambda: confirmbox.get_result(),
-        "C-n"     : lambda: confirmbox.listbox.mvcursor(1),
-        "<down>"  : lambda: confirmbox.listbox.mvcursor(1),
-        "C-p"     : lambda: confirmbox.listbox.mvcursor(-1),
-        "<up>"    : lambda: confirmbox.listbox.mvcursor(-1),
-        "M-n"     : lambda: confirmbox.listbox.mvscroll(1),
-        "M-p"     : lambda: confirmbox.listbox.mvscroll(-1),
-        "C-v"     : lambda: confirmbox.listbox.pagedown(),
-        "M-v"     : lambda: confirmbox.listbox.pageup(),
-        "M-+"     : lambda: confirmbox.listbox.zoombox(+5),
-        "M--"     : lambda: confirmbox.listbox.zoombox(-5),
-        "M-="     : lambda: confirmbox.listbox.zoombox(0),
+pyful.widget.define_key(widgets.menu, {
+        "C-n"    : lambda: widgets.menu.mvcursor(+1),
+        "<down>" : lambda: widgets.menu.mvcursor(+1),
+        "C-p"    : lambda: widgets.menu.mvcursor(-1),
+        "<up>"   : lambda: widgets.menu.mvcursor(-1),
+        "C-d"    : lambda: widgets.menu.mvcursor(+5),
+        "C-u"    : lambda: widgets.menu.mvcursor(-5),
+        "C-v"    : lambda: widgets.menu.pagedown(),
+        "M-v"    : lambda: widgets.menu.pageup(),
+        "M-n"    : lambda: widgets.menu.mvscroll(+1),
+        "M-p"    : lambda: widgets.menu.mvscroll(-1),
+        "C-a"    : lambda: widgets.menu.settop(),
+        "M-<"    : lambda: widgets.menu.settop(),
+        "C-e"    : lambda: widgets.menu.setbottom(),
+        "M->"    : lambda: widgets.menu.setbottom(),
+        "C-g"    : lambda: widgets.menu.hide(),
+        "C-c"    : lambda: widgets.menu.hide(),
+        "ESC"    : lambda: widgets.menu.hide(),
+        "RET"    : lambda: widgets.menu.run(),
         })
 
-menu.keybind(
-    lambda menu: {
-        "C-n"    : lambda: menu.mvcursor(+1),
-        "<down>" : lambda: menu.mvcursor(+1),
-        "C-p"    : lambda: menu.mvcursor(-1),
-        "<up>"   : lambda: menu.mvcursor(-1),
-        "C-d"    : lambda: menu.mvcursor(+5),
-        "C-u"    : lambda: menu.mvcursor(-5),
-        "C-v"    : lambda: menu.pagedown(),
-        "M-v"    : lambda: menu.pageup(),
-        "M-n"    : lambda: menu.mvscroll(+1),
-        "M-p"    : lambda: menu.mvscroll(-1),
-        "C-a"    : lambda: menu.settop(),
-        "M-<"    : lambda: menu.settop(),
-        "C-e"    : lambda: menu.setbottom(),
-        "M->"    : lambda: menu.setbottom(),
-        "C-g"    : lambda: menu.hide(),
-        "C-c"    : lambda: menu.hide(),
-        "ESC"    : lambda: menu.hide(),
-        "RET"    : lambda: menu.run(),
+pyful.widget.define_key(widgets.message.confirmbox, {
+        "C-f"     : lambda: widgets.message.confirmbox.mvcursor(1),
+        "<right>" : lambda: widgets.message.confirmbox.mvcursor(1),
+        "C-b"     : lambda: widgets.message.confirmbox.mvcursor(-1),
+        "<left>"  : lambda: widgets.message.confirmbox.mvcursor(-1),
+        "C-a"     : lambda: widgets.message.confirmbox.settop(),
+        "C-e"     : lambda: widgets.message.confirmbox.setbottom(),
+        "C-c"     : lambda: widgets.message.confirmbox.hide(),
+        "C-g"     : lambda: widgets.message.confirmbox.hide(),
+        "ESC"     : lambda: widgets.message.confirmbox.hide(),
+        "RET"     : lambda: widgets.message.confirmbox.get_result(),
+        "C-n"     : lambda: widgets.message.confirmbox.listbox.mvcursor(1),
+        "<down>"  : lambda: widgets.message.confirmbox.listbox.mvcursor(1),
+        "C-p"     : lambda: widgets.message.confirmbox.listbox.mvcursor(-1),
+        "<up>"    : lambda: widgets.message.confirmbox.listbox.mvcursor(-1),
+        "M-n"     : lambda: widgets.message.confirmbox.listbox.mvscroll(1),
+        "M-p"     : lambda: widgets.message.confirmbox.listbox.mvscroll(-1),
+        "C-v"     : lambda: widgets.message.confirmbox.listbox.pagedown(),
+        "M-v"     : lambda: widgets.message.confirmbox.listbox.pageup(),
+        "M-+"     : lambda: widgets.message.confirmbox.listbox.zoombox(+5),
+        "M--"     : lambda: widgets.message.confirmbox.listbox.zoombox(-5),
+        "M-="     : lambda: widgets.message.confirmbox.listbox.zoombox(0),
+        })
+
+pyful.widget.define_key(widgets.action, {
+        "C-n"    : lambda: widgets.action.mvcursor(1),
+        "<down>" : lambda: widgets.action.mvcursor(1),
+        "C-v"    : lambda: widgets.action.pagedown(),
+        "C-d"    : lambda: widgets.action.pagedown(),
+        "C-p"    : lambda: widgets.action.mvcursor(-1),
+        "<up>"   : lambda: widgets.action.mvcursor(-1),
+        "M-n"    : lambda: widgets.action.mvscroll(1),
+        "M-p"    : lambda: widgets.action.mvscroll(-1),
+        "M-v"    : lambda: widgets.action.pageup(),
+        "C-u"    : lambda: widgets.action.pageup(),
+        "C-g"    : lambda: widgets.action.hide(),
+        "C-c"    : lambda: widgets.action.hide(),
+        "ESC"    : lambda: widgets.action.hide(),
+        "M-+"    : lambda: widgets.action.zoombox(+5),
+        "M--"    : lambda: widgets.action.zoombox(-5),
+        "M-="    : lambda: widgets.action.zoombox(0),
+        "RET"    : lambda: widgets.action.select_action(),
         })
 
 # ======================================================================
@@ -570,165 +529,163 @@ menu.keybind(
 #
 # A value of the menu item dictionary must be the sequence that
 # consist of the sequence that meet the following requirement:
-# 
 #     - The first element is the menu item title;
 #     - The second element is the key symbol;
 #     - The third element is the callable function of no argument.
-#
 # ======================================================================
 
-menu.items["Main"] = (
-    ("File" , "f", lambda: menu.show("File")),
-    ("Edit" , "e", lambda: menu.show("Edit")),
-    ("View" , "v", lambda: menu.show("View")),
-    ("Go"   , "g", lambda: menu.show("Go")),
-    ("Tool" , "t", lambda: menu.show("Tool")),
-    ("Help" , "h", lambda: menu.show("Help")),
-    )
+pyful.menu.define_menu("Main", (
+    ("File" , "f", lambda: widgets.menu.show("File")),
+    ("Edit" , "e", lambda: widgets.menu.show("Edit")),
+    ("View" , "v", lambda: widgets.menu.show("View")),
+    ("Go"   , "g", lambda: widgets.menu.show("Go")),
+    ("Tool" , "t", lambda: widgets.menu.show("Tool")),
+    ("Help" , "h", lambda: widgets.menu.show("Help")),
+    ))
 
-menu.items["File"] = (
-    ("New file"        ,  "n", command.query("newfile")),
-    ("New directory"   ,  "k", command.query("mkdir")),
-    ("New workspace"   ,  "w", command.query("create_workspace")),
-    ("New dirview"     ,  "d", command.query("create_dir")),
-    ("Open"            ,  "o", command.query("open_at_system")),
-    ("Close workspace" ,  "W", command.query("close_workspace")),
-    ("Close dirview"   ,  "D", command.query("close_dir")),
-    ("Exit"            ,  "q", command.query("exit")),
-    )
+pyful.menu.define_menu("File", (
+    ("New file"        ,  "n", lambda: command.run("newfile")),
+    ("New directory"   ,  "k", lambda: command.run("mkdir")),
+    ("New workspace"   ,  "w", lambda: command.run("create_workspace")),
+    ("New dirview"     ,  "d", lambda: command.run("create_dir")),
+    ("Open"            ,  "o", lambda: command.run("open_at_system")),
+    ("Close workspace" ,  "W", lambda: command.run("close_workspace")),
+    ("Close dirview"   ,  "D", lambda: command.run("close_dir")),
+    ("Exit"            ,  "q", lambda: command.run("exit")),
+    ))
 
-menu.items["Edit"] = (
-    ("Copy"           ,  "c"     , command.query("copy")),
-    ("Move"           ,  "m"     , command.query("move")),
-    ("Delete"         ,  "D"     , command.query("delete")),
-    ("Trashbox"       ,  "d"     , command.query("trashbox")),
-    ("Toggle mark"    ,  "SPC"   , command.query("mark_toggle")),
-    ("All mark"       ,  "<end>" , command.query("mark_toggle_all")),
-    ("Rename"         ,  "r"     , command.query("rename")),
-    ("Replace"        ,  "R"     , command.query("replace")),
-    ("Create symlink" ,  "l"     , command.query("symlink")),
-    ("Create link"    ,  "L"     , command.query("link")),
-    ("Change mtime"   ,  "t"     , command.query("utime")),
-    ("Chmod"          ,  "M"     , command.query("chmod")),
-    ("Chown"          ,  "O"     , command.query("chown")),
-    ("Archive"        ,  "a"     , lambda: menu.show("archive")),
-    )
+pyful.menu.define_menu("Edit", (
+    ("Copy"           ,  "c"     , lambda: command.run("copy")),
+    ("Move"           ,  "m"     , lambda: command.run("move")),
+    ("Delete"         ,  "D"     , lambda: command.run("delete")),
+    ("Trashbox"       ,  "d"     , lambda: command.run("trashbox")),
+    ("Toggle mark"    ,  "SPC"   , lambda: command.run("mark_toggle")),
+    ("All mark"       ,  "<end>" , lambda: command.run("mark_toggle_all")),
+    ("Rename"         ,  "r"     , lambda: command.run("rename")),
+    ("Replace"        ,  "R"     , lambda: command.run("replace")),
+    ("Create symlink" ,  "l"     , lambda: command.run("symlink")),
+    ("Create link"    ,  "L"     , lambda: command.run("link")),
+    ("Change mtime"   ,  "t"     , lambda: command.run("utime")),
+    ("Chmod"          ,  "M"     , lambda: command.run("chmod")),
+    ("Chown"          ,  "O"     , lambda: command.run("chown")),
+    ("Archive"        ,  "a"     , lambda: widgets.menu.show("archive")),
+    ))
 
-menu.items["View"] = (
-    ("Reload"         , "C-l" , command.query("all_reload")),
-    ("Refresh window" , "C-r" , command.query("refresh_window")),
-    ("Info to view"   , "V"   , lambda: menu.show("fileinfo")),
-    ("Sort"           , "s"   , lambda: menu.show("sort")),
-    ("Layout"         , "L"   , lambda: menu.show("layout")),
-    ("Filter mask"    , "m"   , command.query("mask")),
-    )
+pyful.menu.define_menu("View", (
+    ("Reload"         , "C-l" , lambda: command.run("all_reload")),
+    ("Refresh window" , "C-r" , lambda: command.run("refresh_window")),
+    ("Info to view"   , "V"   , lambda: widgets.menu.show("fileinfo")),
+    ("Sort"           , "s"   , lambda: widgets.menu.show("sort")),
+    ("Layout"         , "L"   , lambda: widgets.menu.show("layout")),
+    ("Filter mask"    , "m"   , lambda: command.run("mask")),
+    ))
 
-menu.items["Go"] = (
-    ("To parent"        , "C-h" , command.query("chdir_parent")),
-    ("To home"          , "~"   , command.query("chdir_home")),
-    ("To root"          , "\\"  , command.query("chdir_root")),
-    ("To neighbor"      , "w"   , command.query("chdir_neighbor")),
-    ("Backward history" , "M-h" , command.query("chdir_backward")),
-    ("Forward history"  , "M-l" , command.query("chdir_forward")),
-    ("Finder start"     , "f"   , command.query("finder_start")),
-    ("Bookmark"         , "b"   , lambda: menu.show("bookmark")),
-    )
+pyful.menu.define_menu("Go", (
+    ("To parent"        , "C-h" , lambda: command.run("chdir_parent")),
+    ("To home"          , "~"   , lambda: command.run("chdir_home")),
+    ("To root"          , "\\"  , lambda: command.run("chdir_root")),
+    ("To neighbor"      , "w"   , lambda: command.run("chdir_neighbor")),
+    ("Backward history" , "M-h" , lambda: command.run("chdir_backward")),
+    ("Forward history"  , "M-l" , lambda: command.run("chdir_forward")),
+    ("Finder start"     , "f"   , lambda: command.run("finder_start")),
+    ("Bookmark"         , "b"   , lambda: widgets.menu.show("bookmark")),
+    ))
 
-menu.items["Tool"] = (
-    ("Shell"           ,  "h"   , command.query("shell")),
-    ("Eval"            ,  "M-:" , command.query("eval")),
-    ("Command"         ,  "M-x" , command.query("mx")),
-    ("Glob search"     ,  "g"   , command.query("glob")),
-    ("Glob recursive"  ,  "G"   , command.query("globdir")),
-    ("Rehash programs" ,  "r"   , command.query("rehash_programs")),
-    ("Reload rc.py"    ,  "R"   , command.query("reload_rcfile")),
-    ("Editor"          ,  "E"   , lambda: menu.show("editor")),
-    ("Web browser"     ,  "w"   , lambda: menu.show("webbrowser")),
-    ("File manager"    ,  "f"   , lambda: menu.show("filemanager")),
-    )
+pyful.menu.define_menu("Tool", (
+    ("Shell"           ,  "h"   , lambda: command.run("shell")),
+    ("Eval"            ,  "M-:" , lambda: command.run("eval")),
+    ("Command"         ,  "M-x" , lambda: command.run("mx")),
+    ("Glob search"     ,  "g"   , lambda: command.run("glob")),
+    ("Glob recursive"  ,  "G"   , lambda: command.run("globdir")),
+    ("Rehash programs" ,  "r"   , lambda: command.run("rehash_programs")),
+    ("Reload rc.py"    ,  "R"   , lambda: command.run("reload_rcfile")),
+    ("Editor"          ,  "E"   , lambda: widgets.menu.show("editor")),
+    ("Web browser"     ,  "w"   , lambda: widgets.menu.show("webbrowser")),
+    ("File manager"    ,  "f"   , lambda: widgets.menu.show("filemanager")),
+    ))
 
-menu.items["Help"] = (
-    ("Help"     ,  "h", command.query("help")),
-    ("Help all" ,  "H", command.query("help_all")),
-    )
+pyful.menu.define_menu("Help", (
+    ("Help"     ,  "h", lambda: command.run("help")),
+    ("Help all" ,  "H", lambda: command.run("help_all")),
+    ))
 
-menu.items["archive"] = (
-    ("Zip"            , "z", command.query("zip")),
-    ("Zip each files" , "Z", command.query("zipeach")),
-    ("Tar"            , "t", command.query("zip")),
-    ("Tar each files" , "T", command.query("zipeach")),
-    ("Inflat zip"     , "i", command.query("unzip")),
-    ("Extract tar"    , "e", command.query("untar")),
-    )
+pyful.menu.define_menu("archive", (
+    ("Zip"            , "z", lambda: command.run("zip")),
+    ("Zip each files" , "Z", lambda: command.run("zipeach")),
+    ("Tar"            , "t", lambda: command.run("zip")),
+    ("Tar each files" , "T", lambda: command.run("zipeach")),
+    ("Inflat zip"     , "i", lambda: command.run("unzip")),
+    ("Extract tar"    , "e", lambda: command.run("untar")),
+    ))
 
-menu.items["bookmark"] = (
-    ("/etc" , "e", lambda: filer.dir.chdir("/etc")),
-    ("/usr" , "u", lambda: filer.dir.chdir("/usr")),
-    )
+pyful.menu.define_menu("bookmark", (
+    ("/etc" , "e", lambda: widgets.filer.dir.chdir("/etc")),
+    ("/usr" , "u", lambda: widgets.filer.dir.chdir("/usr")),
+    ))
 
-menu.items["fileinfo"] = (
-    ("toggle extension" , "e", command.query("toggle_draw_ext")),
-    ("toggle permission", "p", command.query("toggle_draw_permission")),
-    ("toggle nlink"     , "l", command.query("toggle_draw_nlink")),
-    ("toggle user"      , "u", command.query("toggle_draw_user")),
-    ("toggle group"     , "g", command.query("toggle_draw_group")),
-    ("toggle size"      , "s", command.query("toggle_draw_size")),
-    ("toggle mtime"     , "t", command.query("toggle_draw_mtime")),
-    )
+pyful.menu.define_menu("fileinfo", (
+    ("toggle extension" , "e", lambda: command.run("toggle_draw_ext")),
+    ("toggle permission", "p", lambda: command.run("toggle_draw_permission")),
+    ("toggle nlink"     , "l", lambda: command.run("toggle_draw_nlink")),
+    ("toggle user"      , "u", lambda: command.run("toggle_draw_user")),
+    ("toggle group"     , "g", lambda: command.run("toggle_draw_group")),
+    ("toggle size"      , "s", lambda: command.run("toggle_draw_size")),
+    ("toggle mtime"     , "t", lambda: command.run("toggle_draw_mtime")),
+    ))
 
-menu.items["layout"] = (
-    ("tile"        , "t", command.query("layout_tile")),
-    ("tileLeft"    , "L", command.query("layout_tileleft")),
-    ("tileTop"     , "T", command.query("layout_tiletop")),
-    ("tileBottom"  , "B", command.query("layout_tilebottom")),
-    ("oneline"     , "l", command.query("layout_oneline")),
-    ("onecolumn"   , "c", command.query("layout_onecolumn")),
-    ("magnifier"   , "m", command.query("layout_magnifier")),
-    ("fullscreen"  , "f", command.query("layout_fullscreen")),
-    )
+pyful.menu.define_menu("layout", (
+    ("tile"        , "t", lambda: command.run("layout_tile")),
+    ("tileLeft"    , "L", lambda: command.run("layout_tileleft")),
+    ("tileTop"     , "T", lambda: command.run("layout_tiletop")),
+    ("tileBottom"  , "B", lambda: command.run("layout_tilebottom")),
+    ("oneline"     , "l", lambda: command.run("layout_oneline")),
+    ("onecolumn"   , "c", lambda: command.run("layout_onecolumn")),
+    ("magnifier"   , "m", lambda: command.run("layout_magnifier")),
+    ("fullscreen"  , "f", lambda: command.run("layout_fullscreen")),
+    ))
 
-menu.items["sort"] = (
-    ("name"              , "n", command.query("sort_name")),
-    ("name reverse"      , "N", command.query("sort_name_rev")),
-    ("extension"         , "e", command.query("sort_ext")),
-    ("extension reverse" , "E", command.query("sort_ext_rev")),
-    ("size"              , "s", command.query("sort_size")),
-    ("size reverse"      , "S", command.query("sort_size_rev")),
-    ("time"              , "t", command.query("sort_time")),
-    ("time reverse"      , "T", command.query("sort_time_rev")),
-    ("link"              , "l", command.query("sort_nlink")),
-    ("link reverse"      , "L", command.query("sort_nlink_rev")),
-    ("permission"        , "p", command.query("sort_permission")),
-    ("permission reverse", "P", command.query("sort_permission_rev")),
-    ("toggle upward directory", "u", command.query("toggle_sort_updir")),
-    )
+pyful.menu.define_menu("sort", (
+    ("name"              , "n", lambda: command.run("sort_name")),
+    ("name reverse"      , "N", lambda: command.run("sort_name_rev")),
+    ("extension"         , "e", lambda: command.run("sort_ext")),
+    ("extension reverse" , "E", lambda: command.run("sort_ext_rev")),
+    ("size"              , "s", lambda: command.run("sort_size")),
+    ("size reverse"      , "S", lambda: command.run("sort_size_rev")),
+    ("time"              , "t", lambda: command.run("sort_time")),
+    ("time reverse"      , "T", lambda: command.run("sort_time_rev")),
+    ("link"              , "l", lambda: command.run("sort_nlink")),
+    ("link reverse"      , "L", lambda: command.run("sort_nlink_rev")),
+    ("permission"        , "p", lambda: command.run("sort_permission")),
+    ("permission reverse", "P", lambda: command.run("sort_permission_rev")),
+    ("toggle upward directory", "u", lambda: command.run("toggle_sort_updir")),
+    ))
 
 # The editor launcher example.
-menu.items["editor"] = (
+pyful.menu.define_menu("editor", (
     ("emacs"              , "e", lambda: process.spawn("emacs -nw %f")),
     ("emacs new terminal" , "E", lambda: process.spawn("emacs -nw %f %T")),
     ("emacs frame"        , "f", lambda: process.spawn("emacs %f")),
     ("vim"                , "v", lambda: process.spawn("vim %f")),
     ("vim new terminal"   , "V", lambda: process.spawn("vim %f %T")),
     ("gvim"               , "g", lambda: process.spawn("gvim %f %&")),
-    )
+    ))
 
 # The web broweser launcher example.
-menu.items["webbrowser"] = (
+pyful.menu.define_menu("webbrowser", (
     ("firefox" , "f", lambda: process.spawn("firefox %&")),
     ("w3m"     , "w", lambda: process.spawn("w3m google.com %T")),
     ("chrome"  , "c", lambda: process.spawn("chromium-browser %&")),
-    )
+    ))
 
 # The file manager launcher example.
-menu.items["filemanager"] = (
+pyful.menu.define_menu("filemanager", (
     ("nautilus" , "n", lambda: process.spawn("nautilus --no-desktop %D %&")),
     ("mc"       , "m", lambda: process.spawn("mc %T")),
     ("thunar"   , "t", lambda: process.spawn("thunar %&")),
-    )
+    ))
 
 # The program launcher example.
-menu.items["launcher"] = (
+pyful.menu.define_menu("launcher", (
     ("htop"           , "h", lambda: process.spawn("htop %T")),
     ("mc"             , "m", lambda: process.spawn("mc %T")),
     ("MOC"            , "M", lambda: process.spawn("mocp %T")),
@@ -740,22 +697,22 @@ menu.items["launcher"] = (
     ("nautilus"       , "n", lambda: process.spawn("nautilus --no-desktop %D %&")),
     ("system-monitor" , "s", lambda: process.spawn("gnome-system-monitor %&")),
     ("synaptic"       , "S", lambda: process.spawn("gksu synaptic %&")),
-    )
+    ))
 
 # Update the filer keymap.
-filer.keymap.update({
-        "<f1>" : lambda: menu.show("File"),
-        "<f2>" : lambda: menu.show("Edit"),
-        "<f3>" : lambda: menu.show("View"),
-        "<f4>" : lambda: menu.show("Go"),
-        "<f5>" : lambda: menu.show("Tool"),
-        "<f6>" : lambda: menu.show("Help"),
-        "C-x"  : lambda: menu.show("Main"),
-        "V"    : lambda: menu.show("fileinfo"),
-        "s"    : lambda: menu.show("sort"),
-        "L"    : lambda: menu.show("layout"),
-        "E"    : lambda: menu.show("editor"),
-        ";"    : lambda: menu.show("launcher"),
+pyful.widget.define_key(widgets.filer, {
+        "<f1>" : lambda: widgets.menu.show("File"),
+        "<f2>" : lambda: widgets.menu.show("Edit"),
+        "<f3>" : lambda: widgets.menu.show("View"),
+        "<f4>" : lambda: widgets.menu.show("Go"),
+        "<f5>" : lambda: widgets.menu.show("Tool"),
+        "<f6>" : lambda: widgets.menu.show("Help"),
+        "C-x"  : lambda: widgets.menu.show("Main"),
+        "V"    : lambda: widgets.menu.show("fileinfo"),
+        "s"    : lambda: widgets.menu.show("sort"),
+        "L"    : lambda: widgets.menu.show("layout"),
+        "E"    : lambda: widgets.menu.show("editor"),
+        ";"    : lambda: widgets.menu.show("launcher"),
         })
 
 # ======================================================================
@@ -792,47 +749,45 @@ filer.keymap.update({
 # ======================================================================
 
 # Define a image file associate the menu item.
-menu.items["image"] = (
+pyful.menu.define_menu("image", (
     ("display"    , "d", lambda: process.spawn("display %f %&")),
     ("gimp"       , "g", lambda: process.spawn("gimp %f %&")),
-    )
+    ))
 
 # Define a music file associate the menu item.
-menu.items["music"] = (
+pyful.menu.define_menu("music", (
     ("mplayer"  , "m", lambda: process.spawn("mplayer %m")),
     ("MOC"      , "M", lambda: process.spawn("mocp -a %m %&")),
     ("amarok"   , "a", lambda: process.spawn("amarok %f %&")),
-    )
+    ))
 
 # Define a video file associate the menu item.
-menu.items["video"] = (
+pyful.menu.define_menu("video", (
     ("mplayer"  , "m", lambda: process.spawn("mplayer %f")),
     ("vlc"      , "v", lambda: process.spawn("vlc %f %&")),
-    )
+    ))
 
 # Update filer keymap for file association.
-filer.keymap.update({
-        ("RET", ".py"   ): lambda: cmdline.shell("python %f"),
-        ("RET", ".rb"   ): lambda: cmdline.shell("ruby %f"),
-        ("RET", ".sh"   ): lambda: cmdline.shell("sh %f"),
-        ("RET", ".exe"  ): lambda: cmdline.shell("wine %f"),
-        ("RET", ".c"    ): lambda: cmdline.shell("gcc %f"),
-        ("RET", ".java" ): lambda: cmdline.shell("javac %f"),
-        ("RET", ".class"): lambda: cmdline.shell("java %x"),
-        ("RET", ".jar"  ): lambda: cmdline.shell("java -jar %f"),
-        ("RET", ".jpg"  ): lambda: menu.show("image"),
-        ("RET", ".gif"  ): lambda: menu.show("image"),
-        ("RET", ".png"  ): lambda: menu.show("image"),
-        ("RET", ".bmp"  ): lambda: menu.show("image"),
-        ("RET", ".mp3"  ): lambda: menu.show("music"),
-        ("RET", ".flac" ): lambda: menu.show("music"),
-        ("RET", ".avi"  ): lambda: menu.show("video"),
-        ("RET", ".mp4"  ): lambda: menu.show("video"),
-        ("RET", ".flv"  ): lambda: menu.show("video"),
+pyful.widget.define_key(widgets.filer, {
+        ("RET", ".py"   ): lambda: widgets.cmdline.shell("python %f"),
+        ("RET", ".rb"   ): lambda: widgets.cmdline.shell("ruby %f"),
+        ("RET", ".sh"   ): lambda: widgets.cmdline.shell("sh %f"),
+        ("RET", ".exe"  ): lambda: widgets.cmdline.shell("wine %f"),
+        ("RET", ".c"    ): lambda: widgets.cmdline.shell("gcc %f"),
+        ("RET", ".java" ): lambda: widgets.cmdline.shell("javac %f"),
+        ("RET", ".class"): lambda: widgets.cmdline.shell("java %x"),
+        ("RET", ".jar"  ): lambda: widgets.cmdline.shell("java -jar %f"),
+        ("RET", ".jpg"  ): lambda: widgets.menu.show("image"),
+        ("RET", ".gif"  ): lambda: widgets.menu.show("image"),
+        ("RET", ".png"  ): lambda: widgets.menu.show("image"),
+        ("RET", ".bmp"  ): lambda: widgets.menu.show("image"),
+        ("RET", ".mp3"  ): lambda: widgets.menu.show("music"),
+        ("RET", ".flac" ): lambda: widgets.menu.show("music"),
+        ("RET", ".avi"  ): lambda: widgets.menu.show("video"),
+        ("RET", ".mp4"  ): lambda: widgets.menu.show("video"),
+        ("RET", ".flv"  ): lambda: widgets.menu.show("video"),
         })
 
-
-# ======================================================================
 
 if "screen" in os.getenv("TERM"):
     # Change GNU SCREEN's title.
@@ -841,7 +796,3 @@ else:
     # Change terminal emulator's title.
     import socket
     sys.stdout.write("\033]0;pyful@{0}\007".format(socket.gethostname()))
-
-# ======================================================================
-
-

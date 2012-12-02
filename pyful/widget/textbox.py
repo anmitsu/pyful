@@ -26,44 +26,15 @@ from pyful.widget.base import Widget
 class TextBox(Widget):
     promptattr = 0
     wordbreakchars = re.compile("[._/\s\t\n\"\\`'@$><=:|&{(]")
-    keyfun = lambda textbox: {
-        "C-f"         : textbox.forward_char,
-        "<right>"     : textbox.forward_char,
-        "C-b"         : textbox.backward_char,
-        "<left>"      : textbox.backward_char,
-        "M-f"         : textbox.forward_word,
-        "M-b"         : textbox.backward_word,
-        "C-d"         : textbox.delete_char,
-        "<dc>"        : textbox.delete_char,
-        "C-h"         : textbox.delete_backward_char,
-        "<backspace>" : textbox.delete_backward_char,
-        "M-d"         : textbox.delete_forward_word,
-        "M-h"         : textbox.delete_backward_word,
-        "C-w"         : textbox.delete_backward_word,
-        "C-k"         : textbox.kill_line,
-        "C-u"         : textbox.kill_line_all,
-        "C-a"         : textbox.settop,
-        "C-e"         : textbox.setbottom,
-        "C-g"         : textbox.hide,
-        "C-c"         : textbox.hide,
-        "ESC"         : textbox.hide,
-        }
-
-    @classmethod
-    def keybind(cls, keyfun):
-        cls.keyfun = keyfun
-        for wdg in cls.widgets.values():
-            if isinstance(wdg, cls):
-                wdg.keymap = wdg.keyfun()
 
     def __init__(self, name=None):
         Widget.__init__(self, name)
+        self.__class__.keymap = {}
         self.panel.leaveok = False
         self.text = ""
         self.textmap = []
         self.prompt = ""
         self.cursor = 0
-        self.keymap = self.keyfun()
 
     def refresh(self):
         self.panel.unlink_window()

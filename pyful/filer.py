@@ -1235,7 +1235,6 @@ class Finder(TextBox):
         self.refresh()
 
     def refresh(self):
-        self.keymap = self.keyfun()
         y, x = self.dir.screen.win.getmaxyx()
         by, bx = self.dir.screen.win.getbegyx()
         self.panel.resize(1, x-2, by+y-2, bx+1)

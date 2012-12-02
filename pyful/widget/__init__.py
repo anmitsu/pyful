@@ -20,6 +20,13 @@ import curses
 
 from pyful.widget import *
 
+def define_key(obj, keymap, override=False):
+    if hasattr(obj.__class__, "keymap"):
+        if override:
+            obj.__class__.keymap = keymap
+        else:
+            obj.__class__.keymap.update(keymap)
+
 def get(name):
     return base.Widget.widgets[name]
 

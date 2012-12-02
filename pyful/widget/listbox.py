@@ -26,41 +26,16 @@ from pyful.widget.base import Widget
 class ListBox(Widget):
     scroll_type = "HalfScroll"
     zoom = 0
-    keyfun = lambda listbox: {
-        "C-n"   : lambda: listbox.mvcursor(1),
-        "<down>": lambda: listbox.mvcursor(1),
-        "C-v"   : lambda: listbox.pagedown(),
-        "C-d"   : lambda: listbox.pagedown(),
-        "C-p"   : lambda: listbox.mvcursor(-1),
-        "<up>"  : lambda: listbox.mvcursor(-1),
-        "M-n"   : lambda: listbox.mvscroll(1),
-        "M-p"   : lambda: listbox.mvscroll(-1),
-        "M-v"   : lambda: listbox.pageup(),
-        "C-u"   : lambda: listbox.pageup(),
-        "C-g"   : lambda: listbox.hide(),
-        "C-c"   : lambda: listbox.hide(),
-        "ESC"   : lambda: listbox.hide(),
-        "M-+"   : lambda: listbox.zoombox(+5),
-        "M--"   : lambda: listbox.zoombox(-5),
-        "M-="   : lambda: listbox.zoombox(0),
-        }
-
-    @classmethod
-    def keybind(cls, keyfun):
-        cls.keyfun = keyfun
-        for wdg in cls.widgets.values():
-            if isinstance(wdg, cls):
-                wdg.keymap = wdg.keyfun()
 
     def __init__(self, title=None):
         Widget.__init__(self, title)
+        self.__class__.keymap = {}
         self.list = []
         self.title = title
         self.cursor = 0
         self.scrolltop = 0
         self.lb = 0
         self.maxrow = 1
-        self.keymap = self.keyfun()
 
     def zoombox(self, amount):
         if amount == 0:

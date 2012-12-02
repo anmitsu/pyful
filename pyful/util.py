@@ -103,8 +103,8 @@ def escapemacro(string):
     return re.sub(r"((?<!\\)%[mMdDfFxX])", r"\\\1", string)
 
 def expandmacro(string, shell=False):
-    from pyful import widget
-    filer = widget.get("Filer")
+    from pyful import widgets
+    filer = widgets.filer
     m = {
         "%m": re.search(r"(?<!\\)%m", string),
         "%M": re.search(r"(?<!\\)%M", string),

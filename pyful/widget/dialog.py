@@ -23,46 +23,15 @@ from pyful.widget.base import Widget
 from pyful.widget.listbox import ListBox, Entry
 
 class Dialog(Widget):
-    keyfun = lambda dialog: {
-        "C-f"     : lambda: dialog.mvcursor(1),
-        "<right>" : lambda: dialog.mvcursor(1),
-        "C-b"     : lambda: dialog.mvcursor(-1),
-        "<left>"  : lambda: dialog.mvcursor(-1),
-        "C-a"     : lambda: dialog.settop(),
-        "C-e"     : lambda: dialog.setbottom(),
-        "C-c"     : lambda: dialog.hide(),
-        "C-g"     : lambda: dialog.hide(),
-        "ESC"     : lambda: dialog.hide(),
-        "RET"     : lambda: dialog.get_result(),
-        "C-n"     : lambda: dialog.listbox.mvcursor(1),
-        "<down>"  : lambda: dialog.listbox.mvcursor(1),
-        "C-p"     : lambda: dialog.listbox.mvcursor(-1),
-        "<up>"    : lambda: dialog.listbox.mvcursor(-1),
-        "M-n"     : lambda: dialog.listbox.mvscroll(1),
-        "M-p"     : lambda: dialog.listbox.mvscroll(-1),
-        "C-v"     : lambda: dialog.listbox.pagedown(),
-        "M-v"     : lambda: dialog.listbox.pageup(),
-        "M-+"     : lambda: dialog.listbox.zoombox(+5),
-        "M--"     : lambda: dialog.listbox.zoombox(-5),
-        "M-="     : lambda: dialog.listbox.zoombox(0),
-        }
-
-    @classmethod
-    def keybind(cls, keyfun):
-        cls.keyfun = keyfun
-        for wdg in cls.widgets.values():
-            if isinstance(wdg, cls):
-                wdg.keymap = wdg.keyfun()
-
     def __init__(self, name=None):
         Widget.__init__(self, name)
+        self.__class__.keymap = {}
         self.message = ""
         self.options = []
         self.cursor = 0
         self.result = None
         self.listbox = ListBox()
         self.listbox.lb = -1
-        self.keymap = self.keyfun()
 
     def refresh(self):
         pass

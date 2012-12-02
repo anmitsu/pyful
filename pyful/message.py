@@ -22,29 +22,30 @@ import threading
 from pyful import look
 from pyful import util
 from pyful import widget
+from pyful import widgets
 
 from pyful.widget.base import Widget
 from pyful.widget.dialog import DialogBar
 from pyful.widget.listbox import ListBox, Entry
 
 def puts(string, timex=3):
-    widget.get("Message").puts(string, timex)
+    widgets.message.puts(string, timex)
 
 def error(string, timex=3):
-    widget.get("Message").error(string, timex)
+    widgets.message.error(string, timex)
 
 def exception(except_cls):
-    widget.get("Message").exception(except_cls)
+    widgets.message.exception(except_cls)
 
 def confirm(message, options, entries=None, position=0):
-    return widget.get("Message").confirm(message, options, entries, position)
+    return widgets.message.confirm(message, options, entries, position)
 
 def forcedraw():
-    widget.get("Message").draw()
+    widgets.message.draw()
     curses.doupdate()
 
 def drawhistroy():
-    widget.get("Message").draw_histroy()
+    widgets.message.draw_histroy()
 
 class Message(Widget):
     maxsave = 100
@@ -56,6 +57,10 @@ class Message(Widget):
         self.timer = None
         self.messagebox = MessageBox()
         self.confirmbox = ConfirmBox()
+
+    def refresh(self):
+        self.messagebox.refresh()
+        self.confirmbox.refresh()
 
     def start_timer(self, timex):
         if self.timer:
@@ -116,7 +121,7 @@ class MessageBox(ListBox):
     height = 4
 
     def __init__(self):
-        ListBox.__init__(self, "MessageBox")
+        ListBox.__init__(self)
         self.lb = -1
 
     def refresh(self):
@@ -126,15 +131,20 @@ class MessageBox(ListBox):
 
 class ConfirmBox(DialogBar):
     def __init__(self):
-        DialogBar.__init__(self, "ConfirmBox")
+        DialogBar.__init__(self)
 
     def run(self, message, options, entries=None):
         self.result = None
         self.show(message, options, entries)
         def _draw():
-            widget.get("Filer").draw()
+            widgets.filer.draw()
             self.draw()
         ui = widget.ui.UI(_draw, self.input)
         while self.active:
             ui.run()
         return self.result
+
+
+
+
+

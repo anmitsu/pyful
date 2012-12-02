@@ -29,6 +29,7 @@ import errno
 from pyful import message
 from pyful import util
 from pyful import widget
+from pyful import widgets
 
 from pyful.widget.gauge import ProgressGauge
 
@@ -106,7 +107,7 @@ def rename(src, dst):
         message.exception(e)
 
 def replace(pattern, repstr):
-    filer = widget.get("Filer")
+    filer = widgets.filer
     files = filer.dir.get_mark_files()
     renamed = [pattern.sub(r""+repstr, f) for f in files]
     msg = []
@@ -206,31 +207,26 @@ def _get_file_length(paths):
 
 class Subloop(object):
     def __init__(self):
-        cmdline = widget.get("Cmdline")
-        filer = widget.get("Filer")
-        menu = widget.get("Menu")
-        message = widget.get("Message")
-        helper = widget.get("Help")
         def _input(key):
-            if cmdline.active:
-                cmdline.input(key)
-            elif menu.active:
-                menu.input(key)
-            elif helper.active:
-                helper.input(key)
+            if widgets.cmdline.active:
+                widgets.cmdline.input(key)
+            elif widgets.menu.active:
+                widgets.menu.input(key)
+            elif widgets.help.active:
+                widgets.help.input(key)
             else:
-                filer.input(key)
+                widgets.filer.input(key)
         def _draw():
-            filer.draw(navigation=False)
-            if menu.active:
-                menu.draw()
-            if cmdline.active:
-                cmdline.draw()
-            elif helper.active:
-                helper.draw()
+            widgets.filer.draw(navigation=False)
+            if widgets.menu.active:
+                widgets.menu.draw()
+            if widgets.cmdline.active:
+                widgets.cmdline.draw()
+            elif widgets.help.active:
+                widgets.helper.draw()
             else:
-                if message.active and not filer.finder.active:
-                    message.draw()
+                if widgets.message.active and not widgets.filer.finder.active:
+                    widgets.message.draw()
                 self.draw_thread()
         self.navbar = widget.get("NavigationBar")
         self.ui = widget.ui.UI(_draw, _input)
@@ -263,7 +259,7 @@ class Filectrl(object):
         subloop = Subloop()
         while len(self.threads):
             subloop.run()
-        widget.get("Filer").workspace.all_reload()
+        widgets.filer.workspace.all_reload()
 
     def delete(self, path):
         thread = DeleteThread(path)
@@ -857,7 +853,6 @@ class FileJob(object):
     def copyfileobj(self, fsrc, fdst, length=16*1024):
         curval = 0
         navbar = widget.get("NavigationBar")
-        cmdline = widget.get("Cmdline")
         size = os.stat(self.src).st_size
         if size:
             gauge = ProgressGauge(size)
@@ -867,12 +862,12 @@ class FileJob(object):
             buf = fsrc.read(length)
             if not buf:
                 gauge.finish()
-                if not cmdline.active:
+                if not widgets.cmdline.active:
                     navbar.draw(gauge.draw, 1, 1)
                 break
             curval += len(buf)
             gauge.update(curval)
-            if not cmdline.active:
+            if not widgets.cmdline.active:
                 navbar.draw(gauge.draw, 1, 1)
             fdst.write(buf)
 
