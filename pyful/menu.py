@@ -21,6 +21,9 @@ from pyful import message
 
 from pyful.widget.listbox import ListBox, Entry
 
+def define_menu(name, items):
+    Menu.items[name] = items
+
 class Menu(ListBox):
     items = {}
 
