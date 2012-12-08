@@ -64,10 +64,6 @@ class Dialog(Widget):
         self.listbox.hide()
         self.panel.hide()
 
-    def keybind(self, func):
-        self.keymap = func(self)
-        return self.keymap
-
     def get_result(self):
         self.result = self.cursor_entry()
         self.hide()

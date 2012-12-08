@@ -86,10 +86,6 @@ class Filer(Widget):
     def pager(self):
         return self.workspace.dir.pager
 
-    def keybind(self, func):
-        self.keymap = func(self)
-        return self.keymap
-
     def refresh(self):
         y, x = self.stdscr.getmaxyx()
         self.titlebar = curses.newwin(1, x, 0, 0)
