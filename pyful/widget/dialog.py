@@ -23,10 +23,10 @@ from pyful.widget.base import Widget
 from pyful.widget.listbox import ListBox, Entry
 
 class Dialog(Widget):
+    keymap = None
+
     def __init__(self, name=None):
         Widget.__init__(self, name)
-        if not hasattr(self.__class__, "keymap"):
-            self.__class__.keymap = {}
         self.message = ""
         self.options = []
         self.cursor = 0

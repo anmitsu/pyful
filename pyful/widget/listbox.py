@@ -26,11 +26,10 @@ from pyful.widget.base import Widget
 class ListBox(Widget):
     scroll_type = "HalfScroll"
     zoom = 0
+    keymap = None
 
     def __init__(self, title=None):
         Widget.__init__(self, title)
-        if not hasattr(self.__class__, "keymap"):
-            self.__class__.keymap = {}
         self.list = []
         self.title = title
         self.cursor = 0

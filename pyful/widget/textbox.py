@@ -26,11 +26,10 @@ from pyful.widget.base import Widget
 class TextBox(Widget):
     promptattr = 0
     wordbreakchars = re.compile("[._/\s\t\n\"\\`'@$><=:|&{(]")
+    keymap = None
 
     def __init__(self, name=None):
         Widget.__init__(self, name)
-        if not hasattr(self.__class__, "keymap"):
-            self.__class__.keymap = {}
         self.panel.leaveok = False
         self.text = ""
         self.textmap = []
